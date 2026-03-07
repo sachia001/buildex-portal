@@ -1,0 +1,36 @@
+# Dependencies
+node_modules/
+client/node_modules/
+
+# Build output (Railway builds it)
+client/build/
+
+# Environment variables
+.env
+.env.local
+.env.production
+
+# Uploads (user files — not in git)
+uploads/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+
+# Windows bat/vbs launchers
+*.bat
+*.vbs
+
+# Windows reserved filenames
+nul
+
+# HTML export files (not needed for deployment)
+BUILDEXEXPERTISE.html
+BUILDEXEXPERTISE_files/
+
+# Claude config
+.claude/
