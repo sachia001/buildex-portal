@@ -49,7 +49,7 @@ const Navbar = ({ username, role, onLogout }) => {
 
     // Navigation visibility per role
     const show = {
-        inspections: ['admin', 'chancellor', 'tech_manager', 'inspector'].includes(role),
+        inspections: ['admin', 'chancellor', 'tech_manager', 'inspector', 'quality_manager'].includes(role),
         documents:   ['admin', 'quality_manager'].includes(role),
         equipment:   ['admin'].includes(role),
         management:  ['admin', 'quality_manager'].includes(role),

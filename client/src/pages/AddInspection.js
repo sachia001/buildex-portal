@@ -11,15 +11,15 @@ const AddInspection = () => {
     const [formData, setFormData] = useState({
         objectName: '', objectAddress: '',
         clientName: '', clientID: '', clientPhone: '', clientEmail: '',
-        
+
         // 👇 აღდგენილი ველები
-        inspectionScope: 'ობიექტის ხარჯთაღრიცხვის ინსპექტირება', 
-        tenderNumber: '', 
+        inspectionScope: 'ობიექტის ხარჯთაღრიცხვის ინსპექტირება',
+        tenderNumber: '',
         tenderLink: '',
 
         applicationContent: 'გთხოვთ, ჩაატაროთ ინსპექტირება და გასცეთ შესაბამისი დასკვნა.',
         deadline: '', startDate: new Date().toISOString().split('T')[0],
-        expert: '', technicalManager: '', qualityManager: ''
+        expert: [], technicalManager: [], qualityManager: ''
     });
 
     const scopes = [
@@ -37,6 +37,11 @@ const AddInspection = () => {
     }, []);
 
     const handleChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
+
+    const handleMultiToggle = (field, id) => {
+        const current = formData[field];
+        setFormData({ ...formData, [field]: current.includes(id) ? current.filter(x => x !== id) : [...current, id] });
+    };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -109,16 +114,43 @@ const AddInspection = () => {
                         <Card.Body>
                             <Row className="g-3">
                                 <Col md={4}>
-                                    <Form.Label className="small fw-bold">ექსპერტი</Form.Label>
-                                    <Form.Select name="expert" onChange={handleChange}><option value="">-- აირჩიეთ --</option>{staff.map(s => <option key={s._id} value={s._id}>{s.firstName} {s.lastName}</option>)}</Form.Select>
+                                    <Form.Label className="small fw-bold">ექსპერტი <span className="text-muted fw-normal">(შეიძლება რამდენიმე)</span></Form.Label>
+                                    <div className="border rounded p-2" style={{maxHeight: '140px', overflowY: 'auto', background: '#fff'}}>
+                                        {staff.filter(s => s.position === 'ექსპერტი').length === 0
+                                            ? <span className="text-muted small">ექსპერტი ვერ მოიძებნა</span>
+                                            : staff.filter(s => s.position === 'ექსპერტი').map(s => (
+                                                <Form.Check key={s._id} type="checkbox"
+                                                    label={`${s.firstName} ${s.lastName}`}
+                                                    checked={formData.expert.includes(s._id)}
+                                                    onChange={() => handleMultiToggle('expert', s._id)}
+                                                />
+                                            ))
+                                        }
+                                    </div>
                                 </Col>
                                 <Col md={4}>
-                                    <Form.Label className="small fw-bold">ტექ. მენეჯერი</Form.Label>
-                                    <Form.Select name="technicalManager" onChange={handleChange}><option value="">-- აირჩიეთ --</option>{staff.map(s => <option key={s._id} value={s._id}>{s.firstName} {s.lastName}</option>)}</Form.Select>
+                                    <Form.Label className="small fw-bold">ტექ. მენეჯერი <span className="text-muted fw-normal">(შეიძლება რამდენიმე)</span></Form.Label>
+                                    <div className="border rounded p-2" style={{maxHeight: '140px', overflowY: 'auto', background: '#fff'}}>
+                                        {staff.filter(s => s.position === 'ტექ. მენეჯერი').length === 0
+                                            ? <span className="text-muted small">ტექ. მენეჯერი ვერ მოიძებნა</span>
+                                            : staff.filter(s => s.position === 'ტექ. მენეჯერი').map(s => (
+                                                <Form.Check key={s._id} type="checkbox"
+                                                    label={`${s.firstName} ${s.lastName}`}
+                                                    checked={formData.technicalManager.includes(s._id)}
+                                                    onChange={() => handleMultiToggle('technicalManager', s._id)}
+                                                />
+                                            ))
+                                        }
+                                    </div>
                                 </Col>
                                 <Col md={4}>
                                     <Form.Label className="small fw-bold">ხარისხის მენეჯერი</Form.Label>
-                                    <Form.Select name="qualityManager" onChange={handleChange}><option value="">-- აირჩიეთ --</option>{staff.map(s => <option key={s._id} value={s._id}>{s.firstName} {s.lastName}</option>)}</Form.Select>
+                                    <Form.Select name="qualityManager" onChange={handleChange}>
+                                        <option value="">-- აირჩიეთ --</option>
+                                        {staff.filter(s => s.position === 'ხარ. მენეჯერი').map(s => (
+                                            <option key={s._id} value={s._id}>{s.firstName} {s.lastName}</option>
+                                        ))}
+                                    </Form.Select>
                                 </Col>
                             </Row>
                         </Card.Body>

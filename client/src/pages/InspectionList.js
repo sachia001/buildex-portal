@@ -46,7 +46,10 @@ const InspectionList = ({ role }) => {
             );
         }
         if (filter.expert) {
-            result = result.filter(i => i.expert && i.expert._id === filter.expert);
+            result = result.filter(i => {
+                if (Array.isArray(i.expert)) return i.expert.some(e => e._id === filter.expert);
+                return i.expert && i.expert._id === filter.expert;
+            });
         }
         if (filter.status) {
             result = result.filter(i => i.status === filter.status);
@@ -74,7 +77,11 @@ const InspectionList = ({ role }) => {
     };
 
     // უნიკალური ექსპერტების სია ფილტრისთვის
-    const expertsList = [...new Set(inspections.map(i => i.expert).filter(Boolean).map(e => JSON.stringify({id: e._id, name: `${e.firstName} ${e.lastName}`})))].map(e => JSON.parse(e));
+    const expertsList = Object.values(
+        inspections.flatMap(i => Array.isArray(i.expert) ? i.expert : (i.expert ? [i.expert] : []))
+            .filter(Boolean)
+            .reduce((acc, e) => { acc[e._id] = { id: e._id, name: `${e.firstName} ${e.lastName}` }; return acc; }, {})
+    );
 
     const handleFilterChange = (e) => {
         setFilter({ ...filter, [e.target.name]: e.target.value });
@@ -203,7 +210,9 @@ const InspectionList = ({ role }) => {
                                         <td className="text-truncate" style={{maxWidth: '250px'}} title={item.objectName}>{item.objectName}</td>
                                         <td className="text-muted small">{item.clientName || '-'}</td>
                                         <td className="fw-bold text-dark">
-                                            {item.expert ? `${item.expert.firstName} ${item.expert.lastName}` : '-'}
+                                            {Array.isArray(item.expert) && item.expert.length > 0
+                                                ? item.expert.map(e => `${e.firstName} ${e.lastName}`).join(', ')
+                                                : (item.expert ? `${item.expert.firstName} ${item.expert.lastName}` : '-')}
                                         </td>
                                         <td className="text-muted">
                                             {new Date(item.createdAt).toLocaleDateString('ka-GE')}

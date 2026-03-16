@@ -8,7 +8,8 @@ import { PDFDownloadLink } from '@react-pdf/renderer';
 import PdfDocument from '../pdf-components/PdfDocument'; 
 import ReportCoverPdf from '../pdf-components/ReportCoverPdf'; 
 
-const InspectionDetails = () => {
+const InspectionDetails = ({ role }) => {
+    const isReadOnly = role === 'quality_manager';
     const { id } = useParams();
     const navigate = useNavigate();
     const [data, setData] = useState(null);
@@ -105,9 +106,11 @@ const InspectionDetails = () => {
                     <Card className="shadow-sm border-0 mb-4">
                         <Card.Header className="bg-white py-3 d-flex justify-content-between align-items-center">
                             <h6 className="m-0 fw-bold text-primary">🔧 საქმის დეტალები</h6>
-                            <Button variant={editMode ? "success" : "warning"} size="sm" onClick={() => editMode ? handleSave() : setEditMode(true)}>
-                                {editMode ? "💾 შენახვა" : "✏️ რედაქტირება"}
-                            </Button>
+                            {!isReadOnly && (
+                                <Button variant={editMode ? "success" : "warning"} size="sm" onClick={() => editMode ? handleSave() : setEditMode(true)}>
+                                    {editMode ? "💾 შენახვა" : "✏️ რედაქტირება"}
+                                </Button>
+                            )}
                         </Card.Header>
                         <Card.Body>
                             <Row className="g-3">
@@ -130,11 +133,19 @@ const InspectionDetails = () => {
                                 <Col md={12}><hr/></Col>
                                 <Col md={4}>
                                     <div className="small text-muted">ექსპერტი</div>
-                                    <div className="fw-bold">{data.expert ? `${data.expert.firstName} ${data.expert.lastName}` : "დაუნიშვნელია"}</div>
+                                    <div className="fw-bold">
+                                        {Array.isArray(data.expert) && data.expert.length > 0
+                                            ? data.expert.map(e => `${e.firstName} ${e.lastName}`).join(', ')
+                                            : (data.expert ? `${data.expert.firstName} ${data.expert.lastName}` : "დაუნიშვნელია")}
+                                    </div>
                                 </Col>
                                 <Col md={4}>
                                     <div className="small text-muted">ტექ. მენეჯერი</div>
-                                    <div className="fw-bold">{data.technicalManager ? `${data.technicalManager.firstName} ${data.technicalManager.lastName}` : "-"}</div>
+                                    <div className="fw-bold">
+                                        {Array.isArray(data.technicalManager) && data.technicalManager.length > 0
+                                            ? data.technicalManager.map(e => `${e.firstName} ${e.lastName}`).join(', ')
+                                            : (data.technicalManager ? `${data.technicalManager.firstName} ${data.technicalManager.lastName}` : "-")}
+                                    </div>
                                 </Col>
                                 <Col md={4}>
                                     <div className="small text-muted">ხარისხის მენეჯერი</div>
@@ -148,15 +159,17 @@ const InspectionDetails = () => {
                     <Card className="shadow-sm border-0">
                         <Card.Header className="bg-white py-3"><h6 className="m-0 fw-bold text-primary">📂 დოკუმენტაცია</h6></Card.Header>
                         <Card.Body>
-                            <div className="d-flex gap-2 mb-3 bg-light p-3 rounded">
-                                <Form.Select size="sm" value={docType} onChange={e => setDocType(e.target.value)}>
-                                    {docTypes.map(t => <option key={t} value={t}>{t}</option>)}
-                                </Form.Select>
-                                <Form.Control type="file" size="sm" onChange={e => setFile(e.target.files[0])} />
-                                <Button size="sm" variant="success" onClick={handleUpload} disabled={uploading}>
-                                    {uploading ? '...' : 'ატვირთვა'}
-                                </Button>
-                            </div>
+                            {!isReadOnly && (
+                                <div className="d-flex gap-2 mb-3 bg-light p-3 rounded">
+                                    <Form.Select size="sm" value={docType} onChange={e => setDocType(e.target.value)}>
+                                        {docTypes.map(t => <option key={t} value={t}>{t}</option>)}
+                                    </Form.Select>
+                                    <Form.Control type="file" size="sm" onChange={e => setFile(e.target.files[0])} />
+                                    <Button size="sm" variant="success" onClick={handleUpload} disabled={uploading}>
+                                        {uploading ? '...' : 'ატვირთვა'}
+                                    </Button>
+                                </div>
+                            )}
                             
                             <Table hover size="sm" className="align-middle">
                                 <thead><tr><th>დოკუმენტი</th><th>მოქმედება</th></tr></thead>

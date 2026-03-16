@@ -93,8 +93,8 @@ const InspectionSchema = new mongoose.Schema({
     status: { type: String, default: 'რეგისტრირებული' },
     deadline: Date,
     startDate: Date,
-    expert: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
-    technicalManager: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+    expert: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+    technicalManager: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
     qualityManager: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
     documents: { type: Object, default: {} }
 }, { timestamps: true });
@@ -214,7 +214,7 @@ api.get('/inspections', async (req, res) => {
         if (req.user.role === 'inspector' && req.user.staffId) {
             query = { $or: [{ expert: req.user.staffId }, { technicalManager: req.user.staffId }] };
         }
-        const list = await Inspection.find(query).populate('expert', 'firstName lastName').sort({ createdAt: -1 });
+        const list = await Inspection.find(query).populate('expert', 'firstName lastName').populate('technicalManager', 'firstName lastName').sort({ createdAt: -1 });
         res.json(list);
     } catch (err) { res.status(500).json({ error: err.message }); }
 });
