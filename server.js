@@ -37,7 +37,8 @@ const upload = multer({ storage });
 const AuthUser = mongoose.model('AuthUser', new mongoose.Schema({
     username: { type: String, required: true, unique: true },
     passwordHash: { type: String, required: true },
-    role: { type: String, default: 'user' }
+    role: { type: String, default: 'inspector' },
+    staffId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null }
 }, { timestamps: true }));
 
 // Seed default admin on startup
@@ -186,7 +187,11 @@ api.post('/inspections', async (req, res) => {
 
 api.get('/inspections', async (req, res) => {
     try {
-        const list = await Inspection.find().populate('expert', 'firstName lastName').sort({ createdAt: -1 });
+        let query = {};
+        if (req.user.role === 'inspector' && req.user.staffId) {
+            query = { $or: [{ expert: req.user.staffId }, { technicalManager: req.user.staffId }] };
+        }
+        const list = await Inspection.find(query).populate('expert', 'firstName lastName').sort({ createdAt: -1 });
         res.json(list);
     } catch (err) { res.status(500).json({ error: err.message }); }
 });
@@ -196,6 +201,14 @@ api.get('/inspections/:id', async (req, res) => {
         const item = await Inspection.findById(req.params.id).populate('expert technicalManager qualityManager');
         if (!item) return res.status(404).json({ error: 'ვერ მოიძებნა' });
         res.json(item);
+    } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+api.delete('/inspections/:id', async (req, res) => {
+    if (req.user.role !== 'admin') return res.status(403).json({ error: 'წაშლის უფლება არ გაქვთ' });
+    try {
+        await Inspection.findByIdAndDelete(req.params.id);
+        res.json({ msg: 'საქმე წაიშალა' });
     } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
@@ -253,6 +266,7 @@ api.put('/users/:id', async (req, res) => {
 });
 
 api.delete('/users/:id', async (req, res) => {
+    if (req.user.role !== 'admin') return res.status(403).json({ error: 'წაშლის უფლება არ გაქვთ' });
     try {
         await User.findByIdAndDelete(req.params.id);
         res.json({ msg: 'თანამშრომელი წაიშალა' });
@@ -296,6 +310,7 @@ api.post('/equipment', async (req, res) => {
 });
 
 api.delete('/equipment/:id', async (req, res) => {
+    if (req.user.role !== 'admin') return res.status(403).json({ error: 'წაშლის უფლება არ გაქვთ' });
     try {
         await Equipment.findByIdAndDelete(req.params.id);
         res.json({ msg: 'წაიშალა' });
@@ -317,6 +332,7 @@ api.post('/management-reviews', async (req, res) => {
 });
 
 api.delete('/management-reviews/:id', async (req, res) => {
+    if (req.user.role !== 'admin') return res.status(403).json({ error: 'წაშლის უფლება არ გაქვთ' });
     try {
         await ManagementReview.findByIdAndDelete(req.params.id);
         res.json({ msg: 'წაიშალა' });
@@ -366,7 +382,7 @@ authRouter.post('/login', async (req, res) => {
         if (!user) return res.status(401).json({ message: 'მომხმარებელი ვერ მოიძებნა' });
         const ok = await bcrypt.compare(password, user.passwordHash);
         if (!ok) return res.status(401).json({ message: 'პაროლი არასწორია' });
-        const token = jwt.sign({ id: user._id, username: user.username, role: user.role }, JWT_SECRET, { expiresIn: '8h' });
+        const token = jwt.sign({ id: user._id, username: user.username, role: user.role, staffId: user.staffId || null }, JWT_SECRET, { expiresIn: '8h' });
         res.json({ token, username: user.username, role: user.role });
     } catch (err) { res.status(500).json({ message: err.message }); }
 });
@@ -384,20 +400,24 @@ authRouter.post('/change-password', requireAuth, async (req, res) => {
     } catch (err) { res.status(500).json({ message: err.message }); }
 });
 
-// Admin: list and create auth users
+// Admin+HR: list and create auth users
+const canManageUsers = (role) => role === 'admin' || role === 'hr';
+
 authRouter.get('/users', requireAuth, async (req, res) => {
-    if (req.user.role !== 'admin') return res.status(403).json({ message: 'მხოლოდ ადმინი' });
-    const users = await AuthUser.find({}, 'username role createdAt');
+    if (!canManageUsers(req.user.role)) return res.status(403).json({ message: 'უფლება არ გაქვთ' });
+    const users = await AuthUser.find({}, 'username role staffId createdAt').populate('staffId', 'firstName lastName');
     res.json(users);
 });
 
 authRouter.post('/users', requireAuth, async (req, res) => {
-    if (req.user.role !== 'admin') return res.status(403).json({ message: 'მხოლოდ ადმინი' });
+    if (!canManageUsers(req.user.role)) return res.status(403).json({ message: 'უფლება არ გაქვთ' });
     try {
-        const { username, password, role } = req.body;
+        const { username, password, role, staffId } = req.body;
+        // HR cannot create admin accounts
+        if (req.user.role === 'hr' && role === 'admin') return res.status(403).json({ message: 'HR-ს არ შეუძლია ადმინის შექმნა' });
         const hash = await bcrypt.hash(password, 10);
-        const user = await AuthUser.create({ username, passwordHash: hash, role: role || 'user' });
-        res.json({ username: user.username, role: user.role });
+        const user = await AuthUser.create({ username, passwordHash: hash, role: role || 'inspector', staffId: staffId || null });
+        res.json({ _id: user._id, username: user.username, role: user.role });
     } catch (err) {
         if (err.code === 11000) return res.status(400).json({ message: 'მომხმარებელი უკვე არსებობს' });
         res.status(400).json({ message: err.message });
@@ -405,7 +425,7 @@ authRouter.post('/users', requireAuth, async (req, res) => {
 });
 
 authRouter.delete('/users/:id', requireAuth, async (req, res) => {
-    if (req.user.role !== 'admin') return res.status(403).json({ message: 'მხოლოდ ადმინი' });
+    if (req.user.role !== 'admin') return res.status(403).json({ message: 'მხოლოდ ადმინს შეუძლია წაშლა' });
     await AuthUser.findByIdAndDelete(req.params.id);
     res.json({ msg: 'წაიშალა' });
 });

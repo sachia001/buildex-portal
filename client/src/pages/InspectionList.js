@@ -3,8 +3,9 @@ import { Container, Card, Table, Button, Form, Row, Col, Badge, Spinner } from '
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 
-const InspectionList = () => {
+const InspectionList = ({ role }) => {
     const navigate = useNavigate();
+    const isAdmin = role === 'admin';
     const [inspections, setInspections] = useState([]);
     const [filtered, setFiltered] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -81,6 +82,16 @@ const InspectionList = () => {
 
     const clearFilters = () => {
         setFilter({ search: '', expert: '', status: '', dateFrom: '', dateTo: '' });
+    };
+
+    const handleDelete = async (id, name) => {
+        if (!window.confirm(`წაიშალოს "${name}"? ეს ქმედება შეუქცევადია.`)) return;
+        try {
+            await axios.delete(`/api/inspections/${id}`);
+            fetchInspections();
+        } catch (err) {
+            alert(err.response?.data?.error || 'წაშლა ვერ მოხერხდა');
+        }
     };
 
     const getStatusBadge = (status) => {
@@ -201,15 +212,26 @@ const InspectionList = () => {
                                             {getStatusBadge(item.status)}
                                         </td>
                                         <td className="text-end pe-3">
-                                            <Button 
-                                                size="sm" 
-                                                variant="outline-primary" 
-                                                className="py-0 px-2"
+                                            <Button
+                                                size="sm"
+                                                variant="outline-primary"
+                                                className="py-0 px-2 me-1"
                                                 style={{fontSize: '0.8rem', borderRadius: '4px'}}
                                                 onClick={() => navigate(`/inspections/${item._id}`)}
                                             >
                                                 დეტალები
                                             </Button>
+                                            {isAdmin && (
+                                                <Button
+                                                    size="sm"
+                                                    variant="outline-danger"
+                                                    className="py-0 px-2"
+                                                    style={{fontSize: '0.8rem', borderRadius: '4px'}}
+                                                    onClick={() => handleDelete(item._id, item.inspectionNumber)}
+                                                >
+                                                    🗑️
+                                                </Button>
+                                            )}
                                         </td>
                                     </tr>
                                 ))
