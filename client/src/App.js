@@ -166,7 +166,11 @@ function AppContent() {
                 <Routes>
                     <Route path="/" element={<Dashboard role={role} />} />
                     <Route path="/inspections" element={<InspectionList role={role} />} />
-                    <Route path="/add-inspection" element={<AddInspection />} />
+                    <Route path="/add-inspection" element={
+                        ['admin', 'chancellor'].includes(role)
+                            ? <AddInspection />
+                            : <div className="text-center mt-5"><h4 className="text-danger">🚫 წვდომა აკრძალულია</h4><p className="text-muted">მხოლოდ ადმინი და კანცელარია ახდენენ საქმის რეგისტრაციას.</p><Link to="/inspections" className="btn btn-secondary mt-2">← უკან</Link></div>
+                    } />
                     <Route path="/inspections/:id" element={<InspectionDetails role={role} />} />
                     <Route path="/admin" element={<AdminRegister role={role} />} />
                     <Route path="/staff/:id" element={<StaffDetails />} />

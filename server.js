@@ -193,6 +193,8 @@ api.use(requireAuth);
 
 // --- INSPECTIONS ---
 api.post('/inspections', async (req, res) => {
+    if (!['admin', 'chancellor'].includes(req.user.role))
+        return res.status(403).json({ error: 'საქმის რეგისტრაციის უფლება არ გაქვთ' });
     try {
         const appNum  = await generateDocumentNumber('IN');
         const inspNum = await generateDocumentNumber('BX-INS');

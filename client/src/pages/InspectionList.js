@@ -129,12 +129,14 @@ const InspectionList = ({ role }) => {
                         <h4 className="fw-bold m-0" style={{color: THEME.primary}}>📂 ინსპექტირების რეესტრი</h4>
                         <span className="text-muted small">სულ: {filtered.length} ჩანაწერი</span>
                     </div>
-                    <Button 
-                        style={{backgroundColor: THEME.primary, border: 'none'}} 
-                        onClick={() => navigate('/add-inspection')}
-                    >
-                        + ახალი საქმე
-                    </Button>
+                    {['admin', 'chancellor'].includes(role) && (
+                        <Button
+                            style={{backgroundColor: THEME.primary, border: 'none'}}
+                            onClick={() => navigate('/add-inspection')}
+                        >
+                            + ახალი საქმე
+                        </Button>
+                    )}
                 </div>
 
                 {/* Filters Panel */}
