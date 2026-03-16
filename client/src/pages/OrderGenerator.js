@@ -201,7 +201,7 @@ const OrderGenerator = () => {
                             <p><strong>ნომერი:</strong> {pdfData.number}</p>
                             <p><strong>თემა:</strong> {pdfData.subject}</p>
                             <hr/>
-                            <ul>{pdfData.clauses.map((c, i) => (<li key={i} className="mb-1">{c.title && <strong>{c.title}: </strong>}{c.text.substring(0, 80)}...</li>))}</ul>
+                            <ul>{pdfData.clauses.map((c, i) => (<li key={i} className="mb-1">{c.title && <strong>{c.title}: </strong>}{c.text.length > 80 ? c.text.substring(0, 80) + '...' : c.text}</li>))}</ul>
                         </div>
 
                         {employeeName && startDate && signatureImage ? (

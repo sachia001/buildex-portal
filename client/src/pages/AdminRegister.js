@@ -24,6 +24,16 @@ const AdminRegister = () => {
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
 
+    const handleDelete = async (id, name) => {
+        if (!window.confirm(`წაიშალოს ${name}? ეს ქმედება შეუქცევადია.`)) return;
+        try {
+            await axios.delete(`/api/users/${id}`);
+            fetchStaff();
+        } catch (err) {
+            alert("წაშლა ვერ მოხერხდა");
+        }
+    };
+
     const fetchStaff = async () => {
         try {
             const res = await axios.get('/api/users/staff');
@@ -148,6 +158,9 @@ const AdminRegister = () => {
                                     <td className="text-center">
                                         <Button size="sm" variant="outline-primary" onClick={() => navigate(`/staff/${s._id}`)}>
                                             პირადი საქმე
+                                        </Button>
+                                        <Button size="sm" variant="outline-danger" className="ms-2" onClick={() => handleDelete(s._id, `${s.firstName} ${s.lastName}`)}>
+                                            🗑️ წაშლა
                                         </Button>
                                     </td>
                                 </tr>
