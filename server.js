@@ -4,6 +4,10 @@ const cors = require('cors');
 const path = require('path');
 const fs = require('fs');
 const multer = require('multer');
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
+
+const JWT_SECRET = process.env.JWT_SECRET || 'buildex-secret-2026';
 
 const app = express();
 app.use(cors());
@@ -29,6 +33,35 @@ const storage = multer.diskStorage({
 const upload = multer({ storage });
 
 // --- MODELS ---
+
+const AuthUser = mongoose.model('AuthUser', new mongoose.Schema({
+    username: { type: String, required: true, unique: true },
+    passwordHash: { type: String, required: true },
+    role: { type: String, default: 'user' }
+}, { timestamps: true }));
+
+// Seed default admin on startup
+mongoose.connection.once('open', async () => {
+    const exists = await AuthUser.findOne({ username: 'admin' });
+    if (!exists) {
+        const hash = await bcrypt.hash('Buildex@2026', 10);
+        await AuthUser.create({ username: 'admin', passwordHash: hash, role: 'admin' });
+        console.log('✅ ადმინი შეიქმნა: admin / Buildex@2026');
+    }
+});
+
+// JWT middleware
+const requireAuth = (req, res, next) => {
+    const authHeader = req.headers.authorization;
+    if (!authHeader) return res.status(401).json({ message: 'ავტორიზაცია საჭიროა' });
+    const token = authHeader.split(' ')[1];
+    try {
+        req.user = jwt.verify(token, JWT_SECRET);
+        next();
+    } catch {
+        return res.status(401).json({ message: 'ტოკენი არასწორია ან ვადაგასულია' });
+    }
+};
 
 const Counter = mongoose.model('Counter', new mongoose.Schema({
     _id: { type: String, required: true },
@@ -322,6 +355,65 @@ api.get('/dashboard/stats', async (req, res) => {
         res.json({ counts: { total, active, completed, registered, staffCount }, equipment: eqStats, urgentList });
     } catch (err) { res.status(500).json({ error: err.message }); }
 });
+
+// --- AUTH ROUTES (public — no JWT required) ---
+const authRouter = express.Router();
+
+authRouter.post('/login', async (req, res) => {
+    try {
+        const { username, password } = req.body;
+        const user = await AuthUser.findOne({ username });
+        if (!user) return res.status(401).json({ message: 'მომხმარებელი ვერ მოიძებნა' });
+        const ok = await bcrypt.compare(password, user.passwordHash);
+        if (!ok) return res.status(401).json({ message: 'პაროლი არასწორია' });
+        const token = jwt.sign({ id: user._id, username: user.username, role: user.role }, JWT_SECRET, { expiresIn: '8h' });
+        res.json({ token, username: user.username, role: user.role });
+    } catch (err) { res.status(500).json({ message: err.message }); }
+});
+
+authRouter.post('/change-password', requireAuth, async (req, res) => {
+    try {
+        const { oldPassword, newPassword } = req.body;
+        const user = await AuthUser.findById(req.user.id);
+        if (!user) return res.status(404).json({ message: 'მომხმარებელი ვერ მოიძებნა' });
+        const ok = await bcrypt.compare(oldPassword, user.passwordHash);
+        if (!ok) return res.status(401).json({ message: 'ძველი პაროლი არასწორია' });
+        user.passwordHash = await bcrypt.hash(newPassword, 10);
+        await user.save();
+        res.json({ message: 'პაროლი შეიცვალა' });
+    } catch (err) { res.status(500).json({ message: err.message }); }
+});
+
+// Admin: list and create auth users
+authRouter.get('/users', requireAuth, async (req, res) => {
+    if (req.user.role !== 'admin') return res.status(403).json({ message: 'მხოლოდ ადმინი' });
+    const users = await AuthUser.find({}, 'username role createdAt');
+    res.json(users);
+});
+
+authRouter.post('/users', requireAuth, async (req, res) => {
+    if (req.user.role !== 'admin') return res.status(403).json({ message: 'მხოლოდ ადმინი' });
+    try {
+        const { username, password, role } = req.body;
+        const hash = await bcrypt.hash(password, 10);
+        const user = await AuthUser.create({ username, passwordHash: hash, role: role || 'user' });
+        res.json({ username: user.username, role: user.role });
+    } catch (err) {
+        if (err.code === 11000) return res.status(400).json({ message: 'მომხმარებელი უკვე არსებობს' });
+        res.status(400).json({ message: err.message });
+    }
+});
+
+authRouter.delete('/users/:id', requireAuth, async (req, res) => {
+    if (req.user.role !== 'admin') return res.status(403).json({ message: 'მხოლოდ ადმინი' });
+    await AuthUser.findByIdAndDelete(req.params.id);
+    res.json({ msg: 'წაიშალა' });
+});
+
+app.use('/api/auth', authRouter);
+
+// Protect all other /api routes with JWT
+api.use(requireAuth);
 
 // Mount the API router — BEFORE static file serving
 app.use('/api', api);
