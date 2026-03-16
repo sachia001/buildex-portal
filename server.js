@@ -219,6 +219,13 @@ api.put('/users/:id', async (req, res) => {
     } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
+api.delete('/users/:id', async (req, res) => {
+    try {
+        await User.findByIdAndDelete(req.params.id);
+        res.json({ msg: 'თანამშრომელი წაიშალა' });
+    } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
 api.post('/users/:id/upload', upload.single('file'), async (req, res) => {
     try {
         if (!req.file) return res.status(400).json({ error: 'ფაილი არ არის' });
