@@ -140,6 +140,30 @@ async function generateDocumentNumber(type, date = new Date()) {
     const yearFull = date.getFullYear();
     const yearShort = yearFull.toString().slice(-2);
     const month = (date.getMonth() + 1).toString().padStart(2, '0');
+
+    // BX-INS and IN: derive sequence from actual existing records, not a stored counter
+    // This ensures numbering is correct after deletions
+    if (type === 'BX-INS') {
+        const last = await Inspection.findOne({}, 'inspectionNumber').sort({ createdAt: -1 });
+        let nextSeq = 1;
+        if (last && last.inspectionNumber) {
+            const parts = last.inspectionNumber.split('-');
+            const n = parseInt(parts[parts.length - 1]);
+            if (!isNaN(n)) nextSeq = n + 1;
+        }
+        return `BX-INS-${yearShort}-${month}-${nextSeq.toString().padStart(4, '0')}`;
+    }
+
+    if (type === 'IN') {
+        const last = await Inspection.findOne({}, 'applicationNumber').sort({ createdAt: -1 });
+        let nextSeq = 1;
+        if (last && last.applicationNumber) {
+            const m = last.applicationNumber.match(/^IN-(\d+)\//);
+            if (m) nextSeq = parseInt(m[1]) + 1;
+        }
+        return `IN-${nextSeq}/${yearShort}`;
+    }
+
     const counterKey = `${type}-${yearFull}`;
     const counter = await Counter.findByIdAndUpdate(
         { _id: counterKey }, { $inc: { seq: 1 } }, { new: true, upsert: true }
@@ -152,11 +176,9 @@ async function generateDocumentNumber(type, date = new Date()) {
         case '01':     return `\u211601/${seq2}-${yearShort}`;
         case '02-HR':  return `\u211602-HR/${seq2}-${yearShort}`;
         case '03-TR':  return `\u211603-TR/${seq2}-${yearShort}`;
-        case 'IN':     return `IN-${seq}/${yearShort}`;
         case 'OUT':    return `OUT-${seq}/${yearShort}`;
         case 'LC':     return `LC-${seq2}-${month}/${yearShort}`;
         case 'SC':     return `SC-${seq2}-${month}/${yearShort}`;
-        case 'BX-INS': return `BX-INS-${yearShort}-${month}-${seq4}`;
         case 'IM':     return `IM-${seq}/${yearShort}`;
         default: throw new Error("უცნობი კატეგორია");
     }
