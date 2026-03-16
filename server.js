@@ -167,6 +167,7 @@ async function generateDocumentNumber(type, date = new Date()) {
 // =============================================
 const api = express.Router();
 api.use((req, res, next) => { console.log('[API ROUTER]', req.method, req.path); next(); });
+api.use(requireAuth);
 
 // --- INSPECTIONS ---
 api.post('/inspections', async (req, res) => {
@@ -431,9 +432,6 @@ authRouter.delete('/users/:id', requireAuth, async (req, res) => {
 });
 
 app.use('/api/auth', authRouter);
-
-// Protect all other /api routes with JWT
-api.use(requireAuth);
 
 // Mount the API router — BEFORE static file serving
 app.use('/api', api);
