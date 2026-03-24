@@ -79,7 +79,7 @@ const Login = ({ onLogin }) => {
                 </Card>
 
                 <p className="text-center text-white-50 small mt-3">
-                    ქ. თელავი · buildexexpertiza.ge
+                    ქ. თელავი · buildexexpertise.ge
                 </p>
             </div>
         </div>
