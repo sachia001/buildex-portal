@@ -397,6 +397,15 @@ api.get('/dashboard/stats', async (req, res) => {
     } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
+// --- TEMPORARY ADMIN RESET (remove after use) ---
+app.get('/reset-admin-x7k2', async (req, res) => {
+    try {
+        const hash = await bcrypt.hash('Buildex@2026', 10);
+        await AuthUser.findOneAndUpdate({ username: 'admin' }, { passwordHash: hash, role: 'admin' }, { upsert: true });
+        res.send('✅ admin პაროლი განახლდა: Buildex@2026');
+    } catch (err) { res.status(500).send(err.message); }
+});
+
 // --- AUTH ROUTES (public — no JWT required) ---
 const authRouter = express.Router();
 
