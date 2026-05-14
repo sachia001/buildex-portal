@@ -397,6 +397,16 @@ api.get('/dashboard/stats', async (req, res) => {
     } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
+// --- TEMPORARY: Emergency admin reset (remove after use) ---
+app.post('/api/auth/emergency-reset', async (req, res) => {
+    if (req.body.secret !== 'buildex-reset-2026') return res.status(403).json({ message: 'Forbidden' });
+    try {
+        const hash = await bcrypt.hash('Buildex@2026', 10);
+        await AuthUser.findOneAndUpdate({ username: 'admin' }, { passwordHash: hash, role: 'admin' }, { upsert: true, new: true });
+        res.json({ ok: true, message: 'admin / Buildex@2026 — პაროლი განახლდა' });
+    } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
 // --- AUTH ROUTES (public — no JWT required) ---
 const authRouter = express.Router();
 
