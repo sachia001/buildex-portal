@@ -491,7 +491,7 @@ const CompanyDocsPage = ({ role }) => {
                     </div>
                   </Col>
 
-                  <Col md={12}><hr className="my-1" /><strong className="small text-muted">გამცემი ({transferType === 'gift' ? 'ჩამჩუქებელი' : 'გამყიდველი'})</strong></Col>
+                  <Col md={12}><hr className="my-1" /><strong className="small text-muted">წილის დამთმობი</strong></Col>
                   <Col md={3}>
                     <Form.Label className="small fw-bold">სახელი, გვარი</Form.Label>
                     <Form.Control value={transferForm.transferorName} onChange={e => setTransferForm({ ...transferForm, transferorName: e.target.value })} />
@@ -509,7 +509,7 @@ const CompanyDocsPage = ({ role }) => {
                     <Form.Control value={transferForm.transferorCurrentShare} onChange={e => setTransferForm({ ...transferForm, transferorCurrentShare: e.target.value })} />
                   </Col>
 
-                  <Col md={12}><hr className="my-1" /><strong className="small text-muted">მიმღები ({transferType === 'gift' ? 'დასაჩუქრებული' : 'მყიდველი'})</strong></Col>
+                  <Col md={12}><hr className="my-1" /><strong className="small text-muted">წილის შემძენი</strong></Col>
                   <Col md={4}>
                     <Form.Label className="small fw-bold">სახელი, გვარი *</Form.Label>
                     <Form.Control placeholder="სახელი გვარი" value={transferForm.transfereeName} onChange={e => setTransferForm({ ...transferForm, transfereeName: e.target.value })} />
