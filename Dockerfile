@@ -2,14 +2,13 @@ FROM node:20-slim
 
 WORKDIR /app
 
-COPY package*.json ./
+COPY . .
+
 RUN npm install --production=false
 
-COPY client/package*.json ./client/
-RUN cd client && npm install
+RUN npm install --prefix client
 
-COPY . .
-RUN cd client && npm run build
+RUN npm run build --prefix client
 
 ENV PORT=8080
 EXPOSE 8080
