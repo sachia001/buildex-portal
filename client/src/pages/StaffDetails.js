@@ -1,12 +1,18 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Container, Card, Row, Col, Form, Button, Table, Badge, Spinner, Modal, Nav, Tab } from 'react-bootstrap';
+import { Container, Card, Row, Col, Form, Button, Table, Badge, Spinner, Modal, Nav, Tab, Accordion } from 'react-bootstrap';
 import { useParams, useNavigate } from 'react-router-dom';
 import { PDFDownloadLink } from '@react-pdf/renderer';
 import axios from 'axios';
 import SignatureCanvas from 'react-signature-canvas';
 import DirectorsOrderPdf from '../pdf-components/DirectorsOrderPdf';
 import LaborContractPdf from '../pdf-components/LaborContractPdf';
+import ImpartialityDeclarationPdf from '../pdf-components/ImpartialityDeclarationPdf';
+import ConfidentialityAgreementPdf from '../pdf-components/ConfidentialityAgreementPdf';
+import TrainingRecordPdf from '../pdf-components/TrainingRecordPdf';
 import { generateDocNumber } from '../utils/docCategories';
+
+const today = new Date().toISOString().split('T')[0];
+const todayGe = new Date().toLocaleDateString('ka-GE');
 
 const StaffDetails = () => {
     const { id } = useParams();
@@ -16,26 +22,51 @@ const StaffDetails = () => {
     const [showStatusModal, setShowStatusModal] = useState(false);
     const [newStatus, setNewStatus] = useState('');
 
-    // Upload State
+    // Upload
     const [docType, setDocType] = useState('პირადობა');
     const [file, setFile] = useState(null);
     const [uploading, setUploading] = useState(false);
+    const docOptions = ['პირადობა', 'CV', 'დიპლომი', 'სერთიფიკატი', 'ბრძანება', 'ხელშეკრულება'];
 
-    const docOptions = ["პირადობა", "CV", "დიპლომი", "სერთიფიკატი", "ბრძანება", "ხელშეკრულება"];
-
-    // PDF Generation State
+    // ბრძანება / ხელშეკრულება
     const [salary, setSalary] = useState('');
     const [address, setAddress] = useState('');
-    const [startDate, setStartDate] = useState(new Date().toISOString().split('T')[0]);
+    const [startDate, setStartDate] = useState(today);
     const [contractNumber, setContractNumber] = useState('LC-2026-001');
+
+    // FM-02 — მიუკერძოებლობის დეკლარაცია
+    const [scopes, setScopes] = useState([]);
+    const [conflicts, setConflicts] = useState({
+        ownership: false, family: false, employment: false, financial: false, contract: false
+    });
+
+    // FM-13 — ტრენინგის ჩანაწერი
+    const [trainingDate, setTrainingDate] = useState(today);
+    const [duration, setDuration] = useState('');
+    const [trainingType, setTrainingType] = useState('შიდა');
+    const [topic, setTopic] = useState('');
+    const [trainer, setTrainer] = useState('');
+    const [trainingLocation, setTrainingLocation] = useState('ქ. თელავი');
+    const [assessmentMethods, setAssessmentMethods] = useState([]);
+    const [assessmentResult, setAssessmentResult] = useState('კომპეტენტური');
+    const [authorized, setAuthorized] = useState(true);
+    const [nextTrainingDate, setNextTrainingDate] = useState('');
+
+    // ხელმოწერა (ერთი — გამოიყენება ყველა PDF-ში)
     const [signatureImage, setSignatureImage] = useState(null);
     const sigPadRef = useRef({});
-
     const clearSignature = () => { sigPadRef.current.clear(); setSignatureImage(null); };
     const saveSignature = () => {
-        if (sigPadRef.current.isEmpty()) return alert("ჯერ დახატეთ ხელმოწერა!");
+        if (sigPadRef.current.isEmpty()) return alert('ჯერ დახატეთ ხელმოწერა!');
         setSignatureImage(sigPadRef.current.getCanvas().toDataURL('image/png'));
     };
+
+    const toggleScope = (code) => setScopes(prev =>
+        prev.includes(code) ? prev.filter(s => s !== code) : [...prev, code]
+    );
+    const toggleAssessmentMethod = (key) => setAssessmentMethods(prev =>
+        prev.includes(key) ? prev.filter(m => m !== key) : [...prev, key]
+    );
 
     const fetchUser = async () => {
         try {
@@ -50,30 +81,28 @@ const StaffDetails = () => {
     useEffect(() => { fetchUser(); }, [id]);
 
     const handleUpload = async () => {
-        if (!file) return alert("აირჩიეთ ფაილი!");
+        if (!file) return alert('აირჩიეთ ფაილი!');
         const formData = new FormData();
         formData.append('file', file);
         formData.append('docType', docType);
         setUploading(true);
         try {
-            await axios.post(`/api/users/${id}/upload`, formData, {
-                headers: { 'Content-Type': 'multipart/form-data' }
-            });
-            alert("✅ ფაილი აიტვირთა!");
+            await axios.post(`/api/users/${id}/upload`, formData, { headers: { 'Content-Type': 'multipart/form-data' } });
+            alert('✅ ფაილი აიტვირთა!');
             setFile(null);
             fetchUser();
-        } catch (err) { alert("ატვირთვა ვერ მოხერხდა!"); }
+        } catch { alert('ატვირთვა ვერ მოხერხდა!'); }
         finally { setUploading(false); }
     };
 
     const deleteDoc = async (key) => {
-        if (!window.confirm("წავშალოთ დოკუმენტი?")) return;
+        if (!window.confirm('წავშალოთ დოკუმენტი?')) return;
         const newDocs = { ...user.documents };
         delete newDocs[key];
         try {
             await axios.put(`/api/users/${id}`, { documents: newDocs });
             fetchUser();
-        } catch (err) { alert("ვერ წაიშალა"); }
+        } catch { alert('ვერ წაიშალა'); }
     };
 
     const handleStatusChange = async () => {
@@ -81,32 +110,29 @@ const StaffDetails = () => {
             await axios.put(`/api/users/${id}`, { status: newStatus });
             setShowStatusModal(false);
             fetchUser();
-            alert("✅ სტატუსი შეიცვალა");
-        } catch (error) { alert("შეცდომა"); }
+            alert('✅ სტატუსი შეიცვალა');
+        } catch { alert('შეცდომა'); }
     };
 
-    // Build PDF data objects from staff profile
-    const buildOrderData = (withSig) => {
-        const fullName = `${user.firstName} ${user.lastName}`;
-        return {
-            number: generateDocNumber('DIRECTOR_HR', 1),
-            date: new Date().toLocaleDateString('ka-GE'),
-            subject: `${fullName}-ს ${user.position} პოზიციაზე დანიშვნის შესახებ`,
-            preamble: `საქართველოს ორგანული კანონის „საქართველოს შრომის კოდექსის" მე-6 და მე-9 მუხლების, კომპანიის წესდებისა და საშტატო ნუსხის საფუძველზე, ასევე კანდიდატის კვალიფიკაციის SST ISO/IEC 17020:2012 სტანდარტის მოთხოვნებთან შესაბამისობის დადასტურების გათვალისწინებით,`,
-            clauses: [
-                { title: "დანიშვნა", text: `${fullName} (პ/ნ ${user.personalId}) დაინიშნოს შპს „ბილდექს ექსპერტიზა"-ში ${user.position} პოზიციაზე, ${startDate}-დან.` },
-                { title: "ანაზღაურება", text: `შრომის ანაზღაურება განისაზღვროს თვეში ${salary || '___'} ლარის ოდენობით (დარიცხული), შრომითი ხელშეკრულების პირობების შესაბამისად.` },
-                { title: "ფუნქცია-მოვალეობები", text: `დასაქმებულის უფლება-მოვალეობები განისაზღვროს თანამდებობრივი ინსტრუქციით, რომელიც წარმოადგენს შრომითი ხელშეკრულების განუყოფელ ნაწილს.` },
-                { title: "ISO 17020 ვალდებულება", text: `დანიშვნისთანავე დასაქმებულმა ხელი მოაწეროს „დამოუკიდებლობისა და მიუკერძოებლობის დეკლარაციას" და გაეცნოს ხარისხის სახელმძღვანელოს.` },
-                { title: "საფუძველი", text: `მხარეთა შორის გაფორმებული შრომითი ხელშეკრულება; ${fullName}-ს განცხადება/CV.` },
-                { title: "", text: "ბრძანება ძალაშია ხელმოწერისთანავე." }
-            ],
-            directorName: "ლევან საჩიშვილი",
-            signature: withSig ? signatureImage : null
-        };
-    };
+    // PDF data builders
+    const buildOrderData = () => ({
+        number: generateDocNumber('DIRECTOR_HR', 1),
+        date: todayGe,
+        subject: `${user.firstName} ${user.lastName}-ს ${user.position} პოზიციაზე დანიშვნის შესახებ`,
+        preamble: `საქართველოს ორგანული კანონის „საქართველოს შრომის კოდექსის" მე-6 და მე-9 მუხლების, კომპანიის წესდებისა და საშტატო ნუსხის საფუძველზე, ასევე კანდიდატის კვალიფიკაციის SST ISO/IEC 17020:2012 სტანდარტის მოთხოვნებთან შესაბამისობის დადასტურების გათვალისწინებით,`,
+        clauses: [
+            { title: 'დანიშვნა', text: `${user.firstName} ${user.lastName} (პ/ნ ${user.personalId}) დაინიშნოს შპს „ბილდექს ექსპერტიზა"-ში ${user.position} პოზიციაზე, ${startDate}-დან.` },
+            { title: 'ანაზღაურება', text: `შრომის ანაზღაურება განისაზღვროს თვეში ${salary || '___'} ლარის ოდენობით (დარიცხული), შრომითი ხელშეკრულების პირობების შესაბამისად.` },
+            { title: 'ფუნქცია-მოვალეობები', text: `დასაქმებულის უფლება-მოვალეობები განისაზღვროს თანამდებობრივი ინსტრუქციით, რომელიც წარმოადგენს შრომითი ხელშეკრულების განუყოფელ ნაწილს.` },
+            { title: 'ISO 17020 ვალდებულება', text: `დანიშვნისთანავე დასაქმებულმა ხელი მოაწეროს „დამოუკიდებლობისა და მიუკერძოებლობის დეკლარაციას" და გაეცნოს ხარისხის სახელმძღვანელოს.` },
+            { title: 'საფუძველი', text: `მხარეთა შორის გაფორმებული შრომითი ხელშეკრულება; ${user.firstName} ${user.lastName}-ს განცხადება/CV.` },
+            { title: '', text: 'ბრძანება ძალაშია ხელმოწერისთანავე.' },
+        ],
+        directorName: 'ლევან საჩიშვილი',
+        signature: signatureImage,
+    });
 
-    const buildContractData = (withSig) => ({
+    const buildContractData = () => ({
         employeeName: `${user.firstName} ${user.lastName}`,
         personalId: user.personalId,
         address: address || '___',
@@ -115,32 +141,95 @@ const StaffDetails = () => {
         salary: salary || '___',
         startDate,
         contractNumber,
-        date: new Date().toLocaleDateString('ka-GE'),
-        directorSignature: withSig ? signatureImage : null
+        date: todayGe,
+        directorSignature: signatureImage,
     });
 
-    const orderValid = !!startDate;
-    const contractValid = !!(startDate && contractNumber);
+    const buildImpartialityData = () => ({
+        name: `${user.firstName} ${user.lastName}`,
+        position: user.position,
+        personalId: user.personalId,
+        date: todayGe,
+        scopes,
+        conflicts,
+        signature: signatureImage,
+    });
+
+    const buildConfidentialityData = () => ({
+        name: `${user.firstName} ${user.lastName}`,
+        position: user.position,
+        date: todayGe,
+        signature: signatureImage,
+    });
+
+    const buildTrainingData = () => ({
+        name: `${user.firstName} ${user.lastName}`,
+        position: user.position,
+        personalId: user.personalId,
+        date: todayGe,
+        trainingDate,
+        duration,
+        trainingType,
+        topic,
+        trainer,
+        location: trainingLocation,
+        assessmentMethods,
+        assessmentResult,
+        authorized,
+        nextTrainingDate,
+        signature: signatureImage,
+    });
+
+    const fname = user ? `${user.firstName}_${user.lastName}` : '';
 
     if (loading) return <Container className="mt-5 text-center"><Spinner animation="border" /></Container>;
     if (!user) return <Container className="mt-5 text-center">თანამშრომელი ვერ მოიძებნა</Container>;
 
     const photoUrl = user.photo ? `/${user.photo}` : null;
 
+    const scopeOptions = [
+        ['BE-PR-01', 'ხარჯთაღრიცხვის შესაბამისობა'],
+        ['BE-PR-02', 'შესრ. სამუშ. ფ. 2'],
+        ['BE-PR-03', 'ფასწარმოქმნის ადეკვატურობა'],
+        ['BE-PR-04', 'ტექნ. ზედამხედველობა'],
+    ];
+    const conflictLabels = [
+        ['ownership', 'მფლობელობითი ინტერესი კლიენტთან'],
+        ['family', 'ნათესავური / პირადი კავშირი კლიენტთან'],
+        ['employment', 'დასაქმება კლიენტთან ბოლო 2 წელში'],
+        ['financial', 'ფინანსური დამოკიდებულება კლიენტზე'],
+        ['contract', 'სხვა მოქმედი ვალდებულება კლიენტთან'],
+    ];
+    const trainingTypeOptions = [
+        ['შიდა', 'შიდა ტრენინგი'],
+        ['გარე', 'გარე ტრენინგი / სემინარი'],
+        ['witnessing', 'ადგილზე დაკვირვება'],
+        ['ახალი_ინსპ', 'ახ. ინსპ. ზედამხ. ტრ.'],
+        ['ნორმატიული', 'ნორმ. დოკ. სწავლება'],
+        ['IT', 'IT / პროგ. უზრ. ტრენინგი'],
+        ['სხვა', 'სხვა'],
+    ];
+    const methodOptions = [
+        ['test', 'წერ. ტესტი'],
+        ['witnessing', 'ადგ. დაკვ.'],
+        ['oral', 'ზეპირი'],
+        ['practical', 'პრაქტ. სავ.'],
+        ['manager', 'ტექნ. მენ. შეფ.'],
+    ];
+
     return (
         <Container className="mt-4 font-georgian pb-5">
             <Button variant="outline-secondary" className="mb-3" onClick={() => navigate('/admin')}>← უკან სიაში</Button>
 
             <Row>
-                {/* Left: Profile card */}
+                {/* Left: Profile */}
                 <Col md={4}>
                     <Card className="border-0 shadow-lg rounded-4 overflow-hidden text-center mb-4">
-                        <div className="bg-primary p-4 d-flex justify-content-center align-items-center" style={{ minHeight: '150px' }}>
-                            {photoUrl ? (
-                                <img src={photoUrl} alt="Profile" className="rounded-circle shadow" style={{ width: 120, height: 120, objectFit: 'cover', border: '4px solid white' }} />
-                            ) : (
-                                <div className="bg-white rounded-circle d-flex align-items-center justify-content-center shadow" style={{ width: 120, height: 120, fontSize: '3rem', border: '4px solid white' }}>👤</div>
-                            )}
+                        <div className="bg-primary p-4 d-flex justify-content-center align-items-center" style={{ minHeight: 150 }}>
+                            {photoUrl
+                                ? <img src={photoUrl} alt="Profile" className="rounded-circle shadow" style={{ width: 120, height: 120, objectFit: 'cover', border: '4px solid white' }} />
+                                : <div className="bg-white rounded-circle d-flex align-items-center justify-content-center shadow" style={{ width: 120, height: 120, fontSize: '3rem', border: '4px solid white' }}>👤</div>
+                            }
                         </div>
                         <Card.Body className="pt-3">
                             <h4 className="fw-bold">{user.firstName} {user.lastName}</h4>
@@ -166,17 +255,17 @@ const StaffDetails = () => {
                         </Nav>
 
                         <Tab.Content>
-                            {/* TAB 1: Document upload/view */}
+                            {/* TAB 1: Upload/view docs */}
                             <Tab.Pane eventKey="docs">
                                 <Card className="border-0 shadow-sm rounded-4 p-4">
                                     <div className="d-flex gap-2 p-3 bg-light rounded mb-3 align-items-end flex-wrap">
-                                        <div className="flex-grow-1" style={{ minWidth: '150px' }}>
+                                        <div className="flex-grow-1" style={{ minWidth: 150 }}>
                                             <Form.Label className="small fw-bold">დოკუმენტის ტიპი</Form.Label>
                                             <Form.Select size="sm" value={docType} onChange={e => setDocType(e.target.value)}>
                                                 {docOptions.map(o => <option key={o} value={o}>{o}</option>)}
                                             </Form.Select>
                                         </div>
-                                        <div className="flex-grow-1" style={{ minWidth: '200px' }}>
+                                        <div className="flex-grow-1" style={{ minWidth: 200 }}>
                                             <Form.Label className="small fw-bold">ფაილის არჩევა</Form.Label>
                                             <Form.Control type="file" size="sm" onChange={e => setFile(e.target.files[0])} />
                                         </div>
@@ -187,8 +276,8 @@ const StaffDetails = () => {
                                     <Table hover responsive className="align-middle">
                                         <thead className="table-light"><tr><th>დასახელება</th><th>ქმედება</th></tr></thead>
                                         <tbody>
-                                            {user.documents && Object.keys(user.documents).length > 0 ? (
-                                                Object.entries(user.documents).map(([key, path]) => (
+                                            {user.documents && Object.keys(user.documents).length > 0
+                                                ? Object.entries(user.documents).map(([key, path]) => (
                                                     <tr key={key}>
                                                         <td className="fw-bold text-dark">{key}</td>
                                                         <td>
@@ -197,124 +286,236 @@ const StaffDetails = () => {
                                                         </td>
                                                     </tr>
                                                 ))
-                                            ) : (
-                                                <tr><td colSpan="2" className="text-center text-muted py-4">დოკუმენტები არ არის ატვირთული</td></tr>
-                                            )}
+                                                : <tr><td colSpan="2" className="text-center text-muted py-4">დოკუმენტები არ არის ატვირთული</td></tr>
+                                            }
                                         </tbody>
                                     </Table>
                                 </Card>
                             </Tab.Pane>
 
-                            {/* TAB 2: PDF generation */}
+                            {/* TAB 2: PDF Generation */}
                             <Tab.Pane eventKey="generate">
-                                <Card className="border-0 shadow-sm rounded-4 p-4">
-                                    <h6 className="fw-bold text-primary mb-3">📋 დოკუმენტების პარამეტრები</h6>
-                                    <Row className="g-3 mb-3">
-                                        <Col md={6}>
-                                            <Form.Label className="small fw-bold">დაწყების თარიღი</Form.Label>
-                                            <Form.Control type="date" size="sm" value={startDate} onChange={e => setStartDate(e.target.value)} />
-                                        </Col>
-                                        <Col md={6}>
-                                            <Form.Label className="small fw-bold">ხელფასი (ლარი)</Form.Label>
-                                            <Form.Control type="number" size="sm" value={salary} onChange={e => setSalary(e.target.value)} placeholder="მაგ: 1500" />
-                                        </Col>
-                                        <Col md={6}>
-                                            <Form.Label className="small fw-bold">ხელშეკრულების №</Form.Label>
-                                            <Form.Control size="sm" value={contractNumber} onChange={e => setContractNumber(e.target.value)} />
-                                        </Col>
-                                        <Col md={6}>
-                                            <Form.Label className="small fw-bold">მისამართი (ხელშეკრ.)</Form.Label>
-                                            <Form.Control size="sm" value={address} onChange={e => setAddress(e.target.value)} placeholder="ფაქტობრივი მისამართი" />
-                                        </Col>
-                                    </Row>
+                                <Card className="border-0 shadow-sm rounded-4 p-3">
 
-                                    <hr />
-                                    <h6 className="fw-bold text-primary mb-2">
-                                        ✍️ დირექტორის ხელმოწერა <small className="text-muted fw-normal">(არასავალდებულო)</small>
-                                    </h6>
-                                    <div className="border rounded mb-2" style={{ backgroundColor: '#f8f9fa', display: 'inline-block' }}>
-                                        <SignatureCanvas
-                                            ref={sigPadRef}
-                                            penColor="black"
-                                            canvasProps={{ width: 380, height: 120, className: 'sigCanvas' }}
-                                        />
+                                    {/* ხელმოწერა — საერთო ყველა PDF-ისთვის */}
+                                    <div className="p-3 bg-light rounded mb-3">
+                                        <h6 className="fw-bold mb-2">✍️ ხელმოწერა <small className="text-muted fw-normal">(სურვილისამებრ — ჩაიდება ყველა PDF-ში)</small></h6>
+                                        <div className="border rounded d-inline-block" style={{ backgroundColor: '#fff' }}>
+                                            <SignatureCanvas ref={sigPadRef} penColor="black" canvasProps={{ width: 380, height: 110, className: 'sigCanvas' }} />
+                                        </div>
+                                        <div className="d-flex gap-2 mt-2">
+                                            <Button variant="outline-secondary" size="sm" onClick={clearSignature}>გასუფთავება</Button>
+                                            <Button variant="outline-primary" size="sm" onClick={saveSignature}>✅ შენახვა</Button>
+                                        </div>
+                                        {signatureImage
+                                            ? <p className="text-success small mt-2 mb-0">✔ ხელმოწერა შენახულია — ყველა PDF-ში ჩაიდება</p>
+                                            : <p className="text-muted small mt-2 mb-0">ხელმოწერის გარეშეც შეგიძლია გენერირება</p>
+                                        }
                                     </div>
-                                    <div className="d-flex gap-2 mb-2">
-                                        <Button variant="outline-secondary" size="sm" onClick={clearSignature}>გასუფთავება</Button>
-                                        <Button variant="outline-primary" size="sm" onClick={saveSignature}>✅ ხელმოწერის დადასტურება</Button>
-                                    </div>
-                                    {signatureImage
-                                        ? <p className="text-success small mb-3">✔ ხელმოწერა შენახულია — PDF-ში ჩაიდება</p>
-                                        : <p className="text-muted small mb-3">ხელმოწერის გარეშეც გენერირება შეიძლება — ველი ცარიელი დარჩება</p>
-                                    }
 
-                                    <hr />
-                                    <h6 className="fw-bold text-primary mb-3">⬇️ PDF გენერაცია</h6>
-                                    <div className="d-flex flex-wrap gap-3">
-                                        {orderValid ? (
-                                            <>
-                                                <PDFDownloadLink
-                                                    document={<DirectorsOrderPdf data={buildOrderData(!!signatureImage)} />}
-                                                    fileName={`დანიშვნის_ბრძანება_${user.firstName}_${user.lastName}.pdf`}
-                                                    style={{ textDecoration: 'none' }}
-                                                >
-                                                    {({ loading: pdfLoading }) => (
-                                                        <Button variant={signatureImage ? 'success' : 'outline-success'} size="sm" disabled={pdfLoading}>
-                                                            {pdfLoading ? '...' : `📥 დანიშვნის ბრძანება${signatureImage ? ' (ხელმოწ. ✓)' : ''}`}
-                                                        </Button>
-                                                    )}
-                                                </PDFDownloadLink>
+                                    <Accordion defaultActiveKey="iso" flush>
 
-                                                {signatureImage && (
+                                        {/* === ISO 17020 ფორმები === */}
+                                        <Accordion.Item eventKey="iso">
+                                            <Accordion.Header>📋 ISO 17020 სავალდებულო ფორმები</Accordion.Header>
+                                            <Accordion.Body>
+
+                                                {/* FM-02 */}
+                                                <div className="mb-4">
+                                                    <h6 className="fw-bold text-primary border-bottom pb-1 mb-3">FM-02 — მიუკერძოებლობის დეკლარაცია</h6>
+                                                    <Form.Label className="small fw-bold">ავტორიზებული სფეროები:</Form.Label>
+                                                    <div className="d-flex flex-wrap gap-3 mb-3">
+                                                        {scopeOptions.map(([code, label]) => (
+                                                            <Form.Check key={code} type="checkbox" id={`scope-${code}`}
+                                                                label={`${code} — ${label}`}
+                                                                checked={scopes.includes(code)}
+                                                                onChange={() => toggleScope(code)} />
+                                                        ))}
+                                                    </div>
+                                                    <Form.Label className="small fw-bold">ინტერესთა კონფლიქტი:</Form.Label>
+                                                    <div className="mb-3">
+                                                        {conflictLabels.map(([key, label]) => (
+                                                            <div key={key} className="d-flex align-items-center gap-3 mb-1">
+                                                                <span className="small flex-grow-1">{label}:</span>
+                                                                <Form.Check inline type="radio" label="კი" name={`conflict-${key}`} id={`c-yes-${key}`}
+                                                                    checked={conflicts[key] === true}
+                                                                    onChange={() => setConflicts(p => ({ ...p, [key]: true }))} />
+                                                                <Form.Check inline type="radio" label="არა" name={`conflict-${key}`} id={`c-no-${key}`}
+                                                                    checked={conflicts[key] === false}
+                                                                    onChange={() => setConflicts(p => ({ ...p, [key]: false }))} />
+                                                            </div>
+                                                        ))}
+                                                    </div>
                                                     <PDFDownloadLink
-                                                        document={<DirectorsOrderPdf data={buildOrderData(false)} />}
-                                                        fileName={`დანიშვნის_ბრძანება_${user.firstName}_${user.lastName}_blank.pdf`}
+                                                        document={<ImpartialityDeclarationPdf data={buildImpartialityData()} />}
+                                                        fileName={`FM-02_მიუკ_დეკლ_${fname}.pdf`}
                                                         style={{ textDecoration: 'none' }}
                                                     >
-                                                        {({ loading: pdfLoading }) => (
-                                                            <Button variant="outline-secondary" size="sm" disabled={pdfLoading}>
-                                                                {pdfLoading ? '...' : '📄 ბრძანება (ხელმოწ. გარეშე)'}
+                                                        {({ loading: l }) => (
+                                                            <Button variant="outline-primary" size="sm" disabled={l}>
+                                                                {l ? '...' : '📥 FM-02 — მიუკერძოებლობის დეკლარაცია'}
                                                             </Button>
                                                         )}
                                                     </PDFDownloadLink>
-                                                )}
-                                            </>
-                                        ) : null}
+                                                </div>
 
-                                        {contractValid ? (
-                                            <>
-                                                <PDFDownloadLink
-                                                    document={<LaborContractPdf data={buildContractData(!!signatureImage)} />}
-                                                    fileName={`ხელშეკრულება_${user.firstName}_${user.lastName}.pdf`}
-                                                    style={{ textDecoration: 'none' }}
-                                                >
-                                                    {({ loading: pdfLoading }) => (
-                                                        <Button variant={signatureImage ? 'primary' : 'outline-primary'} size="sm" disabled={pdfLoading}>
-                                                            {pdfLoading ? '...' : `📥 შრომ. ხელშეკრ.${signatureImage ? ' (ხელმოწ. ✓)' : ''}`}
-                                                        </Button>
-                                                    )}
-                                                </PDFDownloadLink>
-
-                                                {signatureImage && (
+                                                {/* FM-03 */}
+                                                <div>
+                                                    <h6 className="fw-bold text-primary border-bottom pb-1 mb-3">FM-03 — კონფიდენციალურობის შეთანხმება</h6>
+                                                    <p className="text-muted small mb-3">ავტომატურად ივსება პირადი საქმის მონაცემებით. ხელმოწერის შეყვანის შემდეგ PDF-ში ჩაიდება.</p>
                                                     <PDFDownloadLink
-                                                        document={<LaborContractPdf data={buildContractData(false)} />}
-                                                        fileName={`ხელშეკრულება_${user.firstName}_${user.lastName}_blank.pdf`}
+                                                        document={<ConfidentialityAgreementPdf data={buildConfidentialityData()} />}
+                                                        fileName={`FM-03_კონფ_შეთ_${fname}.pdf`}
                                                         style={{ textDecoration: 'none' }}
                                                     >
-                                                        {({ loading: pdfLoading }) => (
-                                                            <Button variant="outline-secondary" size="sm" disabled={pdfLoading}>
-                                                                {pdfLoading ? '...' : '📄 ხელშეკრ. (ხელმოწ. გარეშე)'}
+                                                        {({ loading: l }) => (
+                                                            <Button variant="outline-primary" size="sm" disabled={l}>
+                                                                {l ? '...' : '📥 FM-03 — კონფიდენციალურობის შეთანხმება'}
                                                             </Button>
                                                         )}
                                                     </PDFDownloadLink>
-                                                )}
-                                            </>
-                                        ) : null}
+                                                </div>
+                                            </Accordion.Body>
+                                        </Accordion.Item>
 
-                                        {!orderValid && (
-                                            <p className="text-muted small mt-1">შეავსეთ „დაწყების თარიღი" PDF-ის გენერაციისთვის</p>
-                                        )}
-                                    </div>
+                                        {/* === ბრძანება / ხელშეკრულება === */}
+                                        <Accordion.Item eventKey="hr">
+                                            <Accordion.Header>📑 HR დოკუმენტები (ბრძანება / ხელშეკრულება)</Accordion.Header>
+                                            <Accordion.Body>
+                                                <Row className="g-3 mb-3">
+                                                    <Col md={6}>
+                                                        <Form.Label className="small fw-bold">დაწყების თარიღი</Form.Label>
+                                                        <Form.Control type="date" size="sm" value={startDate} onChange={e => setStartDate(e.target.value)} />
+                                                    </Col>
+                                                    <Col md={6}>
+                                                        <Form.Label className="small fw-bold">ხელფასი (ლარი)</Form.Label>
+                                                        <Form.Control type="number" size="sm" value={salary} onChange={e => setSalary(e.target.value)} placeholder="მაგ: 1500" />
+                                                    </Col>
+                                                    <Col md={6}>
+                                                        <Form.Label className="small fw-bold">ხელშეკრ. №</Form.Label>
+                                                        <Form.Control size="sm" value={contractNumber} onChange={e => setContractNumber(e.target.value)} />
+                                                    </Col>
+                                                    <Col md={6}>
+                                                        <Form.Label className="small fw-bold">მისამართი</Form.Label>
+                                                        <Form.Control size="sm" value={address} onChange={e => setAddress(e.target.value)} placeholder="ფაქტობრივი მისამართი" />
+                                                    </Col>
+                                                </Row>
+                                                <div className="d-flex flex-wrap gap-3">
+                                                    {startDate && (
+                                                        <PDFDownloadLink
+                                                            document={<DirectorsOrderPdf data={buildOrderData()} />}
+                                                            fileName={`დანიშვნ_ბრძ_${fname}.pdf`}
+                                                            style={{ textDecoration: 'none' }}
+                                                        >
+                                                            {({ loading: l }) => (
+                                                                <Button variant="outline-success" size="sm" disabled={l}>
+                                                                    {l ? '...' : '📥 დანიშვნის ბრძანება'}
+                                                                </Button>
+                                                            )}
+                                                        </PDFDownloadLink>
+                                                    )}
+                                                    {startDate && contractNumber && (
+                                                        <PDFDownloadLink
+                                                            document={<LaborContractPdf data={buildContractData()} />}
+                                                            fileName={`ხელშეკრ_${fname}.pdf`}
+                                                            style={{ textDecoration: 'none' }}
+                                                        >
+                                                            {({ loading: l }) => (
+                                                                <Button variant="outline-primary" size="sm" disabled={l}>
+                                                                    {l ? '...' : '📥 შრომითი ხელშეკრულება'}
+                                                                </Button>
+                                                            )}
+                                                        </PDFDownloadLink>
+                                                    )}
+                                                    {!startDate && <p className="text-muted small">შეავსეთ „დაწყების თარიღი"</p>}
+                                                </div>
+                                            </Accordion.Body>
+                                        </Accordion.Item>
+
+                                        {/* === ტრენინგის ჩანაწერი === */}
+                                        <Accordion.Item eventKey="training">
+                                            <Accordion.Header>🎓 FM-13 — ტრენინგის ჩანაწერი</Accordion.Header>
+                                            <Accordion.Body>
+                                                <Row className="g-3 mb-3">
+                                                    <Col md={6}>
+                                                        <Form.Label className="small fw-bold">ტრენინგის თარიღი</Form.Label>
+                                                        <Form.Control type="date" size="sm" value={trainingDate} onChange={e => setTrainingDate(e.target.value)} />
+                                                    </Col>
+                                                    <Col md={6}>
+                                                        <Form.Label className="small fw-bold">ხანგრძლივობა (სთ)</Form.Label>
+                                                        <Form.Control type="number" size="sm" value={duration} onChange={e => setDuration(e.target.value)} placeholder="მაგ: 4" />
+                                                    </Col>
+                                                    <Col md={12}>
+                                                        <Form.Label className="small fw-bold">ტრენინგის ტიპი</Form.Label>
+                                                        <div className="d-flex flex-wrap gap-3">
+                                                            {trainingTypeOptions.map(([key, label]) => (
+                                                                <Form.Check key={key} type="radio" name="trainingType"
+                                                                    id={`tt-${key}`} label={label}
+                                                                    checked={trainingType === key}
+                                                                    onChange={() => setTrainingType(key)} />
+                                                            ))}
+                                                        </div>
+                                                    </Col>
+                                                    <Col md={12}>
+                                                        <Form.Label className="small fw-bold">თემა / სათაური</Form.Label>
+                                                        <Form.Control size="sm" value={topic} onChange={e => setTopic(e.target.value)} placeholder="ტრენინგის თემა" />
+                                                    </Col>
+                                                    <Col md={6}>
+                                                        <Form.Label className="small fw-bold">ტრენერი / ორგანიზატორი</Form.Label>
+                                                        <Form.Control size="sm" value={trainer} onChange={e => setTrainer(e.target.value)} placeholder="სახელი / ორგ. დასახელება" />
+                                                    </Col>
+                                                    <Col md={6}>
+                                                        <Form.Label className="small fw-bold">ადგილი</Form.Label>
+                                                        <Form.Control size="sm" value={trainingLocation} onChange={e => setTrainingLocation(e.target.value)} />
+                                                    </Col>
+                                                    <Col md={12}>
+                                                        <Form.Label className="small fw-bold">შეფასების მეთოდი (შეიძლება რამდენიმე)</Form.Label>
+                                                        <div className="d-flex flex-wrap gap-3">
+                                                            {methodOptions.map(([key, label]) => (
+                                                                <Form.Check key={key} type="checkbox" id={`am-${key}`} label={label}
+                                                                    checked={assessmentMethods.includes(key)}
+                                                                    onChange={() => toggleAssessmentMethod(key)} />
+                                                            ))}
+                                                        </div>
+                                                    </Col>
+                                                    <Col md={6}>
+                                                        <Form.Label className="small fw-bold">შეფასების შედეგი</Form.Label>
+                                                        <div className="d-flex gap-4">
+                                                            <Form.Check type="radio" name="aresult" id="ar-comp" label="კომპეტენტური"
+                                                                checked={assessmentResult === 'კომპეტენტური'} onChange={() => setAssessmentResult('კომპეტენტური')} />
+                                                            <Form.Check type="radio" name="aresult" id="ar-cont" label="ტრენინგი გრძელდება"
+                                                                checked={assessmentResult === 'გრძელდება'} onChange={() => setAssessmentResult('გრძელდება')} />
+                                                        </div>
+                                                    </Col>
+                                                    <Col md={6}>
+                                                        <Form.Label className="small fw-bold">ავტორიზებულია</Form.Label>
+                                                        <div className="d-flex gap-4">
+                                                            <Form.Check type="radio" name="auth" id="auth-yes" label="კი"
+                                                                checked={authorized === true} onChange={() => setAuthorized(true)} />
+                                                            <Form.Check type="radio" name="auth" id="auth-no" label="არა"
+                                                                checked={authorized === false} onChange={() => setAuthorized(false)} />
+                                                        </div>
+                                                    </Col>
+                                                    <Col md={6}>
+                                                        <Form.Label className="small fw-bold">შემდეგი ტრენინგის თარიღი</Form.Label>
+                                                        <Form.Control type="date" size="sm" value={nextTrainingDate} onChange={e => setNextTrainingDate(e.target.value)} />
+                                                    </Col>
+                                                </Row>
+                                                <PDFDownloadLink
+                                                    document={<TrainingRecordPdf data={buildTrainingData()} />}
+                                                    fileName={`FM-13_ტრენ_ჩანაწ_${fname}.pdf`}
+                                                    style={{ textDecoration: 'none' }}
+                                                >
+                                                    {({ loading: l }) => (
+                                                        <Button variant="outline-success" size="sm" disabled={l}>
+                                                            {l ? '...' : '📥 FM-13 — ტრენინგის ჩანაწერი'}
+                                                        </Button>
+                                                    )}
+                                                </PDFDownloadLink>
+                                            </Accordion.Body>
+                                        </Accordion.Item>
+
+                                    </Accordion>
                                 </Card>
                             </Tab.Pane>
                         </Tab.Content>
@@ -322,7 +523,7 @@ const StaffDetails = () => {
                 </Col>
             </Row>
 
-            {/* Status Change Modal */}
+            {/* Status Modal */}
             <Modal show={showStatusModal} onHide={() => setShowStatusModal(false)} centered>
                 <Modal.Header closeButton><Modal.Title>სტატუსის შეცვლა</Modal.Title></Modal.Header>
                 <Modal.Body>
