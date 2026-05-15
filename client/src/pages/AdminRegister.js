@@ -38,6 +38,10 @@ const AdminRegister = ({ role }) => {
     const [photoFile, setPhotoFile] = useState(null);
     const [staffError, setStaffError] = useState('');
     const [staffLoading, setStaffLoading] = useState(false);
+    const [showEditModal, setShowEditModal] = useState(false);
+    const [editStaff, setEditStaff] = useState(null);
+    const [editForm, setEditForm] = useState({});
+    const [editSaving, setEditSaving] = useState(false);
 
     // ── Tab 2: Auth users ──────────────────────────────────────
     const [authUsers, setAuthUsers] = useState([]);
@@ -90,6 +94,30 @@ const AdminRegister = ({ role }) => {
         setStaffError('');
     };
 
+    const openEditModal = (s) => {
+        setEditStaff(s);
+        setEditForm({
+            firstName: s.firstName || '',
+            lastName: s.lastName || '',
+            email: s.email || '',
+            phone: s.phone || '',
+            position: s.position || 'ექსპერტი',
+            authExpiry: s.authExpiry ? s.authExpiry.split('T')[0] : '',
+            status: s.status || 'აქტიური',
+        });
+        setShowEditModal(true);
+    };
+
+    const handleEditSave = async () => {
+        setEditSaving(true);
+        try {
+            await axios.put(`/api/users/${editStaff._id}`, editForm);
+            setShowEditModal(false);
+            fetchStaff();
+        } catch (err) { alert('შეცდომა: ' + (err.response?.data?.error || err.message)); }
+        finally { setEditSaving(false); }
+    };
+
     const handleStaffSubmit = async (e) => {
         e.preventDefault();
         setStaffLoading(true); setStaffError('');
@@ -105,6 +133,7 @@ const AdminRegister = ({ role }) => {
         finally { setStaffLoading(false); }
     };
 
+    // eslint-disable-next-line no-unused-vars
     const getAuthStatus = (authExpiry) => {
         if (!authExpiry) return <Badge bg="secondary">არ არის</Badge>;
         const days = Math.ceil((new Date(authExpiry) - new Date()) / (1000 * 60 * 60 * 24));
@@ -175,8 +204,8 @@ const AdminRegister = ({ role }) => {
                                             <th>პირადი №</th>
                                             <th>პოზიცია</th>
                                             <th>კომპეტენციები</th>
-                                            <th>ავტ. ვადა</th>
-                                            <th>სტატუსი</th>
+                                            <th>ავტ. ვადა / ISO</th>
+                                            <th>დასაქმ. სტატუსი</th>
                                             <th className="text-center">მართვა</th>
                                         </tr>
                                     </thead>
@@ -197,8 +226,15 @@ const AdminRegister = ({ role }) => {
                                                     </div>
                                                 </td>
                                                 <td>{s.authExpiry ? new Date(s.authExpiry).toLocaleDateString('ka-GE') : '—'}</td>
-                                                <td>{getAuthStatus(s.authExpiry)}</td>
+                                                <td>
+                                                    <Badge bg={s.status === 'აქტიური' ? 'success' : s.status === 'გათავისუფლებული' ? 'danger' : 'secondary'}>
+                                                        {s.status || 'აქტიური'}
+                                                    </Badge>
+                                                </td>
                                                 <td className="text-center">
+                                                    <Button size="sm" variant="outline-warning" className="me-1" onClick={() => openEditModal(s)}>
+                                                        ✏️
+                                                    </Button>
                                                     <Button size="sm" variant="outline-primary" onClick={() => navigate(`/staff/${s._id}`)}>
                                                         პირადი საქმე
                                                     </Button>
@@ -278,6 +314,62 @@ const AdminRegister = ({ role }) => {
                     )}
                 </Tab.Content>
             </Tab.Container>
+
+            {/* ── Staff Edit Modal ── */}
+            <Modal show={showEditModal} onHide={() => setShowEditModal(false)} backdrop="static">
+                <Modal.Header closeButton>
+                    <Modal.Title>✏️ თანამშრომლის რედაქტირება</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <Row className="g-3">
+                        <Col md={6}>
+                            <Form.Label className="small fw-bold">სახელი</Form.Label>
+                            <Form.Control value={editForm.firstName || ''} onChange={e => setEditForm({...editForm, firstName: e.target.value})} />
+                        </Col>
+                        <Col md={6}>
+                            <Form.Label className="small fw-bold">გვარი</Form.Label>
+                            <Form.Control value={editForm.lastName || ''} onChange={e => setEditForm({...editForm, lastName: e.target.value})} />
+                        </Col>
+                        <Col md={6}>
+                            <Form.Label className="small fw-bold">ელ.ფოსტა</Form.Label>
+                            <Form.Control type="email" value={editForm.email || ''} onChange={e => setEditForm({...editForm, email: e.target.value})} />
+                        </Col>
+                        <Col md={6}>
+                            <Form.Label className="small fw-bold">ტელეფონი</Form.Label>
+                            <Form.Control value={editForm.phone || ''} onChange={e => setEditForm({...editForm, phone: e.target.value})} />
+                        </Col>
+                        <Col md={6}>
+                            <Form.Label className="small fw-bold">პოზიცია</Form.Label>
+                            <Form.Select value={editForm.position || ''} onChange={e => setEditForm({...editForm, position: e.target.value})}>
+                                <option>ექსპერტი</option>
+                                <option>ტექ. მენეჯერი</option>
+                                <option>ხარ. მენეჯერი</option>
+                                <option>დირექტორი</option>
+                                <option>კანცელარია</option>
+                                <option>HR</option>
+                            </Form.Select>
+                        </Col>
+                        <Col md={6}>
+                            <Form.Label className="small fw-bold">ავტ. ვადა</Form.Label>
+                            <Form.Control type="date" value={editForm.authExpiry || ''} onChange={e => setEditForm({...editForm, authExpiry: e.target.value})} />
+                        </Col>
+                        <Col md={12}>
+                            <Form.Label className="small fw-bold">სამსახურებრივი სტატუსი</Form.Label>
+                            <Form.Select value={editForm.status || 'აქტიური'} onChange={e => setEditForm({...editForm, status: e.target.value})}>
+                                <option>აქტიური</option>
+                                <option>შვებულებაში</option>
+                                <option>გათავისუფლებული</option>
+                            </Form.Select>
+                        </Col>
+                    </Row>
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button variant="secondary" onClick={() => setShowEditModal(false)}>გაუქმება</Button>
+                    <Button variant="success" onClick={handleEditSave} disabled={editSaving}>
+                        {editSaving ? <Spinner size="sm" animation="border" /> : '💾 შენახვა'}
+                    </Button>
+                </Modal.Footer>
+            </Modal>
 
             {/* ── Staff Registration Modal ── */}
             <Modal show={showStaffModal} onHide={() => { setShowStaffModal(false); resetStaffForm(); }} size="lg" backdrop="static">

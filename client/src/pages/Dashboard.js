@@ -79,7 +79,7 @@ const Dashboard = ({ role }) => {
                 <Row className="g-3 mb-4">
                     <Col md={3}>
                         <Card className="border-0" style={{...smallCardStyle, borderLeftColor: COLORS.primary}}>
-                            <Card.Body className="p-3 d-flex justify-content-between align-items-center">
+                            <Card.Body className="p-3 d-flex justify-content-between align-items-center" style={{cursor:'pointer'}} onClick={() => navigate('/inspections')}>
                                 <div><div className="text-muted small fw-bold">სულ საქმეები</div><h3 className="m-0 fw-bold">{stats?.counts?.total}</h3></div>
                                 <div className="fs-1 text-muted opacity-25">📁</div>
                             </Card.Body>
@@ -87,7 +87,7 @@ const Dashboard = ({ role }) => {
                     </Col>
                     <Col md={3}>
                         <Card className="border-0" style={{...smallCardStyle, borderLeftColor: COLORS.warning}}>
-                            <Card.Body className="p-3 d-flex justify-content-between align-items-center">
+                            <Card.Body className="p-3 d-flex justify-content-between align-items-center" style={{cursor:'pointer'}} onClick={() => navigate('/inspections')}>
                                 <div><div className="text-muted small fw-bold">მიმდინარე</div><h3 className="m-0 fw-bold text-warning">{stats?.counts?.active}</h3></div>
                                 <div className="fs-1 text-warning opacity-25">⚡</div>
                             </Card.Body>
@@ -95,7 +95,7 @@ const Dashboard = ({ role }) => {
                     </Col>
                     <Col md={3}>
                         <Card className="border-0" style={{...smallCardStyle, borderLeftColor: COLORS.success}}>
-                            <Card.Body className="p-3 d-flex justify-content-between align-items-center">
+                            <Card.Body className="p-3 d-flex justify-content-between align-items-center" style={{cursor:'pointer'}} onClick={() => navigate('/inspections')}>
                                 <div><div className="text-muted small fw-bold">დასრულებული</div><h3 className="m-0 fw-bold text-success">{stats?.counts?.completed}</h3></div>
                                 <div className="fs-1 text-success opacity-25">✅</div>
                             </Card.Body>
@@ -103,13 +103,24 @@ const Dashboard = ({ role }) => {
                     </Col>
                     <Col md={3}>
                         <Card className="border-0" style={{...smallCardStyle, borderLeftColor: COLORS.info}}>
-                            <Card.Body className="p-3 d-flex justify-content-between align-items-center">
+                            <Card.Body className="p-3 d-flex justify-content-between align-items-center" style={{cursor:'pointer'}} onClick={() => navigate('/admin')}>
                                 <div><div className="text-muted small fw-bold">პერსონალი</div><h3 className="m-0 fw-bold text-info">{stats?.counts?.staffCount}</h3></div>
                                 <div className="fs-1 text-info opacity-25">👥</div>
                             </Card.Body>
                         </Card>
                     </Col>
                 </Row>
+
+                {/* Quick Actions */}
+                <div className="d-flex gap-2 flex-wrap mb-4">
+                    <Button variant="primary" size="sm" onClick={() => navigate('/add-inspection')}>+ ახალი საქმე</Button>
+                    <Button variant="outline-secondary" size="sm" onClick={() => navigate('/inspections')}>📂 ყველა საქმე</Button>
+                    <Button variant="outline-secondary" size="sm" onClick={() => navigate('/complaints')}>📨 საჩივრები</Button>
+                    <Button variant="outline-secondary" size="sm" onClick={() => navigate('/internal-audits')}>🔍 შიდა აუდიტი</Button>
+                    <Button variant="outline-secondary" size="sm" onClick={() => navigate('/corrective-actions')}>⚙️ CAR</Button>
+                    <Button variant="outline-secondary" size="sm" onClick={() => navigate('/equipment')}>🛠️ აპარატურა</Button>
+                    <Button variant="outline-secondary" size="sm" onClick={() => navigate('/insurance')}>🛡️ დაზღვევა</Button>
+                </div>
 
                 {/* 3. Main Content Grid (3 Columns for Density) */}
                 <Row className="g-3">
@@ -241,6 +252,37 @@ const Dashboard = ({ role }) => {
                                     </div>
                                 </div>
                             </Card.Body>
+                        </Card>
+                    </Col>
+                </Row>
+
+                {/* Recent / Urgent Inspections */}
+                <Row className="mt-3">
+                    <Col>
+                        <Card className="shadow-sm border-0">
+                            <Card.Header style={{...cardHeaderStyle, backgroundColor: '#2980b9'}}>📋 გადაუდებელი ვადების მქონე საქმეები</Card.Header>
+                            <Table hover size="sm" responsive className="mb-0 align-middle">
+                                <thead className="bg-light">
+                                    <tr style={{fontSize: '0.85rem'}}>
+                                        <th className="p-2">საქმე №</th>
+                                        <th>ობიექტი</th>
+                                        <th>დამკვეთი</th>
+                                        <th>სტატუსი</th>
+                                        <th>ვადა</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {stats?.urgentList && stats.urgentList.length > 0 ? stats.urgentList.map(item => (
+                                        <tr key={item._id} style={{cursor:'pointer', fontSize:'0.85rem'}} onClick={() => navigate(`/inspections/${item._id}`)}>
+                                            <td className="p-2 fw-bold text-primary font-monospace">{item.inspectionNumber}</td>
+                                            <td className="text-truncate" style={{maxWidth:180}}>{item.objectName}</td>
+                                            <td className="text-muted text-truncate" style={{maxWidth:150}}>{item.clientName}</td>
+                                            <td><Badge bg={item.status==='დასრულებული'?'success':item.status==='მიმდინარე'?'warning':'secondary'} text={item.status==='მიმდინარე'?'dark':undefined}>{item.status}</Badge></td>
+                                            <td className="small">{item.deadline ? new Date(item.deadline).toLocaleDateString('ka-GE') : '—'}</td>
+                                        </tr>
+                                    )) : <tr><td colSpan="5" className="text-center py-3 text-muted small">გადაუდებელი ვადები არ არის</td></tr>}
+                                </tbody>
+                            </Table>
                         </Card>
                     </Col>
                 </Row>

@@ -47,7 +47,7 @@ const ImpartialityPerCasePdf = ({ data }) => {
   const {
     name = '', position = '', personalId = '', date = '',
     inspectionNumber = '', applicationNumber = '', clientName = '',
-    objectName = '', objectAddress = '', inspectionScope = '', caseDate = '',
+    objectName = '', objectAddress = '', caseDate = '',
     caseConflicts = {}, conclusion = 'clear', signature,
   } = data;
 
@@ -110,12 +110,6 @@ const ImpartialityPerCasePdf = ({ data }) => {
           <View style={s.fieldRow}>
             <Text style={s.fieldLabel}>მისამართი:</Text>
             <View style={s.underline}><Text>{objectAddress}</Text></View>
-          </View>
-        ) : null}
-        {inspectionScope ? (
-          <View style={s.fieldRow}>
-            <Text style={s.fieldLabel}>სფერო:</Text>
-            <View style={s.underline}><Text>{inspectionScope}</Text></View>
           </View>
         ) : null}
         <View style={s.fieldRow}>

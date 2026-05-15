@@ -40,25 +40,10 @@ const s = StyleSheet.create({
   conclusion: { textAlign: 'justify', marginTop: 8, marginBottom: 8, fontSize: 9, color: '#333' },
 });
 
-const scopeOptions = [
-  ['BE-PR-01', 'ხარჯთაღრიცხვის შესაბამისობის ინსპექტირება'],
-  ['BE-PR-02', 'შესრულებული სამუშაოს ფ. №2-ის ინსპექტირება'],
-  ['BE-PR-03', 'ფასწარმოქმნის ადეკვატურობის ინსპექტირება'],
-  ['BE-PR-04', 'ტექნიკური ზედამხედველობის ინსპექტირება'],
-];
-
-const conflictItems = [
-  ['ownership', 'მაქვს საკუთრებრივი ინტერესი ან წილი სამომავლო კლიენტთა კომპანიებში'],
-  ['family', 'მყავს ოჯახური/ახლო პირადი კავშირი სამომავლო კლიენტებთან'],
-  ['employment', 'ვიყავი დასაქმებული სამომავლო კლიენტთა ორგანიზაციებში ბოლო 2 წლის განმავლობაში'],
-  ['financial', 'მაქვს ფინანსური დამოკიდებულება ან ინტერესი სამომავლო კლიენტთა მიმართ'],
-  ['other', 'სხვა ინტერესთა კონფლიქტის სახეობა'],
-];
-
 const ImpartialityGeneralPdf = ({ data }) => {
   const {
     name = '', position = '', personalId = '', date = '',
-    scopes = [], conflicts = {}, conflictDetails = {}, signature,
+    signature,
   } = data;
 
   return (
@@ -102,53 +87,27 @@ const ImpartialityGeneralPdf = ({ data }) => {
           კონფლიქტის შემთხვევაში.
         </Text>
 
-        {/* Section A — scopes */}
-        <View style={s.sectionBar}>
-          <Text style={s.sectionBarText}>A — ავტორიზებული სფეროები</Text>
+        {/* Commitment section — replaces old Section A and B */}
+        <View style={[s.sectionBar, { marginTop: 10 }]}>
+          <Text style={s.sectionBarText}>ვალდებულება და ინტერესთა კონფლიქტის არარსებობის დადასტურება</Text>
         </View>
-        {scopeOptions.map(([code, label]) => (
-          <View key={code} style={s.checkRow}>
-            <View style={scopes.includes(code) ? s.checkboxFilled : s.checkbox} />
-            <Text style={s.checkLabel}>{code} — {label}</Text>
+        <Text style={{ fontSize: 9, textAlign: 'justify', marginBottom: 6, lineHeight: 1.6 }}>
+          {'ვადასტურებ, რომ წინამდებარე დეკლარაციის გაფორმების მომენტში ჩემ მიმართ არ არსებობს ინტერესთა კონფლიქტი, მათ შორის:'}
+        </Text>
+        {[
+          'საკუთრებრივი ინტერესი ან წილი კლიენტთა კომპანიებში;',
+          'ოჯახური ან ახლო პირადი კავშირი კლიენტებთან;',
+          'დასაქმება კლიენტებთან ბოლო 2 წლის განმავლობაში;',
+          'ფინანსური დამოკიდებულება ან ინტერესი კლიენტთა მიმართ;',
+          'სხვა სახის ინტერესთა კონფლიქტი.',
+        ].map((item, i) => (
+          <View key={i} style={{ flexDirection: 'row', marginBottom: 3, marginLeft: 10 }}>
+            <Text style={{ fontSize: 9, marginRight: 4 }}>•</Text>
+            <Text style={{ fontSize: 9, flex: 1 }}>{item}</Text>
           </View>
         ))}
-
-        {/* Section B — general conflict declaration */}
-        <View style={s.sectionBar}>
-          <Text style={s.sectionBarText}>B — ინტერესთა კონფლიქტის ზოგადი დეკლარაცია</Text>
-        </View>
-        {conflictItems.map(([key, label]) => {
-          const isYes = conflicts[key] === true;
-          const detail = conflictDetails[key] || '';
-          return (
-            <View key={key}>
-              <View style={s.yesNoRow}>
-                <Text style={s.yesNoLabel}>{label}</Text>
-                <View style={s.yesNoBoxes}>
-                  <View style={s.yesNoItem}>
-                    <View style={isYes ? s.checkboxFilled : s.checkbox} />
-                    <Text style={s.yesNoText}>კი</Text>
-                  </View>
-                  <View style={s.yesNoItem}>
-                    <View style={!isYes ? s.checkboxFilled : s.checkbox} />
-                    <Text style={s.yesNoText}>არა</Text>
-                  </View>
-                </View>
-              </View>
-              {isYes && (
-                <View style={s.detailLine}>
-                  <Text style={s.detailLabel}>დეტალები:</Text>
-                  <View style={s.detailUnderline}><Text>{detail}</Text></View>
-                </View>
-              )}
-            </View>
-          );
-        })}
-
-        <Text style={s.conclusion}>
-          ვადასტურებ, რომ ზემოაღნიშნული ინფორმაცია სრული და სწორია. ვიცი, რომ ახალი
-          ინტერესთა კონფლიქტის წარმოშობის შემთხვევაში ვალდებული ვარ დაუყოვნებლივ
-          ვაცნობო ხელმძღვანელობას.
+        <Text style={{ fontSize: 9, textAlign: 'justify', marginTop: 6, lineHeight: 1.6 }}>
+          {'ვკისრულობ ვალდებულებას, რომ ზემოაღნიშნული ნებისმიერი გარემოების წარმოშობის შემთხვევაში დაუყოვნებლივ, მაგრამ არაუგვიანეს 24 საათისა, შევატყობინებ ტექნიკურ მენეჯერს და/ან ხარისხის მენეჯერს. ვიცი, რომ ინტერესთა კონფლიქტის შეუტყობინებლობა წარმოადგენს ISO/IEC 17020:2012/2013 სტანდარტის §4.1 მოთხოვნის დარღვევას.'}
         </Text>
 
         <View style={s.sigRow}>

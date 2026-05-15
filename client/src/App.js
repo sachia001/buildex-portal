@@ -15,6 +15,7 @@ import ContractGenerator from './pages/ContractGenerator';
 import EquipmentManager from './pages/EquipmentManager';
 import ManagementReview from './pages/ManagementReview';
 import InsurancePage from './pages/InsurancePage';
+import CompanyDocsPage from './pages/CompanyDocsPage';
 import ComplaintsPage from './pages/ComplaintsPage';
 import InternalAuditPage from './pages/InternalAuditPage';
 import CorrectiveActionsPage from './pages/CorrectiveActionsPage';
@@ -62,6 +63,7 @@ const Navbar = ({ username, role, onLogout }) => {
         complaints:  ['admin', 'quality_manager'].includes(role),
         audits:      ['admin', 'quality_manager'].includes(role),
         corrections: ['admin', 'quality_manager'].includes(role),
+        companyDocs: ['admin'].includes(role),
     };
 
     return (
@@ -99,6 +101,9 @@ const Navbar = ({ username, role, onLogout }) => {
                     )}
                     {show.corrections && (
                         <Link className="btn btn-light fw-bold text-secondary border-0" to="/corrective-actions">⚙️ CAR</Link>
+                    )}
+                    {show.companyDocs && (
+                        <Link className="btn btn-light fw-bold text-secondary border-0" to="/company-docs">🏢 კომპანია</Link>
                     )}
                     {show.staff && (
                         <Link className="btn btn-primary fw-bold px-4 shadow-sm rounded-pill" to="/admin">👥 პერსონალი</Link>
@@ -203,6 +208,7 @@ function AppContent() {
                     <Route path="/corrective-actions" element={<CorrectiveActionsPage role={role} />} />
                     <Route path="/order-generator" element={<OrderGenerator />} />
                     <Route path="/contract-generator" element={<ContractGenerator />} />
+                    <Route path="/company-docs" element={<CompanyDocsPage role={role} />} />
                     <Route path="/change-password" element={<ChangePassword />} />
                     <Route path="*" element={
                         <div className="text-center mt-5">

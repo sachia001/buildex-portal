@@ -199,6 +199,14 @@ const Insurance = mongoose.model('Insurance', new mongoose.Schema({
     status: { type: String, default: 'active' }
 }, { timestamps: true }));
 
+const CompanyDoc = mongoose.model('CompanyDoc', new mongoose.Schema({
+    title: { type: String, required: true },
+    category: { type: String, default: 'სხვა' }, // წესდება / PO გადაწყვეტილება / სხვა
+    description: String,
+    fileUrl: String,
+    docDate: { type: Date, default: Date.now },
+}, { timestamps: true }));
+
 // --- HELPER: ნუმერაციის გენერატორი ---
 async function generateDocumentNumber(type, date = new Date()) {
     const yearFull = date.getFullYear();
@@ -592,6 +600,29 @@ api.delete('/insurance/:id', async (req, res) => {
     if (req.user.role !== 'admin') return res.status(403).json({ error: 'წაშლის უფლება არ გაქვთ' });
     try {
         await Insurance.findByIdAndDelete(req.params.id);
+        res.json({ msg: 'წაიშალა' });
+    } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// --- COMPANY DOCS ---
+api.get('/company-docs', async (req, res) => {
+    try { res.json(await CompanyDoc.find().sort({ createdAt: -1 })); }
+    catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+api.post('/company-docs', upload.single('file'), async (req, res) => {
+    try {
+        const data = JSON.parse(req.body.data || '{}');
+        if (req.file) data.fileUrl = `uploads/docs/${req.file.filename}`;
+        const item = await CompanyDoc.create(data);
+        res.status(201).json(item);
+    } catch (err) { res.status(400).json({ error: err.message }); }
+});
+
+api.delete('/company-docs/:id', async (req, res) => {
+    if (req.user.role !== 'admin') return res.status(403).json({ error: 'უფლება არ გაქვთ' });
+    try {
+        await CompanyDoc.findByIdAndDelete(req.params.id);
         res.json({ msg: 'წაიშალა' });
     } catch (err) { res.status(500).json({ error: err.message }); }
 });

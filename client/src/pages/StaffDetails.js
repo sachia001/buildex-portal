@@ -35,11 +35,6 @@ const StaffDetails = () => {
     const [startDate, setStartDate] = useState(today);
     const [contractNumber, setContractNumber] = useState('LC-2026-001');
 
-    // FM-02a — ზოგადი მიუკერძოებლობა
-    const [scopes, setScopes] = useState([]);
-    const [genConflicts, setGenConflicts] = useState({ ownership: false, family: false, employment: false, financial: false, other: false });
-    const [genConflictDetails, setGenConflictDetails] = useState({});
-
     // FM-02b — საქმეზე მიბმული
     const [caseSearchNum, setCaseSearchNum] = useState('');
     const [caseSearching, setCaseSearching] = useState(false);
@@ -69,9 +64,6 @@ const StaffDetails = () => {
         setSignatureImage(sigPadRef.current.getCanvas().toDataURL('image/png'));
     };
 
-    const toggleScope = (code) => setScopes(prev =>
-        prev.includes(code) ? prev.filter(s => s !== code) : [...prev, code]
-    );
     const toggleAssessmentMethod = (key) => setAssessmentMethods(prev =>
         prev.includes(key) ? prev.filter(m => m !== key) : [...prev, key]
     );
@@ -175,9 +167,6 @@ const StaffDetails = () => {
         position: user.position,
         personalId: user.personalId,
         date: todayGe,
-        scopes,
-        conflicts: genConflicts,
-        conflictDetails: genConflictDetails,
         signature: signatureImage,
     });
 
@@ -191,7 +180,6 @@ const StaffDetails = () => {
         clientName: foundCase?.clientName || '',
         objectName: foundCase?.objectName || '',
         objectAddress: foundCase?.objectAddress || '',
-        inspectionScope: foundCase?.inspectionScope || '',
         caseDate: foundCase ? new Date(foundCase.createdAt).toLocaleDateString('ka-GE') : '',
         caseConflicts,
         conclusion: caseConclusion,
@@ -230,12 +218,6 @@ const StaffDetails = () => {
 
     const photoUrl = user.photo ? `/${user.photo}` : null;
 
-    const scopeOptions = [
-        ['BE-PR-01', 'ხარჯთაღრიცხვის შესაბამისობა'],
-        ['BE-PR-02', 'შესრ. სამუშ. ფ. 2'],
-        ['BE-PR-03', 'ფასწარმოქმნის ადეკვატურობა'],
-        ['BE-PR-04', 'ტექნ. ზედამხედველობა'],
-    ];
     const trainingTypeOptions = [
         ['შიდა', 'შიდა ტრენინგი'],
         ['გარე', 'გარე ტრენინგი / სემინარი'],
@@ -359,42 +341,10 @@ const StaffDetails = () => {
                                                 {/* FM-02a — ზოგადი */}
                                                 <div className="mb-4 border-bottom pb-4">
                                                     <h6 className="fw-bold text-primary mb-3">FM-02a — ზოგადი მიუკერძოებლობის დეკლარაცია <small className="text-muted fw-normal">(ახალი თანამშრომელი)</small></h6>
-
-                                                    <Form.Label className="small fw-bold">ავტორიზებული სფეროები:</Form.Label>
-                                                    <div className="d-flex flex-wrap gap-3 mb-3">
-                                                        {scopeOptions.map(([code, label]) => (
-                                                            <Form.Check key={code} type="checkbox" id={`scope-${code}`}
-                                                                label={`${code} — ${label}`}
-                                                                checked={scopes.includes(code)}
-                                                                onChange={() => toggleScope(code)} />
-                                                        ))}
-                                                    </div>
-
-                                                    <Form.Label className="small fw-bold">ინტერესთა კონფლიქტის ზოგადი დეკლარაცია:</Form.Label>
-                                                    {[
-                                                        ['ownership', 'საკუთრებრივი ინტერესი კლიენტთა კომპანიებში'],
-                                                        ['family', 'ოჯახური/პირადი კავშირი სამომავლო კლიენტებთან'],
-                                                        ['employment', 'დასაქმება კლიენტებთან ბოლო 2 წელში'],
-                                                        ['financial', 'ფინანსური დამოკიდებულება კლიენტებზე'],
-                                                        ['other', 'სხვა ინტერესთა კონფლიქტი'],
-                                                    ].map(([key, label]) => (
-                                                        <div key={key} className="mb-2">
-                                                            <div className="d-flex align-items-center gap-3">
-                                                                <span className="small flex-grow-1">{label}:</span>
-                                                                <Form.Check inline type="radio" label="კი" name={`gen-${key}`}
-                                                                    checked={genConflicts[key] === true}
-                                                                    onChange={() => setGenConflicts(p => ({ ...p, [key]: true }))} />
-                                                                <Form.Check inline type="radio" label="არა" name={`gen-${key}`}
-                                                                    checked={genConflicts[key] === false}
-                                                                    onChange={() => setGenConflicts(p => ({ ...p, [key]: false }))} />
-                                                            </div>
-                                                            {genConflicts[key] === true && (
-                                                                <Form.Control size="sm" className="mt-1" placeholder="დეტალები..."
-                                                                    value={genConflictDetails[key] || ''}
-                                                                    onChange={e => setGenConflictDetails(p => ({ ...p, [key]: e.target.value }))} />
-                                                            )}
-                                                        </div>
-                                                    ))}
+                                                    <p className="small text-muted mb-3">
+                                                        თანამშრომელი ადასტურებს ინტერესთა კონფლიქტის არარსებობას და ვალდებულებას,
+                                                        შეატყობინოს ნებისმიერი კონფლიქტის შემთხვევაში.
+                                                    </p>
 
                                                     <PDFDownloadLink document={<ImpartialityGeneralPdf data={buildImpartialityGeneralData()} />}
                                                         fileName={`FM-02a_ზოგ_მიუკ_${fname}.pdf`} style={{ textDecoration: 'none' }}>
