@@ -1,12 +1,10 @@
-FROM node:20-alpine
+FROM node:20-slim
 
 WORKDIR /app
 
-# Install root dependencies
 COPY package*.json ./
-RUN npm install
+RUN npm install --production=false
 
-# Build React client
 COPY client/package*.json ./client/
 RUN cd client && npm install
 

@@ -44,11 +44,15 @@ const AuthUser = mongoose.model('AuthUser', new mongoose.Schema({
 
 // Seed default admin on startup
 mongoose.connection.once('open', async () => {
-    const exists = await AuthUser.findOne({ username: 'admin' });
-    if (!exists) {
-        const hash = await bcrypt.hash('Buildex@2026', 10);
-        await AuthUser.create({ username: 'admin', passwordHash: hash, role: 'admin' });
-        console.log('✅ ადმინი შეიქმნა: admin / Buildex@2026');
+    try {
+        const exists = await AuthUser.findOne({ username: 'admin' });
+        if (!exists) {
+            const hash = await bcrypt.hash('Buildex@2026', 10);
+            await AuthUser.create({ username: 'admin', passwordHash: hash, role: 'admin' });
+            console.log('✅ ადმინი შეიქმნა: admin / Buildex@2026');
+        }
+    } catch (err) {
+        console.error('Admin seed error:', err.message);
     }
 });
 
@@ -471,10 +475,20 @@ app.use('/api/auth', authRouter);
 // Mount the API router — BEFORE static file serving
 app.use('/api', api);
 
+// Health check for Railway deployment
+app.get('/health', (req, res) => res.json({ ok: true }));
+
 // --- FRONTEND (React Build) ---
 const buildPath = path.join(__dirname, 'client', 'build');
 app.use(express.static(buildPath));
-app.use((req, res) => res.sendFile(path.join(buildPath, 'index.html')));
+app.use((req, res) => {
+    const indexPath = path.join(buildPath, 'index.html');
+    if (fs.existsSync(indexPath)) {
+        res.sendFile(indexPath);
+    } else {
+        res.status(200).json({ status: 'API running', buildMissing: true });
+    }
+});
 
 const PORT = process.env.PORT || 5001;
 app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));

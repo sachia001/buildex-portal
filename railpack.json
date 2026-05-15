@@ -1,0 +1,17 @@
+{
+  "$schema": "https://schema.railpack.com",
+  "packages": {
+    "node": "20"
+  },
+  "steps": {
+    "install": {
+      "commands": ["npm install", "cd client && npm install"]
+    },
+    "build": {
+      "commands": ["cd client && npm run build"]
+    }
+  },
+  "deploy": {
+    "startCommand": "node server.js"
+  }
+}

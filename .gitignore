@@ -2,9 +2,6 @@
 node_modules/
 client/node_modules/
 
-# Build output (Railway builds it)
-client/build/
-
 # Environment variables
 .env
 .env.local
