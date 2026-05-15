@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Container, Table, Button, Form, Card, Row, Col, Badge, Spinner } from 'react-bootstrap';
+import { Container, Table, Button, Form, Card, Row, Col, Badge, Spinner, Modal } from 'react-bootstrap';
 import axios from 'axios';
 
 const EquipmentManager = () => {
@@ -9,6 +9,10 @@ const EquipmentManager = () => {
         name: '', serialNumber: '', manufacturer: '',
         calibrationDate: '', calibrationInterval: 12
     });
+    const [editItem, setEditItem] = useState(null);
+    const [showEdit, setShowEdit] = useState(false);
+    const [editData, setEditData] = useState({ name: '', manufacturer: '', calibrationDate: '', calibrationInterval: 12 });
+    const [editUploading, setEditUploading] = useState(false);
 
     // ✅ მონაცემების წამოღება (შესწორებული სინტაქსით)
     const fetchEquipment = () => {
@@ -50,6 +54,28 @@ const EquipmentManager = () => {
                 fetchEquipment();
             } catch (err) { alert("წაშლა ვერ მოხერხდა"); }
         }
+    };
+
+    const openEdit = (item) => {
+        setEditItem(item);
+        setEditData({
+            name: item.name,
+            manufacturer: item.manufacturer || '',
+            calibrationDate: item.calibrationDate ? item.calibrationDate.split('T')[0] : '',
+            calibrationInterval: item.calibrationInterval || 12
+        });
+        setShowEdit(true);
+    };
+
+    const handleEditSave = async () => {
+        setEditUploading(true);
+        try {
+            await axios.put(`/api/equipment/${editItem._id}`, editData);
+            setShowEdit(false);
+            fetchEquipment();
+        } catch (err) {
+            alert('შეცდომა: ' + (err.response?.data?.error || err.message));
+        } finally { setEditUploading(false); }
     };
 
     // სტატუსის დათვლა (ISO სტანდარტის შესაბამისი ფერებით)
@@ -135,9 +161,10 @@ const EquipmentManager = () => {
                                             </td>
                                             <td>{getStatus(item.nextCalibration)}</td>
                                             <td className="text-center">
-                                                <Button size="sm" variant="outline-danger" onClick={() => handleDelete(item._id)}>
-                                                    🗑️ წაშლა
-                                                </Button>
+                                                <div className="d-flex gap-1 justify-content-center">
+                                                    <Button size="sm" variant="outline-warning" onClick={() => openEdit(item)}>✏️</Button>
+                                                    <Button size="sm" variant="outline-danger" onClick={() => handleDelete(item._id)}>🗑️</Button>
+                                                </div>
                                             </td>
                                         </tr>
                                     )) : (
@@ -153,6 +180,36 @@ const EquipmentManager = () => {
                     </Card>
                 </Col>
             </Row>
+
+            <Modal show={showEdit} onHide={() => setShowEdit(false)} backdrop="static">
+                <Modal.Header closeButton>
+                    <Modal.Title>კალიბრაციის განახლება</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <Form.Group className="mb-3">
+                        <Form.Label className="fw-bold small">დასახელება</Form.Label>
+                        <Form.Control value={editData.name} onChange={e => setEditData({...editData, name: e.target.value})} />
+                    </Form.Group>
+                    <Form.Group className="mb-3">
+                        <Form.Label className="fw-bold small">მწარმოებელი</Form.Label>
+                        <Form.Control value={editData.manufacturer} onChange={e => setEditData({...editData, manufacturer: e.target.value})} />
+                    </Form.Group>
+                    <Form.Group className="mb-3">
+                        <Form.Label className="fw-bold small">კალიბრაციის თარიღი</Form.Label>
+                        <Form.Control type="date" value={editData.calibrationDate} onChange={e => setEditData({...editData, calibrationDate: e.target.value})} />
+                    </Form.Group>
+                    <Form.Group className="mb-3">
+                        <Form.Label className="fw-bold small">ინტერვალი (თვე)</Form.Label>
+                        <Form.Control type="number" value={editData.calibrationInterval} onChange={e => setEditData({...editData, calibrationInterval: e.target.value})} />
+                    </Form.Group>
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button variant="secondary" onClick={() => setShowEdit(false)}>გაუქმება</Button>
+                    <Button variant="success" onClick={handleEditSave} disabled={editUploading}>
+                        {editUploading ? <Spinner size="sm" /> : '💾 შენახვა'}
+                    </Button>
+                </Modal.Footer>
+            </Modal>
         </Container>
     );
 };

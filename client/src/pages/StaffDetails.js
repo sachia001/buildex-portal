@@ -6,7 +6,8 @@ import axios from 'axios';
 import SignatureCanvas from 'react-signature-canvas';
 import DirectorsOrderPdf from '../pdf-components/DirectorsOrderPdf';
 import LaborContractPdf from '../pdf-components/LaborContractPdf';
-import ImpartialityDeclarationPdf from '../pdf-components/ImpartialityDeclarationPdf';
+import ImpartialityGeneralPdf from '../pdf-components/ImpartialityGeneralPdf';
+import ImpartialityPerCasePdf from '../pdf-components/ImpartialityPerCasePdf';
 import ConfidentialityAgreementPdf from '../pdf-components/ConfidentialityAgreementPdf';
 import TrainingRecordPdf from '../pdf-components/TrainingRecordPdf';
 import { generateDocNumber } from '../utils/docCategories';
@@ -34,11 +35,18 @@ const StaffDetails = () => {
     const [startDate, setStartDate] = useState(today);
     const [contractNumber, setContractNumber] = useState('LC-2026-001');
 
-    // FM-02 — მიუკერძოებლობის დეკლარაცია
+    // FM-02a — ზოგადი მიუკერძოებლობა
     const [scopes, setScopes] = useState([]);
-    const [conflicts, setConflicts] = useState({
-        ownership: false, family: false, employment: false, financial: false, contract: false
-    });
+    const [genConflicts, setGenConflicts] = useState({ ownership: false, family: false, employment: false, financial: false, other: false });
+    const [genConflictDetails, setGenConflictDetails] = useState({});
+
+    // FM-02b — საქმეზე მიბმული
+    const [caseSearchNum, setCaseSearchNum] = useState('');
+    const [caseSearching, setCaseSearching] = useState(false);
+    const [foundCase, setFoundCase] = useState(null);
+    const [caseNotFound, setCaseNotFound] = useState(false);
+    const [caseConflicts, setCaseConflicts] = useState({ acquainted: false, employed: false, financial: false, participated: false, other: false });
+    const [caseConclusion, setCaseConclusion] = useState('clear');
 
     // FM-13 — ტრენინგის ჩანაწერი
     const [trainingDate, setTrainingDate] = useState(today);
@@ -114,6 +122,23 @@ const StaffDetails = () => {
         } catch { alert('შეცდომა'); }
     };
 
+    const searchInspection = async () => {
+        if (!caseSearchNum.trim()) return;
+        setCaseSearching(true);
+        setCaseNotFound(false);
+        setFoundCase(null);
+        try {
+            const res = await axios.get('/api/inspections');
+            const match = res.data.find(i =>
+                i.inspectionNumber === caseSearchNum.trim() ||
+                i.applicationNumber === caseSearchNum.trim()
+            );
+            if (match) setFoundCase(match);
+            else setCaseNotFound(true);
+        } catch { setCaseNotFound(true); }
+        finally { setCaseSearching(false); }
+    };
+
     // PDF data builders
     const buildOrderData = () => ({
         number: generateDocNumber('DIRECTOR_HR', 1),
@@ -145,13 +170,31 @@ const StaffDetails = () => {
         directorSignature: signatureImage,
     });
 
-    const buildImpartialityData = () => ({
+    const buildImpartialityGeneralData = () => ({
         name: `${user.firstName} ${user.lastName}`,
         position: user.position,
         personalId: user.personalId,
         date: todayGe,
         scopes,
-        conflicts,
+        conflicts: genConflicts,
+        conflictDetails: genConflictDetails,
+        signature: signatureImage,
+    });
+
+    const buildImpartialityPerCaseData = () => ({
+        name: `${user.firstName} ${user.lastName}`,
+        position: user.position,
+        personalId: user.personalId,
+        date: todayGe,
+        inspectionNumber: foundCase?.inspectionNumber || '',
+        applicationNumber: foundCase?.applicationNumber || '',
+        clientName: foundCase?.clientName || '',
+        objectName: foundCase?.objectName || '',
+        objectAddress: foundCase?.objectAddress || '',
+        inspectionScope: foundCase?.inspectionScope || '',
+        caseDate: foundCase ? new Date(foundCase.createdAt).toLocaleDateString('ka-GE') : '',
+        caseConflicts,
+        conclusion: caseConclusion,
         signature: signatureImage,
     });
 
@@ -192,13 +235,6 @@ const StaffDetails = () => {
         ['BE-PR-02', 'შესრ. სამუშ. ფ. 2'],
         ['BE-PR-03', 'ფასწარმოქმნის ადეკვატურობა'],
         ['BE-PR-04', 'ტექნ. ზედამხედველობა'],
-    ];
-    const conflictLabels = [
-        ['ownership', 'მფლობელობითი ინტერესი კლიენტთან'],
-        ['family', 'ნათესავური / პირადი კავშირი კლიენტთან'],
-        ['employment', 'დასაქმება კლიენტთან ბოლო 2 წელში'],
-        ['financial', 'ფინანსური დამოკიდებულება კლიენტზე'],
-        ['contract', 'სხვა მოქმედი ვალდებულება კლიენტთან'],
     ];
     const trainingTypeOptions = [
         ['შიდა', 'შიდა ტრენინგი'],
@@ -320,9 +356,10 @@ const StaffDetails = () => {
                                             <Accordion.Header>📋 ISO 17020 სავალდებულო ფორმები</Accordion.Header>
                                             <Accordion.Body>
 
-                                                {/* FM-02 */}
-                                                <div className="mb-4">
-                                                    <h6 className="fw-bold text-primary border-bottom pb-1 mb-3">FM-02 — მიუკერძოებლობის დეკლარაცია</h6>
+                                                {/* FM-02a — ზოგადი */}
+                                                <div className="mb-4 border-bottom pb-4">
+                                                    <h6 className="fw-bold text-primary mb-3">FM-02a — ზოგადი მიუკერძოებლობის დეკლარაცია <small className="text-muted fw-normal">(ახალი თანამშრომელი)</small></h6>
+
                                                     <Form.Label className="small fw-bold">ავტორიზებული სფეროები:</Form.Label>
                                                     <div className="d-flex flex-wrap gap-3 mb-3">
                                                         {scopeOptions.map(([code, label]) => (
@@ -332,28 +369,102 @@ const StaffDetails = () => {
                                                                 onChange={() => toggleScope(code)} />
                                                         ))}
                                                     </div>
-                                                    <Form.Label className="small fw-bold">ინტერესთა კონფლიქტი:</Form.Label>
-                                                    <div className="mb-3">
-                                                        {conflictLabels.map(([key, label]) => (
-                                                            <div key={key} className="d-flex align-items-center gap-3 mb-1">
+
+                                                    <Form.Label className="small fw-bold">ინტერესთა კონფლიქტის ზოგადი დეკლარაცია:</Form.Label>
+                                                    {[
+                                                        ['ownership', 'საკუთრებრივი ინტერესი კლიენტთა კომპანიებში'],
+                                                        ['family', 'ოჯახური/პირადი კავშირი სამომავლო კლიენტებთან'],
+                                                        ['employment', 'დასაქმება კლიენტებთან ბოლო 2 წელში'],
+                                                        ['financial', 'ფინანსური დამოკიდებულება კლიენტებზე'],
+                                                        ['other', 'სხვა ინტერესთა კონფლიქტი'],
+                                                    ].map(([key, label]) => (
+                                                        <div key={key} className="mb-2">
+                                                            <div className="d-flex align-items-center gap-3">
                                                                 <span className="small flex-grow-1">{label}:</span>
-                                                                <Form.Check inline type="radio" label="კი" name={`conflict-${key}`} id={`c-yes-${key}`}
-                                                                    checked={conflicts[key] === true}
-                                                                    onChange={() => setConflicts(p => ({ ...p, [key]: true }))} />
-                                                                <Form.Check inline type="radio" label="არა" name={`conflict-${key}`} id={`c-no-${key}`}
-                                                                    checked={conflicts[key] === false}
-                                                                    onChange={() => setConflicts(p => ({ ...p, [key]: false }))} />
+                                                                <Form.Check inline type="radio" label="კი" name={`gen-${key}`}
+                                                                    checked={genConflicts[key] === true}
+                                                                    onChange={() => setGenConflicts(p => ({ ...p, [key]: true }))} />
+                                                                <Form.Check inline type="radio" label="არა" name={`gen-${key}`}
+                                                                    checked={genConflicts[key] === false}
+                                                                    onChange={() => setGenConflicts(p => ({ ...p, [key]: false }))} />
                                                             </div>
-                                                        ))}
-                                                    </div>
-                                                    <PDFDownloadLink
-                                                        document={<ImpartialityDeclarationPdf data={buildImpartialityData()} />}
-                                                        fileName={`FM-02_მიუკ_დეკლ_${fname}.pdf`}
-                                                        style={{ textDecoration: 'none' }}
-                                                    >
+                                                            {genConflicts[key] === true && (
+                                                                <Form.Control size="sm" className="mt-1" placeholder="დეტალები..."
+                                                                    value={genConflictDetails[key] || ''}
+                                                                    onChange={e => setGenConflictDetails(p => ({ ...p, [key]: e.target.value }))} />
+                                                            )}
+                                                        </div>
+                                                    ))}
+
+                                                    <PDFDownloadLink document={<ImpartialityGeneralPdf data={buildImpartialityGeneralData()} />}
+                                                        fileName={`FM-02a_ზოგ_მიუკ_${fname}.pdf`} style={{ textDecoration: 'none' }}>
                                                         {({ loading: l }) => (
-                                                            <Button variant="outline-primary" size="sm" disabled={l}>
-                                                                {l ? '...' : '📥 FM-02 — მიუკერძოებლობის დეკლარაცია'}
+                                                            <Button variant="outline-primary" size="sm" disabled={l} className="mt-2">
+                                                                {l ? '...' : '📥 FM-02a — ზოგადი მიუკერძოებლობის დეკლარაცია'}
+                                                            </Button>
+                                                        )}
+                                                    </PDFDownloadLink>
+                                                </div>
+
+                                                {/* FM-02b — საქმეზე მიბმული */}
+                                                <div className="mb-4 border-bottom pb-4">
+                                                    <h6 className="fw-bold text-primary mb-3">FM-02b — მიუკერძოებლობის შეფასება <small className="text-muted fw-normal">(კონკრეტული საქმე)</small></h6>
+
+                                                    <div className="d-flex gap-2 mb-3">
+                                                        <Form.Control size="sm" placeholder="საქმის ნომერი (BX-INS-... ან IN-...)"
+                                                            value={caseSearchNum} onChange={e => setCaseSearchNum(e.target.value)}
+                                                            onKeyDown={e => e.key === 'Enter' && searchInspection()} />
+                                                        <Button size="sm" variant="outline-secondary" onClick={searchInspection} disabled={caseSearching}>
+                                                            {caseSearching ? '...' : '🔍 ძებნა'}
+                                                        </Button>
+                                                    </div>
+
+                                                    {caseNotFound && <div className="alert alert-warning py-2 small">საქმე ვერ მოიძებნა</div>}
+
+                                                    {foundCase && (
+                                                        <div className="bg-light rounded p-3 mb-3 small">
+                                                            <div className="fw-bold text-success mb-2">✅ საქმე მოიძებნა</div>
+                                                            <div><strong>ინსპ. №:</strong> {foundCase.inspectionNumber}</div>
+                                                            <div><strong>კლიენტი:</strong> {foundCase.clientName}</div>
+                                                            <div><strong>ობიექტი:</strong> {foundCase.objectName}</div>
+                                                            {foundCase.inspectionScope && <div><strong>სფერო:</strong> {foundCase.inspectionScope}</div>}
+                                                        </div>
+                                                    )}
+
+                                                    <Form.Label className="small fw-bold">საქმე-სპეციფიური კონფლიქტის შეფასება:</Form.Label>
+                                                    {[
+                                                        ['acquainted', 'პირადად იცნობ კლიენტს/წარმომადგენელს?'],
+                                                        ['employed', 'ნამსახურები ხარ კლიენტთან ბოლო 2 წელში?'],
+                                                        ['financial', 'გაქვს ფინანსური ინტერესი ინსპ. შედეგში?'],
+                                                        ['participated', 'მონაწილეობდი ობიექტის პროექტირებაში/მშენებლობაში?'],
+                                                        ['other', 'სხვა ინტერესთა კონფლიქტი?'],
+                                                    ].map(([key, label]) => (
+                                                        <div key={key} className="d-flex align-items-center gap-3 mb-1">
+                                                            <span className="small flex-grow-1">{label}</span>
+                                                            <Form.Check inline type="radio" label="კი" name={`case-${key}`}
+                                                                checked={caseConflicts[key] === true}
+                                                                onChange={() => setCaseConflicts(p => ({ ...p, [key]: true }))} />
+                                                            <Form.Check inline type="radio" label="არა" name={`case-${key}`}
+                                                                checked={caseConflicts[key] === false}
+                                                                onChange={() => setCaseConflicts(p => ({ ...p, [key]: false }))} />
+                                                        </div>
+                                                    ))}
+
+                                                    <Form.Label className="small fw-bold mt-3">დასკვნა:</Form.Label>
+                                                    <div className="d-flex gap-4 mb-3">
+                                                        <Form.Check type="radio" name="conclusion" id="conc-clear"
+                                                            label="კონფლიქტი არ არის — ინსპ. შეიძლება"
+                                                            checked={caseConclusion === 'clear'} onChange={() => setCaseConclusion('clear')} />
+                                                        <Form.Check type="radio" name="conclusion" id="conc-conflict"
+                                                            label="კონფლიქტი გამოვლინდა — ვერ ჩავატარებ"
+                                                            checked={caseConclusion === 'conflict'} onChange={() => setCaseConclusion('conflict')} />
+                                                    </div>
+
+                                                    <PDFDownloadLink document={<ImpartialityPerCasePdf data={buildImpartialityPerCaseData()} />}
+                                                        fileName={`FM-02b_${foundCase?.inspectionNumber || 'საქმე'}_${fname}.pdf`} style={{ textDecoration: 'none' }}>
+                                                        {({ loading: l }) => (
+                                                            <Button variant="outline-danger" size="sm" disabled={l || !foundCase}>
+                                                                {!foundCase ? '🔍 ჯერ მიუთითეთ საქმის ნომერი' : l ? '...' : '📥 FM-02b — საქმის მიუკერძოებლობის შეფასება'}
                                                             </Button>
                                                         )}
                                                     </PDFDownloadLink>

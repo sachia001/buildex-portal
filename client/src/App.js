@@ -14,6 +14,10 @@ import OrderGenerator from './pages/OrderGenerator';
 import ContractGenerator from './pages/ContractGenerator';
 import EquipmentManager from './pages/EquipmentManager';
 import ManagementReview from './pages/ManagementReview';
+import InsurancePage from './pages/InsurancePage';
+import ComplaintsPage from './pages/ComplaintsPage';
+import InternalAuditPage from './pages/InternalAuditPage';
+import CorrectiveActionsPage from './pages/CorrectiveActionsPage';
 import Login from './components/Login';
 import ChangePassword from './components/ChangePassword';
 
@@ -51,9 +55,13 @@ const Navbar = ({ username, role, onLogout }) => {
     const show = {
         inspections: ['admin', 'chancellor', 'tech_manager', 'inspector', 'quality_manager'].includes(role),
         documents:   ['admin', 'quality_manager'].includes(role),
-        equipment:   ['admin'].includes(role),
+        equipment:   ['admin', 'quality_manager'].includes(role),
         management:  ['admin', 'quality_manager'].includes(role),
         staff:       ['admin', 'hr'].includes(role),
+        insurance:   ['admin', 'quality_manager'].includes(role),
+        complaints:  ['admin', 'quality_manager'].includes(role),
+        audits:      ['admin', 'quality_manager'].includes(role),
+        corrections: ['admin', 'quality_manager'].includes(role),
     };
 
     return (
@@ -79,6 +87,18 @@ const Navbar = ({ username, role, onLogout }) => {
                     )}
                     {show.management && (
                         <Link className="btn btn-light fw-bold text-secondary border-0" to="/management-review">📋 გადახედვა</Link>
+                    )}
+                    {show.insurance && (
+                        <Link className="btn btn-light fw-bold text-secondary border-0" to="/insurance">🛡️ დაზღვევა</Link>
+                    )}
+                    {show.complaints && (
+                        <Link className="btn btn-light fw-bold text-secondary border-0" to="/complaints">📨 საჩივრები</Link>
+                    )}
+                    {show.audits && (
+                        <Link className="btn btn-light fw-bold text-secondary border-0" to="/internal-audits">🔍 აუდიტი</Link>
+                    )}
+                    {show.corrections && (
+                        <Link className="btn btn-light fw-bold text-secondary border-0" to="/corrective-actions">⚙️ CAR</Link>
                     )}
                     {show.staff && (
                         <Link className="btn btn-primary fw-bold px-4 shadow-sm rounded-pill" to="/admin">👥 პერსონალი</Link>
@@ -177,6 +197,10 @@ function AppContent() {
                     <Route path="/management-review" element={<ManagementReview role={role} />} />
                     <Route path="/documents" element={<DocumentsPage />} />
                     <Route path="/equipment" element={<EquipmentManager role={role} />} />
+                    <Route path="/insurance" element={<InsurancePage role={role} />} />
+                    <Route path="/complaints" element={<ComplaintsPage role={role} />} />
+                    <Route path="/internal-audits" element={<InternalAuditPage role={role} />} />
+                    <Route path="/corrective-actions" element={<CorrectiveActionsPage role={role} />} />
                     <Route path="/order-generator" element={<OrderGenerator />} />
                     <Route path="/contract-generator" element={<ContractGenerator />} />
                     <Route path="/change-password" element={<ChangePassword />} />

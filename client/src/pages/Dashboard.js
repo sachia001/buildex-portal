@@ -4,7 +4,7 @@ import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 
-const Dashboard = () => {
+const Dashboard = ({ role }) => {
     const [stats, setStats] = useState(null);
     const [staff, setStaff] = useState([]); // პერსონალის მონიტორინგისთვის
     const [loading, setLoading] = useState(true);
@@ -45,6 +45,8 @@ const Dashboard = () => {
     ];
 
     const eq = stats?.equipment || { expired: 0, warning: 0, valid: 0 };
+    const ins = stats?.insurance || { expiringSoon: [], expired: [] };
+    const alerts = stats?.alerts || { openComplaints: 0, overdueActions: 0 };
 
     // პერსონალის ვალიდაცია (ვის გასდის ვადა)
     const expiringStaff = staff.filter(s => {
@@ -127,7 +129,7 @@ const Dashboard = () => {
                                             <td className="fw-bold text-primary">{item.inspectionNumber}</td>
                                             <td className="text-truncate" style={{maxWidth: '120px'}} title={item.objectName}>{item.objectName}</td>
                                             <td><Badge bg="danger">{new Date(item.deadline).toLocaleDateString()}</Badge></td>
-                                            <td className="small fw-bold">{item.expert ? `${item.expert.firstName} ${item.expert.lastName}` : '-'}</td>
+                                            <td className="small fw-bold">{Array.isArray(item.expert) && item.expert.length > 0 ? item.expert.map(e => `${e.firstName} ${e.lastName}`).join(', ') : (item.expert ? `${item.expert.firstName} ${item.expert.lastName}` : '-')}</td>
                                         </tr>
                                     )) : <tr><td colSpan="4" className="text-center py-4 text-muted small">ვადები დაცულია</td></tr>}
                                 </tbody>
@@ -160,7 +162,7 @@ const Dashboard = () => {
                         </Card>
 
                         {/* პერსონალის მონიტორინგი (ახალი) */}
-                        <Card className="shadow-sm border-0">
+                        <Card className="shadow-sm border-0 mb-3">
                             <Card.Header style={{...cardHeaderStyle, backgroundColor: '#d35400'}}>🆔 პერსონალის ავტორიზაცია</Card.Header>
                             <Card.Body className="p-0">
                                 {expiringStaff.length > 0 ? (
@@ -179,6 +181,39 @@ const Dashboard = () => {
                                 )}
                             </Card.Body>
                         </Card>
+
+                        {/* ISO შესაბამისობის მაჩვენებლები */}
+                        {(ins.expired.length > 0 || ins.expiringSoon.length > 0 || alerts.openComplaints > 0 || alerts.overdueActions > 0) && (
+                            <Card className="shadow-sm border-0">
+                                <Card.Header style={{...cardHeaderStyle, backgroundColor: '#8e44ad'}}>⚠️ ISO გაფრთხილებები</Card.Header>
+                                <ListGroup variant="flush">
+                                    {ins.expired.length > 0 && (
+                                        <ListGroup.Item className="d-flex justify-content-between align-items-center">
+                                            <span className="small text-danger fw-bold">🛡️ ვადაგასული პოლისი</span>
+                                            <Badge bg="danger" pill>{ins.expired.length}</Badge>
+                                        </ListGroup.Item>
+                                    )}
+                                    {ins.expiringSoon.length > 0 && (
+                                        <ListGroup.Item className="d-flex justify-content-between align-items-center">
+                                            <span className="small text-warning fw-bold">🛡️ პოლისი იწურება</span>
+                                            <Badge bg="warning" text="dark" pill>{ins.expiringSoon.length}</Badge>
+                                        </ListGroup.Item>
+                                    )}
+                                    {alerts.openComplaints > 0 && (
+                                        <ListGroup.Item className="d-flex justify-content-between align-items-center" style={{cursor:'pointer'}} onClick={() => navigate('/complaints')}>
+                                            <span className="small fw-bold">📨 ღია საჩივრები</span>
+                                            <Badge bg="warning" text="dark" pill>{alerts.openComplaints}</Badge>
+                                        </ListGroup.Item>
+                                    )}
+                                    {alerts.overdueActions > 0 && (
+                                        <ListGroup.Item className="d-flex justify-content-between align-items-center" style={{cursor:'pointer'}} onClick={() => navigate('/corrective-actions')}>
+                                            <span className="small text-danger fw-bold">⚙️ ვადაგასული CAR</span>
+                                            <Badge bg="danger" pill>{alerts.overdueActions}</Badge>
+                                        </ListGroup.Item>
+                                    )}
+                                </ListGroup>
+                            </Card>
+                        )}
                     </Col>
 
                     {/* COL 3: Analytics & Activity */}

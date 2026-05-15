@@ -94,6 +94,11 @@ const InspectionSchema = new mongoose.Schema({
     clientName: String,
     clientID: String,
     clientPhone: String,
+    clientEmail: String,
+    contactPerson: String,
+    issueDate: String,
+    inspectionTask: String,
+    accreditationScope: String,
     applicationContent: String,
     status: { type: String, default: 'რეგისტრირებული' },
     deadline: Date,
@@ -138,6 +143,60 @@ const ManagementReview = mongoose.model('ManagementReview', new mongoose.Schema(
         decisions: String
     },
     status: { type: String, default: 'დასრულებული' }
+}, { timestamps: true }));
+
+const Complaint = mongoose.model('Complaint', new mongoose.Schema({
+    complaintNumber: { type: String, unique: true },
+    dateReceived: { type: Date, required: true, default: Date.now },
+    complainant: { type: String, required: true },
+    complainantContact: String,
+    inspectionRef: String,
+    description: { type: String, required: true },
+    category: { type: String, default: 'საჩივარი' }, // საჩივარი / აპელაცია
+    status: { type: String, default: 'განხილვაში' }, // განხილვაში / დასრულებული / უარყოფილი
+    reviewedBy: String,
+    resolution: String,
+    closedDate: Date,
+    preventiveAction: String
+}, { timestamps: true }));
+
+const InternalAudit = mongoose.model('InternalAudit', new mongoose.Schema({
+    auditNumber: { type: String, unique: true },
+    auditDate: { type: Date, required: true },
+    auditor: { type: String, required: true },
+    scope: String,
+    findings: [String],
+    nonConformities: String,
+    positiveFindings: String,
+    conclusion: String,
+    correctiveActionRequired: { type: Boolean, default: false },
+    status: { type: String, default: 'დასრულებული' }
+}, { timestamps: true }));
+
+const CorrectiveAction = mongoose.model('CorrectiveAction', new mongoose.Schema({
+    carNumber: { type: String, unique: true },
+    sourceType: { type: String, default: 'შიდა აუდიტი' }, // შიდა აუდიტი / საჩივარი / გარე აუდიტი / პერსონალის შეფასება
+    sourceRef: String,
+    description: { type: String, required: true },
+    rootCause: String,
+    actionPlan: String,
+    responsiblePerson: String,
+    deadline: Date,
+    completedDate: Date,
+    effectiveness: String,
+    status: { type: String, default: 'ღია' } // ღია / მიმდინარე / დახურული
+}, { timestamps: true }));
+
+const Insurance = mongoose.model('Insurance', new mongoose.Schema({
+    insurerName: { type: String, required: true },
+    policyNumber: { type: String, required: true },
+    insuranceType: { type: String, default: 'პროფესიული პასუხისმგებლობა' },
+    startDate: { type: Date, required: true },
+    endDate: { type: Date, required: true },
+    insuredAmount: String,
+    notes: String,
+    fileUrl: String,
+    status: { type: String, default: 'active' }
 }, { timestamps: true }));
 
 // --- HELPER: ნუმერაციის გენერატორი ---
@@ -185,6 +244,9 @@ async function generateDocumentNumber(type, date = new Date()) {
         case 'LC':     return `LC-${seq2}-${month}/${yearShort}`;
         case 'SC':     return `SC-${seq2}-${month}/${yearShort}`;
         case 'IM':     return `IM-${seq}/${yearShort}`;
+        case 'COMP': return `COMP-${seq}/${yearShort}`;
+        case 'AUD':  return `AUD-${seq}/${yearShort}`;
+        case 'CAR':  return `CAR-${seq}/${yearShort}`;
         default: throw new Error("უცნობი კატეგორია");
     }
 }
@@ -376,7 +438,7 @@ api.get('/dashboard/stats', async (req, res) => {
         const in5Days = new Date();
         in5Days.setDate(today.getDate() + 5);
 
-        const [total, active, completed, registered, staffCount, equipmentList, urgentList] = await Promise.all([
+        const [total, active, completed, registered, staffCount, equipmentList, urgentList, insuranceList, openComplaints, overdueActions] = await Promise.all([
             Inspection.countDocuments(),
             Inspection.countDocuments({ status: 'მიმდინარე' }),
             Inspection.countDocuments({ status: 'დასრულებული' }),
@@ -386,7 +448,10 @@ api.get('/dashboard/stats', async (req, res) => {
             Inspection.find({
                 deadline: { $gte: today, $lte: in5Days },
                 status:   { $ne: 'დასრულებული' }
-            }).populate('expert', 'firstName lastName').sort({ deadline: 1 }).limit(10)
+            }).populate('expert', 'firstName lastName').sort({ deadline: 1 }).limit(10),
+            Insurance.find({ status: 'active' }).sort({ endDate: 1 }),
+            Complaint.countDocuments({ status: 'განხილვაში' }),
+            CorrectiveAction.countDocuments({ status: { $ne: 'დახურული' }, deadline: { $lt: today } })
         ]);
 
         const eqStats = { expired: 0, warning: 0, valid: 0 };
@@ -398,17 +463,136 @@ api.get('/dashboard/stats', async (req, res) => {
             else                     eqStats.valid++;
         });
 
-        res.json({ counts: { total, active, completed, registered, staffCount }, equipment: eqStats, urgentList });
+        const insStats = { expiringSoon: [], expired: [] };
+        insuranceList.forEach(ins => {
+            if (!ins.endDate) return;
+            const diffDays = Math.ceil((new Date(ins.endDate) - today) / (1000 * 60 * 60 * 24));
+            if (diffDays < 0) insStats.expired.push({ id: ins._id, insurerName: ins.insurerName, policyNumber: ins.policyNumber, endDate: ins.endDate });
+            else if (diffDays <= 30) insStats.expiringSoon.push({ id: ins._id, insurerName: ins.insurerName, policyNumber: ins.policyNumber, endDate: ins.endDate, daysLeft: diffDays });
+        });
+
+        res.json({ counts: { total, active, completed, registered, staffCount }, equipment: eqStats, urgentList, insurance: insStats, alerts: { openComplaints, overdueActions } });
     } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-// --- TEMPORARY: Emergency admin reset (remove after use) ---
-app.post('/api/auth/emergency-reset', async (req, res) => {
-    if (req.body.secret !== 'buildex-reset-2026') return res.status(403).json({ message: 'Forbidden' });
+// --- COMPLAINTS ---
+api.get('/complaints', async (req, res) => {
+    try { res.json(await Complaint.find().sort({ createdAt: -1 })); }
+    catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+api.post('/complaints', async (req, res) => {
     try {
-        const hash = await bcrypt.hash('Buildex@2026', 10);
-        await AuthUser.findOneAndUpdate({ username: 'admin' }, { passwordHash: hash, role: 'admin' }, { upsert: true, new: true });
-        res.json({ ok: true, message: 'admin / Buildex@2026 — პაროლი განახლდა' });
+        const num = await generateDocumentNumber('COMP');
+        const item = await Complaint.create({ ...req.body, complaintNumber: num });
+        res.status(201).json(item);
+    } catch (err) { res.status(400).json({ error: err.message }); }
+});
+
+api.put('/complaints/:id', async (req, res) => {
+    try {
+        const updated = await Complaint.findByIdAndUpdate(req.params.id, req.body, { new: true });
+        if (!updated) return res.status(404).json({ error: 'ვერ მოიძებნა' });
+        res.json(updated);
+    } catch (err) { res.status(400).json({ error: err.message }); }
+});
+
+api.delete('/complaints/:id', async (req, res) => {
+    if (!['admin', 'quality_manager'].includes(req.user.role)) return res.status(403).json({ error: 'უფლება არ გაქვთ' });
+    try {
+        await Complaint.findByIdAndDelete(req.params.id);
+        res.json({ msg: 'წაიშალა' });
+    } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// --- INTERNAL AUDITS ---
+api.get('/internal-audits', async (req, res) => {
+    try { res.json(await InternalAudit.find().sort({ auditDate: -1 })); }
+    catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+api.post('/internal-audits', async (req, res) => {
+    try {
+        const num = await generateDocumentNumber('AUD');
+        const item = await InternalAudit.create({ ...req.body, auditNumber: num });
+        res.status(201).json(item);
+    } catch (err) { res.status(400).json({ error: err.message }); }
+});
+
+api.put('/internal-audits/:id', async (req, res) => {
+    try {
+        const updated = await InternalAudit.findByIdAndUpdate(req.params.id, req.body, { new: true });
+        if (!updated) return res.status(404).json({ error: 'ვერ მოიძებნა' });
+        res.json(updated);
+    } catch (err) { res.status(400).json({ error: err.message }); }
+});
+
+api.delete('/internal-audits/:id', async (req, res) => {
+    if (req.user.role !== 'admin') return res.status(403).json({ error: 'წაშლის უფლება არ გაქვთ' });
+    try {
+        await InternalAudit.findByIdAndDelete(req.params.id);
+        res.json({ msg: 'წაიშალა' });
+    } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// --- CORRECTIVE ACTIONS ---
+api.get('/corrective-actions', async (req, res) => {
+    try { res.json(await CorrectiveAction.find().sort({ createdAt: -1 })); }
+    catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+api.post('/corrective-actions', async (req, res) => {
+    try {
+        const num = await generateDocumentNumber('CAR');
+        const item = await CorrectiveAction.create({ ...req.body, carNumber: num });
+        res.status(201).json(item);
+    } catch (err) { res.status(400).json({ error: err.message }); }
+});
+
+api.put('/corrective-actions/:id', async (req, res) => {
+    try {
+        const updated = await CorrectiveAction.findByIdAndUpdate(req.params.id, req.body, { new: true });
+        if (!updated) return res.status(404).json({ error: 'ვერ მოიძებნა' });
+        res.json(updated);
+    } catch (err) { res.status(400).json({ error: err.message }); }
+});
+
+api.delete('/corrective-actions/:id', async (req, res) => {
+    if (!['admin', 'quality_manager'].includes(req.user.role)) return res.status(403).json({ error: 'უფლება არ გაქვთ' });
+    try {
+        await CorrectiveAction.findByIdAndDelete(req.params.id);
+        res.json({ msg: 'წაიშალა' });
+    } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// --- INSURANCE ---
+api.get('/insurance', async (req, res) => {
+    try { res.json(await Insurance.find().sort({ endDate: 1 })); }
+    catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+api.post('/insurance', upload.single('file'), async (req, res) => {
+    try {
+        const data = JSON.parse(req.body.data || '{}');
+        if (req.file) data.fileUrl = `uploads/docs/${req.file.filename}`;
+        const item = await Insurance.create(data);
+        res.status(201).json(item);
+    } catch (err) { res.status(400).json({ error: err.message }); }
+});
+
+api.put('/insurance/:id', async (req, res) => {
+    try {
+        const updated = await Insurance.findByIdAndUpdate(req.params.id, req.body, { new: true });
+        if (!updated) return res.status(404).json({ error: 'ვერ მოიძებნა' });
+        res.json(updated);
+    } catch (err) { res.status(400).json({ error: err.message }); }
+});
+
+api.delete('/insurance/:id', async (req, res) => {
+    if (req.user.role !== 'admin') return res.status(403).json({ error: 'წაშლის უფლება არ გაქვთ' });
+    try {
+        await Insurance.findByIdAndDelete(req.params.id);
+        res.json({ msg: 'წაიშალა' });
     } catch (err) { res.status(500).json({ error: err.message }); }
 });
 

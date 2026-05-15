@@ -148,15 +148,15 @@ const ReportCoverPdf = ({ data = {} }) => {
 
         <View style={{marginLeft: 20, marginRight: 20}}>
             <View style={styles.infoGroup}><Text style={styles.label}>ინსპექტირების ობიექტის დასახელება:</Text><Text style={styles.value}>{data.objectName}</Text></View>
-            <View style={styles.infoGroup}><Text style={styles.label}>მისამართი:</Text><Text style={styles.value}>{data.address}</Text></View>
+            <View style={styles.infoGroup}><Text style={styles.label}>მისამართი:</Text><Text style={styles.value}>{data.objectAddress || data.address}</Text></View>
             <View style={styles.infoGroup}><Text style={styles.label}>დამკვეთი:</Text><Text style={styles.value}>{data.clientName}</Text></View>
         </View>
 
         <View style={styles.yearContainer}><Text style={styles.yearText}>{currentYear} წელი</Text></View>
         
         <View style={styles.coverFooter}>
-            <Text style={{fontSize: 9, color: '#003366'}}>თელავი, ლეონიძის ქუჩა 22; ტელ: +995 511 74 74 00</Text>
-            <Text style={{fontSize: 9, color: '#003366'}}>info@buildexpertise.com</Text>
+            <Text style={{fontSize: 9, color: '#003366'}}>თელავი, ჭ. ამირეჯიბის ქ. №26; ტელ: +995 511 74 74 00</Text>
+            <Text style={{fontSize: 9, color: '#003366'}}>buildexpertiza@gmail.com</Text>
         </View>
 
         <Text break />
@@ -238,8 +238,12 @@ const ReportCoverPdf = ({ data = {} }) => {
         <Text style={{fontWeight: 'bold', textAlign: 'center', marginBottom: 10}}>ინსპექტირების შემსრულებლები:</Text>
         <Text style={{textAlign: 'justify', marginBottom: 20, fontSize: 9}}>ინსპექტირების შემსრულებლები ინსპექტირების ორგანოს ხელმძღვანელის მიერ გაფრთხილებული და პასუხისმგებელნი ვართ ინსპექტირება ვაწარმოოთ მიუკერძოებლად, ჯეროვნად ჩავატაროთ კვლევა და დავიცვათ ინსპექტირების ჩატარების დროს მიღებული ან წარმოქმნილი ნებისმიერი სახის ინფორმაციის კონფიდენციალურობა.</Text>
         
-        <View style={styles.listItem}><Text>1. ინსპექტორი:</Text></View>
-        <View style={styles.listItem}><Text>2. ინსპექტორი:</Text></View>
+        {Array.isArray(data.expert) && data.expert.length > 0
+            ? data.expert.map((e, i) => (
+                <View key={i} style={styles.listItem}><Text>{i + 1}. ინსპექტორი: {e.firstName || ''} {e.lastName || ''}</Text></View>
+            ))
+            : <View style={styles.listItem}><Text>1. ინსპექტორი:</Text></View>
+        }
 
         <Text style={styles.sectionTitle}>წარმოდგენილი მასალები:</Text>
         {[...Array(5)].map((_, i) => (<View key={i} style={styles.listItem}><Text style={styles.bullet}>{i + 1}.</Text></View>))}

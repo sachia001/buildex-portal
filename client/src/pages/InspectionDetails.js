@@ -127,8 +127,50 @@ const InspectionDetails = ({ role }) => {
                                 <Col md={6}>
                                     <Form.Label className="small fw-bold text-muted">მისამართი</Form.Label>
                                     {editMode ? (
-                                        <Form.Control value={formData.objectAddress} onChange={e => setFormData({...formData, objectAddress: e.target.value})} />
+                                        <Form.Control value={formData.objectAddress || ''} onChange={e => setFormData({...formData, objectAddress: e.target.value})} />
                                     ) : <div>{data.objectAddress || '-'}</div>}
+                                </Col>
+                                <Col md={12}>
+                                    <Form.Label className="small fw-bold text-muted">ინსპექტირების სფერო</Form.Label>
+                                    {editMode ? (
+                                        <Form.Select value={formData.inspectionScope || ''} onChange={e => setFormData({...formData, inspectionScope: e.target.value})}>
+                                            <option>ობიექტის ხარჯთაღრიცხვის ინსპექტირება</option>
+                                            <option>შესრულებული სამუშაოების (ფორმა #2) ინსპექტირება</option>
+                                            <option>ობიექტის ტექნიკური მდგომარეობის ინსპექტირება</option>
+                                            <option>პროექტის ინსპექტირება</option>
+                                            <option>სხვა</option>
+                                        </Form.Select>
+                                    ) : <div>{data.inspectionScope || '-'}</div>}
+                                </Col>
+                                <Col md={4}>
+                                    <Form.Label className="small fw-bold text-muted">ტენდერის ნომერი</Form.Label>
+                                    {editMode ? (
+                                        <Form.Control value={formData.tenderNumber || ''} onChange={e => setFormData({...formData, tenderNumber: e.target.value})} />
+                                    ) : <div>{data.tenderNumber || '-'}</div>}
+                                </Col>
+                                <Col md={4}>
+                                    <Form.Label className="small fw-bold text-muted">დაწყება</Form.Label>
+                                    {editMode ? (
+                                        <Form.Control type="date" value={formData.startDate ? formData.startDate.split('T')[0] : ''} onChange={e => setFormData({...formData, startDate: e.target.value})} />
+                                    ) : <div>{data.startDate ? new Date(data.startDate).toLocaleDateString('ka-GE') : '-'}</div>}
+                                </Col>
+                                <Col md={4}>
+                                    <Form.Label className="small fw-bold text-muted">ვადა</Form.Label>
+                                    {editMode ? (
+                                        <Form.Control type="date" value={formData.deadline ? formData.deadline.split('T')[0] : ''} onChange={e => setFormData({...formData, deadline: e.target.value})} />
+                                    ) : <div>{data.deadline ? new Date(data.deadline).toLocaleDateString('ka-GE') : '-'}</div>}
+                                </Col>
+                                <Col md={6}>
+                                    <Form.Label className="small fw-bold text-muted">ელ.ფოსტა</Form.Label>
+                                    {editMode ? (
+                                        <Form.Control value={formData.clientEmail || ''} onChange={e => setFormData({...formData, clientEmail: e.target.value})} />
+                                    ) : <div>{data.clientEmail || '-'}</div>}
+                                </Col>
+                                <Col md={6}>
+                                    <Form.Label className="small fw-bold text-muted">წარმომადგენელი</Form.Label>
+                                    {editMode ? (
+                                        <Form.Control value={formData.contactPerson || ''} onChange={e => setFormData({...formData, contactPerson: e.target.value})} />
+                                    ) : <div>{data.contactPerson || '-'}</div>}
                                 </Col>
                                 <Col md={12}><hr/></Col>
                                 <Col md={4}>
@@ -176,9 +218,22 @@ const InspectionDetails = ({ role }) => {
                                 <tbody>
                                     {data.documents && Object.entries(data.documents).map(([key, path]) => (
                                         <tr key={key}>
-                                            <td>{key}</td>
+                                            <td><Badge bg="secondary" className="me-2">{key}</Badge></td>
                                             <td>
-                                                <a href={`/${path}`} target="_blank" rel="noreferrer" className="btn btn-sm btn-link">ნახვა</a>
+                                                <div className="d-flex gap-2 align-items-center">
+                                                    <a href={`/${path}`} target="_blank" rel="noreferrer" className="btn btn-sm btn-outline-primary">👁 ნახვა</a>
+                                                    {!isReadOnly && (
+                                                        <Button size="sm" variant="outline-danger" onClick={async () => {
+                                                            if (!window.confirm(`წაიშალოს "${key}"?`)) return;
+                                                            const newDocs = { ...data.documents };
+                                                            delete newDocs[key];
+                                                            try {
+                                                                await axios.put(`/api/inspections/${id}`, { documents: newDocs });
+                                                                fetchData();
+                                                            } catch { alert('შეცდომა'); }
+                                                        }}>🗑️</Button>
+                                                    )}
+                                                </div>
                                             </td>
                                         </tr>
                                     ))}
