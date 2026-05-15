@@ -25,7 +25,7 @@ const s = StyleSheet.create({
 
   tableHeader: { flexDirection: 'row', backgroundColor: '#ddd', paddingVertical: 3, paddingHorizontal: 4, marginTop: 4 },
   tableRow: { flexDirection: 'row', borderBottomWidth: 0.5, borderBottomColor: '#bbb', paddingVertical: 4, paddingHorizontal: 4 },
-  tableNote: { fontSize: 7.5, color: '#888', fontStyle: 'italic', marginLeft: 4, marginTop: 1 },
+  tableNote: { fontSize: 7.5, color: '#888', marginLeft: 4, marginTop: 1 },
   tc: { fontSize: 8.5 },
 
   blankLine: { borderBottomWidth: 0.5, borderBottomColor: '#999', height: 14, marginBottom: 3 },
@@ -52,13 +52,15 @@ const Field = ({ label, value, note }) => (
   </View>
 );
 
-const BlankLines = ({ count = 3 }) => (
-  <View style={{ marginLeft: 152, marginBottom: 4 }}>
-    {Array.from({ length: count }).map((_, i) => (
-      <View key={i} style={s.blankLine} />
-    ))}
-  </View>
-);
+const BlankLines = ({ count = 3 }) => {
+  const lines = [];
+  for (let i = 0; i < count; i++) lines.push(i);
+  return (
+    <View style={{ marginLeft: 152, marginBottom: 4 }}>
+      {lines.map(i => <View key={i} style={s.blankLine}><Text> </Text></View>)}
+    </View>
+  );
+};
 
 const FoundingAgreementPdf = ({ data = {} }) => {
   const {
@@ -220,16 +222,14 @@ const FoundingAgreementPdf = ({ data = {} }) => {
               <Text style={s.sigName}>{p.name}</Text>
               <Text style={s.sigRole}>{'პარტნიორი / ხელმძღვანელობაზე და წარმომადგენლობაზე უფლებამოსილი პირი'}</Text>
               <View style={s.sigLineRow}>
-                <Text style={s.sigLineText}>{'ხელმოწერა: ____________________________  /  '}{p.name.split(' ').pop()}{'  /'}</Text>
-                <Text style={s.sigLineText}>{'თარიღი: '}{foundingDate}</Text>
+                <Text style={s.sigLineText}>{`ხელმოწერა: ____________________________  /  ${p.name.split(' ').pop()}  /`}</Text>
+                <Text style={s.sigLineText}>{`თარიღი: ${foundingDate}`}</Text>
               </View>
             </View>
           ))}
         </View>
 
-        <Text style={s.footer}>
-          {'შპს „ბილდექს ექსპერტიზა"  |  ს/კ 431188010  |  სადამფუძნებლო შეთანხმება  |  '}{foundingDate}
-        </Text>
+        <Text style={s.footer}>{`შპს „ბილდექს ექსპერტიზა"  |  ს/კ 431188010  |  სადამფუძნებლო შეთანხმება  |  ${foundingDate}`}</Text>
       </Page>
     </Document>
   );

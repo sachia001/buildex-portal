@@ -36,8 +36,8 @@ const s = StyleSheet.create({
 
   partiesBox: { borderWidth: 0.8, borderColor: '#003366', marginBottom: 12 },
   partyRow: { flexDirection: 'row', borderBottomWidth: 0.5, borderBottomColor: '#dde' },
-  partyLabel: { backgroundColor: '#eef2f6', width: 115, padding: '6 8', fontSize: 9, fontWeight: 'bold', flexShrink: 0 },
-  partyData: { flex: 1, padding: '6 8', fontSize: 9 },
+  partyLabel: { backgroundColor: '#eef2f6', width: 115, paddingVertical: 6, paddingHorizontal: 8, fontSize: 9, fontWeight: 'bold', flexShrink: 0 },
+  partyData: { flex: 1, paddingVertical: 6, paddingHorizontal: 8, fontSize: 9 },
 
   sigSection: { marginTop: 32 },
   sigTitle: { fontSize: 10, fontWeight: 'bold', marginBottom: 14 },
