@@ -5,35 +5,35 @@ import fontPath from '../fonts/bpg_arial.ttf';
 Font.register({ family: 'BPG Arial', src: fontPath });
 
 const s = StyleSheet.create({
-  page: { fontFamily: 'BPG Arial', padding: '0 0 50 0', fontSize: 10, lineHeight: 1.75 },
+  page: { fontFamily: 'BPG Arial', padding: '0 0 40 0', fontSize: 10, lineHeight: 1.6 },
   watermark: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, justifyContent: 'center', alignItems: 'center', zIndex: -1 },
   watermarkImg: { width: 460, opacity: 0.2 },
 
-  headerBar: { padding: '8 50', flexDirection: 'row', alignItems: 'center', marginBottom: 0 },
-  headerLogo: { width: 40, height: 40, marginRight: 14, objectFit: 'contain' },
+  headerBar: { padding: '7 50', flexDirection: 'row', alignItems: 'center', marginBottom: 0 },
+  headerLogo: { width: 38, height: 38, marginRight: 12, objectFit: 'contain' },
   headerTextBlock: { flex: 1 },
   headerCompany: { color: '#003366', fontSize: 11, fontWeight: 'bold' },
   headerSub: { color: '#666', fontSize: 7.5, marginTop: 1 },
   headerNum: { color: '#003366', fontSize: 9, marginLeft: 'auto' },
 
-  dividerTop: { borderTopWidth: 2, borderTopColor: '#c8a84b', marginBottom: 0 },
+  dividerTop: { borderTopWidth: 0.8, borderTopColor: '#ccc', marginBottom: 0 },
 
-  body: { paddingHorizontal: 50, paddingTop: 22 },
+  body: { paddingHorizontal: 50, paddingTop: 16 },
 
   // Title block
   docTitle: { fontSize: 12, fontWeight: 'bold', textAlign: 'center', marginBottom: 3 },
-  docNum: { fontSize: 10, textAlign: 'center', color: '#333', marginBottom: 16 },
-  cityDateRow: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 16, fontSize: 10 },
-  divider: { borderTopWidth: 0.8, borderTopColor: '#003366', marginVertical: 12 },
+  docNum: { fontSize: 10, textAlign: 'center', color: '#333', marginBottom: 10 },
+  cityDateRow: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 10, fontSize: 10 },
+  divider: { borderTopWidth: 0.8, borderTopColor: '#003366', marginVertical: 8 },
 
-  preamble: { fontSize: 10, textAlign: 'justify', marginBottom: 14, lineHeight: 1.75 },
+  preamble: { fontSize: 10, textAlign: 'justify', marginBottom: 10, lineHeight: 1.6 },
 
-  decisionSection: { marginBottom: 10 },
-  decisionNum: { fontSize: 10.5, fontWeight: 'bold', marginBottom: 4 },
-  decisionBody: { fontSize: 10, textAlign: 'justify', marginLeft: 14, lineHeight: 1.75 },
+  decisionSection: { marginBottom: 8 },
+  decisionNum: { fontSize: 10.5, fontWeight: 'bold', marginBottom: 3 },
+  decisionBody: { fontSize: 10, textAlign: 'justify', marginLeft: 14, lineHeight: 1.6 },
 
-  sigSection: { marginTop: 30 },
-  sigTitle: { fontSize: 10, fontWeight: 'bold', marginBottom: 16 },
+  sigSection: { marginTop: 20 },
+  sigTitle: { fontSize: 10, fontWeight: 'bold', marginBottom: 12 },
   sigRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 30 },
   sigBlock: { minWidth: '40%', marginBottom: 16 },
   sigLabel: { fontSize: 10, fontWeight: 'bold', marginBottom: 2 },
@@ -93,7 +93,7 @@ const PartnerDecisionPdf = ({ data = {} }) => {
           {/* Preamble */}
           {isSingle ? (
             <Text style={s.preamble}>
-              {`მე, ${p0.name} (საქართველოს მოქალაქე, პირადი ნომერი: ${p0.personalId}, რეგისტრირებული მისამართი: საქართველო, ${p0.address || '—'}), როგორც შეზღუდული პასუხისმგებლობის საზოგადოება „ბილდექს ექსპერტიზა"-ს ${p0.share || 100}%-იანი წილის ერთპიროვნულმა პარტნიორმა, „მეწარმეთა შესახებ" საქართველოს კანონით ხელმძღვანელობით, მივიღე შემდეგი\n\nგ ა დ ა წ ყ ვ ე ტ ი ლ ე ბ ა :`}
+              {`მე, ${p0.name} (საქართველოს მოქალაქე, პირადი ნომერი: ${p0.personalId}, რეგისტრირებული მისამართი: საქართველო, ${p0.address || '—'}), როგორც შეზღუდული პასუხისმგებლობის საზოგადოება „ბილდექს ექსპერტიზა"-ს ${p0.share || 100}%-იანი წილის ერთპიროვნულმა პარტნიორმა, „მეწარმეთა შესახებ" საქართველოს კანონის შესაბამისად, მივიღე შემდეგი\n\nგ ა დ ა წ ყ ვ ე ტ ი ლ ე ბ ა :`}
             </Text>
           ) : (
             <Text style={s.preamble}>

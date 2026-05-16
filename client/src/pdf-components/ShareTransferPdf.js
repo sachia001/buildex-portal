@@ -14,7 +14,7 @@ const s = StyleSheet.create({
   headerTextBlock: { flex: 1 },
   headerCompany: { color: '#003366', fontSize: 11, fontWeight: 'bold' },
   headerSub: { color: '#666', fontSize: 7.5, marginTop: 1 },
-  dividerGold: { borderTopWidth: 2, borderTopColor: '#c8a84b' },
+  dividerGold: { borderTopWidth: 0.8, borderTopColor: '#ccc' },
 
   body: { paddingHorizontal: 50, paddingTop: 22 },
 
@@ -117,9 +117,7 @@ const ShareTransferPdf = ({ data = {} }) => {
               : 'შეზღუდული პასუხისმგებლობის საზოგადოება „ბილდექს ექსპერტიზა"-ში წილის გაყიდვა-შეძენის შესახებ'}
           </Text>
           <Text style={s.centerRef}>
-            {isGift
-              ? 'სამოქალაქო კოდექსი მ. 524-528  |  მეწარმეთა შესახებ კანონი'
-              : 'სამოქალაქო კოდექსი მ. 477-503  |  მეწარმეთა შესახებ კანონი'}
+            {`საქართველოს სამოქალაქო კოდექსი  |  „მეწარმეთა შესახებ" საქართველოს კანონი`}
           </Text>
           {contractNumber
             ? <Text style={s.centerNum}>{`№ ${contractNumber}`}</Text>
@@ -135,7 +133,7 @@ const ShareTransferPdf = ({ data = {} }) => {
             <View style={[s.partyRow, { borderBottomWidth: 0 }]}>
               <Text style={[s.partyLabel, { backgroundColor: '#003366', color: '#fff' }]}>მხარეები</Text>
               <Text style={[s.partyData, { fontSize: 8, color: '#555' }]}>
-                {isGift ? 'ჩუქება — სამოქ. კოდ. 524-ე მუხლის საფუძველზე' : 'ნასყიდობა — სამოქ. კოდ. 477-ე მუხლის საფუძველზე'}
+                {isGift ? 'წილის უსასყიდლო გადაცემა — საქართველოს სამოქალაქო კოდექსის შესაბამისად' : 'წილის ნასყიდობა — საქართველოს სამოქალაქო კოდექსის შესაბამისად'}
               </Text>
             </View>
             <View style={s.partyRow}>
