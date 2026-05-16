@@ -6,10 +6,9 @@ COPY package*.json ./
 RUN npm install --production=false
 
 COPY client/package*.json ./client/
-RUN cd client && npm install
+RUN cd client && npm install --production
 
 COPY . .
-RUN cd client && npm run build
 
 ENV PORT=8080
 EXPOSE 8080
