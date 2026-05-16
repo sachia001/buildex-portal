@@ -7,15 +7,14 @@ Font.register({ family: 'BPG Arial', src: fontPath });
 const s = StyleSheet.create({
   page: { fontFamily: 'BPG Arial', padding: '0 0 50 0', fontSize: 10, lineHeight: 1.75 },
   watermark: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, justifyContent: 'center', alignItems: 'center', zIndex: -1 },
-  watermarkImg: { width: 300, opacity: 0.04 },
+  watermarkImg: { width: 460, opacity: 0.3 },
 
-  // Header bar — exactly like inspection report PDFs
-  headerBar: { backgroundColor: '#003366', padding: '10 50', flexDirection: 'row', alignItems: 'center', marginBottom: 0 },
+  headerBar: { padding: '8 50', flexDirection: 'row', alignItems: 'center', marginBottom: 0 },
   headerLogo: { width: 40, height: 40, marginRight: 14, objectFit: 'contain' },
   headerTextBlock: { flex: 1 },
-  headerCompany: { color: '#fff', fontSize: 11, fontWeight: 'bold' },
-  headerSub: { color: '#aac4e0', fontSize: 7.5, marginTop: 1 },
-  headerNum: { color: '#fff', fontSize: 9, marginLeft: 'auto' },
+  headerCompany: { color: '#003366', fontSize: 11, fontWeight: 'bold' },
+  headerSub: { color: '#666', fontSize: 7.5, marginTop: 1 },
+  headerNum: { color: '#003366', fontSize: 9, marginLeft: 'auto' },
 
   dividerTop: { borderTopWidth: 2, borderTopColor: '#c8a84b', marginBottom: 0 },
 
@@ -39,7 +38,8 @@ const s = StyleSheet.create({
   sigBlock: { minWidth: '40%', marginBottom: 16 },
   sigLabel: { fontSize: 10, fontWeight: 'bold', marginBottom: 2 },
   sigDetail: { fontSize: 9, color: '#444', marginBottom: 1 },
-  sigLine: { borderTopWidth: 1, borderTopColor: '#000', marginTop: 32, paddingTop: 3, fontSize: 8.5, textAlign: 'left' },
+  sigLine: { borderBottomWidth: 0.5, borderBottomColor: '#555', marginTop: 40, width: 180 },
+  sigLineLabel: { fontSize: 8.5, textAlign: 'left', marginTop: 3, color: '#333' },
   footer: { fontSize: 7.5, color: '#aaa', textAlign: 'center', marginTop: 18 },
 });
 
@@ -124,9 +124,8 @@ const PartnerDecisionPdf = ({ data = {} }) => {
                   <Text style={s.sigLabel}>{p.name}</Text>
                   <Text style={s.sigDetail}>პ/ნ: {p.personalId}</Text>
                   <Text style={s.sigDetail}>წილი: {p.share || 100}%</Text>
-                  <View style={s.sigLine}>
-                    <Text>___________________________ / {p.name.split(' ').pop()} /</Text>
-                  </View>
+                  <View style={s.sigLine} />
+                  <Text style={s.sigLineLabel}>{`/ ${p.name.split(' ').pop()} /`}</Text>
                 </View>
               ))}
             </View>

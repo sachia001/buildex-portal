@@ -7,13 +7,13 @@ Font.register({ family: 'BPG Arial', src: fontPath });
 const s = StyleSheet.create({
   page: { fontFamily: 'BPG Arial', padding: '0 0 50 0', fontSize: 10, lineHeight: 1.75 },
   watermark: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, justifyContent: 'center', alignItems: 'center', zIndex: -1 },
-  watermarkImg: { width: 320, opacity: 0.04 },
+  watermarkImg: { width: 460, opacity: 0.3 },
 
-  headerBar: { backgroundColor: '#003366', padding: '10 50', flexDirection: 'row', alignItems: 'center' },
+  headerBar: { padding: '8 50', flexDirection: 'row', alignItems: 'center' },
   headerLogo: { width: 40, height: 40, marginRight: 14, objectFit: 'contain' },
   headerTextBlock: { flex: 1 },
-  headerCompany: { color: '#fff', fontSize: 11, fontWeight: 'bold' },
-  headerSub: { color: '#aac4e0', fontSize: 7.5, marginTop: 1 },
+  headerCompany: { color: '#003366', fontSize: 11, fontWeight: 'bold' },
+  headerSub: { color: '#666', fontSize: 7.5, marginTop: 1 },
   dividerGold: { borderTopWidth: 2, borderTopColor: '#c8a84b' },
 
   body: { paddingHorizontal: 50, paddingTop: 22 },
@@ -45,7 +45,8 @@ const s = StyleSheet.create({
   sigBlock: { width: '44%' },
   sigBlockLabel: { fontSize: 10, fontWeight: 'bold', marginBottom: 3 },
   sigDetail: { fontSize: 9, color: '#444', marginBottom: 2 },
-  sigLine: { borderTopWidth: 1, borderTopColor: '#000', marginTop: 32, paddingTop: 3, fontSize: 8.5, textAlign: 'center' },
+  sigLine: { borderBottomWidth: 0.5, borderBottomColor: '#555', marginTop: 40, width: 180 },
+  sigLineLabel: { fontSize: 8.5, textAlign: 'left', marginTop: 3, color: '#333' },
   footer: { fontSize: 7.5, color: '#aaa', textAlign: 'center', marginTop: 20 },
 });
 
@@ -260,14 +261,16 @@ const ShareTransferPdf = ({ data = {} }) => {
                 <Text style={s.sigDetail}>{transferorName}</Text>
                 <Text style={s.sigDetail}>{`პ/ნ: ${transferorId}`}</Text>
                 <Text style={s.sigDetail}>{transferorAddress}</Text>
-                <View style={s.sigLine}><Text>{`_________________________  /  ${transferorName.split(' ').pop()}  /`}</Text></View>
+                <View style={s.sigLine} />
+                <Text style={s.sigLineLabel}>{`/ ${transferorName.split(' ').pop()} /`}</Text>
               </View>
               <View style={s.sigBlock}>
                 <Text style={s.sigBlockLabel}>წილის შემძენი:</Text>
                 <Text style={s.sigDetail}>{tName}</Text>
                 <Text style={s.sigDetail}>{`პ/ნ: ${tId}`}</Text>
                 <Text style={s.sigDetail}>{tAddr}</Text>
-                <View style={s.sigLine}><Text>{`_________________________  /  ${transfereeName ? transfereeName.split(' ').pop() : '________'}  /`}</Text></View>
+                <View style={s.sigLine} />
+                <Text style={s.sigLineLabel}>{`/ ${transfereeName ? transfereeName.split(' ').pop() : '———'} /`}</Text>
               </View>
             </View>
           </View>

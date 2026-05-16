@@ -7,7 +7,7 @@ Font.register({ family: 'BPG Arial', src: fontPath });
 const s = StyleSheet.create({
   page: { fontFamily: 'BPG Arial', padding: '40 50 50 50', fontSize: 9, lineHeight: 1.6 },
   watermark: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, justifyContent: 'center', alignItems: 'center', zIndex: -1 },
-  watermarkImg: { width: 300, opacity: 0.04 },
+  watermarkImg: { width: 460, opacity: 0.3 },
 
   titleBlock: { alignItems: 'center', marginBottom: 10 },
   mainTitle: { fontSize: 12, fontWeight: 'bold', textAlign: 'center', marginBottom: 2 },
@@ -35,8 +35,10 @@ const s = StyleSheet.create({
   sigBlock: { marginBottom: 18 },
   sigName: { fontSize: 9.5, fontWeight: 'bold' },
   sigRole: { fontSize: 8.5, color: '#555', marginBottom: 4 },
-  sigLineRow: { flexDirection: 'row', justifyContent: 'space-between', borderTopWidth: 0.8, borderTopColor: '#333', paddingTop: 3, marginTop: 26 },
-  sigLineText: { fontSize: 8.5 },
+  sigLineRow: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 40 },
+  sigLineCol: { width: '45%' },
+  sigLineBar: { borderBottomWidth: 0.5, borderBottomColor: '#555', marginBottom: 3 },
+  sigLineText: { fontSize: 8.5, color: '#333' },
 
   attachNote: { fontSize: 8.5, color: '#555', marginTop: 8, marginBottom: 6, textAlign: 'justify' },
   footer: { fontSize: 7.5, color: '#aaa', textAlign: 'center', marginTop: 12 },
@@ -222,8 +224,14 @@ const FoundingAgreementPdf = ({ data = {} }) => {
               <Text style={s.sigName}>{p.name}</Text>
               <Text style={s.sigRole}>{'პარტნიორი / ხელმძღვანელობაზე და წარმომადგენლობაზე უფლებამოსილი პირი'}</Text>
               <View style={s.sigLineRow}>
-                <Text style={s.sigLineText}>{`ხელმოწერა: ____________________________  /  ${p.name.split(' ').pop()}  /`}</Text>
-                <Text style={s.sigLineText}>{`თარიღი: ${foundingDate}`}</Text>
+                <View style={s.sigLineCol}>
+                  <View style={s.sigLineBar} />
+                  <Text style={s.sigLineText}>{`/ ${p.name.split(' ').pop()} /`}</Text>
+                </View>
+                <View style={s.sigLineCol}>
+                  <View style={s.sigLineBar} />
+                  <Text style={s.sigLineText}>{`თარიღი: ${foundingDate}`}</Text>
+                </View>
               </View>
             </View>
           ))}

@@ -7,8 +7,8 @@ Font.register({ family: 'BPG Arial', src: fontPath });
 const s = StyleSheet.create({
   // Cover page
   coverPage: { fontFamily: 'BPG Arial', padding: 0, backgroundColor: '#fff' },
-  coverBanner: { backgroundColor: '#003366', paddingVertical: 14, paddingHorizontal: 50, alignItems: 'center' },
-  coverBannerText: { color: '#fff', fontSize: 8, letterSpacing: 1 },
+  coverBanner: { paddingVertical: 10, paddingHorizontal: 50, alignItems: 'center', borderBottomWidth: 0.5, borderBottomColor: '#ccc' },
+  coverBannerText: { color: '#888', fontSize: 8, letterSpacing: 1 },
   coverBody: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 60, paddingVertical: 60 },
   coverLogo: { width: 110, height: 110, marginBottom: 28, objectFit: 'contain' },
   coverCompany: { fontSize: 15, fontWeight: 'bold', color: '#003366', textAlign: 'center', marginBottom: 4 },
@@ -19,13 +19,13 @@ const s = StyleSheet.create({
   coverDocTitle: { fontSize: 32, fontWeight: 'bold', color: '#003366', textAlign: 'center', letterSpacing: 6, marginBottom: 40 },
   coverRule2: { width: 180, borderTopWidth: 1, borderTopColor: '#aaa', marginBottom: 30 },
   coverMeta: { fontSize: 9, color: '#666', textAlign: 'center', marginBottom: 5 },
-  coverFooterBar: { backgroundColor: '#003366', paddingVertical: 10, paddingHorizontal: 50, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  coverFooterText: { color: '#aaa', fontSize: 7.5 },
+  coverFooterBar: { paddingVertical: 10, paddingHorizontal: 50, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', borderTopWidth: 0.5, borderTopColor: '#ccc' },
+  coverFooterText: { color: '#888', fontSize: 7.5 },
 
   // Content pages
   page: { fontFamily: 'BPG Arial', padding: '45 50 55 50', fontSize: 9.5, lineHeight: 1.7 },
   watermark: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, justifyContent: 'center', alignItems: 'center', zIndex: -1 },
-  watermarkImg: { width: 300, opacity: 0.04 },
+  watermarkImg: { width: 460, opacity: 0.3 },
   articleHeader: { fontSize: 10.5, fontWeight: 'bold', marginTop: 13, marginBottom: 5, textAlign: 'center' },
   sub: { flexDirection: 'row', marginBottom: 4 },
   subNum: { fontSize: 9.5, minWidth: 38, flexShrink: 0 },
@@ -36,7 +36,8 @@ const s = StyleSheet.create({
   sigBlock: { marginBottom: 20, minWidth: '40%' },
   sigName: { fontSize: 9.5, fontWeight: 'bold', marginBottom: 2 },
   sigShare: { fontSize: 9, color: '#555', marginBottom: 2 },
-  sigLine: { borderTopWidth: 1, borderTopColor: '#000', marginTop: 28, paddingTop: 3, fontSize: 8.5, textAlign: 'center' },
+  sigLine: { borderBottomWidth: 0.5, borderBottomColor: '#555', marginTop: 36, width: 180 },
+  sigLineLabel: { fontSize: 8.5, textAlign: 'left', marginTop: 3, color: '#333' },
   footer: { fontSize: 7.5, color: '#aaa', textAlign: 'center', marginTop: 12 },
 });
 
@@ -248,7 +249,8 @@ const CharterPdf = ({ data = {} }) => {
             <View key={i} style={s.sigBlock}>
               <Text style={s.sigName}>{p.name}</Text>
               <Text style={s.sigShare}>წილი: {p.share}%  |  პ/ნ: {p.personalId}</Text>
-              <View style={s.sigLine}><Text>_______________________ / {p.name.split(' ').pop()} /</Text></View>
+              <View style={s.sigLine} />
+              <Text style={s.sigLineLabel}>{`/ ${p.name.split(' ').pop()} /`}</Text>
             </View>
           ))}
         </View>
