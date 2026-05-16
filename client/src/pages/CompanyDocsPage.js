@@ -7,6 +7,7 @@ import ShareTransferPdf from '../pdf-components/ShareTransferPdf';
 import CharterPdf from '../pdf-components/CharterPdf';
 import PartnerDecisionPdf from '../pdf-components/PartnerDecisionPdf';
 import FoundingAgreementPdf from '../pdf-components/FoundingAgreementPdf';
+import ServiceContractPdf from '../pdf-components/ServiceContractPdf';
 
 // ── Shared partner defaults ──────────────────────────────────────────────────
 const DEFAULT_PARTNERS = [
@@ -212,6 +213,27 @@ const CompanyDocsPage = ({ role }) => {
 
   // ── Founding agreement form ───────────────────────────────────────────────
   const [foundingDate, setFoundingDate] = useState('09 მარტი, 2026 წელი');
+
+  // ── Service contract form ─────────────────────────────────────────────────
+  const [svcForm, setSvcForm] = useState({
+    contractNumber: '',
+    contractDate: new Date().toLocaleDateString('ka-GE'),
+    city: 'ქ. თელავი',
+    clientType: 'physical',
+    clientName: '',
+    clientId: '',
+    clientAddress: '',
+    clientRepName: '',
+    clientRepId: '',
+    serviceType: 'შენობა-ნაგებობის ინსპექტირება',
+    serviceScope: '',
+    objectAddress: '',
+    serviceFee: '',
+    paymentTerms: 'ანგარიშ-ფაქტურის გამოწერიდან 5 (ხუთი) სამუშაო დღის ვადაში',
+    contractStart: '',
+    contractEnd: '',
+    vatIncluded: true,
+  });
 
   // ── Build PDF data objects ────────────────────────────────────────────────
   const charterPdfData = { partners, director: config.director, directorId: config.directorId, address: config.addressShort, email: config.email, charterDate };
@@ -574,6 +596,111 @@ const CompanyDocsPage = ({ role }) => {
                       fileName={`share-transfer-${transferType}-${transferForm.contractNumber || 'draft'}.pdf`}
                       label={transferType === 'gift' ? 'ჩუქების ხელშეკრ. გენერაცია' : 'ნასყიდობის ხელშეკრ. გენერაცია'}
                       variant={transferType === 'gift' ? 'success' : 'primary'}
+                    />
+                  </Col>
+                </Row>
+              </Accordion.Body>
+            </Accordion.Item>
+
+            {/* 5. Service contract */}
+            <Accordion.Item eventKey="service-contract">
+              <Accordion.Header>📑 მომსახურების ხელშეკრულება (ინსპექტირება)</Accordion.Header>
+              <Accordion.Body>
+                <Row className="g-3">
+                  <Col md={3}>
+                    <Form.Label className="small fw-bold">ხელშეკრ. ნომერი</Form.Label>
+                    <Form.Control placeholder="01/26" value={svcForm.contractNumber} onChange={e => setSvcForm({ ...svcForm, contractNumber: e.target.value })} />
+                  </Col>
+                  <Col md={3}>
+                    <Form.Label className="small fw-bold">გაფ. თარიღი</Form.Label>
+                    <Form.Control value={svcForm.contractDate} onChange={e => setSvcForm({ ...svcForm, contractDate: e.target.value })} />
+                  </Col>
+                  <Col md={3}>
+                    <Form.Label className="small fw-bold">ქალაქი</Form.Label>
+                    <Form.Control value={svcForm.city} onChange={e => setSvcForm({ ...svcForm, city: e.target.value })} />
+                  </Col>
+                  <Col md={3}>
+                    <Form.Label className="small fw-bold">დამკვეთის ტიპი</Form.Label>
+                    <Form.Select value={svcForm.clientType} onChange={e => setSvcForm({ ...svcForm, clientType: e.target.value })}>
+                      <option value="physical">ფიზიკური პირი</option>
+                      <option value="legal">იურიდიული პირი</option>
+                    </Form.Select>
+                  </Col>
+
+                  <Col md={12}><hr className="my-1" /><strong className="small text-muted">დამკვეთი</strong></Col>
+                  <Col md={4}>
+                    <Form.Label className="small fw-bold">
+                      {svcForm.clientType === 'legal' ? 'ორგანიზაციის სახელწოდება *' : 'სახელი, გვარი *'}
+                    </Form.Label>
+                    <Form.Control placeholder={svcForm.clientType === 'legal' ? 'შპს ...' : 'სახელი გვარი'} value={svcForm.clientName} onChange={e => setSvcForm({ ...svcForm, clientName: e.target.value })} />
+                  </Col>
+                  <Col md={3}>
+                    <Form.Label className="small fw-bold">{svcForm.clientType === 'legal' ? 'ს/კ' : 'პ/ნ'}</Form.Label>
+                    <Form.Control placeholder={svcForm.clientType === 'legal' ? 'საიდ. კოდი' : 'პირადი ნომერი'} value={svcForm.clientId} onChange={e => setSvcForm({ ...svcForm, clientId: e.target.value })} />
+                  </Col>
+                  <Col md={5}>
+                    <Form.Label className="small fw-bold">{svcForm.clientType === 'legal' ? 'იურ. მისამართი' : 'მისამართი'}</Form.Label>
+                    <Form.Control placeholder="მისამართი" value={svcForm.clientAddress} onChange={e => setSvcForm({ ...svcForm, clientAddress: e.target.value })} />
+                  </Col>
+                  {svcForm.clientType === 'legal' && (
+                    <>
+                      <Col md={4}>
+                        <Form.Label className="small fw-bold">წარმომადგენელი (სახ. გვ.)</Form.Label>
+                        <Form.Control placeholder="სახელი გვარი" value={svcForm.clientRepName} onChange={e => setSvcForm({ ...svcForm, clientRepName: e.target.value })} />
+                      </Col>
+                      <Col md={3}>
+                        <Form.Label className="small fw-bold">წარმომადგ. პ/ნ</Form.Label>
+                        <Form.Control placeholder="პირადი ნომერი" value={svcForm.clientRepId} onChange={e => setSvcForm({ ...svcForm, clientRepId: e.target.value })} />
+                      </Col>
+                    </>
+                  )}
+
+                  <Col md={12}><hr className="my-1" /><strong className="small text-muted">მომსახურება</strong></Col>
+                  <Col md={5}>
+                    <Form.Label className="small fw-bold">მომსახურების სახე</Form.Label>
+                    <Form.Select value={svcForm.serviceType} onChange={e => setSvcForm({ ...svcForm, serviceType: e.target.value })}>
+                      <option>შენობა-ნაგებობის ინსპექტირება</option>
+                      <option>სამშენებლო სამუშაოთა ინსპექტირება</option>
+                      <option>ტექნიკური ექსპერტიზა</option>
+                      <option>ინფრასტრუქტურის ინსპექტირება</option>
+                    </Form.Select>
+                  </Col>
+                  <Col md={7}>
+                    <Form.Label className="small fw-bold">ობიექტის მისამართი</Form.Label>
+                    <Form.Control placeholder="ობიექტის სრული მისამართი" value={svcForm.objectAddress} onChange={e => setSvcForm({ ...svcForm, objectAddress: e.target.value })} />
+                  </Col>
+                  <Col md={12}>
+                    <Form.Label className="small fw-bold">მომსახურების მოცულობა / სამუშაოს აღწერა</Form.Label>
+                    <Form.Control as="textarea" rows={3} placeholder="ინსპექტირების ფარგლები, შემოწმების ეტაპები და ა.შ." value={svcForm.serviceScope} onChange={e => setSvcForm({ ...svcForm, serviceScope: e.target.value })} />
+                  </Col>
+
+                  <Col md={12}><hr className="my-1" /><strong className="small text-muted">ანაზღაურება და ვადები</strong></Col>
+                  <Col md={3}>
+                    <Form.Label className="small fw-bold">საფასური (₾)</Form.Label>
+                    <Form.Control placeholder="0.00" value={svcForm.serviceFee} onChange={e => setSvcForm({ ...svcForm, serviceFee: e.target.value })} />
+                  </Col>
+                  <Col md={3} className="d-flex align-items-end pb-1">
+                    <Form.Check type="checkbox" label="დღგ-ს ჩათვლით" checked={svcForm.vatIncluded} onChange={e => setSvcForm({ ...svcForm, vatIncluded: e.target.checked })} />
+                  </Col>
+                  <Col md={6}>
+                    <Form.Label className="small fw-bold">გადახდის პირობები</Form.Label>
+                    <Form.Control value={svcForm.paymentTerms} onChange={e => setSvcForm({ ...svcForm, paymentTerms: e.target.value })} />
+                  </Col>
+                  <Col md={3}>
+                    <Form.Label className="small fw-bold">ხელშ. დაწყება</Form.Label>
+                    <Form.Control placeholder="09 მარტი, 2026 წელი" value={svcForm.contractStart} onChange={e => setSvcForm({ ...svcForm, contractStart: e.target.value })} />
+                  </Col>
+                  <Col md={3}>
+                    <Form.Label className="small fw-bold">ხელშ. დასრულება</Form.Label>
+                    <Form.Control placeholder="09 ივნისი, 2026 წელი" value={svcForm.contractEnd} onChange={e => setSvcForm({ ...svcForm, contractEnd: e.target.value })} />
+                  </Col>
+
+                  <Col md={12} className="mt-2">
+                    <PdfBtn
+                      document={<ServiceContractPdf data={svcForm} />}
+                      fileName={`service-contract-${svcForm.contractNumber || 'draft'}.pdf`}
+                      label="მომსახურების ხელშეკრ. გენერაცია"
+                      variant="warning"
                     />
                   </Col>
                 </Row>
