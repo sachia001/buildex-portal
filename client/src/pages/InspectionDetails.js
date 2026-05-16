@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { Container, Card, Row, Col, Button, Form, Badge, Spinner, Table } from 'react-bootstrap';
+import { Container, Card, Row, Col, Button, Form, Badge, Spinner, Table, Modal } from 'react-bootstrap';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { PDFDownloadLink } from '@react-pdf/renderer';
 
-// PDF კომპონენტები (დარწმუნდით რომ ფაილები არსებობს)
-import PdfDocument from '../pdf-components/PdfDocument'; 
-import ReportCoverPdf from '../pdf-components/ReportCoverPdf'; 
+// PDF კომპონენტები
+import PdfDocument from '../pdf-components/PdfDocument';
+import ReportCoverPdf from '../pdf-components/ReportCoverPdf';
+import ServiceContractPdf from '../pdf-components/ServiceContractPdf';
 
 const InspectionDetails = ({ role }) => {
     const isReadOnly = role === 'quality_manager';
@@ -18,6 +19,34 @@ const InspectionDetails = ({ role }) => {
     // რედაქტირება
     const [editMode, setEditMode] = useState(false);
     const [formData, setFormData] = useState({});
+
+    // მომსახურების ხელშეკრულება
+    const [showSvcModal, setShowSvcModal] = useState(false);
+    const [svcForm, setSvcForm] = useState({});
+
+    const openSvcModal = () => {
+        const fmtDate = d => d ? new Date(d).toLocaleDateString('ka-GE', { day: 'numeric', month: 'long', year: 'numeric' }) : '';
+        setSvcForm({
+            contractNumber: `SC-${data.inspectionNumber || ''}`,
+            contractDate: new Date().toLocaleDateString('ka-GE'),
+            city: 'ქ. თელავი',
+            clientType: 'legal',
+            clientName: data.clientName || '',
+            clientId: data.clientID || '',
+            clientAddress: '',
+            clientRepName: data.contactPerson || '',
+            clientRepId: '',
+            serviceType: data.inspectionScope || 'შენობა-ნაგებობის ინსპექტირება',
+            serviceScope: data.applicationContent || '',
+            objectAddress: data.objectAddress || '',
+            serviceFee: '',
+            paymentTerms: 'ანგარიშ-ფაქტურის გამოწერიდან 5 (ხუთი) სამუშაო დღის ვადაში',
+            contractStart: fmtDate(data.startDate),
+            contractEnd: fmtDate(data.deadline),
+            vatIncluded: true,
+        });
+        setShowSvcModal(true);
+    };
 
     // ატვირთვა
     const [file, setFile] = useState(null);
@@ -78,6 +107,7 @@ const InspectionDetails = ({ role }) => {
     if (!data) return <Container className="mt-5">საქმე ვერ მოიძებნა</Container>;
 
     return (
+        <>
         <Container className="pt-4 pb-5 font-georgian">
             {/* Header */}
             <div className="d-flex justify-content-between align-items-center mb-4 bg-white p-4 rounded shadow-sm border-start border-5 border-primary">
@@ -95,6 +125,8 @@ const InspectionDetails = ({ role }) => {
                     <PDFDownloadLink document={<ReportCoverPdf data={data} />} fileName={`Report-${data.inspectionNumber}.pdf`}>
                         {({ loading }) => <Button variant="outline-success" size="sm" disabled={loading}>📗 თავფურცელი</Button>}
                     </PDFDownloadLink>
+
+                    <Button variant="outline-warning" size="sm" onClick={openSvcModal}>📑 ხელშეკრულება</Button>
 
                     <Button variant="secondary" size="sm" onClick={() => navigate('/inspections')}>უკან</Button>
                 </div>
@@ -261,6 +293,107 @@ const InspectionDetails = ({ role }) => {
                 </Col>
             </Row>
         </Container>
+
+        {/* მომსახურების ხელშეკრულების გენერატორი */}
+        <Modal show={showSvcModal} onHide={() => setShowSvcModal(false)} size="lg" backdrop="static">
+            <Modal.Header closeButton className="border-0 pb-0">
+                <Modal.Title className="fw-bold">📑 მომსახურების ხელშეკრულება — საქმე № {data.inspectionNumber}</Modal.Title>
+            </Modal.Header>
+            <Modal.Body>
+                <Row className="g-3">
+                    <Col md={4}>
+                        <Form.Label className="small fw-bold">ხელშეკრ. ნომერი</Form.Label>
+                        <Form.Control value={svcForm.contractNumber || ''} onChange={e => setSvcForm({ ...svcForm, contractNumber: e.target.value })} />
+                    </Col>
+                    <Col md={4}>
+                        <Form.Label className="small fw-bold">გაფ. თარიღი</Form.Label>
+                        <Form.Control value={svcForm.contractDate || ''} onChange={e => setSvcForm({ ...svcForm, contractDate: e.target.value })} />
+                    </Col>
+                    <Col md={4}>
+                        <Form.Label className="small fw-bold">დამკვეთის ტიპი</Form.Label>
+                        <Form.Select value={svcForm.clientType || 'legal'} onChange={e => setSvcForm({ ...svcForm, clientType: e.target.value })}>
+                            <option value="legal">იურიდიული პირი</option>
+                            <option value="physical">ფიზიკური პირი</option>
+                        </Form.Select>
+                    </Col>
+
+                    <Col md={12}><hr className="my-1" /><small className="text-muted fw-bold">დამკვეთი (ავტომატურად შეავსო)</small></Col>
+                    <Col md={5}>
+                        <Form.Label className="small fw-bold">{svcForm.clientType === 'legal' ? 'ორგანიზაცია' : 'სახელი, გვარი'}</Form.Label>
+                        <Form.Control value={svcForm.clientName || ''} onChange={e => setSvcForm({ ...svcForm, clientName: e.target.value })} />
+                    </Col>
+                    <Col md={3}>
+                        <Form.Label className="small fw-bold">{svcForm.clientType === 'legal' ? 'ს/კ' : 'პ/ნ'}</Form.Label>
+                        <Form.Control value={svcForm.clientId || ''} onChange={e => setSvcForm({ ...svcForm, clientId: e.target.value })} />
+                    </Col>
+                    <Col md={4}>
+                        <Form.Label className="small fw-bold">იურ. / ფაქტ. მისამართი</Form.Label>
+                        <Form.Control placeholder="მისამართი" value={svcForm.clientAddress || ''} onChange={e => setSvcForm({ ...svcForm, clientAddress: e.target.value })} />
+                    </Col>
+                    {svcForm.clientType === 'legal' && (
+                        <>
+                            <Col md={5}>
+                                <Form.Label className="small fw-bold">წარმომადგენელი</Form.Label>
+                                <Form.Control value={svcForm.clientRepName || ''} onChange={e => setSvcForm({ ...svcForm, clientRepName: e.target.value })} />
+                            </Col>
+                            <Col md={3}>
+                                <Form.Label className="small fw-bold">წარმომადგ. პ/ნ</Form.Label>
+                                <Form.Control placeholder="პირადი ნომერი" value={svcForm.clientRepId || ''} onChange={e => setSvcForm({ ...svcForm, clientRepId: e.target.value })} />
+                            </Col>
+                        </>
+                    )}
+
+                    <Col md={12}><hr className="my-1" /><small className="text-muted fw-bold">მომსახურება (ავტომატურად შეავსო)</small></Col>
+                    <Col md={5}>
+                        <Form.Label className="small fw-bold">მომსახურების სახე</Form.Label>
+                        <Form.Control value={svcForm.serviceType || ''} onChange={e => setSvcForm({ ...svcForm, serviceType: e.target.value })} />
+                    </Col>
+                    <Col md={7}>
+                        <Form.Label className="small fw-bold">ობიექტის მისამართი</Form.Label>
+                        <Form.Control value={svcForm.objectAddress || ''} onChange={e => setSvcForm({ ...svcForm, objectAddress: e.target.value })} />
+                    </Col>
+                    <Col md={12}>
+                        <Form.Label className="small fw-bold">მომსახურების მოცულობა / განაცხადის შინაარსი</Form.Label>
+                        <Form.Control as="textarea" rows={3} value={svcForm.serviceScope || ''} onChange={e => setSvcForm({ ...svcForm, serviceScope: e.target.value })} />
+                    </Col>
+
+                    <Col md={12}><hr className="my-1" /><small className="text-muted fw-bold">ანაზღაურება და ვადები</small></Col>
+                    <Col md={3}>
+                        <Form.Label className="small fw-bold">საფასური (₾) *</Form.Label>
+                        <Form.Control placeholder="0.00" value={svcForm.serviceFee || ''} onChange={e => setSvcForm({ ...svcForm, serviceFee: e.target.value })} />
+                    </Col>
+                    <Col md={3} className="d-flex align-items-end pb-2">
+                        <Form.Check type="checkbox" label="დღგ-ს ჩათვლით" checked={!!svcForm.vatIncluded} onChange={e => setSvcForm({ ...svcForm, vatIncluded: e.target.checked })} />
+                    </Col>
+                    <Col md={6}>
+                        <Form.Label className="small fw-bold">გადახდის პირობები</Form.Label>
+                        <Form.Control value={svcForm.paymentTerms || ''} onChange={e => setSvcForm({ ...svcForm, paymentTerms: e.target.value })} />
+                    </Col>
+                    <Col md={4}>
+                        <Form.Label className="small fw-bold">ხელშ. დაწყება</Form.Label>
+                        <Form.Control value={svcForm.contractStart || ''} onChange={e => setSvcForm({ ...svcForm, contractStart: e.target.value })} />
+                    </Col>
+                    <Col md={4}>
+                        <Form.Label className="small fw-bold">ხელშ. დასრულება</Form.Label>
+                        <Form.Control value={svcForm.contractEnd || ''} onChange={e => setSvcForm({ ...svcForm, contractEnd: e.target.value })} />
+                    </Col>
+                </Row>
+            </Modal.Body>
+            <Modal.Footer className="border-0">
+                <Button variant="secondary" onClick={() => setShowSvcModal(false)}>დახურვა</Button>
+                <PDFDownloadLink
+                    document={<ServiceContractPdf data={svcForm} />}
+                    fileName={`service-contract-${svcForm.contractNumber || data.inspectionNumber}.pdf`}
+                >
+                    {({ loading }) => (
+                        <Button variant="warning" disabled={loading}>
+                            {loading ? '⏳ მზადდება...' : '📄 ხელშეკრულების გადმოწერა'}
+                        </Button>
+                    )}
+                </PDFDownloadLink>
+            </Modal.Footer>
+        </Modal>
+        </>
     );
 };
 
