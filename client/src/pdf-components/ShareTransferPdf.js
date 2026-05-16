@@ -121,8 +121,8 @@ const ShareTransferPdf = ({ data = {} }) => {
               : 'სამოქალაქო კოდექსი მ. 477-503  |  მეწარმეთა შესახებ კანონი'}
           </Text>
           {contractNumber
-            ? <Text style={s.centerNum}>№ {contractNumber}</Text>
-            : <Text style={{ marginBottom: 18 }} />}
+            ? <Text style={s.centerNum}>{`№ ${contractNumber}`}</Text>
+            : <Text style={{ marginBottom: 18 }}> </Text>}
 
           <View style={s.cityDateRow}>
             <Text>{city}</Text>
@@ -133,17 +133,17 @@ const ShareTransferPdf = ({ data = {} }) => {
           <View style={s.partiesBox}>
             <View style={[s.partyRow, { borderBottomWidth: 0 }]}>
               <Text style={[s.partyLabel, { backgroundColor: '#003366', color: '#fff' }]}>მხარეები</Text>
-              <Text style={[s.partyData, { fontSize: 8, color: '#555', fontStyle: 'italic' }]}>
+              <Text style={[s.partyData, { fontSize: 8, color: '#555' }]}>
                 {isGift ? 'ჩუქება — სამოქ. კოდ. 524-ე მუხლის საფუძველზე' : 'ნასყიდობა — სამოქ. კოდ. 477-ე მუხლის საფუძველზე'}
               </Text>
             </View>
             <View style={s.partyRow}>
               <Text style={s.partyLabel}>წილის დამთმობი</Text>
-              <Text style={s.partyData}>{transferorName}, საქ. მოქ., პ/ნ: {transferorId}, მისამართი: {transferorAddress}</Text>
+              <Text style={s.partyData}>{`${transferorName}, საქ. მოქ., პ/ნ: ${transferorId}, მისამართი: ${transferorAddress}`}</Text>
             </View>
             <View style={[s.partyRow, { borderBottomWidth: 0 }]}>
               <Text style={s.partyLabel}>წილის შემძენი</Text>
-              <Text style={s.partyData}>{tName}, პ/ნ: {tId}, მისამართი: {tAddr}</Text>
+              <Text style={s.partyData}>{`${tName}, პ/ნ: ${tId}, მისამართი: ${tAddr}`}</Text>
             </View>
           </View>
 
@@ -203,7 +203,7 @@ const ShareTransferPdf = ({ data = {} }) => {
           )}
 
           {/* ── Warranties ── */}
-          <Text style={s.artTitle}>მუხლი {art(2)}. მხარეთა გარანტიები და წარმომადგენლობა</Text>
+          <Text style={s.artTitle}>{`მუხლი ${art(2)}. მხარეთა გარანტიები და წარმომადგენლობა`}</Text>
           <Text style={s.para}>{`${art(2)}.1. წილის დამთმობი ადასტურებს და გარანტიას იძლევა, რომ:`}</Text>
           <Text style={s.paraIn}>{`(ა) გადაცემული წილი სრულად და უდავოდ ეკუთვნის მას, თავისუფალია ნებისმიერი სახის გირავნობის, ყადაღის, ტვირთის ან/და მესამე პირთა პრეტენზიისაგან;`}</Text>
           <Text style={s.paraIn}>{`(ბ) წილის დამთმობის წინაშე არ არსებობს გადაუხდელი ვალდებულებები, რომლებიც შეიძლება გადავიდეს წილის შემძენზე;`}</Text>
@@ -217,7 +217,7 @@ const ShareTransferPdf = ({ data = {} }) => {
           <Text style={s.paraIn}>{`(გ) ეთანხმება საზოგადოების წესდებას და კისრულობს პარტნიორის ყველა ვალდებულებას.`}</Text>
 
           {/* ── Obligations ── */}
-          <Text style={s.artTitle}>მუხლი {art(3)}. მხარეთა ვალდებულებები</Text>
+          <Text style={s.artTitle}>{`მუხლი ${art(3)}. მხარეთა ვალდებულებები`}</Text>
           <Text style={s.para}>{`${art(3)}.1. წილის დამთმობი ვალდებულია:`}</Text>
           <Text style={s.paraIn}>{`(ა) ხელშეკრულების გაფორმებიდან 10 (ათი) სამუშაო დღის ვადაში სსიპ საჯარო რეესტრის ეროვნულ სააგენტოში (ნოტარიუსის ან სარეგისტრაციო სამსახურის მეშვეობით) განახორციელოს სახელმწიფო რეგისტრაცია;`}</Text>
           <Text style={s.paraIn}>{`(ბ) გადასცეს წილის შემძენს წილთან დაკავშირებული ყველა საჭირო დოკუმენტი.`}</Text>
@@ -231,17 +231,17 @@ const ShareTransferPdf = ({ data = {} }) => {
           <Text style={s.para}>{`${art(3)}.3. წილის შემძენი იძენს პარტნიორის სრულ კანონიერ სტატუსს — მათ შორის კენჭისყრის, ინფორმაციის მიღებისა და დივიდენდის გამართვის უფლებებს — სსიპ საჯარო რეესტრის ეროვნულ სააგენტოში შესაბამისი ცვლილების სახელმწიფო რეგისტრაციის მომენტიდან.`}</Text>
 
           {/* ── Confidentiality ── */}
-          <Text style={s.artTitle}>მუხლი {art(4)}. კონფიდენციალურობა</Text>
+          <Text style={s.artTitle}>{`მუხლი ${art(4)}. კონფიდენციალურობა`}</Text>
           <Text style={s.para}>{`${art(4)}.1. მხარეები ვალდებულნი არიან არ გაამჟღავნონ ამ ხელშეკრულების პირობები და მათი შინაარსი მესამე პირთათვის, გარდა კანონმდებლობის პირდაპირი მოთხოვნის შემთხვევებისა.`}</Text>
           <Text style={s.para}>{`${art(4)}.2. კონფიდენციალურობის ვალდებულება ძალაშია ხელშეკრულების ძალაში შესვლიდან 5 (ხუთი) წლის განმავლობაში.`}</Text>
 
           {/* ── Disputes ── */}
-          <Text style={s.artTitle}>მუხლი {art(5)}. დავების გადაწყვეტა</Text>
+          <Text style={s.artTitle}>{`მუხლი ${art(5)}. დავების გადაწყვეტა`}</Text>
           <Text style={s.para}>{`${art(5)}.1. ხელშეკრულებიდან გამომდინარე ან მასთან დაკავშირებული ყოველი დავა მხარეები ვალდებულნი არიან გადაწყვიტონ მოლაპარაკებათა გზით, გონივრულ ვადაში.`}</Text>
           <Text style={s.para}>{`${art(5)}.2. შეუთანხმებლობის შემთხვევაში დავა გადაწყდება საქართველოს სასამართლოში, საქართველოს კანონმდებლობის შესაბამისად.`}</Text>
 
           {/* ── Final provisions ── */}
-          <Text style={s.artTitle}>მუხლი {art(6)}. დასკვნითი დებულებები</Text>
+          <Text style={s.artTitle}>{`მუხლი ${art(6)}. დასკვნითი დებულებები`}</Text>
           <Text style={s.para}>{`${art(6)}.1. წინამდებარე ხელშეკრულება შედგენილია ქართულ ენაზე, 2 (ორ) თანაბარი იურიდიული ძალის მქონე ეგზემპლარად, თითო — თითოეული მხარისათვის.`}</Text>
           <Text style={s.para}>{`${art(6)}.2. ხელშეკრულება ძალაში შედის ორივე მხარის მიერ ხელმოწერის მომენტიდან.`}</Text>
           <Text style={s.para}>{`${art(6)}.3. ხელშეკრულებაში ნებისმიერი ცვლილება ან დამატება ძალაშია მხოლოდ მხარეთა ხელმოწერილი წერილობითი შეთანხმების სახით.`}</Text>
@@ -258,16 +258,16 @@ const ShareTransferPdf = ({ data = {} }) => {
               <View style={s.sigBlock}>
                 <Text style={s.sigBlockLabel}>წილის დამთმობი:</Text>
                 <Text style={s.sigDetail}>{transferorName}</Text>
-                <Text style={s.sigDetail}>პ/ნ: {transferorId}</Text>
+                <Text style={s.sigDetail}>{`პ/ნ: ${transferorId}`}</Text>
                 <Text style={s.sigDetail}>{transferorAddress}</Text>
-                <View style={s.sigLine}><Text>_________________________  /  {transferorName.split(' ').pop()}  /</Text></View>
+                <View style={s.sigLine}><Text>{`_________________________  /  ${transferorName.split(' ').pop()}  /`}</Text></View>
               </View>
               <View style={s.sigBlock}>
                 <Text style={s.sigBlockLabel}>წილის შემძენი:</Text>
                 <Text style={s.sigDetail}>{tName}</Text>
-                <Text style={s.sigDetail}>პ/ნ: {tId}</Text>
+                <Text style={s.sigDetail}>{`პ/ნ: ${tId}`}</Text>
                 <Text style={s.sigDetail}>{tAddr}</Text>
-                <View style={s.sigLine}><Text>_________________________  /  {transfereeName ? transfereeName.split(' ').pop() : '________'}  /</Text></View>
+                <View style={s.sigLine}><Text>{`_________________________  /  ${transfereeName ? transfereeName.split(' ').pop() : '________'}  /`}</Text></View>
               </View>
             </View>
           </View>
