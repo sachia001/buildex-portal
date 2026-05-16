@@ -7,7 +7,7 @@ Font.register({ family: 'BPG Arial', src: fontPath });
 const s = StyleSheet.create({
   page: { fontFamily: 'BPG Arial', padding: '0 0 50 0', fontSize: 10, lineHeight: 1.75 },
   watermark: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, justifyContent: 'center', alignItems: 'center', zIndex: -1 },
-  watermarkImg: { width: 460, opacity: 0.3 },
+  watermarkImg: { width: 460, opacity: 0.25 },
 
   headerBar: { padding: '8 50', flexDirection: 'row', alignItems: 'center', marginBottom: 0 },
   headerLogo: { width: 40, height: 40, marginRight: 14, objectFit: 'contain' },

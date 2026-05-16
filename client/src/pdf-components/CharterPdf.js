@@ -25,7 +25,7 @@ const s = StyleSheet.create({
   // Content pages
   page: { fontFamily: 'BPG Arial', padding: '45 50 55 50', fontSize: 9.5, lineHeight: 1.7 },
   watermark: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, justifyContent: 'center', alignItems: 'center', zIndex: -1 },
-  watermarkImg: { width: 460, opacity: 0.3 },
+  watermarkImg: { width: 460, opacity: 0.25 },
   articleHeader: { fontSize: 10.5, fontWeight: 'bold', marginTop: 13, marginBottom: 5, textAlign: 'center' },
   sub: { flexDirection: 'row', marginBottom: 4 },
   subNum: { fontSize: 9.5, minWidth: 38, flexShrink: 0 },
