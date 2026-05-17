@@ -108,7 +108,7 @@ const LaborContractPdf = ({ data }) => {
             <View style={styles.signatureBox}>
                 <Text style={styles.bold}>დამსაქმებელი:</Text>
                 <Text>ლევან საჩიშვილი</Text>
-                {data.directorSignature && <Image src={data.directorSignature} style={styles.signatureImage} />}
+                <Image src={data.directorSignature || '/signature-levan.png'} style={styles.signatureImage} />
                 <Text style={styles.signatureLine}>(ხელმოწერა)</Text>
             </View>
             <View style={styles.signatureBox}>
@@ -193,7 +193,7 @@ const LaborContractPdf = ({ data }) => {
          <View style={styles.signatureRow}>
             <View style={styles.signatureBox}>
                 <Text style={styles.bold}>დამსაქმებელი:</Text>
-                {data.directorSignature && <Image src={data.directorSignature} style={styles.signatureImage} />}
+                <Image src={data.directorSignature || '/signature-levan.png'} style={styles.signatureImage} />
                 <Text style={styles.signatureLine}>(ხელმოწერა)</Text>
             </View>
             <View style={styles.signatureBox}>

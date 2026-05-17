@@ -249,7 +249,8 @@ const CharterPdf = ({ data = {} }) => {
             <View key={i} style={s.sigBlock}>
               <Text style={s.sigName}>{p.name}</Text>
               <Text style={s.sigShare}>წილი: {p.share}%  |  პ/ნ: {p.personalId}</Text>
-              <View style={s.sigLine} />
+              {p.name === 'ლევან საჩიშვილი' && <Image src="/signature-levan.png" style={{ width: 95, height: 48, objectFit: 'contain', marginTop: 4 }} />}
+              <View style={p.name === 'ლევან საჩიშვილი' ? { borderBottomWidth: 0.5, borderBottomColor: '#555', width: 180, marginTop: 2 } : s.sigLine} />
               <Text style={s.sigLineLabel}>{`/ ${p.name.split(' ').pop()} /`}</Text>
             </View>
           ))}

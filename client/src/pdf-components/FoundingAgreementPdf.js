@@ -223,8 +223,9 @@ const FoundingAgreementPdf = ({ data = {} }) => {
             <View key={i} style={s.sigBlock}>
               <Text style={s.sigName}>{p.name}</Text>
               <Text style={s.sigRole}>{'პარტნიორი / ხელმძღვანელობაზე და წარმომადგენლობაზე უფლებამოსილი პირი'}</Text>
-              <View style={s.sigLineRow}>
+              <View style={[s.sigLineRow, p.name === 'ლევან საჩიშვილი' ? { marginTop: 6 } : {}]}>
                 <View style={s.sigLineCol}>
+                  {p.name === 'ლევან საჩიშვილი' && <Image src="/signature-levan.png" style={{ width: 90, height: 45, objectFit: 'contain', marginBottom: 2 }} />}
                   <View style={s.sigLineBar} />
                   <Text style={s.sigLineText}>{`/ ${p.name.split(' ').pop()} /`}</Text>
                 </View>

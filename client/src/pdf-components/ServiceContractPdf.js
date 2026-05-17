@@ -240,7 +240,8 @@ const ServiceContractPdf = ({ data = {} }) => {
                 <Text style={s.sigDetail}>{`ქ. თელავი, ლიონიძის ქ. №22`}</Text>
                 <Text style={s.sigDetail}>{`ტელ.: +995 511 747 400`}</Text>
                 <Text style={s.sigDetail}>{`ელ-ფოსტა: info@buildexexpertise.com`}</Text>
-                <View style={s.sigLine} />
+                <Image src="/signature-levan.png" style={{ width: 95, height: 48, objectFit: 'contain', marginTop: 4 }} />
+                <View style={{ borderBottomWidth: 0.5, borderBottomColor: '#555', width: 180, marginTop: 2 }} />
                 <Text style={s.sigLineLabel}>{`დირექტორი / საჩიშვილი /`}</Text>
               </View>
               <View style={s.sigBlock}>
