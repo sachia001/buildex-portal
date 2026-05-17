@@ -5,49 +5,49 @@ import fontPath from '../fonts/bpg_arial.ttf';
 Font.register({ family: 'BPG Arial', src: fontPath });
 
 const s = StyleSheet.create({
-  page: { fontFamily: 'BPG Arial', padding: '0 0 50 0', fontSize: 10, lineHeight: 1.75 },
+  page: { fontFamily: 'BPG Arial', padding: '0 0 36 0', fontSize: 9.5, lineHeight: 1.55 },
   watermark: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, justifyContent: 'center', alignItems: 'center', zIndex: -1 },
   watermarkImg: { width: 460, opacity: 0.2 },
 
-  headerBar: { padding: '8 50', flexDirection: 'row', alignItems: 'center' },
-  headerLogo: { width: 40, height: 40, marginRight: 14, objectFit: 'contain' },
+  headerBar: { padding: '7 46', flexDirection: 'row', alignItems: 'center' },
+  headerLogo: { width: 36, height: 36, marginRight: 12, objectFit: 'contain' },
   headerTextBlock: { flex: 1 },
-  headerCompany: { color: '#003366', fontSize: 11, fontWeight: 'bold' },
-  headerSub: { color: '#666', fontSize: 7.5, marginTop: 1 },
+  headerCompany: { color: '#003366', fontSize: 10.5, fontWeight: 'bold' },
+  headerSub: { color: '#666', fontSize: 7, marginTop: 1 },
   dividerGold: { borderTopWidth: 0.8, borderTopColor: '#ccc' },
 
-  body: { paddingHorizontal: 50, paddingTop: 22 },
+  body: { paddingHorizontal: 46, paddingTop: 14 },
 
-  centerBold: { fontSize: 13, fontWeight: 'bold', textAlign: 'center', marginBottom: 3 },
-  centerSub: { fontSize: 9.5, textAlign: 'center', color: '#555', marginBottom: 3 },
-  centerRef: { fontSize: 8.5, textAlign: 'center', color: '#888', marginBottom: 4 },
-  centerNum: { fontSize: 9, textAlign: 'center', color: '#444', marginBottom: 18 },
+  centerBold: { fontSize: 12, fontWeight: 'bold', textAlign: 'center', marginBottom: 2 },
+  centerSub: { fontSize: 9, textAlign: 'center', color: '#555', marginBottom: 2 },
+  centerRef: { fontSize: 8, textAlign: 'center', color: '#888', marginBottom: 3 },
+  centerNum: { fontSize: 9, textAlign: 'center', color: '#444', marginBottom: 10 },
 
-  cityDateRow: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 14, fontSize: 10 },
-  divider: { borderTopWidth: 0.8, borderTopColor: '#003366', marginVertical: 10 },
+  cityDateRow: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 8, fontSize: 9.5 },
+  divider: { borderTopWidth: 0.8, borderTopColor: '#003366', marginVertical: 6 },
 
-  artTitle: { fontSize: 10.5, fontWeight: 'bold', marginTop: 12, marginBottom: 5 },
-  para: { fontSize: 10, textAlign: 'justify', marginBottom: 5, lineHeight: 1.75 },
-  paraIn: { fontSize: 10, textAlign: 'justify', marginBottom: 4, marginLeft: 14, lineHeight: 1.75 },
+  artTitle: { fontSize: 10, fontWeight: 'bold', marginTop: 8, marginBottom: 3 },
+  para: { fontSize: 9.5, textAlign: 'justify', marginBottom: 3, lineHeight: 1.55 },
+  paraIn: { fontSize: 9.5, textAlign: 'justify', marginBottom: 2, marginLeft: 12, lineHeight: 1.55 },
 
-  tableHeader: { flexDirection: 'row', backgroundColor: '#eef2f6', paddingVertical: 4, paddingHorizontal: 6, marginBottom: 1 },
-  tableRow: { flexDirection: 'row', borderBottomWidth: 0.5, borderBottomColor: '#ccc', paddingVertical: 4, paddingHorizontal: 6 },
-  tc: { fontSize: 9 },
+  tableHeader: { flexDirection: 'row', backgroundColor: '#eef2f6', paddingVertical: 3, paddingHorizontal: 5, marginBottom: 1 },
+  tableRow: { flexDirection: 'row', borderBottomWidth: 0.5, borderBottomColor: '#ccc', paddingVertical: 3, paddingHorizontal: 5 },
+  tc: { fontSize: 8.5 },
 
-  partiesBox: { borderWidth: 0.8, borderColor: '#003366', marginBottom: 12 },
+  partiesBox: { borderWidth: 0.8, borderColor: '#003366', marginBottom: 8 },
   partyRow: { flexDirection: 'row', borderBottomWidth: 0.5, borderBottomColor: '#dde' },
-  partyLabel: { backgroundColor: '#eef2f6', width: 115, paddingVertical: 6, paddingHorizontal: 8, fontSize: 9, fontWeight: 'bold', flexShrink: 0 },
-  partyData: { flex: 1, paddingVertical: 6, paddingHorizontal: 8, fontSize: 9 },
+  partyLabel: { backgroundColor: '#eef2f6', width: 110, paddingVertical: 4, paddingHorizontal: 7, fontSize: 8.5, fontWeight: 'bold', flexShrink: 0 },
+  partyData: { flex: 1, paddingVertical: 4, paddingHorizontal: 7, fontSize: 8.5 },
 
-  sigSection: { marginTop: 32 },
-  sigTitle: { fontSize: 10, fontWeight: 'bold', marginBottom: 14 },
+  sigSection: { marginTop: 18 },
+  sigTitle: { fontSize: 9.5, fontWeight: 'bold', marginBottom: 10 },
   sigRow: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between' },
-  sigBlock: { width: '44%', marginBottom: 20 },
-  sigBlockLabel: { fontSize: 10, fontWeight: 'bold', marginBottom: 3 },
-  sigDetail: { fontSize: 9, color: '#444', marginBottom: 2 },
-  sigLine: { borderBottomWidth: 0.5, borderBottomColor: '#555', marginTop: 40, width: 180 },
-  sigLineLabel: { fontSize: 8.5, textAlign: 'left', marginTop: 3, color: '#333' },
-  footer: { fontSize: 7.5, color: '#aaa', textAlign: 'center', marginTop: 20 },
+  sigBlock: { width: '44%', marginBottom: 14 },
+  sigBlockLabel: { fontSize: 9.5, fontWeight: 'bold', marginBottom: 2 },
+  sigDetail: { fontSize: 8.5, color: '#444', marginBottom: 1 },
+  sigLine: { borderBottomWidth: 0.5, borderBottomColor: '#555', marginTop: 30, width: 170 },
+  sigLineLabel: { fontSize: 8, textAlign: 'left', marginTop: 2, color: '#333' },
+  footer: { fontSize: 7, color: '#aaa', textAlign: 'center', marginTop: 14 },
 });
 
 const num = v => parseInt(v, 10) || 0;
