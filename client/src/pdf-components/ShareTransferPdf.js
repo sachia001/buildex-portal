@@ -188,7 +188,7 @@ const ShareTransferPdf = ({ data = {} }) => {
           </View>
           {transferees.map((t, i) => (
             <View key={i} style={s.tableRow}>
-              <Text style={[s.tc, { flex: 1 }]}>{`${t.name || '______'} (${tLabel})`}</Text>
+              <Text style={[s.tc, { flex: 1 }]}>{`${t.name || '______'} (${isMulti ? `წილის შემძენი ${i + 1}` : 'წილის შემძენი'})`}</Text>
               <Text style={[s.tc, { width: 100, textAlign: 'center' }]}>—</Text>
               <Text style={[s.tc, { width: 100, textAlign: 'center' }]}>{t.sharePercent ? `${t.sharePercent}%` : '—'}</Text>
             </View>
