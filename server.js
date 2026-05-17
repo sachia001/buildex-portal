@@ -634,6 +634,17 @@ api.delete('/company-docs/:id', async (req, res) => {
     } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
+// --- ORDER NUMBER GENERATION ---
+api.post('/claim-order-number', async (req, res) => {
+    try {
+        const { type } = req.body; // '02-HR', '03-TR'
+        if (!['02-HR', '03-TR', '01'].includes(type))
+            return res.status(400).json({ error: 'უცნობი ბრძანების ტიპი' });
+        const number = await generateDocumentNumber(type);
+        res.json({ number });
+    } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
 // --- COMPANY SETTINGS (partners + config) ---
 api.get('/company-settings', async (req, res) => {
     try {

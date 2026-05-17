@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
-import { Container, Card, Form, Row, Col, Button } from 'react-bootstrap';
+import React, { useState, useEffect } from 'react';
+import { Container, Card, Form, Row, Col, Button, Spinner } from 'react-bootstrap';
 import { PDFDownloadLink } from '@react-pdf/renderer';
+import axios from 'axios';
 import DirectorsOrderPdf from '../pdf-components/DirectorsOrderPdf';
-import { generateDocNumber } from '../utils/docCategories';
 
 const OrderGenerator = () => {
     // --- ძირითადი ველები ---
@@ -22,7 +22,23 @@ const OrderGenerator = () => {
     const [newPosition, setNewPosition] = useState('');
     const [dismissalReason, setDismissalReason] = useState('');
 
-    const currentSeq = 15;
+    // ── ნომრის გენერაცია ──────────────────────────────────────────────────────
+    const [orderNumber, setOrderNumber] = useState('');
+    const [loadingNum, setLoadingNum] = useState(false);
+
+    const typeToCode = { APPOINTMENT: '02-HR', LEAVE: '02-HR', TRIP: '03-TR', TRANSFER: '02-HR', DISMISSAL: '02-HR' };
+
+    // ბრძანების ტიპის შეცვლისას ნომერი გადაიყენება
+    useEffect(() => { setOrderNumber(''); }, [orderType]);
+
+    const claimNumber = async () => {
+        setLoadingNum(true);
+        try {
+            const res = await axios.post('/api/claim-order-number', { type: typeToCode[orderType] });
+            setOrderNumber(res.data.number);
+        } catch { setOrderNumber('შეცდომა'); }
+        finally { setLoadingNum(false); }
+    };
 
     const calculateDays = (start, end) => {
         if(!start || !end) return "...";
@@ -110,10 +126,8 @@ const OrderGenerator = () => {
             ];
         }
 
-        const finalNumber = generateDocNumber(categoryCode, currentSeq);
-
         return {
-            number: finalNumber,
+            number: orderNumber || '— ნომერი არ არის მიღებული —',
             date: new Date().toLocaleDateString('ka-GE'),
             subject,
             preamble,
@@ -124,7 +138,7 @@ const OrderGenerator = () => {
     };
 
     const pdfData = generateOrderData(false);
-    const isReady = employeeName && startDate;
+    const isReady = employeeName && startDate && orderNumber;
 
     return (
         <Container className="mt-4 font-georgian pb-5">
@@ -141,6 +155,19 @@ const OrderGenerator = () => {
                                 <option value="TRANSFER">4. გადაყვანა (02-HR)</option>
                                 <option value="DISMISSAL">5. გათავისუფლება (02-HR)</option>
                         </Form.Select>
+
+                        {/* ბრძანების ნომერი */}
+                        <div className="d-flex gap-2 align-items-center mb-3">
+                            <Form.Control
+                                value={orderNumber}
+                                onChange={e => setOrderNumber(e.target.value)}
+                                placeholder="ბრძანების ნომერი"
+                                style={{ fontWeight: 'bold', fontSize: '1rem' }}
+                            />
+                            <Button variant="outline-primary" onClick={claimNumber} disabled={loadingNum} style={{ whiteSpace: 'nowrap' }}>
+                                {loadingNum ? <Spinner size="sm" /> : '🔢 მიღება'}
+                            </Button>
+                        </div>
 
                         {/* ფორმის ველები */}
                         <Form.Group className="mb-2"><Form.Label>თანამშრომელი</Form.Label><Form.Control type="text" value={employeeName} onChange={(e) => setEmployeeName(e.target.value)} /></Form.Group>
