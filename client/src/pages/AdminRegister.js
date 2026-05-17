@@ -35,11 +35,10 @@ const AdminRegister = ({ role }) => {
     });
     const [competencies, setCompetencies] = useState([]);
     const competencyList = [
-        "ხარჯთაღრიცხვა",
-        "შესრულებული სამუშაოები (ფ.№2)",
-        "ტექნიკური მდგომარეობა",
-        "პროექტის ინსპექტირება",
-        "სამშენებლო მასალები",
+        "BE-PR-01 — ხარჯთაღრიცხვის პროექტთან შესაბამისობა",
+        "BE-PR-02 — შესრულებული სამუშაოები / ფ.№2",
+        "BE-PR-03 — ფასწარმოქმნის ადეკვატურობა",
+        "BE-PR-04 — ტექნიკური ზედამხედველობა",
     ];
     const [photoFile, setPhotoFile] = useState(null);
     const [staffError, setStaffError] = useState('');
