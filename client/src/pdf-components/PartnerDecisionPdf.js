@@ -125,8 +125,12 @@ const PartnerDecisionPdf = ({ data = {} }) => {
                   <Text style={s.sigLabel}>{p.name}</Text>
                   <Text style={s.sigDetail}>პ/ნ: {p.personalId}</Text>
                   <Text style={s.sigDetail}>წილი: {p.share || 100}%</Text>
-                  {withSignature && p.name === 'ლევან საჩიშვილი' && <Image src="/signature-levan.png" style={{ width: 95, height: 48, objectFit: 'contain', marginTop: 4 }} />}
-                  <View style={withSignature && p.name === 'ლევან საჩიშვილი' ? { borderBottomWidth: 0.5, borderBottomColor: '#555', width: 180, marginTop: 2 } : s.sigLine} />
+                  <View style={{ position: 'relative', height: 60, width: 180, marginTop: 8 }}>
+                    {withSignature && p.name === 'ლევან საჩიშვილი' && (
+                      <Image src="/signature-levan.png" style={{ position: 'absolute', bottom: 1, left: 0, width: 140, height: 58, objectFit: 'contain' }} />
+                    )}
+                    <View style={{ position: 'absolute', bottom: 0, left: 0, width: 180, borderBottomWidth: 0.5, borderBottomColor: '#555' }} />
+                  </View>
                   <Text style={s.sigLineLabel}>{`/ ${p.name.split(' ').pop()} /`}</Text>
                 </View>
               ))}

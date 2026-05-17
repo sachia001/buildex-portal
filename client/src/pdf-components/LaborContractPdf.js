@@ -39,8 +39,9 @@ const styles = StyleSheet.create({
   // ხელმოწერა
   signatureRow: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 30, breakInside: 'avoid' },
   signatureBox: { width: '45%' },
-  signatureLine: { borderTopWidth: 1, borderTopColor: '#000', marginTop: 40, paddingTop: 5, textAlign: 'center', fontSize: 8 },
-  signatureImage: { width: 100, height: 40, objectFit: 'contain', position: 'absolute', top: 0, left: 30 }
+  signatureLine: { borderTopWidth: 1, borderTopColor: '#000', paddingTop: 5, textAlign: 'center', fontSize: 8 },
+  signatureWrapper: { position: 'relative', height: 62, marginTop: 8 },
+  signatureImage: { position: 'absolute', bottom: 1, left: 0, width: 140, height: 60, objectFit: 'contain' }
 });
 
 const Header = () => (
@@ -108,8 +109,11 @@ const LaborContractPdf = ({ data }) => {
             <View style={styles.signatureBox}>
                 <Text style={styles.bold}>დამსაქმებელი:</Text>
                 <Text>ლევან საჩიშვილი</Text>
-                {data.withSignature && <Image src="/signature-levan.png" style={styles.signatureImage} />}
-                <Text style={styles.signatureLine}>(ხელმოწერა)</Text>
+                <View style={styles.signatureWrapper}>
+                  {data.withSignature && <Image src="/signature-levan.png" style={styles.signatureImage} />}
+                  <View style={{ position: 'absolute', bottom: 0, left: 0, right: 0, borderTopWidth: 1, borderTopColor: '#000' }} />
+                </View>
+                <Text style={{ textAlign: 'center', fontSize: 8, marginTop: 4 }}>(ხელმოწერა)</Text>
             </View>
             <View style={styles.signatureBox}>
                 <Text style={styles.bold}>დასაქმებული:</Text>
@@ -193,8 +197,11 @@ const LaborContractPdf = ({ data }) => {
          <View style={styles.signatureRow}>
             <View style={styles.signatureBox}>
                 <Text style={styles.bold}>დამსაქმებელი:</Text>
-                {data.withSignature && <Image src="/signature-levan.png" style={styles.signatureImage} />}
-                <Text style={styles.signatureLine}>(ხელმოწერა)</Text>
+                <View style={styles.signatureWrapper}>
+                  {data.withSignature && <Image src="/signature-levan.png" style={styles.signatureImage} />}
+                  <View style={{ position: 'absolute', bottom: 0, left: 0, right: 0, borderTopWidth: 1, borderTopColor: '#000' }} />
+                </View>
+                <Text style={{ textAlign: 'center', fontSize: 8, marginTop: 4 }}>(ხელმოწერა)</Text>
             </View>
             <View style={styles.signatureBox}>
                 <Text style={styles.bold}>დასაქმებული:</Text>

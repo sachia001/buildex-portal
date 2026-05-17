@@ -51,21 +51,9 @@ const styles = StyleSheet.create({
       alignItems: 'center', 
       width: 150 
   },
-  // 👇 ახალი სტილი ხელმოწერის სურათისთვის
-  signatureImage: {
-      width: 100,
-      height: 50,
-      objectFit: 'contain',
-      marginBottom: -10 // ოდნავ ჩამოვწიოთ რომ ხაზს დაადგეს
-  },
-  signatureLine: { 
-      borderTopWidth: 1, 
-      borderTopColor: '#000', 
-      width: '100%', // ხაზი მთელ სიგანეზე
-      textAlign: 'center', 
-      paddingTop: 5, 
-      fontSize: 9 
-  }
+  signatureWrapper: { position: 'relative', height: 62, marginTop: 8, width: '100%' },
+  signatureImage: { position: 'absolute', bottom: 1, left: 0, width: 140, height: 60, objectFit: 'contain' },
+  signatureLine: { borderTopWidth: 1, borderTopColor: '#000', width: '100%', textAlign: 'center', paddingTop: 5, fontSize: 9 }
 });
 
 const DirectorsOrderPdf = ({ data }) => {
@@ -105,10 +93,10 @@ const DirectorsOrderPdf = ({ data }) => {
             </View>
             
             <View style={styles.signatureBlock}>
-                {/* 👇 თუ არის ხელმოწერის სურათი, ვსვამთ მას, თუ არა - ცარიელ ადგილს */}
-                {data.withSignature && <Image src="/signature-levan.png" style={styles.signatureImage} />}
-                
-                {/* ხაზი და წარწერა (ხელმოწერა) */}
+                <View style={styles.signatureWrapper}>
+                  {data.withSignature && <Image src="/signature-levan.png" style={styles.signatureImage} />}
+                  <View style={{ position: 'absolute', bottom: 0, left: 0, right: 0, borderTopWidth: 1, borderTopColor: '#000' }} />
+                </View>
                 <Text style={styles.signatureLine}>(ხელმოწერა)</Text>
             </View>
         </View>

@@ -357,8 +357,12 @@ const ShareTransferPdf = ({ data = {} }) => {
                 <Text style={s.sigDetail}>{transferorName}</Text>
                 <Text style={s.sigDetail}>{`პ/ნ: ${transferorId}`}</Text>
                 <Text style={s.sigDetail}>{transferorAddress}</Text>
-                {withSignature && transferorName === 'ლევან საჩიშვილი' && <Image src="/signature-levan.png" style={{ width: 95, height: 48, objectFit: 'contain', marginTop: 4 }} />}
-                <View style={withSignature && transferorName === 'ლევან საჩიშვილი' ? { borderBottomWidth: 0.5, borderBottomColor: '#555', width: 170, marginTop: 2 } : s.sigLine} />
+                <View style={{ position: 'relative', height: 60, width: 175, marginTop: 8 }}>
+                  {withSignature && transferorName === 'ლევან საჩიშვილი' && (
+                    <Image src="/signature-levan.png" style={{ position: 'absolute', bottom: 1, left: 0, width: 140, height: 58, objectFit: 'contain' }} />
+                  )}
+                  <View style={{ position: 'absolute', bottom: 0, left: 0, width: 175, borderBottomWidth: 0.5, borderBottomColor: '#555' }} />
+                </View>
                 <Text style={s.sigLineLabel}>{`/ ${transferorName.split(' ').pop()} /`}</Text>
               </View>
               {transferees.map((t, i) => (
@@ -367,8 +371,12 @@ const ShareTransferPdf = ({ data = {} }) => {
                   <Text style={s.sigDetail}>{t.name || '______________________________'}</Text>
                   <Text style={s.sigDetail}>{`პ/ნ: ${t.id || '______________________________'}`}</Text>
                   <Text style={s.sigDetail}>{t.address || '______________________________'}</Text>
-                  {withSignature && t.name === 'ლევან საჩიშვილი' && <Image src="/signature-levan.png" style={{ width: 95, height: 48, objectFit: 'contain', marginTop: 4 }} />}
-                  <View style={withSignature && t.name === 'ლევან საჩიშვილი' ? { borderBottomWidth: 0.5, borderBottomColor: '#555', width: 170, marginTop: 2 } : s.sigLine} />
+                  <View style={{ position: 'relative', height: 60, width: 175, marginTop: 8 }}>
+                    {withSignature && t.name === 'ლევან საჩიშვილი' && (
+                      <Image src="/signature-levan.png" style={{ position: 'absolute', bottom: 1, left: 0, width: 140, height: 58, objectFit: 'contain' }} />
+                    )}
+                    <View style={{ position: 'absolute', bottom: 0, left: 0, width: 175, borderBottomWidth: 0.5, borderBottomColor: '#555' }} />
+                  </View>
                   <Text style={s.sigLineLabel}>{`/ ${t.name ? t.name.split(' ').pop() : '———'} /`}</Text>
                 </View>
               ))}

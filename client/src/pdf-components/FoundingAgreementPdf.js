@@ -224,10 +224,14 @@ const FoundingAgreementPdf = ({ data = {} }) => {
             <View key={i} style={s.sigBlock}>
               <Text style={s.sigName}>{p.name}</Text>
               <Text style={s.sigRole}>{'პარტნიორი / ხელმძღვანელობაზე და წარმომადგენლობაზე უფლებამოსილი პირი'}</Text>
-              <View style={[s.sigLineRow, withSignature && p.name === 'ლევან საჩიშვილი' ? { marginTop: 6 } : {}]}>
+              <View style={s.sigLineRow}>
                 <View style={s.sigLineCol}>
-                  {withSignature && p.name === 'ლევან საჩიშვილი' && <Image src="/signature-levan.png" style={{ width: 90, height: 45, objectFit: 'contain', marginBottom: 2 }} />}
-                  <View style={s.sigLineBar} />
+                  <View style={{ position: 'relative', height: 60, marginTop: 8 }}>
+                    {withSignature && p.name === 'ლევან საჩიშვილი' && (
+                      <Image src="/signature-levan.png" style={{ position: 'absolute', bottom: 1, left: 0, width: 140, height: 58, objectFit: 'contain' }} />
+                    )}
+                    <View style={{ position: 'absolute', bottom: 0, left: 0, right: 0, borderBottomWidth: 0.5, borderBottomColor: '#555' }} />
+                  </View>
                   <Text style={s.sigLineText}>{`/ ${p.name.split(' ').pop()} /`}</Text>
                 </View>
                 <View style={s.sigLineCol}>
