@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Container, Card, Row, Col, Button, Form, Table, Badge, Modal, Accordion, Alert } from 'react-bootstrap';
 import { PDFDownloadLink } from '@react-pdf/renderer';
 import axios from 'axios';
@@ -101,6 +101,30 @@ const CompanyDocsPage = ({ role }) => {
   // ── Shared state ─────────────────────────────────────────────────────────
   const [partners, setPartners] = useState(DEFAULT_PARTNERS);
   const [config, setConfig] = useState(DEFAULT_CONFIG);
+
+  // ── Persist to backend ────────────────────────────────────────────────────
+  const saveTimer = useRef(null);
+  const settingsLoaded = useRef(false);
+
+  // Load saved settings on mount
+  useEffect(() => {
+    axios.get('/api/company-settings')
+      .then(res => {
+        if (res.data.partners?.length) setPartners(res.data.partners);
+        if (res.data.config && Object.keys(res.data.config).length) setConfig(prev => ({ ...prev, ...res.data.config }));
+        settingsLoaded.current = true;
+      })
+      .catch(() => { settingsLoaded.current = true; });
+  }, []);
+
+  // Auto-save partners + config whenever they change (debounced 800ms)
+  useEffect(() => {
+    if (!settingsLoaded.current) return;
+    clearTimeout(saveTimer.current);
+    saveTimer.current = setTimeout(() => {
+      axios.put('/api/company-settings', { partners, config }).catch(() => {});
+    }, 800);
+  }, [partners, config]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // ── Partner modal ─────────────────────────────────────────────────────────
   const [showPartnerModal, setShowPartnerModal] = useState(false);

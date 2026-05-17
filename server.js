@@ -208,6 +208,12 @@ const CompanyDoc = mongoose.model('CompanyDoc', new mongoose.Schema({
     docDate: { type: Date, default: Date.now },
 }, { timestamps: true }));
 
+const CompanySettings = mongoose.model('CompanySettings', new mongoose.Schema({
+    key: { type: String, default: 'main', unique: true },
+    partners: { type: Array, default: [] },
+    config: { type: Object, default: {} },
+}, { timestamps: true }));
+
 // --- HELPER: ნუმერაციის გენერატორი ---
 async function generateDocumentNumber(type, date = new Date()) {
     const yearFull = date.getFullYear();
@@ -625,6 +631,26 @@ api.delete('/company-docs/:id', async (req, res) => {
     try {
         await CompanyDoc.findByIdAndDelete(req.params.id);
         res.json({ msg: 'წაიშალა' });
+    } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// --- COMPANY SETTINGS (partners + config) ---
+api.get('/company-settings', async (req, res) => {
+    try {
+        const settings = await CompanySettings.findOne({ key: 'main' });
+        res.json(settings || { partners: [], config: {} });
+    } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+api.put('/company-settings', async (req, res) => {
+    try {
+        const { partners, config } = req.body;
+        const settings = await CompanySettings.findOneAndUpdate(
+            { key: 'main' },
+            { $set: { partners, config } },
+            { upsert: true, new: true }
+        );
+        res.json(settings);
     } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
