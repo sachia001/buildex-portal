@@ -1,9 +1,8 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Container, Card, Row, Col, Form, Button, Table, Badge, Spinner, Modal, Nav, Tab, Accordion } from 'react-bootstrap';
 import { useParams, useNavigate } from 'react-router-dom';
 import { PDFDownloadLink } from '@react-pdf/renderer';
 import axios from 'axios';
-import SignatureCanvas from 'react-signature-canvas';
 import DirectorsOrderPdf from '../pdf-components/DirectorsOrderPdf';
 import LaborContractPdf from '../pdf-components/LaborContractPdf';
 import ImpartialityGeneralPdf from '../pdf-components/ImpartialityGeneralPdf';
@@ -55,14 +54,6 @@ const StaffDetails = () => {
     const [authorized, setAuthorized] = useState(true);
     const [nextTrainingDate, setNextTrainingDate] = useState('');
 
-    // ხელმოწერა (ერთი — გამოიყენება ყველა PDF-ში)
-    const [signatureImage, setSignatureImage] = useState(null);
-    const sigPadRef = useRef({});
-    const clearSignature = () => { sigPadRef.current.clear(); setSignatureImage(null); };
-    const saveSignature = () => {
-        if (sigPadRef.current.isEmpty()) return alert('ჯერ დახატეთ ხელმოწერა!');
-        setSignatureImage(sigPadRef.current.getCanvas().toDataURL('image/png'));
-    };
 
     const toggleAssessmentMethod = (key) => setAssessmentMethods(prev =>
         prev.includes(key) ? prev.filter(m => m !== key) : [...prev, key]
@@ -146,7 +137,7 @@ const StaffDetails = () => {
             { title: '', text: 'ბრძანება ძალაშია ხელმოწერისთანავე.' },
         ],
         directorName: 'ლევან საჩიშვილი',
-        signature: signatureImage,
+        withSignature: false,
     });
 
     const buildContractData = () => ({
@@ -159,7 +150,7 @@ const StaffDetails = () => {
         startDate,
         contractNumber,
         date: todayGe,
-        directorSignature: signatureImage,
+        withSignature: false,
     });
 
     const buildImpartialityGeneralData = () => ({
@@ -167,7 +158,6 @@ const StaffDetails = () => {
         position: user.position,
         personalId: user.personalId,
         date: todayGe,
-        signature: signatureImage,
     });
 
     const buildImpartialityPerCaseData = () => ({
@@ -183,14 +173,12 @@ const StaffDetails = () => {
         caseDate: foundCase ? new Date(foundCase.createdAt).toLocaleDateString('ka-GE') : '',
         caseConflicts,
         conclusion: caseConclusion,
-        signature: signatureImage,
     });
 
     const buildConfidentialityData = () => ({
         name: `${user.firstName} ${user.lastName}`,
         position: user.position,
         date: todayGe,
-        signature: signatureImage,
     });
 
     const buildTrainingData = () => ({
@@ -208,7 +196,6 @@ const StaffDetails = () => {
         assessmentResult,
         authorized,
         nextTrainingDate,
-        signature: signatureImage,
     });
 
     const fname = user ? `${user.firstName}_${user.lastName}` : '';
@@ -315,21 +302,6 @@ const StaffDetails = () => {
                             <Tab.Pane eventKey="generate">
                                 <Card className="border-0 shadow-sm rounded-4 p-3">
 
-                                    {/* ხელმოწერა — საერთო ყველა PDF-ისთვის */}
-                                    <div className="p-3 bg-light rounded mb-3">
-                                        <h6 className="fw-bold mb-2">✍️ ხელმოწერა <small className="text-muted fw-normal">(სურვილისამებრ — ჩაიდება ყველა PDF-ში)</small></h6>
-                                        <div className="border rounded d-inline-block" style={{ backgroundColor: '#fff' }}>
-                                            <SignatureCanvas ref={sigPadRef} penColor="black" canvasProps={{ width: 380, height: 110, className: 'sigCanvas' }} />
-                                        </div>
-                                        <div className="d-flex gap-2 mt-2">
-                                            <Button variant="outline-secondary" size="sm" onClick={clearSignature}>გასუფთავება</Button>
-                                            <Button variant="outline-primary" size="sm" onClick={saveSignature}>✅ შენახვა</Button>
-                                        </div>
-                                        {signatureImage
-                                            ? <p className="text-success small mt-2 mb-0">✔ ხელმოწერა შენახულია — ყველა PDF-ში ჩაიდება</p>
-                                            : <p className="text-muted small mt-2 mb-0">ხელმოწერის გარეშეც შეგიძლია გენერირება</p>
-                                        }
-                                    </div>
 
                                     <Accordion defaultActiveKey="iso" flush>
 
@@ -463,30 +435,24 @@ const StaffDetails = () => {
                                                 </Row>
                                                 <div className="d-flex flex-wrap gap-3">
                                                     {startDate && (
-                                                        <PDFDownloadLink
-                                                            document={<DirectorsOrderPdf data={buildOrderData()} />}
-                                                            fileName={`დანიშვნ_ბრძ_${fname}.pdf`}
-                                                            style={{ textDecoration: 'none' }}
-                                                        >
-                                                            {({ loading: l }) => (
-                                                                <Button variant="outline-success" size="sm" disabled={l}>
-                                                                    {l ? '...' : '📥 დანიშვნის ბრძანება'}
-                                                                </Button>
-                                                            )}
-                                                        </PDFDownloadLink>
+                                                        <div className="d-flex gap-2 flex-wrap">
+                                                            <PDFDownloadLink document={<DirectorsOrderPdf data={{ ...buildOrderData(), withSignature: false }} />} fileName={`დანიშვნ_ბრძ_${fname}.pdf`} style={{ textDecoration: 'none' }}>
+                                                                {({ loading: l }) => <Button variant="outline-success" size="sm" disabled={l}>{l ? '...' : '📥 დანიშვნის ბრძანება'}</Button>}
+                                                            </PDFDownloadLink>
+                                                            <PDFDownloadLink document={<DirectorsOrderPdf data={{ ...buildOrderData(), withSignature: true }} />} fileName={`signed-დანიშვნ_ბრძ_${fname}.pdf`} style={{ textDecoration: 'none' }}>
+                                                                {({ loading: l }) => <Button variant="outline-secondary" size="sm" disabled={l}>{l ? '...' : '✍️ ხელმოწ.'}</Button>}
+                                                            </PDFDownloadLink>
+                                                        </div>
                                                     )}
                                                     {startDate && contractNumber && (
-                                                        <PDFDownloadLink
-                                                            document={<LaborContractPdf data={buildContractData()} />}
-                                                            fileName={`ხელშეკრ_${fname}.pdf`}
-                                                            style={{ textDecoration: 'none' }}
-                                                        >
-                                                            {({ loading: l }) => (
-                                                                <Button variant="outline-primary" size="sm" disabled={l}>
-                                                                    {l ? '...' : '📥 შრომითი ხელშეკრულება'}
-                                                                </Button>
-                                                            )}
-                                                        </PDFDownloadLink>
+                                                        <div className="d-flex gap-2 flex-wrap">
+                                                            <PDFDownloadLink document={<LaborContractPdf data={{ ...buildContractData(), withSignature: false }} />} fileName={`ხელშეკრ_${fname}.pdf`} style={{ textDecoration: 'none' }}>
+                                                                {({ loading: l }) => <Button variant="outline-primary" size="sm" disabled={l}>{l ? '...' : '📥 შრომითი ხელშეკრულება'}</Button>}
+                                                            </PDFDownloadLink>
+                                                            <PDFDownloadLink document={<LaborContractPdf data={{ ...buildContractData(), withSignature: true }} />} fileName={`signed-ხელშეკრ_${fname}.pdf`} style={{ textDecoration: 'none' }}>
+                                                                {({ loading: l }) => <Button variant="outline-secondary" size="sm" disabled={l}>{l ? '...' : '✍️ ხელმოწ.'}</Button>}
+                                                            </PDFDownloadLink>
+                                                        </div>
                                                     )}
                                                     {!startDate && <p className="text-muted small">შეავსეთ „დაწყების თარიღი"</p>}
                                                 </div>
