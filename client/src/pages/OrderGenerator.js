@@ -49,14 +49,12 @@ const OrderGenerator = () => {
     };
 
     const generateOrderData = (withSignature = false) => {
-        let categoryCode = 'DIRECTOR_HR';
         let subject = "";
         let preamble = "";
         let clauses = [];
 
         // 1. დანიშვნა (02-HR)
         if (orderType === 'APPOINTMENT') {
-            categoryCode = 'DIRECTOR_HR';
             subject = `${employeeName}-ს ${position} პოზიციაზე დანიშვნის შესახებ`;
             preamble = `საქართველოს ორგანული კანონის „საქართველოს შრომის კოდექსის" მე-6 და მე-9 მუხლების, კომპანიის წესდებისა და საშტატო ნუსხის საფუძველზე, ასევე კანდიდატის კვალიფიკაციის SST ISO/IEC 17020:2012 სტანდარტის მოთხოვნებთან შესაბამისობის დადასტურების გათვალისწინებით,`;
             clauses = [
@@ -70,7 +68,6 @@ const OrderGenerator = () => {
         }
         // 2. შვებულება
         else if (orderType === 'LEAVE') {
-             categoryCode = 'DIRECTOR_HR';
              const daysCount = calculateDays(startDate, endDate);
              subject = `${employeeName}-სთვის კუთვნილი ანაზღაურებადი შვებულების მიცემის შესახებ`;
              preamble = `საქართველოს ორგანული კანონის „საქართველოს შრომის კოდექსის" 21-ე და 22-ე მუხლებისა და კომპანიის შრომის შინაგანაწესის შესაბამისად,`;
@@ -85,7 +82,6 @@ const OrderGenerator = () => {
         }
         // 3. მივლინება
         else if (orderType === 'TRIP') {
-             categoryCode = 'DIRECTOR_TRIP';
              const daysCount = calculateDays(startDate, endDate);
              subject = `${employeeName}-ს სამსახურებრივი მივლინების შესახებ`;
              preamble = `საქართველოს საგადასახადო კოდექსის, კომპანიის „სამსახურებრივი მივლინების წესისა" და დამკვეთთან გაფორმებული ხელშეკრულების საფუძველზე,`;
@@ -100,7 +96,6 @@ const OrderGenerator = () => {
         }
          // 4. გადაყვანა
         else if (orderType === 'TRANSFER') {
-             categoryCode = 'DIRECTOR_HR';
              subject = `${employeeName}-ს სხვა პოზიციაზე გადაყვანის შესახებ`;
              preamble = `საქართველოს ორგანული კანონის „საქართველოს შრომის კოდექსის" მე-10 მუხლის (შრომითი ხელშეკრულების პირობების შეცვლა) და მხარეთა შორის მიღწეული შეთანხმების საფუძველზე,`;
              clauses = [
@@ -113,7 +108,6 @@ const OrderGenerator = () => {
         }
          // 5. გათავისუფლება
         else if (orderType === 'DISMISSAL') {
-             categoryCode = 'DIRECTOR_HR';
              subject = `${employeeName}-თან შრომითი ურთიერთობის შეწყვეტის შესახებ`;
              preamble = `საქართველოს ორგანული კანონის „საქართველოს შრომის კოდექსის" ${dismissalReason || 'შესაბამისი მუხლის'} შესაბამისად,`;
              clauses = [

@@ -13,7 +13,8 @@ RUN cd client && npm install
 # Copy all source
 COPY . .
 
-# Build React client fresh from source
+# Build React client fresh from source (CI=false: warnings don't fail build)
+ENV CI=false
 RUN cd client && npm run build
 
 ENV PORT=8080
