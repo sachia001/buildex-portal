@@ -732,10 +732,13 @@ app.get('/health', (req, res) => res.json({ ok: true }));
 
 // --- FRONTEND (React Build) ---
 const buildPath = path.join(__dirname, 'client', 'build');
-app.use(express.static(buildPath));
+// Static assets (JS/CSS) have content hashes — cache them long-term
+app.use(express.static(buildPath, { index: false }));
+// index.html must never be cached so browser always gets the latest bundle reference
 app.use((req, res) => {
     const indexPath = path.join(buildPath, 'index.html');
     if (fs.existsSync(indexPath)) {
+        res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate');
         res.sendFile(indexPath);
     } else {
         res.status(200).json({ status: 'API running', buildMissing: true });
