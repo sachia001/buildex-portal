@@ -341,11 +341,10 @@ api.post('/inspections/:id/upload', upload.single('file'), async (req, res) => {
 });
 
 // --- USERS ---
-api.post('/users/register', upload.single('photo'), async (req, res) => {
+api.post('/users/register', async (req, res) => {
     try {
-        const userData = JSON.parse(req.body.userData);
-        if (req.file) userData.photo = `uploads/docs/${req.file.filename}`;
-        const user = await new User(userData).save();
+        // photo comes as base64 data URL (stored directly in MongoDB — no filesystem needed)
+        const user = await new User(req.body).save();
         res.json({ msg: 'OK', user });
     } catch (err) { res.status(400).json({ error: err.message }); }
 });

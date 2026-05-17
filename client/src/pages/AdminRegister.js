@@ -123,15 +123,21 @@ const AdminRegister = ({ role }) => {
         finally { setEditSaving(false); }
     };
 
+    const toBase64 = (file) => new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = reject;
+    });
+
     const handleStaffSubmit = async (e) => {
         e.preventDefault();
         setStaffLoading(true); setStaffError('');
         if (!formData.firstName || !formData.personalId) { setStaffError("შეავსეთ სავალდებულო ველები!"); setStaffLoading(false); return; }
-        const dataToSend = new FormData();
-        dataToSend.append('userData', JSON.stringify({ ...formData, competencies }));
-        if (photoFile) dataToSend.append('photo', photoFile);
         try {
-            await axios.post('/api/users/register', dataToSend, { headers: { 'Content-Type': 'multipart/form-data' } });
+            let photo = null;
+            if (photoFile) photo = await toBase64(photoFile);
+            await axios.post('/api/users/register', { ...formData, competencies, photo });
             setShowStaffModal(false); resetStaffForm(); fetchStaff();
             alert("✅ თანამშრომელი დარეგისტრირდა!");
         } catch (err) { setStaffError(err.response?.data?.error || "შეცდომა რეგისტრაციისას"); }

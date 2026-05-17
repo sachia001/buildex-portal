@@ -36,11 +36,11 @@ const s = StyleSheet.create({
   paraIn: { fontSize: 10, textAlign: 'justify', marginBottom: 3, marginLeft: 14, lineHeight: 1.7 },
 
   sigSection: { marginTop: 24 },
-  sigRow: { flexDirection: 'row', justifyContent: 'space-between' },
+  sigRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-end' },
   sigBlock: { width: '44%' },
   sigBlockLabel: { fontSize: 10, fontWeight: 'bold', marginBottom: 3 },
   sigDetail: { fontSize: 9, color: '#444', marginBottom: 2 },
-  sigLine: { borderBottomWidth: 0.5, borderBottomColor: '#555', marginTop: 36, width: 180 },
+  sigLine: { borderBottomWidth: 0.5, borderBottomColor: '#555', marginTop: 8, width: 180 },
   sigLineLabel: { fontSize: 8.5, textAlign: 'left', marginTop: 3, color: '#333' },
   footer: { fontSize: 7.5, color: '#aaa', textAlign: 'center', marginTop: 16 },
 });

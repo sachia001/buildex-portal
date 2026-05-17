@@ -118,7 +118,10 @@ const LaborContractPdf = ({ data }) => {
             <View style={styles.signatureBox}>
                 <Text style={styles.bold}>დასაქმებული:</Text>
                 <Text>{data.employeeName}</Text>
-                <Text style={styles.signatureLine}>(ხელმოწერა)</Text>
+                <View style={styles.signatureWrapper}>
+                  <View style={{ position: 'absolute', bottom: 0, left: 0, right: 0, borderTopWidth: 1, borderTopColor: '#000' }} />
+                </View>
+                <Text style={{ textAlign: 'center', fontSize: 8, marginTop: 4 }}>(ხელმოწერა)</Text>
             </View>
         </View>
       </Page>

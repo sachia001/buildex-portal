@@ -5,6 +5,7 @@ import { PDFDownloadLink } from '@react-pdf/renderer';
 import axios from 'axios';
 import DirectorsOrderPdf from '../pdf-components/DirectorsOrderPdf';
 import LaborContractPdf from '../pdf-components/LaborContractPdf';
+import ImpartialityDeclarationPdf from '../pdf-components/ImpartialityDeclarationPdf';
 import ImpartialityGeneralPdf from '../pdf-components/ImpartialityGeneralPdf';
 import ImpartialityPerCasePdf from '../pdf-components/ImpartialityPerCasePdf';
 import ConfidentialityAgreementPdf from '../pdf-components/ConfidentialityAgreementPdf';
@@ -33,6 +34,10 @@ const StaffDetails = () => {
     const [address, setAddress] = useState('');
     const [startDate, setStartDate] = useState(today);
     const [contractNumber, setContractNumber] = useState('LC-2026-001');
+
+    // FM-02 — ზოგადი სფეროები + კონფლიქტი
+    const [genScopes, setGenScopes] = useState([]);
+    const [genConflicts, setGenConflicts] = useState({ ownership: false, family: false, employment: false, financial: false, contract: false });
 
     // FM-02b — საქმეზე მიბმული
     const [caseSearchNum, setCaseSearchNum] = useState('');
@@ -153,6 +158,15 @@ const StaffDetails = () => {
         withSignature: false,
     });
 
+    const buildImpartialityDeclarationData = () => ({
+        name: `${user.firstName} ${user.lastName}`,
+        position: user.position,
+        personalId: user.personalId,
+        date: todayGe,
+        scopes: genScopes,
+        conflicts: genConflicts,
+    });
+
     const buildImpartialityGeneralData = () => ({
         name: `${user.firstName} ${user.lastName}`,
         position: user.position,
@@ -203,7 +217,9 @@ const StaffDetails = () => {
     if (loading) return <Container className="mt-5 text-center"><Spinner animation="border" /></Container>;
     if (!user) return <Container className="mt-5 text-center">თანამშრომელი ვერ მოიძებნა</Container>;
 
-    const photoUrl = user.photo ? `/${user.photo}` : null;
+    const photoUrl = user.photo
+        ? (user.photo.startsWith('data:') ? user.photo : `/${user.photo}`)
+        : null;
 
     const trainingTypeOptions = [
         ['შიდა', 'შიდა ტრენინგი'],
@@ -309,6 +325,55 @@ const StaffDetails = () => {
                                         <Accordion.Item eventKey="iso">
                                             <Accordion.Header>📋 ISO 17020 სავალდებულო ფორმები</Accordion.Header>
                                             <Accordion.Body>
+
+                                                {/* FM-02 — მიუკ. დეკლარაცია (სფეროები + კონფლიქტი) */}
+                                                <div className="mb-4 border-bottom pb-4">
+                                                    <h6 className="fw-bold text-primary mb-2">FM-02 — მიუკერძოებლობის დეკლარაცია <small className="text-muted fw-normal">(ინსპექტორის სფეროები)</small></h6>
+                                                    <p className="small text-muted mb-2">ინსპექტორი ამოწმებს ავტ. სფეროებს და ადასტურებს ინტ. კონფ. არარსებობას.</p>
+
+                                                    <Form.Label className="small fw-bold">ავტ. სფეროები (მონიშნეთ):</Form.Label>
+                                                    <div className="mb-2">
+                                                    {[
+                                                        ['BE-PR-01', 'ხარჯთაღრ. შესაბამისობა'],
+                                                        ['BE-PR-02', 'ფ.№2 ინსპექტირება'],
+                                                        ['BE-PR-03', 'ფასწარმოქმნის ადეკვ.'],
+                                                        ['BE-PR-04', 'ტექ. ზედამხედველობა'],
+                                                    ].map(([code, label]) => (
+                                                        <Form.Check key={code} type="checkbox"
+                                                            label={`${code} — ${label}`}
+                                                            checked={genScopes.includes(code)}
+                                                            onChange={e => setGenScopes(s => e.target.checked ? [...s, code] : s.filter(x => x !== code))} />
+                                                    ))}
+                                                    </div>
+
+                                                    <Form.Label className="small fw-bold">ინტ. კონფლიქტი:</Form.Label>
+                                                    {[
+                                                        ['ownership', 'მფლობელობითი ინტ. კლიენტის კომპ.'],
+                                                        ['family',    'ნათ./ოჯახური კავშირი კლიენტთან'],
+                                                        ['employment','ადრ. დასაქმება კლიენტთან (2 წ.)'],
+                                                        ['financial', 'ფინ. დამოკ. ან ინტ. კლიენტთან'],
+                                                        ['contract',  'სხვა მოქმ. ხელშ. ან ვალდ. კლიენტ.'],
+                                                    ].map(([key, label]) => (
+                                                        <div key={key} className="d-flex align-items-center gap-3 mb-1">
+                                                            <span className="small flex-grow-1">{label}</span>
+                                                            <Form.Check inline type="radio" label="კი" name={`gconf-${key}`}
+                                                                checked={genConflicts[key] === true}
+                                                                onChange={() => setGenConflicts(p => ({ ...p, [key]: true }))} />
+                                                            <Form.Check inline type="radio" label="არა" name={`gconf-${key}`}
+                                                                checked={genConflicts[key] !== true}
+                                                                onChange={() => setGenConflicts(p => ({ ...p, [key]: false }))} />
+                                                        </div>
+                                                    ))}
+
+                                                    <PDFDownloadLink document={<ImpartialityDeclarationPdf data={buildImpartialityDeclarationData()} />}
+                                                        fileName={`FM-02_მიუკ_დეკ_${fname}.pdf`} style={{ textDecoration: 'none' }}>
+                                                        {({ loading: l }) => (
+                                                            <Button variant="outline-primary" size="sm" disabled={l} className="mt-2">
+                                                                {l ? '...' : '📥 FM-02 — მიუკ. დეკლარაცია'}
+                                                            </Button>
+                                                        )}
+                                                    </PDFDownloadLink>
+                                                </div>
 
                                                 {/* FM-02a — ზოგადი */}
                                                 <div className="mb-4 border-bottom pb-4">
