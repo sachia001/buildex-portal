@@ -5,7 +5,7 @@ import fontPath from '../fonts/bpg_arial.ttf';
 Font.register({ family: 'BPG Arial', src: fontPath });
 
 const s = StyleSheet.create({
-  page: { fontFamily: 'BPG Arial', padding: '36 0 42 0', fontSize: 9.5, lineHeight: 1.55 },
+  page: { fontFamily: 'BPG Arial', padding: '36 0 42 0', fontSize: 9, lineHeight: 1.5 },
   watermark: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, justifyContent: 'center', alignItems: 'center', zIndex: -1 },
   watermarkImg: { width: 460, opacity: 0.2 },
 
@@ -26,9 +26,9 @@ const s = StyleSheet.create({
   cityDateRow: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 8, fontSize: 9.5 },
   divider: { borderTopWidth: 0.8, borderTopColor: '#003366', marginVertical: 6 },
 
-  artTitle: { fontSize: 10, fontWeight: 'bold', marginTop: 8, marginBottom: 3 },
-  para: { fontSize: 9.5, textAlign: 'justify', marginBottom: 3, lineHeight: 1.55 },
-  paraIn: { fontSize: 9.5, textAlign: 'justify', marginBottom: 2, marginLeft: 12, lineHeight: 1.55 },
+  artTitle: { fontSize: 9.5, fontWeight: 'bold', marginTop: 7, marginBottom: 2 },
+  para: { fontSize: 9, textAlign: 'justify', marginBottom: 2, lineHeight: 1.5 },
+  paraIn: { fontSize: 9, textAlign: 'justify', marginBottom: 1.5, marginLeft: 12, lineHeight: 1.5 },
 
   tableHeader: { flexDirection: 'row', backgroundColor: '#eef2f6', paddingVertical: 3, paddingHorizontal: 5, marginBottom: 1 },
   tableRow: { flexDirection: 'row', borderBottomWidth: 0.5, borderBottomColor: '#ccc', paddingVertical: 3, paddingHorizontal: 5 },
@@ -39,13 +39,13 @@ const s = StyleSheet.create({
   partyLabel: { backgroundColor: '#eef2f6', width: 110, paddingVertical: 4, paddingHorizontal: 7, fontSize: 8.5, fontWeight: 'bold', flexShrink: 0 },
   partyData: { flex: 1, paddingVertical: 4, paddingHorizontal: 7, fontSize: 8.5 },
 
-  sigSection: { marginTop: 18 },
-  sigTitle: { fontSize: 9.5, fontWeight: 'bold', marginBottom: 10 },
+  sigSection: { marginTop: 10 },
+  sigTitle: { fontSize: 9.5, fontWeight: 'bold', marginBottom: 8 },
   sigRow: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between' },
-  sigBlock: { width: '44%', marginBottom: 14 },
-  sigBlockLabel: { fontSize: 9.5, fontWeight: 'bold', marginBottom: 2 },
+  sigBlock: { width: '44%', marginBottom: 10 },
+  sigBlockLabel: { fontSize: 9, fontWeight: 'bold', marginBottom: 2 },
   sigDetail: { fontSize: 8.5, color: '#444', marginBottom: 1 },
-  sigLine: { borderBottomWidth: 0.5, borderBottomColor: '#555', marginTop: 30, width: 170 },
+  sigLine: { borderBottomWidth: 0.5, borderBottomColor: '#555', marginTop: 22, width: 170 },
   sigLineLabel: { fontSize: 8, textAlign: 'left', marginTop: 2, color: '#333' },
   footer: { fontSize: 7, color: '#aaa', textAlign: 'center', marginTop: 14 },
 });
@@ -276,7 +276,7 @@ const ShareTransferPdf = ({ data = {} }) => {
           <Text style={s.artTitle}>{`მუხლი ${art(4)}. წილის დამთმობის უფლებები`}</Text>
           <Text style={s.para}>{`${art(4)}.1. წილის დამთმობს უფლება აქვს:`}</Text>
           <Text style={s.paraIn}>{isGift
-            ? `(ა) გამოიხმოს ჩუქება საქართველოს სამოქალაქო კოდექსით გათვალისწინებულ შემთხვევებში — კერძოდ, თუ დასაჩუქრებული მძიმე დანაშაულს ჩაიდენს ჩამჩუქებლის ან მისი ახლო ნათესავის წინააღმდეგ, ან თუ ჩუქება ჩამჩუქებელს შეუძლებელს გახდის საკუთარი ან მასზე დამოკიდებული პირის სარჩოს;`
+            ? `(ა) გამოიხმოს ჩუქება საქართველოს სამოქალაქო კოდექსით გათვალისწინებულ შემთხვევებში — კერძოდ, თუ წილის შემძენი მძიმე დანაშაულს ჩაიდენს წილის დამთმობის ან მისი ახლო ნათესავის წინააღმდეგ, ან თუ ჩუქება წილის დამთმობს შეუძლებელს გახდის საკუთარი ან მასზე დამოკიდებული პირის სარჩოს;`
             : `(ა) მოითხოვოს ნასყიდობის ფასის სრული გადახდა ხელშეკრულებაში განსაზღვრული ვადების და პირობების შესაბამისად;`}
           </Text>
           <Text style={s.paraIn}>{`(ბ) მოითხოვოს ${tLabel}საგან სახელმწიფო რეგისტრაციისათვის საჭირო ყველა დოკუმენტის დროული გამოყოფა და ხელმოწერა;`}</Text>
