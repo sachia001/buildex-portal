@@ -5,7 +5,7 @@ import fontPath from '../fonts/bpg_arial.ttf';
 Font.register({ family: 'BPG Arial', src: fontPath });
 
 const s = StyleSheet.create({
-  page: { fontFamily: 'BPG Arial', padding: '36 0 42 0', fontSize: 9, lineHeight: 1.5 },
+  page: { fontFamily: 'BPG Arial', padding: '36 0 42 0', fontSize: 9.5, lineHeight: 1.6 },
   watermark: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, justifyContent: 'center', alignItems: 'center', zIndex: -1 },
   watermarkImg: { width: 460, opacity: 0.2 },
 
@@ -26,9 +26,9 @@ const s = StyleSheet.create({
   cityDateRow: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 8, fontSize: 9.5 },
   divider: { borderTopWidth: 0.8, borderTopColor: '#003366', marginVertical: 6 },
 
-  artTitle: { fontSize: 9.5, fontWeight: 'bold', marginTop: 7, marginBottom: 2 },
-  para: { fontSize: 9, textAlign: 'justify', marginBottom: 2, lineHeight: 1.5 },
-  paraIn: { fontSize: 9, textAlign: 'justify', marginBottom: 1.5, marginLeft: 12, lineHeight: 1.5 },
+  artTitle: { fontSize: 10, fontWeight: 'bold', marginTop: 8, marginBottom: 3 },
+  para: { fontSize: 9.5, textAlign: 'justify', marginBottom: 3, lineHeight: 1.6 },
+  paraIn: { fontSize: 9.5, textAlign: 'justify', marginBottom: 2, marginLeft: 12, lineHeight: 1.6 },
 
   tableHeader: { flexDirection: 'row', backgroundColor: '#eef2f6', paddingVertical: 3, paddingHorizontal: 5, marginBottom: 1 },
   tableRow: { flexDirection: 'row', borderBottomWidth: 0.5, borderBottomColor: '#ccc', paddingVertical: 3, paddingHorizontal: 5 },
