@@ -5,18 +5,18 @@ import fontPath from '../fonts/bpg_arial.ttf';
 Font.register({ family: 'BPG Arial', src: fontPath });
 
 const s = StyleSheet.create({
-  page: { fontFamily: 'BPG Arial', padding: '0 0 50 0', fontSize: 10, lineHeight: 1.7 },
+  page: { fontFamily: 'BPG Arial', padding: '36 0 42 0', fontSize: 10, lineHeight: 1.7 },
   watermark: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, justifyContent: 'center', alignItems: 'center', zIndex: -1 },
   watermarkImg: { width: 460, opacity: 0.2 },
 
-  headerBar: { padding: '7 50', flexDirection: 'row', alignItems: 'center' },
+  headerBar: { padding: '7 32 7 60', flexDirection: 'row', alignItems: 'center' },
   headerLogo: { width: 38, height: 38, marginRight: 12, objectFit: 'contain' },
   headerTextBlock: { flex: 1 },
   headerCompany: { color: '#003366', fontSize: 11, fontWeight: 'bold' },
   headerSub: { color: '#666', fontSize: 7.5, marginTop: 1 },
   dividerTop: { borderTopWidth: 0.8, borderTopColor: '#ccc' },
 
-  body: { paddingHorizontal: 50, paddingTop: 16 },
+  body: { paddingLeft: 60, paddingRight: 32, paddingTop: 16 },
 
   centerBold: { fontSize: 13, fontWeight: 'bold', textAlign: 'center', marginBottom: 3 },
   centerSub: { fontSize: 9.5, textAlign: 'center', color: '#555', marginBottom: 3 },

@@ -5,7 +5,7 @@ import fontPath from '../fonts/bpg_arial.ttf';
 Font.register({ family: 'BPG Arial', src: fontPath });
 
 const s = StyleSheet.create({
-  page: { fontFamily: 'BPG Arial', padding: '40 50 50 50', fontSize: 9, lineHeight: 1.6 },
+  page: { fontFamily: 'BPG Arial', padding: '36 32 42 60', fontSize: 9, lineHeight: 1.6 },
   watermark: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, justifyContent: 'center', alignItems: 'center', zIndex: -1 },
   watermarkImg: { width: 460, opacity: 0.2 },
 

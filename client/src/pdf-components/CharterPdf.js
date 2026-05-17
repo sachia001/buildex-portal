@@ -23,7 +23,7 @@ const s = StyleSheet.create({
   coverFooterText: { color: '#888', fontSize: 7.5 },
 
   // Content pages
-  page: { fontFamily: 'BPG Arial', padding: '45 50 55 50', fontSize: 9.5, lineHeight: 1.7 },
+  page: { fontFamily: 'BPG Arial', padding: '36 32 42 60', fontSize: 9.5, lineHeight: 1.7 },
   watermark: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, justifyContent: 'center', alignItems: 'center', zIndex: -1 },
   watermarkImg: { width: 460, opacity: 0.2 },
   articleHeader: { fontSize: 10.5, fontWeight: 'bold', marginTop: 13, marginBottom: 5, textAlign: 'center' },

@@ -348,7 +348,7 @@ const ShareTransferPdf = ({ data = {} }) => {
             : null}
 
           {/* Signatures */}
-          <View style={s.sigSection}>
+          <View style={s.sigSection} wrap={false}>
             <Text style={s.sigTitle}>მხარეთა რეკვიზიტები და ხელმოწერები:</Text>
             <View style={s.sigRow}>
               <View style={s.sigBlock}>

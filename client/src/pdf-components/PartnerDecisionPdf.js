@@ -5,11 +5,11 @@ import fontPath from '../fonts/bpg_arial.ttf';
 Font.register({ family: 'BPG Arial', src: fontPath });
 
 const s = StyleSheet.create({
-  page: { fontFamily: 'BPG Arial', padding: '0 0 40 0', fontSize: 10, lineHeight: 1.6 },
+  page: { fontFamily: 'BPG Arial', padding: '36 0 42 0', fontSize: 10, lineHeight: 1.6 },
   watermark: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, justifyContent: 'center', alignItems: 'center', zIndex: -1 },
   watermarkImg: { width: 460, opacity: 0.2 },
 
-  headerBar: { padding: '7 50', flexDirection: 'row', alignItems: 'center', marginBottom: 0 },
+  headerBar: { padding: '7 32 7 60', flexDirection: 'row', alignItems: 'center', marginBottom: 0 },
   headerLogo: { width: 38, height: 38, marginRight: 12, objectFit: 'contain' },
   headerTextBlock: { flex: 1 },
   headerCompany: { color: '#003366', fontSize: 11, fontWeight: 'bold' },
@@ -18,7 +18,7 @@ const s = StyleSheet.create({
 
   dividerTop: { borderTopWidth: 0.8, borderTopColor: '#ccc', marginBottom: 0 },
 
-  body: { paddingHorizontal: 50, paddingTop: 16 },
+  body: { paddingLeft: 60, paddingRight: 32, paddingTop: 16 },
 
   // Title block
   docTitle: { fontSize: 12, fontWeight: 'bold', textAlign: 'center', marginBottom: 3 },
