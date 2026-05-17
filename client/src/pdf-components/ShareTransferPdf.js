@@ -16,19 +16,19 @@ const s = StyleSheet.create({
   headerSub: { color: '#666', fontSize: 7, marginTop: 1 },
   dividerGold: { borderTopWidth: 0.8, borderTopColor: '#ccc' },
 
-  body: { paddingLeft: 60, paddingRight: 32, paddingTop: 14 },
+  body: { paddingLeft: 60, paddingRight: 32, paddingTop: 10 },
 
-  centerBold: { fontSize: 12, fontWeight: 'bold', textAlign: 'center', marginBottom: 2 },
-  centerSub: { fontSize: 9, textAlign: 'center', color: '#555', marginBottom: 2 },
-  centerRef: { fontSize: 8, textAlign: 'center', color: '#888', marginBottom: 3 },
-  centerNum: { fontSize: 9, textAlign: 'center', color: '#444', marginBottom: 10 },
+  centerBold: { fontSize: 11.5, fontWeight: 'bold', textAlign: 'center', marginBottom: 2 },
+  centerSub: { fontSize: 8.5, textAlign: 'center', color: '#555', marginBottom: 2 },
+  centerRef: { fontSize: 7.5, textAlign: 'center', color: '#888', marginBottom: 2 },
+  centerNum: { fontSize: 9, textAlign: 'center', color: '#444', marginBottom: 7 },
 
-  cityDateRow: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 8, fontSize: 9.5 },
-  divider: { borderTopWidth: 0.8, borderTopColor: '#003366', marginVertical: 6 },
+  cityDateRow: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 6, fontSize: 9 },
+  divider: { borderTopWidth: 0.8, borderTopColor: '#003366', marginVertical: 4 },
 
-  artTitle: { fontSize: 10, fontWeight: 'bold', marginTop: 8, marginBottom: 3 },
-  para: { fontSize: 9.5, textAlign: 'justify', marginBottom: 3, lineHeight: 1.6 },
-  paraIn: { fontSize: 9.5, textAlign: 'justify', marginBottom: 2, marginLeft: 12, lineHeight: 1.6 },
+  artTitle: { fontSize: 9.5, fontWeight: 'bold', marginTop: 5, marginBottom: 2 },
+  para: { fontSize: 9, textAlign: 'justify', marginBottom: 2, lineHeight: 1.5 },
+  paraIn: { fontSize: 9, textAlign: 'justify', marginBottom: 1, marginLeft: 12, lineHeight: 1.5 },
 
   tableHeader: { flexDirection: 'row', backgroundColor: '#eef2f6', paddingVertical: 3, paddingHorizontal: 5, marginBottom: 1 },
   tableRow: { flexDirection: 'row', borderBottomWidth: 0.5, borderBottomColor: '#ccc', paddingVertical: 3, paddingHorizontal: 5 },
@@ -39,15 +39,15 @@ const s = StyleSheet.create({
   partyLabel: { backgroundColor: '#eef2f6', width: 110, paddingVertical: 4, paddingHorizontal: 7, fontSize: 8.5, fontWeight: 'bold', flexShrink: 0 },
   partyData: { flex: 1, paddingVertical: 4, paddingHorizontal: 7, fontSize: 8.5 },
 
-  sigSection: { marginTop: 10 },
-  sigTitle: { fontSize: 9.5, fontWeight: 'bold', marginBottom: 8 },
+  sigSection: { marginTop: 8 },
+  sigTitle: { fontSize: 9.5, fontWeight: 'bold', marginBottom: 6 },
   sigRow: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between' },
-  sigBlock: { width: '44%', marginBottom: 10 },
+  sigBlock: { width: '44%', marginBottom: 8 },
   sigBlockLabel: { fontSize: 9, fontWeight: 'bold', marginBottom: 2 },
   sigDetail: { fontSize: 8.5, color: '#444', marginBottom: 1 },
-  sigLine: { borderBottomWidth: 0.5, borderBottomColor: '#555', marginTop: 22, width: 170 },
+  sigLine: { borderBottomWidth: 0.5, borderBottomColor: '#555', marginTop: 14, width: 170 },
   sigLineLabel: { fontSize: 8, textAlign: 'left', marginTop: 2, color: '#333' },
-  footer: { fontSize: 7, color: '#aaa', textAlign: 'center', marginTop: 14 },
+  footer: { fontSize: 7, color: '#aaa', textAlign: 'center', marginTop: 10 },
 });
 
 const num = v => parseInt(v, 10) || 0;
