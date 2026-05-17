@@ -264,7 +264,7 @@ const CompanyDocsPage = ({ role }) => {
     clientAddress: '',
     clientRepName: '',
     clientRepId: '',
-    serviceType: 'შენობა-ნაგებობის ინსპექტირება',
+    serviceType: 'BE-PR-01',
     serviceScope: '',
     objectAddress: '',
     serviceFee: '',
@@ -694,10 +694,10 @@ const CompanyDocsPage = ({ role }) => {
                   <Col md={5}>
                     <Form.Label className="small fw-bold">მომსახურების სახე</Form.Label>
                     <Form.Select value={svcForm.serviceType} onChange={e => setSvcForm({ ...svcForm, serviceType: e.target.value })}>
-                      <option>შენობა-ნაგებობის ინსპექტირება</option>
-                      <option>სამშენებლო სამუშაოთა ინსპექტირება</option>
-                      <option>ტექნიკური ექსპერტიზა</option>
-                      <option>ინფრასტრუქტურის ინსპექტირება</option>
+                      <option value="BE-PR-01">BE-PR-01 — ხარჯთაღრიცხვის საპროექტო დოკ.-თან შესაბამისობა</option>
+                      <option value="BE-PR-02">BE-PR-02 — შესრულებული სამ. / ფორმა №2 ვერიფიკაცია</option>
+                      <option value="BE-PR-03">BE-PR-03 — ფასწარმოქმნის ადეკვატურობის ინსპექტირება</option>
+                      <option value="BE-PR-04">BE-PR-04 — ტექნიკური ზედამხედველობა–ინსპექტირება</option>
                     </Form.Select>
                   </Col>
                   <Col md={7}>
