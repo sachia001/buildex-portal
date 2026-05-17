@@ -47,6 +47,8 @@ const AdminRegister = ({ role }) => {
     const [editStaff, setEditStaff] = useState(null);
     const [editForm, setEditForm] = useState({});
     const [editSaving, setEditSaving] = useState(false);
+    const [editPhotoFile, setEditPhotoFile] = useState(null);
+    const [editPhotoPreview, setEditPhotoPreview] = useState(null); // current photo shown in modal
 
     // ── Tab 2: Auth users ──────────────────────────────────────
     const [authUsers, setAuthUsers] = useState([]);
@@ -110,13 +112,40 @@ const AdminRegister = ({ role }) => {
             authExpiry: s.authExpiry ? s.authExpiry.split('T')[0] : '',
             status: s.status || 'აქტიური',
         });
+        // restore current photo display
+        const existing = s.photo
+            ? (s.photo.startsWith('data:') ? s.photo : `/${s.photo}`)
+            : null;
+        setEditPhotoPreview(existing);
+        setEditPhotoFile(null);
         setShowEditModal(true);
+    };
+
+    const handleEditPhotoChange = async (e) => {
+        const f = e.target.files[0];
+        if (!f) return;
+        setEditPhotoFile(f);
+        const b64 = await toBase64(f);
+        setEditPhotoPreview(b64);
+    };
+
+    const handleEditPhotoRemove = () => {
+        setEditPhotoFile(null);
+        setEditPhotoPreview(null);
     };
 
     const handleEditSave = async () => {
         setEditSaving(true);
         try {
-            await axios.put(`/api/users/${editStaff._id}`, editForm);
+            let payload = { ...editForm };
+            if (editPhotoFile) {
+                // new photo selected — convert to base64
+                payload.photo = await toBase64(editPhotoFile);
+            } else if (editPhotoPreview === null) {
+                // photo explicitly removed
+                payload.photo = null;
+            }
+            await axios.put(`/api/users/${editStaff._id}`, payload);
             setShowEditModal(false);
             fetchStaff();
         } catch (err) { alert('შეცდომა: ' + (err.response?.data?.error || err.message)); }
@@ -332,6 +361,34 @@ const AdminRegister = ({ role }) => {
                     <Modal.Title>✏️ თანამშრომლის რედაქტირება</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
+                    {/* ── ფოტო ── */}
+                    <div className="d-flex align-items-center gap-3 mb-4 p-3 bg-light rounded">
+                        {editPhotoPreview
+                            ? <img src={editPhotoPreview} alt="profile" className="rounded-circle shadow"
+                                style={{ width: 80, height: 80, objectFit: 'cover', border: '3px solid #dee2e6' }} />
+                            : <div className="rounded-circle bg-secondary d-flex align-items-center justify-content-center"
+                                style={{ width: 80, height: 80, fontSize: '2rem', flexShrink: 0 }}>👤</div>
+                        }
+                        <div className="d-flex flex-column gap-2">
+                            <Form.Label className="small fw-bold mb-0">პროფილის სურათი</Form.Label>
+                            <div className="d-flex gap-2 flex-wrap">
+                                <label className="btn btn-sm btn-outline-primary mb-0" style={{ cursor: 'pointer' }}>
+                                    📷 {editPhotoPreview ? 'შეცვლა' : 'ატვირთვა'}
+                                    <input type="file" accept="image/*" style={{ display: 'none' }}
+                                        onChange={handleEditPhotoChange} />
+                                </label>
+                                {editPhotoPreview && (
+                                    <Button size="sm" variant="outline-danger" onClick={handleEditPhotoRemove}>
+                                        🗑️ წაშლა
+                                    </Button>
+                                )}
+                            </div>
+                            <span className="text-muted" style={{ fontSize: '0.75rem' }}>
+                                {editPhotoFile ? `✅ ${editPhotoFile.name}` : editPhotoPreview ? 'მიმდინარე სურათი' : 'სურათი არ არის'}
+                            </span>
+                        </div>
+                    </div>
+
                     <Row className="g-3">
                         <Col md={6}>
                             <Form.Label className="small fw-bold">სახელი</Form.Label>
