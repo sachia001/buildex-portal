@@ -20,6 +20,38 @@ const InspectionDetails = ({ role }) => {
     const [editMode, setEditMode] = useState(false);
     const [formData, setFormData] = useState({});
 
+    // ინსპექტირების ანგარიში
+    const [showReportModal, setShowReportModal] = useState(false);
+    const [reportForm, setReportForm] = useState({});
+
+    const openReportModal = () => {
+        const fmtDate = d => d ? d.split('T')[0] : '';
+        setReportForm({
+            inspectionNumber: data.inspectionNumber || '',
+            issueDate: new Date().toISOString().split('T')[0],
+            startDate: fmtDate(data.startDate),
+            deadline: fmtDate(data.deadline),
+            objectName: data.objectName || '',
+            objectAddress: data.objectAddress || '',
+            clientName: data.clientName || '',
+            clientID: data.clientID || '',
+            contactPerson: data.contactPerson || '',
+            accreditationScope: data.inspectionScope || '',
+            inspectionTask: data.applicationContent || '',
+            expert: data.expert || [],
+            technicalManager: data.technicalManager || [],
+            qualityManager: data.qualityManager || null,
+            tenderNumber: data.tenderNumber || '',
+            reportBasis: data.tenderNumber ? `განაცხადი / ხელშეკრულება № ${data.tenderNumber}` : '',
+            submittedMaterials: '',
+            normativeDocs: '',
+            tools: '',
+            conclusion: '',
+            researchContent: '',
+        });
+        setShowReportModal(true);
+    };
+
     // მომსახურების ხელშეკრულება
     const [showSvcModal, setShowSvcModal] = useState(false);
     const [svcForm, setSvcForm] = useState({});
@@ -36,7 +68,7 @@ const InspectionDetails = ({ role }) => {
             clientAddress: '',
             clientRepName: data.contactPerson || '',
             clientRepId: '',
-            serviceType: data.inspectionScope || 'შენობა-ნაგებობის ინსპექტირება',
+            serviceType: ['BE-PR-01','BE-PR-02','BE-PR-03','BE-PR-04'].find(c => (data.inspectionScope||'').includes(c)) || 'BE-PR-01',
             serviceScope: data.applicationContent || '',
             objectAddress: data.objectAddress || '',
             serviceFee: '',
@@ -131,9 +163,7 @@ const InspectionDetails = ({ role }) => {
                         {({ loading }) => <Button variant="outline-danger" size="sm" disabled={loading}>📄 განცხადება</Button>}
                     </PDFDownloadLink>
 
-                    <PDFDownloadLink document={<ReportCoverPdf data={data} />} fileName={`Report-${data.inspectionNumber}.pdf`}>
-                        {({ loading }) => <Button variant="outline-success" size="sm" disabled={loading}>📗 თავფურცელი</Button>}
-                    </PDFDownloadLink>
+                    <Button variant="outline-success" size="sm" onClick={openReportModal}>📗 ინსპ. ანგარიში</Button>
 
                     <Button variant="outline-warning" size="sm" onClick={openSvcModal}>📑 ხელშეკრულება</Button>
 
@@ -404,6 +434,110 @@ const InspectionDetails = ({ role }) => {
                     {({ loading }) => (
                         <Button variant="warning" disabled={loading}>
                             {loading ? '⏳ მზადდება...' : '📄 ხელშეკრულების გადმოწერა'}
+                        </Button>
+                    )}
+                </PDFDownloadLink>
+            </Modal.Footer>
+        </Modal>
+
+        {/* ინსპექტირების ანგარიშის გენერატორი */}
+        <Modal show={showReportModal} onHide={() => setShowReportModal(false)} size="xl" backdrop="static">
+            <Modal.Header closeButton className="border-0 pb-0">
+                <Modal.Title className="fw-bold">📗 ინსპექტირების ანგარიში — № {data.inspectionNumber}</Modal.Title>
+            </Modal.Header>
+            <Modal.Body style={{ maxHeight: '78vh', overflowY: 'auto' }}>
+                <Row className="g-3">
+                    {/* ── ძირითადი ინფო ── */}
+                    <Col md={12}><small className="fw-bold text-muted">📋 ძირითადი ინფო</small></Col>
+
+                    <Col md={3}>
+                        <Form.Label className="small fw-bold">ანგარიშის N</Form.Label>
+                        <Form.Control size="sm" value={reportForm.inspectionNumber || ''} onChange={e => setReportForm({...reportForm, inspectionNumber: e.target.value})} />
+                    </Col>
+                    <Col md={3}>
+                        <Form.Label className="small fw-bold">გაცემის თარიღი</Form.Label>
+                        <Form.Control size="sm" type="date" value={reportForm.issueDate || ''} onChange={e => setReportForm({...reportForm, issueDate: e.target.value})} />
+                    </Col>
+                    <Col md={3}>
+                        <Form.Label className="small fw-bold">ინსპ. დაწყება</Form.Label>
+                        <Form.Control size="sm" type="date" value={reportForm.startDate || ''} onChange={e => setReportForm({...reportForm, startDate: e.target.value})} />
+                    </Col>
+                    <Col md={3}>
+                        <Form.Label className="small fw-bold">ინსპ. დასრულება</Form.Label>
+                        <Form.Control size="sm" type="date" value={reportForm.deadline || ''} onChange={e => setReportForm({...reportForm, deadline: e.target.value})} />
+                    </Col>
+
+                    <Col md={6}>
+                        <Form.Label className="small fw-bold">ობიექტის დასახელება</Form.Label>
+                        <Form.Control size="sm" value={reportForm.objectName || ''} onChange={e => setReportForm({...reportForm, objectName: e.target.value})} />
+                    </Col>
+                    <Col md={6}>
+                        <Form.Label className="small fw-bold">ობიექტის მისამართი</Form.Label>
+                        <Form.Control size="sm" value={reportForm.objectAddress || ''} onChange={e => setReportForm({...reportForm, objectAddress: e.target.value})} />
+                    </Col>
+                    <Col md={5}>
+                        <Form.Label className="small fw-bold">დამკვეთი</Form.Label>
+                        <Form.Control size="sm" value={reportForm.clientName || ''} onChange={e => setReportForm({...reportForm, clientName: e.target.value})} />
+                    </Col>
+                    <Col md={3}>
+                        <Form.Label className="small fw-bold">ს/კ</Form.Label>
+                        <Form.Control size="sm" value={reportForm.clientID || ''} onChange={e => setReportForm({...reportForm, clientID: e.target.value})} />
+                    </Col>
+                    <Col md={4}>
+                        <Form.Label className="small fw-bold">წარმომადგენელი</Form.Label>
+                        <Form.Control size="sm" value={reportForm.contactPerson || ''} onChange={e => setReportForm({...reportForm, contactPerson: e.target.value})} />
+                    </Col>
+                    <Col md={12}>
+                        <Form.Label className="small fw-bold">აკრედიტაციის სფერო / ინსპ. სახე</Form.Label>
+                        <Form.Control size="sm" value={reportForm.accreditationScope || ''} onChange={e => setReportForm({...reportForm, accreditationScope: e.target.value})} />
+                    </Col>
+                    <Col md={12}>
+                        <Form.Label className="small fw-bold">ინსპექტირების ამოცანა / განაცხადის შინაარსი</Form.Label>
+                        <Form.Control size="sm" as="textarea" rows={2} value={reportForm.inspectionTask || ''} onChange={e => setReportForm({...reportForm, inspectionTask: e.target.value})} />
+                    </Col>
+
+                    {/* ── ანგარიშის შინაარსი ── */}
+                    <Col md={12}><hr className="my-1" /><small className="fw-bold text-muted">📝 ანგარიშის შინაარსი</small></Col>
+
+                    <Col md={12}>
+                        <Form.Label className="small fw-bold">ანგარიშის შედგენის საფუძველი</Form.Label>
+                        <Form.Control size="sm" as="textarea" rows={2} placeholder="მაგ: ხელშ. N SC-001, განაცხადი №..." value={reportForm.reportBasis || ''} onChange={e => setReportForm({...reportForm, reportBasis: e.target.value})} />
+                    </Col>
+                    <Col md={6}>
+                        <Form.Label className="small fw-bold">წარმოდგენილი მასალები</Form.Label>
+                        <Form.Control size="sm" as="textarea" rows={4} placeholder="თითო ჩანაწერი ახალ ხაზზე&#10;მაგ: პროექტი, ნახაზები&#10;ხარჯთაღრიცხვა" value={reportForm.submittedMaterials || ''} onChange={e => setReportForm({...reportForm, submittedMaterials: e.target.value})} />
+                    </Col>
+                    <Col md={6}>
+                        <Form.Label className="small fw-bold">ნორმ. დოკუმენტაცია</Form.Label>
+                        <Form.Control size="sm" as="textarea" rows={4} placeholder="მაგ: ISO/IEC 17020:2012&#10;СНиП 3.03.01-87&#10;სამშენ. ნებართვა" value={reportForm.normativeDocs || ''} onChange={e => setReportForm({...reportForm, normativeDocs: e.target.value})} />
+                    </Col>
+                    <Col md={12}>
+                        <Form.Label className="small fw-bold">გამოყენებული ხელსაწყოები / მოწყობილობები</Form.Label>
+                        <Form.Control size="sm" as="textarea" rows={2} placeholder="მაგ: მეტრი, ლაზერული ანაზომი, ფოტოაპარატი..." value={reportForm.tools || ''} onChange={e => setReportForm({...reportForm, tools: e.target.value})} />
+                    </Col>
+
+                    {/* ── ძირითადი ველები ── */}
+                    <Col md={12}><hr className="my-1" /><small className="fw-bold text-success">★ ძირითადი შედეგები</small></Col>
+
+                    <Col md={12}>
+                        <Form.Label className="small fw-bold text-success">დასკვნა</Form.Label>
+                        <Form.Control as="textarea" rows={6} placeholder="ინსპექტირების საბოლოო დასკვნა — შეუსაბამობები, შედეგი, რეკომენდაციები..." value={reportForm.conclusion || ''} onChange={e => setReportForm({...reportForm, conclusion: e.target.value})} />
+                    </Col>
+                    <Col md={12}>
+                        <Form.Label className="small fw-bold text-primary">კვლევითი ნაწილი</Form.Label>
+                        <Form.Control as="textarea" rows={8} placeholder="კვლევის მეთოდოლოგია, შემოწმებული ელემენტები, გამოვლენილი ფაქტები, გაზომვების შედეგები..." value={reportForm.researchContent || ''} onChange={e => setReportForm({...reportForm, researchContent: e.target.value})} />
+                    </Col>
+                </Row>
+            </Modal.Body>
+            <Modal.Footer className="border-0">
+                <Button variant="secondary" onClick={() => setShowReportModal(false)}>დახურვა</Button>
+                <PDFDownloadLink
+                    document={<ReportCoverPdf data={reportForm} />}
+                    fileName={`inspection-report-${reportForm.inspectionNumber || 'draft'}.pdf`}
+                >
+                    {({ loading }) => (
+                        <Button variant="success" disabled={loading}>
+                            {loading ? '⏳ მზადდება...' : '📗 ანგარიშის გადმოწერა'}
                         </Button>
                     )}
                 </PDFDownloadLink>

@@ -100,12 +100,17 @@ const styles = StyleSheet.create({
   signatureLine: { borderBottomWidth: 0.5, borderBottomColor: '#000', marginTop: 45, marginBottom: 5 },
 });
 
+const toLines = (str) => (str || '').split('\n').filter(l => l.trim());
+
 const ReportCoverPdf = ({ data = {} }) => {
   const start = data.startDate ? data.startDate.split('T')[0] : '';
-  const end = data.status === 'დასრულებული' && data.deadline ? data.deadline.split('T')[0] : '';
-  const issueDate = data.issueDate ? data.issueDate.split('T')[0] : ''; 
+  const end = data.deadline ? data.deadline.split('T')[0] : '';
+  const issueDate = data.issueDate ? data.issueDate.split('T')[0] : '';
   const currentYear = new Date().getFullYear();
   const reportNum = data.inspectionNumber || '';
+  const submittedLines = toLines(data.submittedMaterials);
+  const normativeLines = toLines(data.normativeDocs);
+  const toolLines = toLines(data.tools);
 
   return (
     <Document>
@@ -204,8 +209,9 @@ const ReportCoverPdf = ({ data = {} }) => {
 
         <View style={styles.multiLineContainer}>
             <Text style={styles.multiLineLabel}>ანგარიშის შედგენის საფუძველი:</Text>
-            <View style={styles.multiLineBox}></View>
-            <View style={styles.multiLineBox}></View>
+            <View style={styles.multiLineBox}>
+                <Text style={{fontSize: 10}}>{data.reportBasis || ''}</Text>
+            </View>
         </View>
 
         <View style={styles.formRow}>
@@ -246,13 +252,28 @@ const ReportCoverPdf = ({ data = {} }) => {
         }
 
         <Text style={styles.sectionTitle}>წარმოდგენილი მასალები:</Text>
-        {[...Array(5)].map((_, i) => (<View key={i} style={styles.listItem}><Text style={styles.bullet}>{i + 1}.</Text></View>))}
-        
+        {submittedLines.length > 0
+            ? submittedLines.map((line, i) => (
+                <View key={i} style={styles.listItem}><Text style={styles.bullet}>{i + 1}.</Text><Text style={{flex:1, fontSize:10}}> {line}</Text></View>
+              ))
+            : [...Array(5)].map((_, i) => (<View key={i} style={styles.listItem}><Text style={styles.bullet}>{i + 1}.</Text></View>))
+        }
+
         <Text style={styles.sectionTitle}>კვლევაში გამოყენებული ნორმატიული დოკუმენტაცია:</Text>
-        <View style={styles.listItem}><Text style={styles.bullet}>•</Text></View>
-        
+        {normativeLines.length > 0
+            ? normativeLines.map((line, i) => (
+                <View key={i} style={styles.listItem}><Text style={styles.bullet}>•</Text><Text style={{flex:1, fontSize:10}}> {line}</Text></View>
+              ))
+            : <View style={styles.listItem}><Text style={styles.bullet}>•</Text></View>
+        }
+
         <Text style={styles.sectionTitle}>კვლევაში გამოყენებული ხელსაწყოები:</Text>
-        <View style={styles.listItem}><Text style={styles.bullet}>•</Text></View>
+        {toolLines.length > 0
+            ? toolLines.map((line, i) => (
+                <View key={i} style={styles.listItem}><Text style={styles.bullet}>•</Text><Text style={{flex:1, fontSize:10}}> {line}</Text></View>
+              ))
+            : <View style={styles.listItem}><Text style={styles.bullet}>•</Text></View>
+        }
 
         <Text break />
 
@@ -260,10 +281,18 @@ const ReportCoverPdf = ({ data = {} }) => {
         {/* =================== გვერდი 5: დასკვნა და კვლევა ================= */}
 
         <Text style={{fontSize: 14, fontWeight: 'bold', textAlign: 'center'}}>დასკვნა</Text>
-        <View style={styles.conclusionBox}></View>
-        
+        <View style={[styles.conclusionBox, {justifyContent: 'flex-start', alignItems: 'flex-start'}]}>
+            {data.conclusion
+                ? <Text style={{fontSize: 10, lineHeight: 1.6}}>{data.conclusion}</Text>
+                : null}
+        </View>
+
         <Text style={{fontSize: 14, fontWeight: 'bold', textAlign: 'center', marginTop: 10}}>კვლევითი ნაწილი</Text>
-        <View style={styles.researchBox}><Text style={{color: '#ccc'}}>(ადგილი ტექსტისთვის და ფოტოებისთვის)</Text></View>
+        <View style={[styles.researchBox, {justifyContent: 'flex-start', alignItems: 'flex-start'}]}>
+            {data.researchContent
+                ? <Text style={{fontSize: 10, lineHeight: 1.6}}>{data.researchContent}</Text>
+                : <Text style={{color: '#ccc'}}>(ადგილი ტექსტისთვის და ფოტოებისთვის)</Text>}
+        </View>
 
         <Text break />
 
