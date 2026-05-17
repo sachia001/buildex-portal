@@ -16,28 +16,28 @@ const s = StyleSheet.create({
   headerSub: { color: '#666', fontSize: 7, marginTop: 1 },
   dividerGold: { borderTopWidth: 0.8, borderTopColor: '#ccc' },
 
-  body: { paddingLeft: 60, paddingRight: 32, paddingTop: 10 },
+  body: { paddingLeft: 60, paddingRight: 32, paddingTop: 12 },
 
-  centerBold: { fontSize: 11.5, fontWeight: 'bold', textAlign: 'center', marginBottom: 2 },
-  centerSub: { fontSize: 8.5, textAlign: 'center', color: '#555', marginBottom: 2 },
-  centerRef: { fontSize: 7.5, textAlign: 'center', color: '#888', marginBottom: 2 },
-  centerNum: { fontSize: 9, textAlign: 'center', color: '#444', marginBottom: 7 },
+  centerBold: { fontSize: 12, fontWeight: 'bold', textAlign: 'center', marginBottom: 2 },
+  centerSub: { fontSize: 9, textAlign: 'center', color: '#555', marginBottom: 2 },
+  centerRef: { fontSize: 8, textAlign: 'center', color: '#888', marginBottom: 3 },
+  centerNum: { fontSize: 9, textAlign: 'center', color: '#444', marginBottom: 9 },
 
-  cityDateRow: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 6, fontSize: 9 },
-  divider: { borderTopWidth: 0.8, borderTopColor: '#003366', marginVertical: 4 },
+  cityDateRow: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 8, fontSize: 9.5 },
+  divider: { borderTopWidth: 0.8, borderTopColor: '#003366', marginVertical: 6 },
 
-  artTitle: { fontSize: 9.5, fontWeight: 'bold', marginTop: 5, marginBottom: 2 },
-  para: { fontSize: 9, textAlign: 'justify', marginBottom: 2, lineHeight: 1.5 },
-  paraIn: { fontSize: 9, textAlign: 'justify', marginBottom: 1, marginLeft: 12, lineHeight: 1.5 },
+  artTitle: { fontSize: 10, fontWeight: 'bold', marginTop: 8, marginBottom: 3 },
+  para: { fontSize: 9.5, textAlign: 'justify', marginBottom: 3, lineHeight: 1.65 },
+  paraIn: { fontSize: 9.5, textAlign: 'justify', marginBottom: 2, marginLeft: 12, lineHeight: 1.65 },
 
   tableHeader: { flexDirection: 'row', backgroundColor: '#eef2f6', paddingVertical: 3, paddingHorizontal: 5, marginBottom: 1 },
   tableRow: { flexDirection: 'row', borderBottomWidth: 0.5, borderBottomColor: '#ccc', paddingVertical: 3, paddingHorizontal: 5 },
-  tc: { fontSize: 8.5 },
+  tc: { fontSize: 9 },
 
-  partiesBox: { borderWidth: 0.8, borderColor: '#003366', marginBottom: 8 },
+  partiesBox: { borderWidth: 0.8, borderColor: '#003366', marginBottom: 10 },
   partyRow: { flexDirection: 'row', borderBottomWidth: 0.5, borderBottomColor: '#dde' },
-  partyLabel: { backgroundColor: '#eef2f6', width: 110, paddingVertical: 4, paddingHorizontal: 7, fontSize: 8.5, fontWeight: 'bold', flexShrink: 0 },
-  partyData: { flex: 1, paddingVertical: 4, paddingHorizontal: 7, fontSize: 8.5 },
+  partyLabel: { backgroundColor: '#eef2f6', width: 115, paddingVertical: 5, paddingHorizontal: 7, fontSize: 9, fontWeight: 'bold', flexShrink: 0 },
+  partyData: { flex: 1, paddingVertical: 5, paddingHorizontal: 7, fontSize: 9 },
 
   sigSection: { marginTop: 8 },
   sigTitle: { fontSize: 9.5, fontWeight: 'bold', marginBottom: 6 },
@@ -336,8 +336,8 @@ const ShareTransferPdf = ({ data = {} }) => {
           <Text style={s.para}>{`${art(10)}.2. მოლაპარაკებებით შეუთანხმებლობის შემთხვევაში დავა გადაეცემა განსახილველად საქართველოს სასამართლოს — საქართველოს სამოქალაქო საპროცესო კოდექსით დადგენილი ტერიტორიული კომპეტენციის შესაბამისად.`}</Text>
           <Text style={s.para}>{`${art(10)}.3. ამ ხელშეკრულებაზე ყველა საკითხში, რომელიც ხელშეკრულებით პირდაპირ არ არის მოწესრიგებული, გამოიყენება საქართველოს კანონმდებლობა.`}</Text>
 
-          {/* Art: Final provisions — force new page so art11 + signatures share one page */}
-          <Text break style={s.artTitle}>{`მუხლი ${art(11)}. დასკვნითი დებულებები`}</Text>
+          {/* Art: Final provisions */}
+          <Text style={s.artTitle}>{`მუხლი ${art(11)}. დასკვნითი დებულებები`}</Text>
           <Text style={s.para}>{`${art(11)}.1. წინამდებარე ხელშეკრულება შედგენილია ქართულ ენაზე, ${totalCount} (${numWord(totalCount)}) თანაბარი იურიდიული ძალის მქონე ეგზემპლარად, თითო — თითოეული მხარისათვის.`}</Text>
           <Text style={s.para}>{`${art(11)}.2. ხელშეკრულება ძალაში შედის ყველა მხარის მიერ ხელმოწერის მომენტიდან.`}</Text>
           <Text style={s.para}>{`${art(11)}.3. ხელშეკრულებაში ნებისმიერი ცვლილება ან დამატება ძალაშია მხოლოდ ყველა მხარის მიერ ხელმოწერილი წერილობითი შეთანხმების სახით.`}</Text>
