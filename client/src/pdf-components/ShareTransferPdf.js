@@ -119,9 +119,7 @@ const ShareTransferPdf = ({ data = {} }) => {
           <Text style={s.centerRef}>
             {'საქართველოს სამოქალაქო კოდექსი  |  „მეწარმეთა შესახებ" საქართველოს კანონი'}
           </Text>
-          {contractNumber
-            ? <Text style={s.centerNum}>{`№ ${contractNumber}`}</Text>
-            : <Text style={{ marginBottom: 18 }}> </Text>}
+          <Text style={s.centerNum}>{contractNumber ? `№ ${contractNumber}` : '№ ______'}</Text>
 
           <View style={s.cityDateRow}>
             <Text>{city}</Text>
