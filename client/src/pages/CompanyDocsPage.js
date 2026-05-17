@@ -190,12 +190,19 @@ const CompanyDocsPage = ({ role }) => {
     transferorId: partners[0]?.personalId || '20001017959',
     transferorAddress: partners[0]?.address || 'ქ. თელავი, ლიონიძის ქ. №22',
     transferorCurrentShare: String(partners[0]?.share || 100),
-    transfereeName: '', transfereeId: '', transfereeAddress: '',
-    sharePercent: '', shareValue: '', salePrice: '',
+    transferees: [{ name: '', id: '', address: '', sharePercent: '', salePrice: '' }],
+    shareValue: '',
     paymentTerms: 'ხელშეკრულების გაფორმებიდან 5 სამუშაო დღის ვადაში',
     contractDate: new Date().toLocaleDateString('ka-GE'),
     contractNumber: '', city: 'ქ. თელავი', notaryName: '',
   });
+
+  const addTransferee = () => setTransferForm(f => ({ ...f, transferees: [...f.transferees, { name: '', id: '', address: '', sharePercent: '', salePrice: '' }] }));
+  const removeTransferee = i => setTransferForm(f => ({ ...f, transferees: f.transferees.filter((_, idx) => idx !== i) }));
+  const updateTransferee = (i, field, val) => setTransferForm(f => { const t = [...f.transferees]; t[i] = { ...t[i], [field]: val }; return { ...f, transferees: t }; });
+
+  const totalTransferred = transferForm.transferees.reduce((s, t) => s + (parseInt(t.sharePercent) || 0), 0);
+  const remainingShare = (parseInt(transferForm.transferorCurrentShare) || 0) - totalTransferred;
 
   // When partners change, auto-update transferor defaults
   useEffect(() => {
@@ -239,7 +246,7 @@ const CompanyDocsPage = ({ role }) => {
   const charterPdfData = { partners, director: config.director, directorId: config.directorId, address: config.addressShort, email: config.email, charterDate };
   const decisionPdfData = { decisionNumber: decisionNum, decisionDate, city: config.city, partners, decisions: decisionData, agendaNote };
   const foundingPdfData = { partners, director: config.director, directorId: config.directorId, directorAddress: config.directorAddress, address: config.address, email: config.email, phone: config.phone, foundingDate, totalShares: config.totalShares, representation: config.representation };
-  const transferPdfData = { transferType, ...transferForm, partners };
+  const transferPdfData = { transferType, ...transferForm, transferees: transferForm.transferees, partners };
 
   return (
     <Container className="mt-4 pb-5">
@@ -531,45 +538,41 @@ const CompanyDocsPage = ({ role }) => {
                     <Form.Control value={transferForm.transferorCurrentShare} onChange={e => setTransferForm({ ...transferForm, transferorCurrentShare: e.target.value })} />
                   </Col>
 
-                  <Col md={12}><hr className="my-1" /><strong className="small text-muted">წილის შემძენი</strong></Col>
-                  <Col md={4}>
-                    <Form.Label className="small fw-bold">სახელი, გვარი *</Form.Label>
-                    <Form.Control placeholder="სახელი გვარი" value={transferForm.transfereeName} onChange={e => setTransferForm({ ...transferForm, transfereeName: e.target.value })} />
-                  </Col>
-                  <Col md={3}>
-                    <Form.Label className="small fw-bold">პ/ნ</Form.Label>
-                    <Form.Control placeholder="პირადი ნომერი" value={transferForm.transfereeId} onChange={e => setTransferForm({ ...transferForm, transfereeId: e.target.value })} />
-                  </Col>
-                  <Col md={5}>
-                    <Form.Label className="small fw-bold">მისამართი</Form.Label>
-                    <Form.Control placeholder="მისამართი" value={transferForm.transfereeAddress} onChange={e => setTransferForm({ ...transferForm, transfereeAddress: e.target.value })} />
+                  <Col md={12}><hr className="my-1" /><strong className="small text-muted">წილის შემძენი / შემძენები</strong></Col>
+                  <Col md={12}>
+                    {transferForm.transferees.map((t, i) => (
+                      <Card key={i} className="mb-2 border bg-light">
+                        <Card.Body className="p-2">
+                          <div className="d-flex justify-content-between mb-2">
+                            <strong className="small">{i + 1}. წილის შემძენი</strong>
+                            {transferForm.transferees.length > 1 && <Button size="sm" variant="outline-danger" onClick={() => removeTransferee(i)}>✕</Button>}
+                          </div>
+                          <Row className="g-2">
+                            <Col md={4}><Form.Label className="small fw-bold">სახელი, გვარი *</Form.Label><Form.Control value={t.name} onChange={e => updateTransferee(i, 'name', e.target.value)} /></Col>
+                            <Col md={3}><Form.Label className="small fw-bold">პ/ნ</Form.Label><Form.Control value={t.id} onChange={e => updateTransferee(i, 'id', e.target.value)} /></Col>
+                            <Col md={5}><Form.Label className="small fw-bold">მისამართი</Form.Label><Form.Control value={t.address} onChange={e => updateTransferee(i, 'address', e.target.value)} /></Col>
+                            <Col md={3}><Form.Label className="small fw-bold">გასხვის. წილი (%)</Form.Label><Form.Control value={t.sharePercent} onChange={e => updateTransferee(i, 'sharePercent', e.target.value)} /></Col>
+                            {transferType === 'sale' && <Col md={3}><Form.Label className="small fw-bold">ფასი (₾)</Form.Label><Form.Control value={t.salePrice} onChange={e => updateTransferee(i, 'salePrice', e.target.value)} /></Col>}
+                          </Row>
+                        </Card.Body>
+                      </Card>
+                    ))}
+                    <Button size="sm" variant="outline-success" onClick={addTransferee}>+ შემძენის დამატება</Button>
+                    <Form.Text className={remainingShare < 0 ? 'text-danger d-block mt-1' : 'text-muted d-block mt-1'}>
+                      სულ გადაიცემა: {totalTransferred}% | დარჩება: {remainingShare}%
+                    </Form.Text>
                   </Col>
 
                   <Col md={12}><hr className="my-1" /><strong className="small text-muted">გასხვისებული წილი</strong></Col>
-                  <Col md={3}>
-                    <Form.Label className="small fw-bold">გასხვის. წილი (%)</Form.Label>
-                    <Form.Control placeholder="50" value={transferForm.sharePercent} onChange={e => setTransferForm({ ...transferForm, sharePercent: e.target.value })} />
-                    {transferForm.sharePercent && transferForm.transferorCurrentShare && (
-                      <Form.Text className="text-muted">
-                        დარჩება: {parseInt(transferForm.transferorCurrentShare) - parseInt(transferForm.sharePercent) || 0}%
-                      </Form.Text>
-                    )}
-                  </Col>
                   <Col md={3}>
                     <Form.Label className="small fw-bold">ბალანსური ღირებულება (₾)</Form.Label>
                     <Form.Control placeholder="0" value={transferForm.shareValue} onChange={e => setTransferForm({ ...transferForm, shareValue: e.target.value })} />
                   </Col>
                   {transferType === 'sale' && (
-                    <>
-                      <Col md={3}>
-                        <Form.Label className="small fw-bold">ნასყიდობის ფასი (₾) *</Form.Label>
-                        <Form.Control placeholder="0" value={transferForm.salePrice} onChange={e => setTransferForm({ ...transferForm, salePrice: e.target.value })} />
-                      </Col>
-                      <Col md={9}>
-                        <Form.Label className="small fw-bold">ანგარიშსწორების პირობები</Form.Label>
-                        <Form.Control value={transferForm.paymentTerms} onChange={e => setTransferForm({ ...transferForm, paymentTerms: e.target.value })} />
-                      </Col>
-                    </>
+                    <Col md={9}>
+                      <Form.Label className="small fw-bold">ანგარიშსწორების პირობები</Form.Label>
+                      <Form.Control value={transferForm.paymentTerms} onChange={e => setTransferForm({ ...transferForm, paymentTerms: e.target.value })} />
+                    </Col>
                   )}
 
                   <Col md={12}><hr className="my-1" /><strong className="small text-muted">ხელშეკრულების დეტალები</strong></Col>
