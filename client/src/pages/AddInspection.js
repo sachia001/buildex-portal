@@ -11,24 +11,39 @@ const AddInspection = () => {
     const [formData, setFormData] = useState({
         objectName: '', objectAddress: '',
         clientName: '', clientID: '', clientPhone: '', clientEmail: '',
-
-        // 👇 აღდგენილი ველები
-        inspectionScope: 'ობიექტის ხარჯთაღრიცხვის ინსპექტირება',
+        inspectionScope: 'ხარჯთაღრიცხვის ინსპექტირება',
         tenderNumber: '',
         tenderLink: '',
-
         applicationContent: 'გთხოვთ, ჩაატაროთ ინსპექტირება და გასცეთ შესაბამისი დასკვნა.',
         deadline: '', startDate: new Date().toISOString().split('T')[0],
-        expert: [], technicalManager: [], qualityManager: ''
+        expert: [], technicalManager: [], qualityManager: '',
+        submittedDocs: [],
     });
 
     const scopes = [
-        "ობიექტის ხარჯთაღრიცხვის ინსპექტირება",
-        "შესრულებული სამუშაოების (ფორმა #2) ინსპექტირება",
+        "ხარჯთაღრიცხვის ინსპექტირება",
+        "შესრულებული სამუშაოების ინსპექტირება (ფ.№2)",
         "ობიექტის ტექნიკური მდგომარეობის ინსპექტირება",
         "პროექტის ინსპექტირება",
-        "სხვა"
+        "სამშენებლო მასალების კვლევა",
+        "სხვა",
     ];
+
+    const submittedDocOptions = [
+        "განცხადება",
+        "ხელშეკრულება (SC)",
+        "ტექნიკური დოკუმენტაცია",
+        "ნახაზები / საპროექტო დოკ.",
+        "ხარჯთაღრიცხვა",
+        "ფ.№2 (შესრ. სამუშ.)",
+        "ფოტო მასალა",
+        "სხვა",
+    ];
+
+    const handleDocToggle = (doc) => {
+        const current = formData.submittedDocs;
+        setFormData({ ...formData, submittedDocs: current.includes(doc) ? current.filter(d => d !== doc) : [...current, doc] });
+    };
 
     const THEME = { primary: '#2c3e50', border: '#dfe6e9', bg: '#f8f9fa' };
 
@@ -91,10 +106,9 @@ const AddInspection = () => {
                         <Card.Header className="bg-white py-3 border-bottom"><h6 className="m-0 fw-bold text-primary">2. ინსპექტირების დეტალები</h6></Card.Header>
                         <Card.Body>
                             <Row className="g-3">
-                                {/* 👇 სფეროს არჩევა */}
                                 <Col md={12}>
                                     <Form.Label className="small fw-bold">ინსპექტირების სფერო</Form.Label>
-                                    <Form.Select name="inspectionScope" onChange={handleChange}>
+                                    <Form.Select name="inspectionScope" value={formData.inspectionScope} onChange={handleChange}>
                                         {scopes.map(s => <option key={s} value={s}>{s}</option>)}
                                     </Form.Select>
                                 </Col>
@@ -105,6 +119,26 @@ const AddInspection = () => {
                                 <Col md={6}><Form.Label className="small fw-bold">დაწყება</Form.Label><Form.Control type="date" name="startDate" value={formData.startDate} onChange={handleChange} /></Col>
                                 <Col md={6}><Form.Label className="small fw-bold">დასრულების ვადა</Form.Label><Form.Control type="date" name="deadline" onChange={handleChange} /></Col>
                             </Row>
+                        </Card.Body>
+                    </Card>
+
+                    {/* 2b. წარმოდგენილი დოკუმენტები */}
+                    <Card className="shadow-sm border-0 mb-4">
+                        <Card.Header className="bg-white py-3 border-bottom"><h6 className="m-0 fw-bold text-primary">2ბ. წარმოდგენილი დოკუმენტები</h6></Card.Header>
+                        <Card.Body>
+                            <Form.Label className="small fw-bold d-block mb-2">მონიშნეთ განაცხადთან ერთად წარმოდგენილი დოკუმენტები:</Form.Label>
+                            <div className="d-flex flex-wrap gap-3">
+                                {submittedDocOptions.map(doc => (
+                                    <Form.Check
+                                        key={doc}
+                                        type="checkbox"
+                                        id={`doc-${doc}`}
+                                        label={doc}
+                                        checked={formData.submittedDocs.includes(doc)}
+                                        onChange={() => handleDocToggle(doc)}
+                                    />
+                                ))}
+                            </div>
                         </Card.Body>
                     </Card>
 

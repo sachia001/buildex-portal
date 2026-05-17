@@ -34,7 +34,13 @@ const AdminRegister = ({ role }) => {
         firstName: '', lastName: '', personalId: '', position: 'ექსპერტი', email: '', phone: '', authExpiry: '',
     });
     const [competencies, setCompetencies] = useState([]);
-    const competencyList = ["ფორმა №2", "ხარჯთაღრიცხვა", "ფარული სამუშაოები", "ლაბორატორიული კვლევა", "პროექტის ექსპერტიზა"];
+    const competencyList = [
+        "ხარჯთაღრიცხვა",
+        "შესრულებული სამუშაოები (ფ.№2)",
+        "ტექნიკური მდგომარეობა",
+        "პროექტის ინსპექტირება",
+        "სამშენებლო მასალები",
+    ];
     const [photoFile, setPhotoFile] = useState(null);
     const [staffError, setStaffError] = useState('');
     const [staffLoading, setStaffLoading] = useState(false);

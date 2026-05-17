@@ -113,8 +113,6 @@ const Dashboard = ({ role }) => {
 
                 {/* Quick Actions */}
                 <div className="d-flex gap-2 flex-wrap mb-4">
-                    <Button variant="primary" size="sm" onClick={() => navigate('/add-inspection')}>+ ახალი საქმე</Button>
-                    <Button variant="outline-secondary" size="sm" onClick={() => navigate('/inspections')}>📂 ყველა საქმე</Button>
                     <Button variant="outline-secondary" size="sm" onClick={() => navigate('/complaints')}>📨 საჩივრები</Button>
                     <Button variant="outline-secondary" size="sm" onClick={() => navigate('/internal-audits')}>🔍 შიდა აუდიტი</Button>
                     <Button variant="outline-secondary" size="sm" onClick={() => navigate('/corrective-actions')}>⚙️ CAR</Button>

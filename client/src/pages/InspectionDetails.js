@@ -53,9 +53,19 @@ const InspectionDetails = ({ role }) => {
     const [docType, setDocType] = useState('განცხადება');
     const [uploading, setUploading] = useState(false);
 
+    // ინსპექტირების სფეროები (AddInspection-ის იდენტური)
+    const inspectionScopes = [
+        "ხარჯთაღრიცხვის ინსპექტირება",
+        "შესრულებული სამუშაოების ინსპექტირება (ფ.№2)",
+        "ობიექტის ტექნიკური მდგომარეობის ინსპექტირება",
+        "პროექტის ინსპექტირება",
+        "სამშენებლო მასალების კვლევა",
+        "სხვა",
+    ];
+
     // დოკუმენტების ტიპები რეგლამენტის მიხედვით
     const docTypes = [
-        "განცხადება", "ხელშეკრულება (SC)", "ბრძანება", 
+        "განცხადება", "ხელშეკრულება (SC)", "ბრძანება",
         "ინსპექტირების ანგარიში (BX-INS)", "ფოტო მასალა", "სხვა"
     ];
 
@@ -166,11 +176,7 @@ const InspectionDetails = ({ role }) => {
                                     <Form.Label className="small fw-bold text-muted">ინსპექტირების სფერო</Form.Label>
                                     {editMode ? (
                                         <Form.Select value={formData.inspectionScope || ''} onChange={e => setFormData({...formData, inspectionScope: e.target.value})}>
-                                            <option>ობიექტის ხარჯთაღრიცხვის ინსპექტირება</option>
-                                            <option>შესრულებული სამუშაოების (ფორმა #2) ინსპექტირება</option>
-                                            <option>ობიექტის ტექნიკური მდგომარეობის ინსპექტირება</option>
-                                            <option>პროექტის ინსპექტირება</option>
-                                            <option>სხვა</option>
+                                            {inspectionScopes.map(s => <option key={s}>{s}</option>)}
                                         </Form.Select>
                                     ) : <div>{data.inspectionScope || '-'}</div>}
                                 </Col>
@@ -204,6 +210,17 @@ const InspectionDetails = ({ role }) => {
                                         <Form.Control value={formData.contactPerson || ''} onChange={e => setFormData({...formData, contactPerson: e.target.value})} />
                                     ) : <div>{data.contactPerson || '-'}</div>}
                                 </Col>
+                                {/* წარმოდგენილი დოკუმენტები */}
+                                {(data.submittedDocs && data.submittedDocs.length > 0) && (
+                                    <Col md={12}>
+                                        <Form.Label className="small fw-bold text-muted">წარმოდგენილი დოკუმენტები</Form.Label>
+                                        <div className="d-flex flex-wrap gap-2">
+                                            {data.submittedDocs.map(d => (
+                                                <span key={d} className="badge bg-light text-dark border">{d}</span>
+                                            ))}
+                                        </div>
+                                    </Col>
+                                )}
                                 <Col md={12}><hr/></Col>
                                 <Col md={4}>
                                     <div className="small text-muted">ექსპერტი</div>

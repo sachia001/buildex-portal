@@ -103,6 +103,7 @@ const InspectionSchema = new mongoose.Schema({
     status: { type: String, default: 'რეგისტრირებული' },
     deadline: Date,
     startDate: Date,
+    submittedDocs: { type: [String], default: [] },
     expert: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
     technicalManager: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
     qualityManager: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
