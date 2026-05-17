@@ -70,6 +70,14 @@ const PdfBtn = ({ document: doc, fileName, label, variant = 'primary' }) => (
   </PDFDownloadLink>
 );
 
+// ── Two-button helper: one without signature, one with facsimile ──────────────
+const DocBtns = ({ makeDoc, fileName, label, variant = 'primary' }) => (
+  <div className="d-flex gap-2 flex-wrap">
+    <PdfBtn document={makeDoc(false)} fileName={fileName} label={label} variant={variant} />
+    <PdfBtn document={makeDoc(true)} fileName={`signed-${fileName}`} label={`${label} (✍️ ხელმოწ.)`} variant="outline-secondary" />
+  </div>
+);
+
 // ── Partner row editor ────────────────────────────────────────────────────────
 const PartnerRow = ({ p, idx, onEdit, onRemove, canRemove }) => (
   <tr>
@@ -376,8 +384,8 @@ const CompanyDocsPage = ({ role }) => {
                     <Alert variant="info" className="py-2 small mb-2">
                       პარტნიორების სია ავტომატურად გადაიტანება ზემოდან — ცვლილება მხოლოდ „პარტნიორები" სექციაში გააკეთეთ.
                     </Alert>
-                    <PdfBtn
-                      document={<CharterPdf data={charterPdfData} />}
+                    <DocBtns
+                      makeDoc={(ws) => <CharterPdf data={{ ...charterPdfData, withSignature: ws }} />}
                       fileName={`wesadeba-buildex-${charterDate.replace(/,?\s+/g, '-')}.pdf`}
                       label="წესდების გენერაცია"
                       variant="dark"
@@ -451,8 +459,8 @@ const CompanyDocsPage = ({ role }) => {
                     <Alert variant="info" className="py-2 small mb-2">
                       პარტნიორები ავტომატურად გადაიტანება ზემოდან — ერთი პარტნიორის დროს გენერირდება ერთპიროვნული გადაწყვეტილება, მრავლის დროს — კრების ოქმი.
                     </Alert>
-                    <PdfBtn
-                      document={<PartnerDecisionPdf data={decisionPdfData} />}
+                    <DocBtns
+                      makeDoc={(ws) => <PartnerDecisionPdf data={{ ...decisionPdfData, withSignature: ws }} />}
                       fileName={`gadawyvetileba-${decisionNum}.pdf`}
                       label={partners.length === 1 ? 'გადაწყვეტილების გენერაცია' : 'კრების ოქმის გენერაცია'}
                       variant="success"
@@ -494,8 +502,8 @@ const CompanyDocsPage = ({ role }) => {
                     <Alert variant="info" className="py-2 small mb-2">
                       პარტნიორების სია ავტომატურად გადაიტანება ზემოდან.
                     </Alert>
-                    <PdfBtn
-                      document={<FoundingAgreementPdf data={foundingPdfData} />}
+                    <DocBtns
+                      makeDoc={(ws) => <FoundingAgreementPdf data={{ ...foundingPdfData, withSignature: ws }} />}
                       fileName={`sadadamfudzneblo-shetankhmeba-buildex.pdf`}
                       label="სადამფუძნებლო შეთანხმების გენერაცია"
                       variant="info"
@@ -594,8 +602,8 @@ const CompanyDocsPage = ({ role }) => {
                   </Col>
 
                   <Col md={12} className="mt-2">
-                    <PdfBtn
-                      document={<ShareTransferPdf data={transferPdfData} />}
+                    <DocBtns
+                      makeDoc={(ws) => <ShareTransferPdf data={{ ...transferPdfData, withSignature: ws }} />}
                       fileName={`share-transfer-${transferType}-${transferForm.contractNumber || 'draft'}.pdf`}
                       label={transferType === 'gift' ? 'ჩუქების ხელშეკრ. გენერაცია' : 'ნასყიდობის ხელშეკრ. გენერაცია'}
                       variant={transferType === 'gift' ? 'success' : 'primary'}
@@ -699,8 +707,8 @@ const CompanyDocsPage = ({ role }) => {
                   </Col>
 
                   <Col md={12} className="mt-2">
-                    <PdfBtn
-                      document={<ServiceContractPdf data={svcForm} />}
+                    <DocBtns
+                      makeDoc={(ws) => <ServiceContractPdf data={{ ...svcForm, withSignature: ws }} />}
                       fileName={`service-contract-${svcForm.contractNumber || 'draft'}.pdf`}
                       label="მომსახურების ხელშეკრ. გენერაცია"
                       variant="warning"

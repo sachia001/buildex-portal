@@ -106,7 +106,7 @@ const DirectorsOrderPdf = ({ data }) => {
             
             <View style={styles.signatureBlock}>
                 {/* 👇 თუ არის ხელმოწერის სურათი, ვსვამთ მას, თუ არა - ცარიელ ადგილს */}
-                <Image src={data.signature || '/signature-levan.png'} style={styles.signatureImage} />
+                {data.withSignature && <Image src="/signature-levan.png" style={styles.signatureImage} />}
                 
                 {/* ხაზი და წარწერა (ხელმოწერა) */}
                 <Text style={styles.signatureLine}>(ხელმოწერა)</Text>

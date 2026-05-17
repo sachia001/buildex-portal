@@ -65,6 +65,7 @@ const CharterPdf = ({ data = {} }) => {
     address = 'ქ. თელავი, ლიონიძის ქ. №22',
     email = 'info@buildexexpertise.com',
     charterDate = '09 მარტი, 2026 წელი',
+    withSignature = false,
   } = data;
 
   const isSingle = partners.length === 1;
@@ -249,8 +250,8 @@ const CharterPdf = ({ data = {} }) => {
             <View key={i} style={s.sigBlock}>
               <Text style={s.sigName}>{p.name}</Text>
               <Text style={s.sigShare}>წილი: {p.share}%  |  პ/ნ: {p.personalId}</Text>
-              {p.name === 'ლევან საჩიშვილი' && <Image src="/signature-levan.png" style={{ width: 95, height: 48, objectFit: 'contain', marginTop: 4 }} />}
-              <View style={p.name === 'ლევან საჩიშვილი' ? { borderBottomWidth: 0.5, borderBottomColor: '#555', width: 180, marginTop: 2 } : s.sigLine} />
+              {withSignature && p.name === 'ლევან საჩიშვილი' && <Image src="/signature-levan.png" style={{ width: 95, height: 48, objectFit: 'contain', marginTop: 4 }} />}
+              <View style={withSignature && p.name === 'ლევან საჩიშვილი' ? { borderBottomWidth: 0.5, borderBottomColor: '#555', width: 180, marginTop: 2 } : s.sigLine} />
               <Text style={s.sigLineLabel}>{`/ ${p.name.split(' ').pop()} /`}</Text>
             </View>
           ))}

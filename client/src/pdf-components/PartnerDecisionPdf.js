@@ -51,6 +51,7 @@ const PartnerDecisionPdf = ({ data = {} }) => {
     partners = [{ name: 'ლევან საჩიშვილი', personalId: '20001017959', address: 'ქ. თელავი, ლიონიძის ქ. №22', share: 100 }],
     decisions = [],
     agendaNote = '',
+    withSignature = false,
   } = data;
 
   const isSingle = partners.length === 1;
@@ -124,8 +125,8 @@ const PartnerDecisionPdf = ({ data = {} }) => {
                   <Text style={s.sigLabel}>{p.name}</Text>
                   <Text style={s.sigDetail}>პ/ნ: {p.personalId}</Text>
                   <Text style={s.sigDetail}>წილი: {p.share || 100}%</Text>
-                  {p.name === 'ლევან საჩიშვილი' && <Image src="/signature-levan.png" style={{ width: 95, height: 48, objectFit: 'contain', marginTop: 4 }} />}
-                  <View style={p.name === 'ლევან საჩიშვილი' ? { borderBottomWidth: 0.5, borderBottomColor: '#555', width: 180, marginTop: 2 } : s.sigLine} />
+                  {withSignature && p.name === 'ლევან საჩიშვილი' && <Image src="/signature-levan.png" style={{ width: 95, height: 48, objectFit: 'contain', marginTop: 4 }} />}
+                  <View style={withSignature && p.name === 'ლევან საჩიშვილი' ? { borderBottomWidth: 0.5, borderBottomColor: '#555', width: 180, marginTop: 2 } : s.sigLine} />
                   <Text style={s.sigLineLabel}>{`/ ${p.name.split(' ').pop()} /`}</Text>
                 </View>
               ))}
