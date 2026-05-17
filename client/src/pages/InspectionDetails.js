@@ -24,8 +24,53 @@ const InspectionDetails = ({ role }) => {
     const [showReportModal, setShowReportModal] = useState(false);
     const [reportForm, setReportForm] = useState({});
 
+    const SCOPE_NORMS = {
+        'BE-PR-01': [
+            'SST ISO/IEC 17020:2012 — შესაბამისობის შეფასება; ინსპექტირების ორგანოების მოთხოვნები',
+            'ILAC G28:07/2018 — სახელმძღვანელო ინსპექტირების სფეროების ფორმულირებისთვის',
+            'ხარჯთაღრიცხვის საპროექტო დოკუმენტაცია (წარდგენილი)',
+            'მოქმედი ტექნიკური რეგლამენტები და სტანდარტები',
+            'ორგანიზაციის ხარისხის სახელმძღვანელო (BE-QM)',
+        ].join('\n'),
+        'BE-PR-02': [
+            'SST ISO/IEC 17020:2012 — შესაბამისობის შეფასება; ინსპექტირების ორგანოების მოთხოვნები',
+            'ILAC G28:07/2018 — სახელმძღვანელო ინსპექტირების სფეროების ფორმულირებისთვის',
+            'შესრულებული სამუშაოების აქტი — ფორმა №2 (KS-2)',
+            'СНиП — სამშენებლო ნორმები და წესები (მოქმედი)',
+            'მოქმედი ტექნიკური რეგლამენტები',
+            'ორგანიზაციის ხარისხის სახელმძღვანელო (BE-QM)',
+        ].join('\n'),
+        'BE-PR-03': [
+            'SST ISO/IEC 17020:2012 — შესაბამისობის შეფასება; ინსპექტირების ორგანოების მოთხოვნები',
+            'ILAC G28:07/2018 — სახელმძღვანელო ინსპექტირების სფეროების ფორმულირებისთვის',
+            'СНиП — სამშენებლო ნორმები და წესები (მოქმედი)',
+            'ЕНиР — ნორმატიული სახელმძღვანელო სამუშაოთა ნორმებისათვის',
+            'მოქმედი ბაზრის ფასები — ხარჯთაღრიცხვის ნორმატიული ბაზა',
+            'ორგანიზაციის ხარისხის სახელმძღვანელო (BE-QM)',
+        ].join('\n'),
+        'BE-PR-04': [
+            'SST ISO/IEC 17020:2012 — შესაბამისობის შეფასება; ინსპექტირების ორგანოების მოთხოვნები',
+            'ILAC G28:07/2018 — სახელმძღვანელო ინსპექტირების სფეროების ფორმულირებისთვის',
+            'СНиП 3.03.01-87 — სამშ. ნ&წ; სამშენებლო კონსტრუქციები',
+            'მოქმედი ტექნიკური რეგლამენტები სამშ. სფეროში',
+            'სამუშაო პროექტი და ხელშეკრულება (წარდგენილი)',
+            'ორგანიზაციის ხარისხის სახელმძღვანელო (BE-QM)',
+        ].join('\n'),
+    };
+
     const openReportModal = () => {
         const fmtDate = d => d ? d.split('T')[0] : '';
+        const scopeCode = ['BE-PR-01','BE-PR-02','BE-PR-03','BE-PR-04'].find(c => (data.inspectionScope||'').includes(c)) || '';
+        const autoNorms = SCOPE_NORMS[scopeCode] || '';
+        const autoSubmitted = Array.isArray(data.submittedDocs) && data.submittedDocs.length > 0
+            ? data.submittedDocs.join('\n')
+            : (data.applicationContent || '');
+        const expertNames = Array.isArray(data.expert) && data.expert.length > 0
+            ? data.expert.map(e => `${e.firstName||''} ${e.lastName||''}`.trim()).join(', ')
+            : (data.expert ? `${data.expert.firstName||''} ${data.expert.lastName||''}`.trim() : '');
+        const techMgrNames = Array.isArray(data.technicalManager) && data.technicalManager.length > 0
+            ? data.technicalManager.map(e => `${e.firstName||''} ${e.lastName||''}`.trim()).join(', ')
+            : (data.technicalManager ? `${data.technicalManager.firstName||''} ${data.technicalManager.lastName||''}`.trim() : '');
         setReportForm({
             inspectionNumber: data.inspectionNumber || '',
             issueDate: new Date().toISOString().split('T')[0],
@@ -39,12 +84,14 @@ const InspectionDetails = ({ role }) => {
             accreditationScope: data.inspectionScope || '',
             inspectionTask: data.applicationContent || '',
             expert: data.expert || [],
+            expertNames,
             technicalManager: data.technicalManager || [],
+            technicalManagerNames: techMgrNames,
             qualityManager: data.qualityManager || null,
             tenderNumber: data.tenderNumber || '',
             reportBasis: data.tenderNumber ? `განაცხადი / ხელშეკრულება № ${data.tenderNumber}` : '',
-            submittedMaterials: '',
-            normativeDocs: '',
+            submittedMaterials: autoSubmitted,
+            normativeDocs: autoNorms,
             tools: '',
             conclusion: '',
             researchContent: '',

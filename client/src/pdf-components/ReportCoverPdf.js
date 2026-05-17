@@ -229,17 +229,7 @@ const ReportCoverPdf = ({ data = {} }) => {
         <Text break />
 
 
-        {/* =================== გვერდი 3: სარჩევი ================= */}
-        
-        <Text style={{fontSize: 18, fontWeight: 'bold', textAlign: 'center', marginBottom: 20}}>სარჩევი</Text>
-        {[...Array(8)].map((_, i) => (<View key={i} style={styles.listItem}><Text>{i + 1}.</Text></View>))}
-        <Text style={styles.sectionTitle}>დანართები</Text>
-        {[...Array(4)].map((_, i) => (<View key={i} style={styles.listItem}><Text>{i + 1}.</Text></View>))}
-
-        <Text break />
-
-
-        {/* =================== გვერდი 4: შინაარსი ================ */}
+        {/* =================== გვერდი 3: შინაარსი ================ */}
 
         <Text style={{fontWeight: 'bold', textAlign: 'center', marginBottom: 10}}>ინსპექტირების შემსრულებლები:</Text>
         <Text style={{textAlign: 'justify', marginBottom: 20, fontSize: 9}}>ინსპექტირების შემსრულებლები ინსპექტირების ორგანოს ხელმძღვანელის მიერ გაფრთხილებული და პასუხისმგებელნი ვართ ინსპექტირება ვაწარმოოთ მიუკერძოებლად, ჯეროვნად ჩავატაროთ კვლევა და დავიცვათ ინსპექტირების ჩატარების დროს მიღებული ან წარმოქმნილი ნებისმიერი სახის ინფორმაციის კონფიდენციალურობა.</Text>
@@ -301,11 +291,11 @@ const ReportCoverPdf = ({ data = {} }) => {
 
         <View style={{marginTop: 20}}>
             <Text style={{fontWeight: 'bold'}}>ინსპექტირების ანგარიში მოამზადა:</Text>
-            <View style={styles.signatureRow}><View style={styles.signatureBlock}><Text>ინსპექტორი:</Text><View style={styles.signatureLine} /><Text style={{textAlign:'center', fontSize:8}}>(ხელმოწერა)</Text></View></View>
-            
+            <View style={styles.signatureRow}><View style={styles.signatureBlock}><Text>ინსპექტორი: {data.expertNames || ''}</Text><View style={styles.signatureLine} /><Text style={{textAlign:'center', fontSize:8}}>(ხელმოწერა)</Text></View></View>
+
             <Text style={{fontWeight: 'bold', marginTop: 30}}>ტექნიკური წესით გადაამოწმა:</Text>
-            <View style={styles.signatureRow}><View style={styles.signatureBlock}><Text>ტექნიკური მენეჯერი:</Text><View style={styles.signatureLine} /><Text style={{textAlign:'center', fontSize:8}}>(ხელმოწერა)</Text></View></View>
-            
+            <View style={styles.signatureRow}><View style={styles.signatureBlock}><Text>ტექნიკური მენეჯერი: {data.technicalManagerNames || ''}</Text><View style={styles.signatureLine} /><Text style={{textAlign:'center', fontSize:8}}>(ხელმოწერა)</Text></View></View>
+
             <Text style={{fontWeight: 'bold', marginTop: 30}}>ადმინისტრაციული წესით გადაამოწმა:</Text>
             <View style={styles.signatureRow}><View style={styles.signatureBlock}><Text>ხელმძღვანელი: ლევან საჩიშვილი</Text><View style={styles.signatureLine} /><Text style={{textAlign:'center', fontSize:8}}>(ხელმოწერა)</Text></View></View>
         </View>
