@@ -142,7 +142,7 @@ const ShareTransferPdf = ({ data = {} }) => {
             </View>
             {transferees.map((t, i) => (
               <View key={i} style={[s.partyRow, i === transferees.length - 1 ? { borderBottomWidth: 0 } : {}]}>
-                <Text style={s.partyLabel}>{isMulti ? `${i + 1}. წილის შემძენი` : 'წილის შემძენი'}</Text>
+                <Text style={s.partyLabel}>{isMulti ? `წილის შემძენი ${i + 1}` : 'წილის შემძენი'}</Text>
                 <Text style={s.partyData}>{`${t.name || '______________________________'}, პ/ნ: ${t.id || '______________________________'}, მისამართი: ${t.address || '______________________________'}`}</Text>
               </View>
             ))}
@@ -363,7 +363,7 @@ const ShareTransferPdf = ({ data = {} }) => {
               </View>
               {transferees.map((t, i) => (
                 <View key={i} style={s.sigBlock}>
-                  <Text style={s.sigBlockLabel}>{isMulti ? `${tLabel} ${i + 1}:` : `${tLabel}:`}</Text>
+                  <Text style={s.sigBlockLabel}>{isMulti ? `წილის შემძენი ${i + 1}:` : `${tLabel}:`}</Text>
                   <Text style={s.sigDetail}>{t.name || '______________________________'}</Text>
                   <Text style={s.sigDetail}>{`პ/ნ: ${t.id || '______________________________'}`}</Text>
                   <Text style={s.sigDetail}>{t.address || '______________________________'}</Text>
