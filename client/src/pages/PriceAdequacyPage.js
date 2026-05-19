@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
+import * as XLSX from 'xlsx';
 import { pdf } from '@react-pdf/renderer';
 import PriceAdequacyReportPdf from '../pdf-components/PriceAdequacyReportPdf';
 
@@ -116,6 +117,45 @@ export default function PriceAdequacyPage({ role }) {
         window.open(`/api/price-adequacy/${activeCheck._id}/word`, '_blank');
     };
 
+    const downloadExcel = () => {
+        if (!activeCheck) return;
+        const rows = (activeCheck.lineItems || []).map(it => ({
+            '#': it.lineNum,
+            'კოდი': it.code || '',
+            'დასახელება': it.description || '',
+            'ერთეული': it.unit || '',
+            'რაოდენობა': it.quantity || '',
+            'ხარჯთ. ერთ.ფ. (₾)': it.unitPrice || '',
+            'ნორმ. ერთ.ფ. (₾)': it.normUnitPrice ?? '',
+            'გადახრა %': it.deviation ?? '',
+            'სტატუსი': it.lineStatus || '',
+            'ნორმ. კოდი': it.normCode || '',
+            'ნორმ. დასახელება': it.normDescription || '',
+            'ხარჯთ. ჯამი (₾)': it.totalPrice || '',
+        }));
+        const summary = [
+            { '#': 'შემოწმება', 'კოდი': activeCheck.checkNumber },
+            { '#': 'BE-CASE', 'კოდი': activeCheck.caseNumber || '—' },
+            { '#': 'ობიექტი', 'კოდი': activeCheck.objectName || '—' },
+            { '#': 'თარიღი', 'კოდი': new Date(activeCheck.checkDate).toLocaleDateString('ka-GE') },
+            { '#': 'ნორმ. ბაზა', 'კოდი': [activeCheck.normType, activeCheck.normYear, activeCheck.normQuarter ? `კვ.${activeCheck.normQuarter}` : null].filter(Boolean).join(' ') },
+            { '#': 'სულ პოზ.', 'კოდი': activeCheck.totalLines },
+            { '#': 'შესაბამ.', 'კოდი': activeCheck.okCount },
+            { '#': 'გაფრთხ.', 'კოდი': activeCheck.warningCount },
+            { '#': 'დარღვევა', 'კოდი': activeCheck.violationCount },
+            { '#': 'ვ.შ.', 'კოდი': activeCheck.unmatchedCount },
+            {},
+            { '#': 'დასკვნა', 'კოდი': activeCheck.conclusion },
+        ];
+        const wb = XLSX.utils.book_new();
+        const wsInfo = XLSX.utils.json_to_sheet(summary, { skipHeader: true });
+        const wsData = XLSX.utils.json_to_sheet(rows);
+        // Style header row of data sheet
+        XLSX.utils.book_append_sheet(wb, wsInfo, 'შეჯამება');
+        XLSX.utils.book_append_sheet(wb, wsData, 'ანალიზი');
+        XLSX.writeFile(wb, `${activeCheck.checkNumber}.xlsx`);
+    };
+
     const filteredItems = activeCheck?.lineItems?.filter(it =>
         filterStatus === 'all' || it.lineStatus === filterStatus
     ) || [];
@@ -203,7 +243,7 @@ export default function PriceAdequacyPage({ role }) {
                             <div className="card-body">
                                 <label className="form-label fw-bold small">ნორმის სახეობა</label>
                                 <select className="form-select form-select-sm mb-2" value={normType} onChange={e => setNormType(e.target.value)}>
-                                    {['NER', 'SNIP', 'SNiP', 'SHNEB', 'all', 'სხვა'].map(t => <option key={t} value={t}>{t === 'all' ? 'ყველა' : t}</option>)}
+                                    {['NER', 'მშენ. კავშირი', 'SNIP', 'SNiP', 'SHNEB', 'all', 'სხვა'].map(t => <option key={t} value={t}>{t === 'all' ? 'ყველა' : t}</option>)}
                                 </select>
 
                                 <div className="row g-2 mb-3">
@@ -353,6 +393,7 @@ export default function PriceAdequacyPage({ role }) {
                                     <button className="btn btn-danger btn-sm" onClick={downloadPdf} disabled={pdfLoading}>
                                         {pdfLoading ? <span className="spinner-border spinner-border-sm" /> : '📄 PDF'}
                                     </button>
+                                    <button className="btn btn-success btn-sm" onClick={downloadExcel}>📊 Excel</button>
                                     <button className="btn btn-primary btn-sm" onClick={downloadWord}>📝 Word</button>
                                 </div>
                             </div>

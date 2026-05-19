@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
-const NORM_TYPES = ['NER', 'SNIP', 'SNiP', 'SHNEB', 'სხვა'];
+const NORM_TYPES = ['NER', 'მშენ. კავშირი', 'SNIP', 'SNiP', 'SHNEB', 'სხვა'];
 
 export default function NormsAdminPage({ role }) {
     const [files, setFiles] = useState([]);
@@ -12,9 +12,10 @@ export default function NormsAdminPage({ role }) {
     const [entries, setEntries] = useState([]);
     const [entTotal, setEntTotal] = useState(0);
     const [entPage, setEntPage] = useState(1);
-    const [form, setForm] = useState({ normType: 'NER', year: new Date().getFullYear(), quarter: 1 });
+    const [form, setForm] = useState({ normType: 'NER', year: new Date().getFullYear(), quarter: 2 });
     const [file, setFile] = useState(null);
     const [msg, setMsg] = useState(null);
+    const [seeding, setSeeding] = useState(false);
 
     const canUpload = ['admin', 'quality_manager'].includes(role);
 
@@ -25,6 +26,18 @@ export default function NormsAdminPage({ role }) {
         try { const r = await axios.get('/api/norms/files'); setFiles(r.data); }
         catch { setMsg({ type: 'danger', text: 'ფაილების ჩატვირთვა ვერ მოხდა' }); }
         finally { setLoading(false); }
+    };
+
+    const handleSeedDemo = async () => {
+        if (!window.confirm(`ჩაიტვირთოს საცდელი NER ბაზა ${form.year} კვ.${form.quarter}?`)) return;
+        setSeeding(true); setMsg(null);
+        try {
+            const r = await axios.post('/api/norms/seed-demo', { year: form.year, quarter: form.quarter, normType: form.normType });
+            setMsg({ type: 'success', text: `✅ საცდელი NER ბაზა: ${r.data.entryCount} ჩანაწ. — ${r.data.normFile.originalName}` });
+            loadFiles();
+        } catch (err) {
+            setMsg({ type: 'danger', text: err.response?.data?.error || 'შეცდომა' });
+        } finally { setSeeding(false); }
     };
 
     const handleUpload = async (e) => {
@@ -121,11 +134,25 @@ export default function NormsAdminPage({ role }) {
                                             onChange={e => setFile(e.target.files[0])} />
                                     </div>
                                     <button type="submit" className="btn btn-primary btn-sm w-100" disabled={uploading}>
-                                        {uploading ? '⏳ ტვირთავს...' : '📤 ატვირთვა'}
+                                        {uploading ? '⏳ ტვირთავს...' : '📤 Excel-ის ატვირთვა'}
                                     </button>
                                 </form>
+
+                                <hr />
+                                <div className="mb-2 small fw-bold text-muted">ან ჩაიტვირთოს სადემო NER ბაზა:</div>
+                                <button
+                                    className="btn btn-outline-warning btn-sm w-100"
+                                    onClick={handleSeedDemo}
+                                    disabled={seeding}
+                                >
+                                    {seeding ? '⏳ ...' : `🧪 საცდელი NER — ${form.year} კვ.${form.quarter}`}
+                                </button>
+                                <div className="mt-1 text-muted" style={{ fontSize: '0.7rem' }}>
+                                    ~80 ტიპური ქართული სამუშაო (ბეტ., ქვა, სანტ., ელ., ფინ.) — 2025 საბაზრო ფასებით
+                                </div>
+
                                 <div className="mt-3 p-2 rounded" style={{ background: '#f8f9fa', fontSize: '0.75rem', color: '#555' }}>
-                                    <strong>ფაილის სტრუქტურა:</strong><br />
+                                    <strong>Excel სტრუქტურა:</strong><br />
                                     სვეტები: კოდი | დასახელება | ერთეული | ერთ.ფასი<br />
                                     <span className="text-muted">სათაური სტრიქონი ავტომატურად მოიძებნება</span>
                                 </div>

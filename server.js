@@ -1071,6 +1071,143 @@ api.get('/price-adequacy/:id/word', async (req, res) => {
     } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
+// Seed demo NER norm data (approximate 2025 Georgian market prices)
+api.post('/norms/seed-demo', async (req, res) => {
+    if (!['admin', 'quality_manager'].includes(req.user.role))
+        return res.status(403).json({ error: 'უფლება არ გაქვთ' });
+    try {
+        const year = parseInt(req.body.year) || 2025;
+        const quarter = parseInt(req.body.quarter) || 2;
+        const normType = req.body.normType || 'NER';
+        // Check if already seeded
+        const existing = await NormFile.findOne({ normType, year, quarter, originalName: /ნიმუში/ });
+        if (existing) return res.status(400).json({ error: 'ამ პერიოდის საცდელი ბაზა უკვე ჩატვირთულია' });
+
+        const DEMO = [
+            // მიწის სამუშაოები
+            { chapter:'მიწის სამუშაოები', code:'E1-1-1', description:'ნიადაგის გათხრა (მექ.)',           unit:'მ³',  unitPrice:8.50 },
+            { chapter:'მიწის სამუშაოები', code:'E1-1-2', description:'ნიადაგის გათხრა (ხელ.)',          unit:'მ³',  unitPrice:18.00 },
+            { chapter:'მიწის სამუშაოები', code:'E1-2-1', description:'ნიადაგის მოტანა 5 კმ-მდე',       unit:'მ³',  unitPrice:12.00 },
+            { chapter:'მიწის სამუშაოები', code:'E1-3-1', description:'ნიადაგის გატკეპნა ვიბ.',          unit:'მ³',  unitPrice:6.00 },
+            { chapter:'მიწის სამუშაოები', code:'E1-4-1', description:'თხრილის გათხრა (ბინ.)',            unit:'მ³',  unitPrice:15.00 },
+            { chapter:'მიწის სამუშაოები', code:'E1-5-1', description:'ქვიშის მომზ. ბალიშად',            unit:'მ³',  unitPrice:45.00 },
+            // საძირკვლის სამ.
+            { chapter:'საძირკვლის სამუშაოები', code:'E2-1-1', description:'ლენტური საძირკვ. ბეტ. C20/25',unit:'მ³', unitPrice:380.00 },
+            { chapter:'საძირკვლის სამუშაოები', code:'E2-1-2', description:'ფილა საძირკველი C25/30',      unit:'მ³',  unitPrice:420.00 },
+            { chapter:'საძირკვლის სამუშაოები', code:'E2-2-1', description:'კედელ-საძირკვ. ქვა-ბეტონი',  unit:'მ³',  unitPrice:220.00 },
+            // ბეტონ-რკინ.
+            { chapter:'ბეტონ-რკინაბეტ. სამ.', code:'E6-1-1', description:'მონოლ. კედელი C20/25',         unit:'მ³',  unitPrice:450.00 },
+            { chapter:'ბეტონ-რკინაბეტ. სამ.', code:'E6-1-2', description:'სვეტი/კოლონა C25/30',          unit:'მ³',  unitPrice:520.00 },
+            { chapter:'ბეტონ-რკინაბეტ. სამ.', code:'E6-1-3', description:'გადახურვის ფილა C25/30',       unit:'მ³',  unitPrice:490.00 },
+            { chapter:'ბეტონ-რკინაბეტ. სამ.', code:'E6-1-4', description:'კიბის მოედანი და საფეხ.',      unit:'მ³',  unitPrice:550.00 },
+            { chapter:'ბეტონ-რკინაბეტ. სამ.', code:'E6-2-1', description:'არმატურა A240 ∅8–12',         unit:'კგ',  unitPrice:1.85 },
+            { chapter:'ბეტონ-რკინაბეტ. სამ.', code:'E6-2-2', description:'არმატურა A400 ∅14–25',        unit:'კგ',  unitPrice:1.75 },
+            { chapter:'ბეტონ-რკინაბეტ. სამ.', code:'E6-3-1', description:'ხის ყალიბი ერთჯ.',            unit:'მ²',  unitPrice:48.00 },
+            { chapter:'ბეტონ-რკინაბეტ. სამ.', code:'E6-3-2', description:'ლოჰმანი/ინვ. ყალიბი',         unit:'მ²',  unitPrice:35.00 },
+            // ქვის სამ.
+            { chapter:'ქვის/ბლოკ. სამუშაოები', code:'E8-1-1', description:'ნახ. ბლოკი 20სმ ბ.',          unit:'მ²',  unitPrice:58.00 },
+            { chapter:'ქვის/ბლოკ. სამუშაოები', code:'E8-1-2', description:'ნახ. ბლოკი 30სმ ბ.',          unit:'მ²',  unitPrice:68.00 },
+            { chapter:'ქვის/ბლოკ. სამუშაოები', code:'E8-2-1', description:'სილიკ. აგური (0.5NF)',        unit:'მ²',  unitPrice:72.00 },
+            { chapter:'ქვის/ბლოკ. სამუშაოები', code:'E8-2-2', description:'კერამ. აგური (1NF)',          unit:'მ²',  unitPrice:85.00 },
+            { chapter:'ქვის/ბლოკ. სამუშაოები', code:'E8-3-1', description:'ქვიშ.-ცემ. ბლოკი 20სმ',      unit:'მ²',  unitPrice:52.00 },
+            { chapter:'ქვის/ბლოკ. სამუშაოები', code:'E8-4-1', description:'ბუნებ. ქვა (ლოდი)',           unit:'მ³',  unitPrice:180.00 },
+            // ლოჯ./ბ.
+            { chapter:'ლოჯიისა და ბალკ.', code:'E9-1-1', description:'ლოჯია/ბალკ. ფილა C25/30',          unit:'მ²',  unitPrice:280.00 },
+            // ეკრანი/ტიხ.
+            { chapter:'ტიხრ./ელემ. კედ.', code:'E10-1-1', description:'გიფსოლ. ტიხრები 10სმ',            unit:'მ²',  unitPrice:42.00 },
+            { chapter:'ტიხრ./ელემ. კედ.', code:'E10-1-2', description:'გიფსოლ. ტიხრები 7.5სმ',           unit:'მ²',  unitPrice:38.00 },
+            // საიზოლაციო
+            { chapter:'საიზოლაციო სამ.', code:'E11-1-1', description:'ბიტ. ორფენ. ჰიდ. (სახ.)',          unit:'მ²',  unitPrice:22.00 },
+            { chapter:'საიზოლაციო სამ.', code:'E11-1-2', description:'სახ. ჰიდ. — ლოჯია/სვ.',           unit:'მ²',  unitPrice:28.00 },
+            { chapter:'საიზოლაციო სამ.', code:'E11-2-1', description:'მინ. ბამბა 5სმ (სახ.)',             unit:'მ²',  unitPrice:18.00 },
+            { chapter:'საიზოლაციო სამ.', code:'E11-2-2', description:'მინ. ბამბა 10სმ (კედ.)',            unit:'მ²',  unitPrice:24.00 },
+            { chapter:'საიზოლაციო სამ.', code:'E11-3-1', description:'პოლ. ფენ. 5სმ (ცოკ./სახ.)',        unit:'მ²',  unitPrice:20.00 },
+            { chapter:'საიზოლაციო სამ.', code:'E11-3-2', description:'EPS/XPS 10სმ (საძ.)',               unit:'მ²',  unitPrice:32.00 },
+            // სახურავი
+            { chapter:'სახურავის სამ.', code:'E20-1-1', description:'ბიტ. შინდ. (კრ. სახ.)',              unit:'მ²',  unitPrice:55.00 },
+            { chapter:'სახურავის სამ.', code:'E20-2-1', description:'ლითონ. პროფ. (სახ.)',                unit:'მ²',  unitPrice:48.00 },
+            { chapter:'სახურავის სამ.', code:'E20-3-1', description:'ბიტ. რულ. მ-ბიტ. (ბ.)',             unit:'მ²',  unitPrice:35.00 },
+            { chapter:'სახურავის სამ.', code:'E20-4-1', description:'ქვ. ნ. შ. (ხ. კარ.)',               unit:'მ²',  unitPrice:65.00 },
+            // ლესვა
+            { chapter:'ლესვა და ისრება', code:'E15-1-1', description:'ცემ.-ქვ. ლესვა კედ. (ბ.)',          unit:'მ²',  unitPrice:22.00 },
+            { chapter:'ლესვა და ისრება', code:'E15-1-2', description:'ცემ.-ქვ. ლესვა ჭ. (ბ.)',            unit:'მ²',  unitPrice:28.00 },
+            { chapter:'ლესვა და ისრება', code:'E15-2-1', description:'გიფსური ლესვა კედ. (ბ.)',           unit:'მ²',  unitPrice:20.00 },
+            { chapter:'ლესვა და ისრება', code:'E15-2-2', description:'გიფსური ლესვა ჭ. (ბ.)',             unit:'მ²',  unitPrice:25.00 },
+            { chapter:'ლესვა და ისრება', code:'E15-3-1', description:'სუბსტ. ლ. (ლეწ. ბ.)',               unit:'მ²',  unitPrice:15.00 },
+            // მოსაპირ.
+            { chapter:'მოპირკეთება', code:'E16-1-1', description:'კერამ. ფილა კედ. (გ.)',                  unit:'მ²',  unitPrice:32.00 },
+            { chapter:'მოპირკეთება', code:'E16-1-2', description:'კერამ. ფილა იატ. (გ.)',                  unit:'მ²',  unitPrice:28.00 },
+            { chapter:'მოპირკეთება', code:'E16-2-1', description:'მარ. ქ. ბ. (გ.)',                        unit:'მ²',  unitPrice:90.00 },
+            { chapter:'მოპირკეთება', code:'E16-3-1', description:'მოზ. ფ. (გ.)',                           unit:'მ²',  unitPrice:55.00 },
+            // საღებ.
+            { chapter:'საღებავი სამ.', code:'E18-1-1', description:'შ. ემ. ღ. კ. 2-ჯ. (გ.)',               unit:'მ²',  unitPrice:9.00 },
+            { chapter:'საღებავი სამ.', code:'E18-1-2', description:'ლ. ღ. კ. ან ჭ. (გ.)',                  unit:'მ²',  unitPrice:12.00 },
+            { chapter:'საღებავი სამ.', code:'E18-2-1', description:'ეპოქ.-ბ. ღ. (გ.)',                     unit:'მ²',  unitPrice:22.00 },
+            // იატ.
+            { chapter:'იატაკის სამ.', code:'E17-1-1', description:'ც.-ქ. გ. ავ. (ბ.)',                     unit:'მ²',  unitPrice:26.00 },
+            { chapter:'იატაკის სამ.', code:'E17-2-1', description:'ლამ. 8მმ (გ.)',                          unit:'მ²',  unitPrice:35.00 },
+            { chapter:'იატაკის სამ.', code:'E17-3-1', description:'პარ. ზ. (გ.)',                           unit:'მ²',  unitPrice:75.00 },
+            { chapter:'იატაკის სამ.', code:'E17-4-1', description:'გ. ბ. ე. (გ.) 80x80',                   unit:'მ²',  unitPrice:40.00 },
+            // კარ-ფანჯ.
+            { chapter:'კარ-ფანჯრ. სამ.', code:'E23-1-1', description:'შ. PVC ფ. 1.0x1.2 ერთ.',            unit:'ც.',  unitPrice:380.00 },
+            { chapter:'კარ-ფანჯრ. სამ.', code:'E23-1-2', description:'შ. PVC ფ. 1.5x1.5 ერთ.',            unit:'ც.',  unitPrice:520.00 },
+            { chapter:'კარ-ფანჯრ. სამ.', code:'E23-2-1', description:'შ. ალ. ფ. (ორ. მ.)',                unit:'მ²',  unitPrice:280.00 },
+            { chapter:'კარ-ფანჯრ. სამ.', code:'E23-3-1', description:'შ. ხ. კ. 0.9x2.0',                 unit:'ც.',  unitPrice:260.00 },
+            { chapter:'კარ-ფანჯრ. სამ.', code:'E23-3-2', description:'შ. ლ. კ. 0.9x2.0',                 unit:'ც.',  unitPrice:320.00 },
+            { chapter:'კარ-ფანჯრ. სამ.', code:'E23-4-1', description:'შ. ალ./PVC შ. კ.',                  unit:'ც.',  unitPrice:550.00 },
+            // სანტ.
+            { chapter:'სანტ.-ტექ. სამ.', code:'E25-1-1', description:'ც. წ. მ. PP ∅20',                   unit:'გ.მ', unitPrice:9.00 },
+            { chapter:'სანტ.-ტექ. სამ.', code:'E25-1-2', description:'ც. წ. მ. PP ∅25',                   unit:'გ.მ', unitPrice:12.00 },
+            { chapter:'სანტ.-ტექ. სამ.', code:'E25-2-1', description:'კ. PVC ∅50',                         unit:'გ.მ', unitPrice:10.00 },
+            { chapter:'სანტ.-ტექ. სამ.', code:'E25-2-2', description:'კ. PVC ∅110',                        unit:'გ.მ', unitPrice:18.00 },
+            { chapter:'სანტ.-ტექ. სამ.', code:'E25-3-1', description:'ს. ტ. PP ∅25',                       unit:'გ.მ', unitPrice:14.00 },
+            { chapter:'სანტ.-ტექ. სამ.', code:'E25-3-2', description:'ს. ტ. PP ∅32',                       unit:'გ.მ', unitPrice:18.00 },
+            { chapter:'სანტ.-ტექ. სამ.', code:'E25-4-1', description:'ქვ. კვ. ს.',                         unit:'ც.',  unitPrice:95.00 },
+            { chapter:'სანტ.-ტექ. სამ.', code:'E25-4-2', description:'ქვ. ნ. ს. (შ.)',                    unit:'ც.',  unitPrice:140.00 },
+            // ელ.
+            { chapter:'ელ. სამ.', code:'E30-1-1', description:'კ. NYM 3x1.5',                               unit:'გ.მ', unitPrice:5.50 },
+            { chapter:'ელ. სამ.', code:'E30-1-2', description:'კ. NYM 3x2.5',                               unit:'გ.მ', unitPrice:7.50 },
+            { chapter:'ელ. სამ.', code:'E30-1-3', description:'კ. NYM 3x4.0',                               unit:'გ.მ', unitPrice:10.00 },
+            { chapter:'ელ. სამ.', code:'E30-2-1', description:'ა. სარ. (ჩ.)',                               unit:'ც.',  unitPrice:28.00 },
+            { chapter:'ელ. სამ.', code:'E30-2-2', description:'ა. გამ. (ჩ.)',                               unit:'ც.',  unitPrice:22.00 },
+            { chapter:'ელ. სამ.', code:'E30-3-1', description:'ელ. ქ. (ჩ.) 3ფ.',                           unit:'ც.',  unitPrice:380.00 },
+            // ვ.ტ.
+            { chapter:'ვენტ.-ტ. სამ.', code:'E28-1-1', description:'ვ. ა. ∅100 PVC',                       unit:'გ.მ', unitPrice:8.00 },
+            { chapter:'ვენტ.-ტ. სამ.', code:'E28-1-2', description:'ვ. ა. ∅150 PVC',                       unit:'გ.მ', unitPrice:12.00 },
+            { chapter:'ვენტ.-ტ. სამ.', code:'E28-2-1', description:'ვ. ბ. ∅125',                           unit:'ც.',  unitPrice:65.00 },
+            // ლ.
+            { chapter:'ლიფტი', code:'E32-1-1', description:'ლ. შ. (4 გ., 400 კგ)',                         unit:'ც.',  unitPrice:28000.00 },
+            { chapter:'ლიფტი', code:'E32-1-2', description:'ლ. შ. (6 გ., 630 კგ)',                         unit:'ც.',  unitPrice:38000.00 },
+            // გ.
+            { chapter:'გარე სამ.', code:'E35-1-1', description:'ა. გ. ა. (ა.)',                             unit:'მ²',  unitPrice:35.00 },
+            { chapter:'გარე სამ.', code:'E35-2-1', description:'ბ. ა. (ა.)',                                unit:'მ²',  unitPrice:42.00 },
+            { chapter:'გარე სამ.', code:'E35-3-1', description:'ს. ღ. ს. (ა.)',                             unit:'მ²',  unitPrice:28.00 },
+        ];
+
+        const normFile = await NormFile.create({
+            originalName: `NER ${year} კვ.${quarter} — ნიმუში (საქ. ბაზ. 2025)`,
+            fileUrl: '',
+            normType,
+            year,
+            quarter,
+            entryCount: DEMO.length,
+        });
+        await NormEntry.insertMany(DEMO.map(e => ({
+            normFileId: normFile._id,
+            normType,
+            year,
+            quarter,
+            code: e.code,
+            description: e.description,
+            unit: e.unit,
+            unitPrice: e.unitPrice,
+            chapter: e.chapter,
+            keywords: extractKeywords(e.description + ' ' + e.chapter),
+        })));
+        res.json({ msg: 'საცდელი NER ბაზა ჩაიტვირთა', entryCount: DEMO.length, normFile });
+    } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
 api.delete('/price-adequacy/:id', async (req, res) => {
     if (req.user.role !== 'admin') return res.status(403).json({ error: 'წაშლის უფლება არ გაქვთ' });
     try { await PriceAdequacyCheck.findByIdAndDelete(req.params.id); res.json({ msg: 'წაიშალა' }); }
