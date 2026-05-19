@@ -113,9 +113,23 @@ export default function PriceAdequacyPage({ role }) {
         finally { setPdfLoading(false); }
     };
 
-    const downloadWord = () => {
+    const downloadWord = async () => {
         if (!activeCheck) return;
-        window.open(`/api/price-adequacy/${activeCheck._id}/word`, '_blank');
+        try {
+            const token = localStorage.getItem('token');
+            const res = await axios.get(`/api/price-adequacy/${activeCheck._id}/word`, {
+                headers: { Authorization: `Bearer ${token}` },
+                responseType: 'blob',
+            });
+            const url = URL.createObjectURL(new Blob([res.data], { type: 'application/msword' }));
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = (activeCheck.checkNumber || 'report') + '.doc';
+            a.click();
+            URL.revokeObjectURL(url);
+        } catch (err) {
+            alert('Word გენერაცია ვერ მოხდა: ' + (err.response?.status === 401 ? 'ავტორიზაცია საჭიროა' : err.message));
+        }
     };
 
     const downloadExcel = () => {
