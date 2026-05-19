@@ -342,12 +342,60 @@ async function generateDocumentNumber(type, date = new Date()) {
 // PRICE ADEQUACY — HELPERS
 // =============================================
 
+// Georgian construction synonym map — maps variants to canonical root
+const GEO_SYNONYMS = {
+    'გრუნტ': 'ნიადაგ', 'გრუნტის': 'ნიადაგ', 'გრუნტი': 'ნიადაგ',
+    'ექსკავ': 'გათხ', 'ექსკავატორ': 'გათხ', 'ექსკავაციი': 'გათხ',
+    'ამოთხრ': 'გათხ', 'გაჭრ': 'გათხ', 'გათხრ': 'გათხ',
+    'დამუშავ': 'გათხ',
+    'შევსებ': 'მოყრ', 'გადავსებ': 'მოყრ', 'ყრ': 'მოყრ', 'ყრილ': 'მოყრ',
+    'გატკეპნ': 'ტკეპნ', 'ტკეპნ': 'ტკეპნ', 'შეტკეპნ': 'ტკეპნ',
+    'ბეტონ': 'ბეტ', 'ბეტ': 'ბეტ', 'რკინაბეტ': 'ბეტ',
+    'ქვიშ': 'ქვიშ', 'ქვიშის': 'ქვიშ',
+    'ბალიშ': 'ქვიშ',
+    'ასფალტ': 'ასფ', 'ასფ': 'ასფ', 'ასფალტბეტ': 'ასფ',
+    'სრიალ': 'ასფ',
+    'ფილ': 'ფილ', 'ბეტონის ფილ': 'ფილ',
+    'კონსტრუქც': 'კონსტ', 'სტრუქტურ': 'კონსტ',
+    'მილ': 'მილ', 'მილსადენ': 'მილ', 'სადენ': 'მილ', 'ტრუბ': 'მილ',
+    'ჭ': 'ჭა', 'ჭები': 'ჭა', 'ჭის': 'ჭა', 'სანიაღვრ': 'ჭა', 'სალუქ': 'ჭა',
+    'ჰიდრ': 'ჭა',
+    'ბორდიურ': 'ბორდ', 'ევრობ': 'ბორდ', 'ლილვ': 'ბორდ',
+    'სადრენ': 'დრენ', 'დრენაჟ': 'დრენ', 'წყაბ': 'დრენ',
+    'კირ': 'კირ', 'კირხსნ': 'კირ',
+    'ცემ': 'ცემ', 'ცემენტ': 'ცემ',
+    'ხელ': 'ხელ', 'ხელით': 'ხელ', 'ხელნ': 'ხელ',
+    'მექ': 'მექ', 'მექანიზ': 'მექ', 'მანქან': 'მექ',
+    'გათბ': 'გათბ', 'გათბობ': 'გათბ',
+    'იზოლ': 'იზოლ', 'თბო': 'იზოლ', 'ჰიდრო': 'ჰიდრ',
+    'საღებავ': 'ღებ', 'შეღებ': 'ღებ',
+    'ლითონ': 'ლით', 'მეტალ': 'ლით',
+    'კარ': 'კარ', 'ფანჯარ': 'ფანჯ',
+    'სახურავ': 'სახ', 'გადახურვ': 'სახ',
+    'ლესვ': 'შტუკ', 'შტუკატ': 'შტუკ', 'გათეთრ': 'შტუკ',
+    'ტრასა': 'ტრასა', 'ტრასის': 'ტრასა', 'ტრაპ': 'ტრასა',
+    'ფენ': 'ფენ', 'მოფენ': 'ფენ', 'დაგებ': 'ფენ',
+    'სარეაბ': 'რემ', 'სარემ': 'რემ', 'რეაბ': 'რემ', 'რეკ': 'რემ',
+    'ნგრ': 'დემ', 'დანგრ': 'დემ', 'დემონტ': 'დემ',
+    'მოხსნ': 'დემ', 'ამოღ': 'დემ',
+};
+
+function normalizeGeo(word) {
+    if (GEO_SYNONYMS[word]) return GEO_SYNONYMS[word];
+    // Try prefix match for longer words (e.g. "გრუნტებს" → check "გრუნტ")
+    for (const [key, val] of Object.entries(GEO_SYNONYMS)) {
+        if (word.startsWith(key) && key.length >= 4) return val;
+    }
+    return word;
+}
+
 function extractKeywords(text) {
     if (!text) return [];
     return String(text).toLowerCase()
         .replace(/[()[\]{}/\\,;:.!?«»""''–—]/g, ' ')
         .split(/\s+/)
-        .filter(w => w.length > 2);
+        .filter(w => w.length > 2)
+        .map(normalizeGeo);
 }
 
 function kwMatchScore(words1, words2) {
@@ -586,7 +634,7 @@ async function runMatchingEngine(lineItems, normYear, normQuarter, normType) {
                 const score = kwMatchScore(itemKw, n.keywords);
                 if (score > best) { best = score; bestNorm = n; }
             }
-            if (best >= 0.4) { normMatch = bestNorm; mScore = best; }
+            if (best >= 0.22) { normMatch = bestNorm; mScore = best; }
         }
         let lineStatus = 'ვერ შემოწმდა', deviation = null;
         if (normMatch && item.unitPrice > 0 && normMatch.unitPrice > 0) {
@@ -1308,10 +1356,62 @@ api.post('/norms/seed-demo', async (req, res) => {
             { chapter:'გარე სამ.', code:'E35-1-1', description:'ა. გ. ა. (ა.)',                             unit:'მ²',  unitPrice:35.00 },
             { chapter:'გარე სამ.', code:'E35-2-1', description:'ბ. ა. (ა.)',                                unit:'მ²',  unitPrice:42.00 },
             { chapter:'გარე სამ.', code:'E35-3-1', description:'ს. ღ. ს. (ა.)',                             unit:'მ²',  unitPrice:28.00 },
+
+            // ===== საგზაო და კომუნიკაციური სამუშაოები =====
+            // გრუნტი / მიწის
+            { chapter:'საგზაო-მიწ. სამ.', code:'R1-1-1', description:'გრუნტის (ნიადაგის) გათხრა ექსკავატორით, დატვირთვა ავტომანქანაზე', unit:'მ³', unitPrice:14.00 },
+            { chapter:'საგზაო-მიწ. სამ.', code:'R1-1-2', description:'გრუნტის გათხრა ხელით (ვიწრო ადგილები)', unit:'მ³', unitPrice:35.00 },
+            { chapter:'საგზაო-მიწ. სამ.', code:'R1-1-3', description:'გრუნტის გადატანა ავტომანქანით 5 კმ-მდე',  unit:'მ³', unitPrice:12.00 },
+            { chapter:'საგზაო-მიწ. სამ.', code:'R1-2-1', description:'გრუნტის დამუშავება, შევსება და ტკეპნა ვიბრომანქანით', unit:'მ³', unitPrice:8.00 },
+            { chapter:'საგზაო-მიწ. სამ.', code:'R1-2-2', description:'ქვიშა-ღორღის ბალიში (საფუძვლის) მოწყობა',  unit:'მ³', unitPrice:48.00 },
+            { chapter:'საგზაო-მიწ. სამ.', code:'R1-3-1', description:'ნიადაგის (გრუნტის) ამოღება, დატვირთვა, გადატანა', unit:'მ³', unitPrice:18.00 },
+
+            // ასფალტი
+            { chapter:'საგზაო-ასფ. სამ.', code:'R2-1-1', description:'ასფალტბეტონის საფარის (ფენის) მოხსნა / დემონტაჟი (ფრეზირება)', unit:'მ²', unitPrice:12.00 },
+            { chapter:'საგზაო-ასფ. სამ.', code:'R2-1-2', description:'ასფალტბეტონის საფარის მოწყობა (გაყრა) 5 სმ',  unit:'მ²', unitPrice:28.00 },
+            { chapter:'საგზაო-ასფ. სამ.', code:'R2-1-3', description:'ასფალტბეტონის 2-ფენიანი საფარი (7სმ)',         unit:'მ²', unitPrice:48.00 },
+            { chapter:'საგზაო-ასფ. სამ.', code:'R2-2-1', description:'ბიტუმის ემულსიის დაგება (გრუნტოვანი ფენა)',   unit:'მ²', unitPrice:4.50 },
+            { chapter:'საგზაო-ასფ. სამ.', code:'R2-3-1', description:'ბეტონის სამანქანო გზის საფარი 15სმ',           unit:'მ²', unitPrice:55.00 },
+
+            // ბორდიური / ლილვი
+            { chapter:'საგზაო-ბორდ. სამ.', code:'R3-1-1', description:'ბორდიური ქვის (ევრობორდიური) მოწყობა',       unit:'გ.მ', unitPrice:22.00 },
+            { chapter:'საგზაო-ბორდ. სამ.', code:'R3-1-2', description:'ბეტონის ბორდიური (ლილვი) ბ/კ-ზე მოწყობა',   unit:'გ.მ', unitPrice:18.00 },
+            { chapter:'საგზაო-ბორდ. სამ.', code:'R3-1-3', description:'ბორდიური ქვის დემონტაჟი და ხელახლა დამაგრება',unit:'გ.მ', unitPrice:12.00 },
+
+            // ჭები / სალუქები
+            { chapter:'სანიაღვ. ჭები.', code:'R4-1-1', description:'სანიაღვრე ჭის (კოლოდეზის) მოწყობა, ბეტონის რგოლები', unit:'ც.', unitPrice:1200.00 },
+            { chapter:'სანიაღვ. ჭები.', code:'R4-1-2', description:'ჭის (ლუკის) სალუქის გასწორება საპროექტო ნიშნულზე', unit:'ც.', unitPrice:180.00 },
+            { chapter:'სანიაღვ. ჭები.', code:'R4-1-3', description:'ჭის თავის (სალუქის) შეცვლა ახლით',               unit:'ც.', unitPrice:350.00 },
+            { chapter:'სანიაღვ. ჭები.', code:'R4-2-1', description:'სადრენაჟო (სანიაღვრე) ჭა — ოთხკუთხა 1x1მ',      unit:'ც.', unitPrice:850.00 },
+            { chapter:'სანიაღვ. ჭები.', code:'R4-2-2', description:'ჰიდრანტი — სახანძრო კრანი (მოწყობა)',            unit:'ც.', unitPrice:650.00 },
+
+            // მილსადენი / ტრასა
+            { chapter:'მილსადენი სამ.', code:'R5-1-1', description:'ბეტონის/ასბესტ-ცემ. მილსადენის (ტრასის) აღდგენა და დამაგრება', unit:'გ.მ', unitPrice:85.00 },
+            { chapter:'მილსადენი სამ.', code:'R5-1-2', description:'PVC/HDPE მილის გაყვანა (ჩადება) ∅110-160',       unit:'გ.მ', unitPrice:28.00 },
+            { chapter:'მილსადენი სამ.', code:'R5-1-3', description:'სასმელი წყლის მილსადენის გაყვანა ∅100',           unit:'გ.მ', unitPrice:35.00 },
+            { chapter:'მილსადენი სამ.', code:'R5-2-1', description:'კანალიზაციის (კოლექტ.) მილსადენი ∅300',          unit:'გ.მ', unitPrice:65.00 },
+            { chapter:'მილსადენი სამ.', code:'R5-2-2', description:'ნიაღვრის წყლის კოლექტ. მილი ∅400',               unit:'გ.მ', unitPrice:95.00 },
+            { chapter:'მილსადენი სამ.', code:'R5-3-1', description:'ტრასის სარეაბილიტაციო (სარემონტო) სამუშაოები',   unit:'გ.მ', unitPrice:120.00 },
+
+            // ბეტონი / ფილები (საგზაო)
+            { chapter:'ბეტ. საგზ. სამ.', code:'R6-1-1', description:'ბეტონის ბ-20 სხმა 15სმ (საგზ. ფილა)',           unit:'მ²', unitPrice:48.00 },
+            { chapter:'ბეტ. საგზ. სამ.', code:'R6-1-2', description:'ბეტონის ბ-25 კონსტრუქცია (სხმა)',               unit:'მ³', unitPrice:420.00 },
+            { chapter:'ბეტ. საგზ. სამ.', code:'R6-2-1', description:'ბეტონის ბოძი (სვეტი) 30x30 — მოწყობა',         unit:'ც.', unitPrice:280.00 },
+            { chapter:'ბეტ. საგზ. სამ.', code:'R6-2-2', description:'ბეტონის (ქვის) ლოდ. სანიაღვრე, ბ/კ',          unit:'გ.მ', unitPrice:32.00 },
+
+            // ქვის სამ.
+            { chapter:'ქვის საფ. სამ.', code:'R7-1-1', description:'ბუნებური ქვის (ხრეშის) მოყრა, გასწორება',        unit:'მ²', unitPrice:22.00 },
+            { chapter:'ქვის საფ. სამ.', code:'R7-1-2', description:'ქვა-ღორღის ამოღება (გათხრა) ხელით',             unit:'მ³', unitPrice:40.00 },
+            { chapter:'ქვის საფ. სამ.', code:'R7-2-1', description:'ბეტონის ლოდებით გამაგრება (ხევი, კალა)',         unit:'მ²', unitPrice:65.00 },
+
+            // სხვ. კეთილმ.
+            { chapter:'კეთილმოწყ. სამ.', code:'R8-1-1', description:'სანიტარ. სახ. ნ. (გათ.) ხელ.',                 unit:'ც.', unitPrice:35.00 },
+            { chapter:'კეთილმოწყ. სამ.', code:'R8-2-1', description:'ბოძი სარეკლამო/მაჩვ. ნ. მოწ.',                unit:'ც.', unitPrice:280.00 },
+            { chapter:'კეთილმოწყ. სამ.', code:'R8-3-1', description:'გრუნტის (ნიადაგის) ამოღება თხრილიდან, სისუფ.', unit:'მ³', unitPrice:25.00 },
         ];
 
         const normFile = await NormFile.create({
-            originalName: `NER ${year} კვ.${quarter} — ნიმუში (საქ. ბაზ. 2025)`,
+            originalName: `NER+საგზ. ${year} კვ.${quarter} — ნიმუში (საქ. ბაზ. 2025)`,
             fileUrl: '',
             normType,
             year,
