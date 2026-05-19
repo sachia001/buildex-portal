@@ -32,13 +32,16 @@ const s = StyleSheet.create({
 
 const CB = ({ checked }) => <View style={checked ? s.boxFilled : s.box} />;
 
-const ImpartialityDeclarationPdf = ({ data }) => {
+const ImpartialityDeclarationPdf = ({ data = {} }) => {
   const {
     name = '', position = '', personalId = '', date = '',
     scopes = [],
     conflicts = {},
-    signature
+    sigs = [],
   } = data;
+  // Support signature from FormFillModal (sigs[0]) or legacy `signature` field
+  const signature = sigs[0]?.dataURL || data.signature || null;
+  const sig0name  = sigs[0]?.name  || '';
 
   const conflictItems = [
     ['ownership', 'მფლობელობითი ინტერესი ან წილი კლიენტის კომპანიაში'],
@@ -118,20 +121,34 @@ const ImpartialityDeclarationPdf = ({ data }) => {
 
         <View style={s.sigRow}>
           <View style={s.sigBlock}>
-            <Text style={{ fontSize: 9, marginBottom: 28 }}>თანამშრომელი:</Text>
-            {signature && <Image src={signature} style={s.sigImage} />}
-            <View style={s.sigLine}><Text>(ხელმოწერა)</Text></View>
-            <Text style={{ fontSize: 8, marginTop: 4 }}>თარიღი: {date}</Text>
+            <Text style={{ fontSize: 9, marginBottom: 4 }}>თანამშრომელი:</Text>
+            {sig0name ? <Text style={{ fontSize: 8, marginBottom: 1 }}>{sig0name}</Text> : null}
+            {signature
+              ? <Image src={signature} style={s.sigImage} />
+              : <View style={{ height: 42 }} />}
+            <View style={s.sigLine}>
+              <Text>{sigs[0]?.date || date || '___________'}</Text>
+            </View>
           </View>
           <View style={s.sigBlock}>
-            <Text style={{ fontSize: 9, marginBottom: 28 }}>შემოწმებული:</Text>
-            <View style={s.sigLine}><Text>(ხელმოწერა)</Text></View>
-            <Text style={{ fontSize: 8, marginTop: 4 }}>თარიღი: ___________</Text>
+            <Text style={{ fontSize: 9, marginBottom: 4 }}>შემოწმებული:</Text>
+            {sigs[1]?.name ? <Text style={{ fontSize: 8, marginBottom: 1 }}>{sigs[1].name}</Text> : null}
+            {sigs[1]?.dataURL
+              ? <Image src={sigs[1].dataURL} style={s.sigImage} />
+              : <View style={{ height: 42 }} />}
+            <View style={s.sigLine}>
+              <Text>{sigs[1]?.date || '___________'}</Text>
+            </View>
           </View>
           <View style={s.sigBlock}>
-            <Text style={{ fontSize: 9, marginBottom: 28 }}>დამტკიცებული:</Text>
-            <View style={s.sigLine}><Text>ლ. საჩიშვილი</Text></View>
-            <Text style={{ fontSize: 8, marginTop: 4 }}>თარიღი: ___________</Text>
+            <Text style={{ fontSize: 9, marginBottom: 4 }}>დამტკიცებული:</Text>
+            {sigs[2]?.name ? <Text style={{ fontSize: 8, marginBottom: 1 }}>{sigs[2].name}</Text> : null}
+            {sigs[2]?.dataURL
+              ? <Image src={sigs[2].dataURL} style={s.sigImage} />
+              : <View style={{ height: 42 }} />}
+            <View style={s.sigLine}>
+              <Text>{sigs[2]?.date || '___________'}</Text>
+            </View>
           </View>
         </View>
 

@@ -1,82 +1,63 @@
 import React from 'react';
 import { Page, Text, View, Document } from '@react-pdf/renderer';
-import { s, WM, FormHeader, SigBlock3, FormFooter, FieldRow, FieldRow2, YesNoRow } from './FormBase';
+import { s, WM, FormHeader, SigBlock3, FormFooter, FieldRow, FieldRow2, YesNoRow, TextArea } from './FormBase';
 
-const FM09_ContractReviewPdf = () => (
+const FM09_ContractReviewPdf = ({ data = {} }) => {
+  const sigs = data.sigs || [];
+  return (
   <Document>
     <Page size="A4" style={s.page}>
       <WM />
-      <FormHeader
-        code="FM-09"
-        isoRef="სსტ ISO/IEC 17020 §7.1"
-        title="ხელშეკრულების განხილვა"
-        subtitle="Contract / Tender Review"
-      />
+      <FormHeader code="FM-09" isoRef="სსტ ISO/IEC 17020 §7.1" title="ხელშეკრულების განხილვა" subtitle="Contract / Tender Review" />
 
-      {/* A — საიდ. */}
       <Text style={s.secH}>A. საიდენტიფიკაციო მონაცემები</Text>
-      <FieldRow2 label1="საქმის № (BE-CASE):" label2="განხილვის თარიღი:" />
-      <FieldRow label="დამკვეთი / ორგანიზაცია:" />
-      <FieldRow label="ინსპექტირების სფერო:" />
-      <View style={{ flexDirection: 'row', gap: 16, marginBottom: 8, marginLeft: 6 }}>
+      <FieldRow2 label1="BE-CASE №:" value1={data.caseNumber}    label2="თარიღი:"    value2={data.reviewDate} />
+      <FieldRow  label="დამკვეთი:"   value={data.clientName} />
+      <View style={{flexDirection:'row',gap:12,marginBottom:3,marginLeft:4}}>
         {['BE-PR-01','BE-PR-02','BE-PR-03','BE-PR-04','სხვა'].map(c => (
-          <View key={c} style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
-            <View style={s.box} /><Text style={{ fontSize: 9 }}>{c}</Text>
+          <View key={c} style={{flexDirection:'row',alignItems:'center',gap:3}}>
+            <View style={data.inspScope===c?s.boxChecked:s.box}>{data.inspScope===c&&<Text style={{color:'#fff',fontSize:6,fontWeight:'bold'}}>✓</Text>}</View>
+            <Text style={{fontSize:8}}>{c}</Text>
           </View>
         ))}
       </View>
-      <FieldRow label="ხელშეკ. / განაცხ. №:" />
+      <FieldRow2 label1="ხელშეკრულების №:" value1={data.contractNumber} label2="ვადა:"     value2={data.deadline} />
+      <FieldRow2 label1="გასამრჯელო (₾):"   value1={data.fee}           label2="FM-02 №:" value2={data.fm02Number} />
 
-      {/* B — ISO §7.1 კრიტერიუმები */}
-      <Text style={s.secH}>B. ISO §7.1.1 — განხილვის კრიტერიუმები</Text>
+      <Text style={s.secH}>B. ISO §7.1.1 — კრიტერიუმები</Text>
       <View style={s.tBorder}>
         <View style={s.tHeader}>
-          <View style={[s.tHead, { width: '8%' }]}><Text>§</Text></View>
-          <View style={[s.tHead, { flex: 1 }]}><Text>მოთხოვნა</Text></View>
-          <View style={[s.tHead, { width: '16%' }]}><Text>კი / არა</Text></View>
-          <View style={[s.tHead, { width: '30%' }]}><Text>კომენტარი</Text></View>
+          <View style={[s.tHead,{width:'10%'}]}><Text>§</Text></View>
+          <View style={[s.tHead,{flex:1}]}><Text>მოთხოვნა</Text></View>
+          <View style={[s.tHead,{width:'17%'}]}><Text>კი / არა</Text></View>
+          <View style={[s.tHead,{width:'28%'}]}><Text>კომენტარი</Text></View>
         </View>
-        {[
-          ['§7.1.1.a','ინსპ. ობიექტი იდენტიფიცირებული და განსაზღვრულია'],
-          ['§7.1.1.b','ინსპ. ორგანოს შესაძლებლობა დადასტურებულია (კომპ. + კალ.)'],
-          ['§7.1.1.c','შესაფერისი ინსპ. მეთოდი შერჩეულია (BE-WI-XX)'],
-          ['§7.1.1.d','კლიენტის სპეციფ. მოთხოვნები ფიქსირებულია'],
-          ['§7.1','შეთანხმებული ვადა და ღირებულება'],
-          ['FM-02','მიუკერძოებლობის შემოწმება ჩატარდა'],
-        ].map(([cl, req], i) => (
-          <View key={cl} style={i % 2 === 0 ? s.tRow : s.tRowAlt}>
-            <View style={[s.tCell, { width: '8%' }]}><Text>{cl}</Text></View>
-            <View style={[s.tCell, { flex: 1 }]}><Text>{req}</Text></View>
-            <View style={[s.tCell, { width: '16%' }]}>
-              <View style={{ flexDirection: 'row', gap: 4 }}>
-                <View style={s.box} /><Text style={{ fontSize: 8 }}>კი</Text>
-                <View style={s.box} /><Text style={{ fontSize: 8 }}>არა</Text>
-              </View>
+        {[['§7.1.1a','ობიექტის იდენტიფიკაცია','r_7_1_1a','r_7_1_1a_note'],['§7.1.1b','შესაძლებლობის დადასტურება','r_7_1_1b','r_7_1_1b_note'],['§7.1.1c','მომსახურების შინაარსი','r_7_1_1c','r_7_1_1c_note'],['§7.1.1d','კლიენტის მოთხოვნები','r_7_1_1d','r_7_1_1d_note'],['§7.1','ვადა და გასამრჯელო','r_7_1','r_7_1_note'],['FM-02','მიუკერძოებლობის შეფასება','r_fm02','r_fm02_note']].map(([cl,req,yesnoKey,noteKey],i) => (
+          <View key={cl} style={i%2===0?s.tRow:s.tRowAlt}>
+            <View style={[s.tCell,{width:'10%'}]}><Text>{cl}</Text></View>
+            <View style={[s.tCell,{flex:1}]}><Text>{req}</Text></View>
+            <View style={[s.tCell,{width:'17%'}]}>
+              {data[yesnoKey]
+                ? <Text style={{fontSize:8,fontWeight:'bold'}}>{data[yesnoKey]==='yes'?'კი':'არა'}</Text>
+                : <View style={{flexDirection:'row',gap:4}}><View style={s.box}/><Text style={{fontSize:7.5}}>კი</Text><View style={s.box}/><Text style={{fontSize:7.5}}>არა</Text></View>
+              }
             </View>
-            <View style={[s.tCell, { width: '30%', minHeight: 22 }]} />
+            <View style={[s.tCell,{width:'28%',minHeight:17}]}>{data[noteKey]?<Text style={{fontSize:8}}>{data[noteKey]}</Text>:null}</View>
           </View>
         ))}
       </View>
 
-      {/* C — მოთხოვნები */}
-      <Text style={s.secH}>C. დამკვეთის სპეციფიკური მოთხოვნები</Text>
-      <View style={[s.textarea, { minHeight: 45 }]} />
+      <Text style={s.secH}>C. კლიენტის სპეციალური მოთხოვნები</Text>
+      <TextArea value={data.clientReqs} placeholder="(სპეციალური მოთხოვნები)" minHeight={32} />
 
-      {/* D — ვადა / ღირებ. */}
-      <Text style={s.secH}>D. ვადა და ღირებულება</Text>
-      <FieldRow2 label1="შესრულების ვადა:" label2="სავარ. ღირებ. (₾):" />
-      <FieldRow label="FM-02 მიუკ. დეკლ. №:" />
+      <Text style={s.secH}>D. გადახრები / შენიშვნები</Text>
+      <TextArea value={data.deviations} placeholder="(გადახრები / შენიშვნები)" minHeight={26} />
+      <YesNoRow label="დამტკიცებულია:" yesNo={data.approved} />
 
-      {/* E — განსხვავებები */}
-      <Text style={s.secH}>E. განსხვავება / შენიშვნა განაცხადიდან</Text>
-      <View style={[s.textarea, { minHeight: 35 }]} />
-
-      <YesNoRow label="ხელშეკრულება/განაცხადი დამტკიცებულია განხილვის შედეგად:" />
-
-      <SigBlock3 labels={['შემავსებელი', 'ტექ. მენეჯერი', 'დირექტორი']} />
+      <SigBlock3 labels={['შემდგენი','ტექნიკური მენეჯერი','დირექტორი']} sigs={sigs} />
       <FormFooter code="FM-09 v2.0 | 28.04.2026 | შენახვა: 10 წელი" />
     </Page>
   </Document>
-);
+);};
 
 export default FM09_ContractReviewPdf;

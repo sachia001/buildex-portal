@@ -1,142 +1,149 @@
 import React from 'react';
 import { Page, Text, View, Document } from '@react-pdf/renderer';
-import { s, WM, FormHeader, FormFooter, FieldRow, FieldRow2 } from './FormBase';
+import { s, WM, FormHeader, FormFooter } from './FormBase';
+import { Image } from '@react-pdf/renderer';
 
-const FM16_VisitRecordPdf = () => (
+const cc = { padding: 2, minHeight: 11 };
+const ch = { padding: 2, minHeight: 13 };
+
+const FM16_VisitRecordPdf = ({ data = {} }) => {
+  const sigs = data.sigs || [];
+  const pairs = [
+    ['BE-CASE №:',data.caseNumber,'ვიზიტის #:',data.visitNumber],
+    ['ვიზიტის თარიღი:',data.visitDate,'დაწყება – დასრულება:',data.visitTime],
+    ['ობიექტის მისამართი:',data.address,'ინსპექტორი:',data.inspector],
+    ['დამკვეთის წარმომადგენელი:',data.clientRep,'კონტრაქტორის წარმომადგენელი:',data.contractorRep],
+  ];
+  return (
   <Document>
     <Page size="A4" style={s.page}>
       <WM />
-      <FormHeader
-        code="FM-16"
-        isoRef="სსტ ISO/IEC 17020 §7.3"
-        title="ვიზიტის ჩანაწერი"
-        subtitle="Site Visit Record"
-      />
+      <FormHeader code="FM-16" isoRef="სსტ ISO/IEC 17020 §7.3" title="ვიზიტის ჩანაწერი" subtitle="Site Visit Record" />
 
-      {/* A */}
       <Text style={s.secH}>A. საიდენტიფიკაციო მონაცემები</Text>
-      <View style={s.tBorder}>
-        {[
-          ['საქმის №:','ვიზიტის # (სულ:__-დან):'],
-          ['ვიზიტის თარიღი:','დრო (დაწ.–დამ.):'],
-          ['ობიექტის მისამართი:','ინსპექტორი:'],
-          ['დამკვ. წარმომ.:','კონტრ. წარმომ.:'],
-        ].map(([l1,l2],i) => (
-          <View key={i} style={{ flexDirection: 'row', borderBottomWidth: 0.5, borderBottomColor: '#ccc' }}>
-            <View style={{ flex: 1, padding: 4, borderRightWidth: 0.5, borderRightColor: '#ccc' }}>
-              <Text style={{ fontWeight: 'bold', fontSize: 8.5 }}>{l1}</Text>
-              <View style={{ borderBottomWidth: 0.5, borderBottomColor: '#000', minHeight: 12, marginTop: 2 }} />
+      <View style={[s.tBorder,{marginBottom:4}]}>
+        {pairs.map(([l1,v1,l2,v2],i) => (
+          <View key={i} style={{flexDirection:'row',borderBottomWidth:0.5,borderBottomColor:'#ccc'}}>
+            <View style={{flex:1,padding:3,borderRightWidth:0.5,borderRightColor:'#ccc'}}>
+              <Text style={{fontWeight:'bold',fontSize:7.5}}>{l1}</Text>
+              <View style={{borderBottomWidth:0.5,borderBottomColor:'#000',minHeight:10,marginTop:1}}>
+                {v1?<Text style={{fontSize:8}}>{v1}</Text>:null}
+              </View>
             </View>
-            <View style={{ flex: 1, padding: 4 }}>
-              <Text style={{ fontWeight: 'bold', fontSize: 8.5 }}>{l2}</Text>
-              <View style={{ borderBottomWidth: 0.5, borderBottomColor: '#000', minHeight: 12, marginTop: 2 }} />
+            <View style={{flex:1,padding:3}}>
+              <Text style={{fontWeight:'bold',fontSize:7.5}}>{l2}</Text>
+              <View style={{borderBottomWidth:0.5,borderBottomColor:'#000',minHeight:10,marginTop:1}}>
+                {v2?<Text style={{fontSize:8}}>{v2}</Text>:null}
+              </View>
             </View>
           </View>
         ))}
       </View>
 
-      {/* B */}
-      <Text style={s.secH}>B. ვიზიტის სახე</Text>
-      <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 12, marginBottom: 6, marginLeft: 6 }}>
-        {['დაგეგმილი','სპონტ. / შეუსათ.','ფარ. სამ. შემ.','საკ. ეტ. შ.','გაზომვის','მიღ.-ჩაბ.'].map(t => (
-          <View key={t} style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
-            <View style={s.box} /><Text style={{ fontSize: 9 }}>{t}</Text>
+      <Text style={s.secH}>B. ვიზიტის სახეობა</Text>
+      <View style={{flexDirection:'row',flexWrap:'wrap',gap:10,marginBottom:4,marginLeft:4}}>
+        {['დათვალიერება / გაზომვა','სინჯის აღება','ფოტო-სამუშაო','საკონტროლო ეტაპი','გარდამავალი ოქმი','მოულოდნელი შემოწმება'].map(t => (
+          <View key={t} style={{flexDirection:'row',alignItems:'center',gap:3}}>
+            <View style={data.visitType===t?s.boxChecked:s.box}>{data.visitType===t&&<Text style={{color:'#fff',fontSize:6,fontWeight:'bold'}}>✓</Text>}</View>
+            <Text style={{fontSize:8}}>{t}</Text>
           </View>
         ))}
       </View>
 
-      {/* C */}
-      <Text style={s.secH}>C. გამოყენებული ინსტრუმენტები</Text>
+      <Text style={s.secH}>C. ინსპექტირება</Text>
       <View style={s.tBorder}>
         <View style={s.tHeader}>
-          <View style={[s.tHead, { flex: 1 }]}><Text>ინსტ. დასახ.</Text></View>
-          <View style={[s.tHead, { width: '20%' }]}><Text>სარ. №</Text></View>
-          <View style={[s.tHead, { width: '22%' }]}><Text>კალ. ვ.</Text></View>
-          <View style={[s.tHead, { width: '28%' }]}><Text>ჩვ. / შედ.</Text></View>
+          <View style={[s.tHead,{flex:1,...cc}]}><Text>ინსპექციის დასახელება</Text></View>
+          <View style={[s.tHead,{width:'18%',...cc}]}><Text>სტანდარტის №</Text></View>
+          <View style={[s.tHead,{width:'20%',...cc}]}><Text>კონტროლის ვითარება</Text></View>
+          <View style={[s.tHead,{width:'26%',...cc}]}><Text>ჩვენება / შენიშვნა</Text></View>
         </View>
-        {[...Array(4)].map((_, i) => (
-          <View key={i} style={i % 2 === 0 ? s.tRow : s.tRowAlt}>
-            <View style={[s.tCell, { flex: 1, minHeight: 18 }]} />
-            <View style={[s.tCell, { width: '20%' }]} />
-            <View style={[s.tCell, { width: '22%' }]} />
-            <View style={[s.tCell, { width: '28%' }]} />
+        {[1,2,3].map(i => (
+          <View key={i} style={i%2===0?s.tRow:s.tRowAlt}>
+            <View style={[s.tCell,{flex:1,...ch}]}>{data[`c${i}_name`]?<Text style={{fontSize:8}}>{data[`c${i}_name`]}</Text>:null}</View>
+            <View style={[s.tCell,{width:'18%',...cc}]}>{data[`c${i}_standard`]?<Text style={{fontSize:8}}>{data[`c${i}_standard`]}</Text>:null}</View>
+            <View style={[s.tCell,{width:'20%',...cc}]}>{data[`c${i}_control`]?<Text style={{fontSize:8}}>{data[`c${i}_control`]}</Text>:null}</View>
+            <View style={[s.tCell,{width:'26%',...cc}]}>{data[`c${i}_note`]?<Text style={{fontSize:8}}>{data[`c${i}_note`]}</Text>:null}</View>
           </View>
         ))}
       </View>
 
-      {/* D */}
-      <Text style={s.secH}>D. დაკვირვებები და გაზომვები</Text>
+      <Text style={s.secH}>D. დეფექტები და გადახრები</Text>
       <View style={s.tBorder}>
         <View style={s.tHeader}>
-          <View style={[s.tHead, { width: '4%' }]}><Text>#</Text></View>
-          <View style={[s.tHead, { flex: 1 }]}><Text>სამ./ელ. დასახ.</Text></View>
-          <View style={[s.tHead, { width: '18%' }]}><Text>ფაქტ. გაზ.</Text></View>
-          <View style={[s.tHead, { width: '18%' }]}><Text>სახ. გაზ.</Text></View>
-          <View style={[s.tHead, { width: '15%' }]}><Text>გადახ.</Text></View>
-          <View style={[s.tHead, { width: '22%' }]}><Text>შენ.</Text></View>
+          <View style={[s.tHead,{width:'4%',...cc}]}><Text>#</Text></View>
+          <View style={[s.tHead,{flex:1,...cc}]}><Text>სამშენებლო ელემენტის დასახელება</Text></View>
+          <View style={[s.tHead,{width:'15%',...cc}]}><Text>ფოტო გადაღება</Text></View>
+          <View style={[s.tHead,{width:'15%',...cc}]}><Text>სტანდარტის გვერდი</Text></View>
+          <View style={[s.tHead,{width:'13%',...cc}]}><Text>გადახრა</Text></View>
+          <View style={[s.tHead,{width:'20%',...cc}]}><Text>შენიშვნა</Text></View>
         </View>
-        {[...Array(6)].map((_, i) => (
-          <View key={i} style={i % 2 === 0 ? s.tRow : s.tRowAlt}>
-            <View style={[s.tCell, { width: '4%' }]}><Text>{i+1}</Text></View>
-            <View style={[s.tCell, { flex: 1, minHeight: 18 }]} />
-            <View style={[s.tCell, { width: '18%' }]} />
-            <View style={[s.tCell, { width: '18%' }]} />
-            <View style={[s.tCell, { width: '15%' }]} />
-            <View style={[s.tCell, { width: '22%' }]} />
+        {[1,2,3,4,5].map(i => (
+          <View key={i} style={i%2===0?s.tRow:s.tRowAlt}>
+            <View style={[s.tCell,{width:'4%',...cc}]}><Text>{i}</Text></View>
+            <View style={[s.tCell,{flex:1,...ch}]}>{data[`d${i}_element`]?<Text style={{fontSize:8}}>{data[`d${i}_element`]}</Text>:null}</View>
+            <View style={[s.tCell,{width:'15%',...cc}]}>{data[`d${i}_photo`]?<Text style={{fontSize:8}}>{data[`d${i}_photo`]}</Text>:null}</View>
+            <View style={[s.tCell,{width:'15%',...cc}]}>{data[`d${i}_page`]?<Text style={{fontSize:8}}>{data[`d${i}_page`]}</Text>:null}</View>
+            <View style={[s.tCell,{width:'13%',...cc}]}>{data[`d${i}_deviation`]?<Text style={{fontSize:8}}>{data[`d${i}_deviation`]}</Text>:null}</View>
+            <View style={[s.tCell,{width:'20%',...cc}]}>{data[`d${i}_note`]?<Text style={{fontSize:8}}>{data[`d${i}_note`]}</Text>:null}</View>
           </View>
         ))}
       </View>
 
-      {/* E */}
-      <Text style={s.secH}>E. ფოტოდოკუმენტაცია</Text>
+      <Text style={s.secH}>E. ფოტო-დოკუმენტაცია</Text>
       <View style={s.tBorder}>
         <View style={s.tHeader}>
-          <View style={[s.tHead, { width: '15%' }]}><Text>ფოტო №</Text></View>
-          <View style={[s.tHead, { flex: 1 }]}><Text>აღწერა</Text></View>
-          <View style={[s.tHead, { width: '30%' }]}><Text>GPS კოორ.</Text></View>
+          <View style={[s.tHead,{width:'13%',...cc}]}><Text>ფოტოს №</Text></View>
+          <View style={[s.tHead,{flex:1,...cc}]}><Text>აღწერა</Text></View>
+          <View style={[s.tHead,{width:'28%',...cc}]}><Text>GPS კოორდინატები</Text></View>
         </View>
-        {[...Array(4)].map((_, i) => (
-          <View key={i} style={i % 2 === 0 ? s.tRow : s.tRowAlt}>
-            <View style={[s.tCell, { width: '15%', minHeight: 16 }]} />
-            <View style={[s.tCell, { flex: 1 }]} />
-            <View style={[s.tCell, { width: '30%' }]} />
+        {[1,2,3].map(i => (
+          <View key={i} style={i%2===0?s.tRow:s.tRowAlt}>
+            <View style={[s.tCell,{width:'13%',...cc}]}>{data[`e${i}_num`]?<Text style={{fontSize:8}}>{data[`e${i}_num`]}</Text>:null}</View>
+            <View style={[s.tCell,{flex:1,...ch}]}>{data[`e${i}_desc`]?<Text style={{fontSize:8}}>{data[`e${i}_desc`]}</Text>:null}</View>
+            <View style={[s.tCell,{width:'28%',...cc}]}>{data[`e${i}_gps`]?<Text style={{fontSize:8}}>{data[`e${i}_gps`]}</Text>:null}</View>
           </View>
         ))}
       </View>
 
-      {/* F */}
       <Text style={s.secH}>F. გამოვლენილი შეუსაბამობები</Text>
       <View style={s.tBorder}>
         <View style={s.tHeader}>
-          <View style={[s.tHead, { width: '4%' }]}><Text>#</Text></View>
-          <View style={[s.tHead, { flex: 1 }]}><Text>შეუსაბ. აღწ.</Text></View>
-          <View style={[s.tHead, { width: '20%' }]}><Text>კატ.</Text></View>
-          <View style={[s.tHead, { width: '28%' }]}><Text>მოთ. / ვ.</Text></View>
+          <View style={[s.tHead,{width:'4%',...cc}]}><Text>#</Text></View>
+          <View style={[s.tHead,{flex:1,...cc}]}><Text>შეუსაბამობის აღწერა</Text></View>
+          <View style={[s.tHead,{width:'18%',...cc}]}><Text>კატეგორია</Text></View>
+          <View style={[s.tHead,{width:'25%',...cc}]}><Text>მოქმედება / ვადა</Text></View>
         </View>
-        {[...Array(3)].map((_, i) => (
-          <View key={i} style={i % 2 === 0 ? s.tRow : s.tRowAlt}>
-            <View style={[s.tCell, { width: '4%' }]}><Text>{i+1}</Text></View>
-            <View style={[s.tCell, { flex: 1, minHeight: 18 }]} />
-            <View style={[s.tCell, { width: '20%' }]} />
-            <View style={[s.tCell, { width: '28%' }]} />
+        {[1,2,3].map(i => (
+          <View key={i} style={i%2===0?s.tRow:s.tRowAlt}>
+            <View style={[s.tCell,{width:'4%',...cc}]}><Text>{i}</Text></View>
+            <View style={[s.tCell,{flex:1,...ch}]}>{data[`f${i}_desc`]?<Text style={{fontSize:8}}>{data[`f${i}_desc`]}</Text>:null}</View>
+            <View style={[s.tCell,{width:'18%',...cc}]}>{data[`f${i}_category`]?<Text style={{fontSize:8}}>{data[`f${i}_category`]}</Text>:null}</View>
+            <View style={[s.tCell,{width:'25%',...cc}]}>{data[`f${i}_action`]?<Text style={{fontSize:8}}>{data[`f${i}_action`]}</Text>:null}</View>
           </View>
         ))}
       </View>
-      <Text style={{ fontSize: 7.5, color: '#555', marginBottom: 6 }}>კატ.: კ — კრიტიკული | ა — არსებითი | ფ — ფორმალური</Text>
+      <Text style={{fontSize:7,color:'#555',marginBottom:3}}>კატეგ.: კ — კრიტიკული | ა — არსებითი | ფ — ფორმალური / ობსერვაცია</Text>
 
-      {/* G */}
       <Text style={s.secH}>G. ადგილზე ხელმოწერები</Text>
       <View style={s.tBorder}>
         <View style={s.tHeader}>
-          <View style={[s.tHead, { flex: 1 }]}><Text>მხარე</Text></View>
-          <View style={[s.tHead, { width: '28%' }]}><Text>სახელი/გვარი</Text></View>
-          <View style={[s.tHead, { width: '28%' }]}><Text>ხელმ. / დრო</Text></View>
+          <View style={[s.tHead,{flex:1,...cc}]}><Text>მხარე</Text></View>
+          <View style={[s.tHead,{width:'27%',...cc}]}><Text>სახელი / გვარი</Text></View>
+          <View style={[s.tHead,{width:'27%',...cc}]}><Text>ხელმოწერა / თარიღი</Text></View>
         </View>
-        {['ინსპექტორი','დამ. წარმომ.','კონტ. წარმომ.'].map((r, i) => (
-          <View key={r} style={i % 2 === 0 ? s.tRow : s.tRowAlt}>
-            <View style={[s.tCell, { flex: 1 }]}><Text>{r}</Text></View>
-            <View style={[s.tCell, { width: '28%', minHeight: 22 }]} />
-            <View style={[s.tCell, { width: '28%' }]} />
+        {['ინსპექტორი','დამკვეთის წარმომადგენელი','კონტრაქტორის წარმომადგენელი'].map((r,i) => (
+          <View key={r} style={i%2===0?s.tRow:s.tRowAlt}>
+            <View style={[s.tCell,{flex:1,...cc}]}><Text>{r}</Text></View>
+            <View style={[s.tCell,{width:'27%',...ch}]}>
+              {sigs[i]?.name ? <Text style={{fontSize:8}}>{sigs[i].name}</Text> : null}
+            </View>
+            <View style={[s.tCell,{width:'27%',...cc}]}>
+              {sigs[i]?.dataURL
+                ? <Image src={sigs[i].dataURL} style={{width:72,height:22,objectFit:'contain'}}/>
+                : null}
+              {sigs[i]?.date ? <Text style={{fontSize:7,marginTop:1}}>{sigs[i].date}</Text> : null}
+            </View>
           </View>
         ))}
       </View>
@@ -144,6 +151,6 @@ const FM16_VisitRecordPdf = () => (
       <FormFooter code="FM-16 v2.0 | 28.04.2026 | შენახვა: 10 წელი" />
     </Page>
   </Document>
-);
+);};
 
 export default FM16_VisitRecordPdf;
