@@ -426,6 +426,12 @@ function parseCostEstimateExcel(buffer) {
             const row = rows[i].map(c => String(c).toLowerCase().trim());
             const dIdx = row.findIndex(c => c.includes('დასახ') || c.includes('სამუშ') || c.includes('description') || c.includes('სახელ'));
             if (dIdx < 0) continue;
+            // Require at least one structural column to avoid matching title rows that contain "სამუშ"
+            const hasQty  = row.some(c => c.includes('რაოდ') || c.includes('quantity'));
+            const hasSul  = row.some(c => c.includes('სულ') || c.includes('total'));
+            const hasMat  = row.some(c => c.includes('მასალ'));
+            const hasN    = row.some(c => c === 'n' || c === '№' || c.includes('შიფ'));
+            if (!hasQty && !hasSul && !hasMat && !hasN) continue; // title row, not a header
 
             headerRow1 = i;
             descCol = dIdx;
