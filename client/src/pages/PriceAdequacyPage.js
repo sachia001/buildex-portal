@@ -120,19 +120,25 @@ export default function PriceAdequacyPage({ role }) {
     const downloadExcel = () => {
         if (!activeCheck) return;
         const rows = (activeCheck.lineItems || []).map(it => ({
-            '#': it.lineNum,
-            'კოდი': it.code || '',
-            'დასახელება': it.description || '',
-            'ერთეული': it.unit || '',
-            'რაოდენობა': it.quantity || '',
-            'ხარჯთ. ერთ.ფ. (₾)': it.unitPrice || '',
+            'N': it.lineNum,
+            'შიფრი': it.code || '',
+            'სამუშაოს დასახელება': it.description || '',
+            'განზ.ერთ.': it.unit || '',
+            'რაოდ.': it.quantity || '',
+            'მასალ. ერთ.ფ.': it.matUnitPrice || '',
+            'მასალ. ჯამი': it.matTotal || '',
+            'ხელფ. ერთ.ფ.': it.wageUnitPrice || '',
+            'ხელფ. ჯამი': it.wageTotal || '',
+            'მექ. ერთ.ფ.': it.machUnitPrice || '',
+            'მექ. ჯამი': it.machTotal || '',
+            'სულ ერთ.ფ. (₾)': it.unitPrice || '',
+            'სულ ჯამი (₾)': it.totalPrice || '',
             'ნორმ. ერთ.ფ. (₾)': it.normUnitPrice ?? '',
             'ნორმ. წყარო': it.normSource || '',
             'გადახრა %': it.deviation ?? '',
             'სტატუსი': it.lineStatus || '',
             'ნორმ. კოდი': it.normCode || '',
             'ნორმ. დასახელება': it.normDescription || '',
-            'ხარჯთ. ჯამი (₾)': it.totalPrice || '',
         }));
         const srcUsed = [...new Set((activeCheck.lineItems || []).filter(r => r.normSource).map(r => r.normSource))];
         const normLabelXlsx = srcUsed.length > 0 ? srcUsed.join(', ') : (activeCheck.normType || 'ყველა');
@@ -452,43 +458,64 @@ export default function PriceAdequacyPage({ role }) {
                             </div>
                         </div>
                         <div className="card-body p-0" style={{ overflowX: 'auto' }}>
-                            <table className="table table-sm mb-0" style={{ minWidth: 1000, fontSize: '0.8rem' }}>
+                            <table className="table table-sm mb-0" style={{ minWidth: 1300, fontSize: '0.78rem' }}>
                                 <thead style={{ background: '#f0f4f8', position: 'sticky', top: 0 }}>
                                     <tr>
-                                        <th style={{ width: 40 }}>#</th>
-                                        <th style={{ width: 80 }}>კოდი</th>
-                                        <th>დასახელება</th>
-                                        <th style={{ width: 50 }}>ერთ.</th>
-                                        <th style={{ width: 55 }}>რაოდ.</th>
-                                        <th style={{ width: 80 }}>ხარჯთ. ₾</th>
-                                        <th style={{ width: 80 }}>ნორმ. ₾</th>
-                                        <th style={{ width: 75 }}>ნ.წყარო</th>
-                                        <th style={{ width: 65 }}>გადახ.%</th>
-                                        <th style={{ width: 100 }}>სტატუსი</th>
-                                        <th style={{ width: 55 }}>შ.%</th>
+                                        <th rowSpan={2} style={{ width: 36, verticalAlign: 'middle' }}>#</th>
+                                        <th rowSpan={2} style={{ width: 72, verticalAlign: 'middle' }}>შიფრი</th>
+                                        <th rowSpan={2} style={{ verticalAlign: 'middle' }}>სამუშაოს დასახელება</th>
+                                        <th rowSpan={2} style={{ width: 42, verticalAlign: 'middle' }}>ერთ.</th>
+                                        <th rowSpan={2} style={{ width: 50, verticalAlign: 'middle' }}>რაოდ.</th>
+                                        <th colSpan={2} style={{ textAlign: 'center', borderLeft: '2px solid #ddd' }}>მასალები (₾)</th>
+                                        <th colSpan={2} style={{ textAlign: 'center', borderLeft: '1px solid #ddd' }}>ხელფასი (₾)</th>
+                                        <th colSpan={2} style={{ textAlign: 'center', borderLeft: '1px solid #ddd' }}>მშენ.მექ. (₾)</th>
+                                        <th rowSpan={2} style={{ width: 75, verticalAlign: 'middle', borderLeft: '2px solid #ddd' }}>სულ ერთ.ფ.</th>
+                                        <th rowSpan={2} style={{ width: 75, verticalAlign: 'middle' }}>ნორმ. ₾</th>
+                                        <th rowSpan={2} style={{ width: 68, verticalAlign: 'middle' }}>ნ.წყარო</th>
+                                        <th rowSpan={2} style={{ width: 62, verticalAlign: 'middle' }}>გადახ.%</th>
+                                        <th rowSpan={2} style={{ width: 95, verticalAlign: 'middle' }}>სტატუსი</th>
+                                    </tr>
+                                    <tr>
+                                        <th style={{ width: 68, borderLeft: '2px solid #ddd', fontWeight: 'normal', fontSize: '0.7rem' }}>ერთ.ფ.</th>
+                                        <th style={{ width: 68, fontWeight: 'normal', fontSize: '0.7rem' }}>ჯამი</th>
+                                        <th style={{ width: 68, borderLeft: '1px solid #ddd', fontWeight: 'normal', fontSize: '0.7rem' }}>ერთ.ფ.</th>
+                                        <th style={{ width: 68, fontWeight: 'normal', fontSize: '0.7rem' }}>ჯამი</th>
+                                        <th style={{ width: 68, borderLeft: '1px solid #ddd', fontWeight: 'normal', fontSize: '0.7rem' }}>ერთ.ფ.</th>
+                                        <th style={{ width: 68, fontWeight: 'normal', fontSize: '0.7rem' }}>ჯამი</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {filteredItems.length === 0
-                                        ? <tr><td colSpan={11} className="text-center text-muted py-4">შედეგები ვერ მოიძებნა</td></tr>
+                                        ? <tr><td colSpan={16} className="text-center text-muted py-4">შედეგები ვერ მოიძებნა</td></tr>
                                         : filteredItems.map((it, i) => {
                                             const sc = STATUS_BADGE[it.lineStatus] || STATUS_BADGE['ვერ შემოწმდა'];
                                             const devAbs = it.deviation != null ? Math.abs(it.deviation) : 0;
+                                            const hasComponents = it.matUnitPrice || it.wageUnitPrice || it.machUnitPrice;
                                             return (
                                                 <tr key={i} style={{ background: i % 2 === 0 ? '#fff' : '#f9fafb' }}>
                                                     <td>{it.lineNum}</td>
-                                                    <td className="text-muted">{it.code || ''}</td>
+                                                    <td className="text-muted" style={{ fontSize: '0.72rem' }}>{it.code || ''}</td>
                                                     <td>
                                                         <div>{it.description}</div>
                                                         {it.normDescription && it.normDescription !== it.description && (
-                                                            <div className="small text-muted" style={{ fontSize: '0.7rem' }}>
-                                                                ≈ {it.normDescription.substring(0, 80)}{it.normDescription.length > 80 ? '…' : ''}
+                                                            <div className="text-muted" style={{ fontSize: '0.68rem' }}>
+                                                                ≈ {it.normDescription.substring(0, 70)}{it.normDescription.length > 70 ? '…' : ''}
                                                             </div>
                                                         )}
                                                     </td>
                                                     <td>{it.unit || ''}</td>
                                                     <td>{it.quantity || ''}</td>
-                                                    <td className="fw-bold">{fmtN(it.unitPrice)}</td>
+                                                    {/* მასალები */}
+                                                    <td style={{ borderLeft: '2px solid #ddd' }}>{hasComponents ? fmtN(it.matUnitPrice) : '—'}</td>
+                                                    <td className="text-muted">{hasComponents ? fmtN(it.matTotal) : '—'}</td>
+                                                    {/* ხელფასი */}
+                                                    <td style={{ borderLeft: '1px solid #ddd' }}>{hasComponents ? fmtN(it.wageUnitPrice) : '—'}</td>
+                                                    <td className="text-muted">{hasComponents ? fmtN(it.wageTotal) : '—'}</td>
+                                                    {/* მექ. */}
+                                                    <td style={{ borderLeft: '1px solid #ddd' }}>{hasComponents ? fmtN(it.machUnitPrice) : '—'}</td>
+                                                    <td className="text-muted">{hasComponents ? fmtN(it.machTotal) : '—'}</td>
+                                                    {/* სულ + ნორმ + გადახ + სტატ */}
+                                                    <td className="fw-bold" style={{ borderLeft: '2px solid #ddd' }}>{fmtN(it.unitPrice)}</td>
                                                     <td>{fmtN(it.normUnitPrice)}</td>
                                                     <td>
                                                         {it.normSource
@@ -496,10 +523,7 @@ export default function PriceAdequacyPage({ role }) {
                                                             : <span className="text-muted">—</span>}
                                                     </td>
                                                     <td>
-                                                        <span style={{
-                                                            fontWeight: 'bold',
-                                                            color: devAbs > 15 ? '#b91c1c' : devAbs > 5 ? '#b45309' : '#15803d'
-                                                        }}>
+                                                        <span style={{ fontWeight: 'bold', color: devAbs > 15 ? '#b91c1c' : devAbs > 5 ? '#b45309' : '#15803d' }}>
                                                             {fmtD(it.deviation)}
                                                         </span>
                                                     </td>
@@ -508,7 +532,6 @@ export default function PriceAdequacyPage({ role }) {
                                                             {it.lineStatus}
                                                         </span>
                                                     </td>
-                                                    <td className="text-muted small">{it.matchScore > 0 ? `${it.matchScore}%` : '—'}</td>
                                                 </tr>
                                             );
                                         })}

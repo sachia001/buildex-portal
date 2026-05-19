@@ -268,6 +268,13 @@ const PriceAdequacyCheck = mongoose.model('PriceAdequacyCheck', new mongoose.Sch
         quantity: { type: Number, default: 0 },
         unitPrice: { type: Number, default: 0 },
         totalPrice: { type: Number, default: 0 },
+        normCoeff: { type: Number, default: 1 },
+        matUnitPrice: { type: Number, default: 0 },
+        matTotal: { type: Number, default: 0 },
+        wageUnitPrice: { type: Number, default: 0 },
+        wageTotal: { type: Number, default: 0 },
+        machUnitPrice: { type: Number, default: 0 },
+        machTotal: { type: Number, default: 0 },
         normCode: { type: String, default: '' },
         normDescription: { type: String, default: '' },
         normUnitPrice: { type: Number, default: null },
@@ -401,44 +408,137 @@ function parseNormExcel(buffer) {
 function parseCostEstimateExcel(buffer) {
     const wb = XLSX_LIB.read(buffer, { type: 'buffer' });
     const items = [];
+    const getNum = v => parseFloat(String(v || '0').replace(/\s/g, '').replace(/[^\d.,-]/g, '').replace(',', '.')) || 0;
+
     for (const sheetName of wb.SheetNames) {
         const ws = wb.Sheets[sheetName];
         const rows = XLSX_LIB.utils.sheet_to_json(ws, { header: 1, defval: '' });
-        let codeCol = -1, descCol = -1, unitCol = -1, qtyCol = -1, priceCol = -1, totalCol = -1, headerRowIdx = -1;
-        for (let i = 0; i < Math.min(rows.length, 35); i++) {
+
+        let headerRow1 = -1, headerRow2 = -1;
+        let codeCol = -1, descCol = -1, unitMeasCol = -1, normCoeffCol = -1, qtyCol = -1;
+        let matPriceCol = -1, matTotalCol = -1;
+        let wagePriceCol = -1, wageTotalCol = -1;
+        let machPriceCol = -1, machTotalCol = -1;
+        let grandTotalCol = -1, simplePriceCol = -1;
+
+        // Scan header rows — look for the row containing the description column
+        for (let i = 0; i < Math.min(rows.length, 20); i++) {
             const row = rows[i].map(c => String(c).toLowerCase().trim());
-            const dIdx = row.findIndex(c => c.includes('დასახ') || c.includes('სამუშა') || c.includes('description') || c.includes('სახელ'));
+            const dIdx = row.findIndex(c => c.includes('დასახ') || c.includes('სამუშ') || c.includes('description') || c.includes('სახელ'));
+            if (dIdx < 0) continue;
+
+            headerRow1 = i;
+            descCol = dIdx;
+            const cIdx = row.findIndex(c => c.includes('შიფ') || c.includes('კოდ') || c === 'n' || c === '№' || c === '#');
             const qIdx = row.findIndex(c => c.includes('რაოდ') || c.includes('quantity') || c === 'qty');
-            const pIdx = row.findIndex(c => (c.includes('ფას') || c.includes('price')) && !c.includes('სულ') && !c.includes('total'));
-            const tIdx = row.findIndex(c => c.includes('სულ') || c.includes('total') || c === 'ჯამი');
-            const uIdx = row.findIndex(c => (c.includes('ერთ') && c.length < 15) || c === 'unit');
-            const cIdx = row.findIndex(c => c === 'კოდი' || c === '№' || c.includes('კოდ') || c === '#');
-            if (dIdx >= 0 && (pIdx >= 0 || tIdx >= 0 || qIdx >= 0)) {
-                headerRowIdx = i;
-                if (cIdx >= 0) codeCol = cIdx;
-                descCol = dIdx;
-                if (uIdx >= 0) unitCol = uIdx;
-                if (qIdx >= 0) qtyCol = qIdx;
-                if (pIdx >= 0) priceCol = pIdx;
-                if (tIdx >= 0) totalCol = tIdx;
-                break;
+            const uIdx = row.findIndex((c, j) => j < dIdx + 3 && j !== dIdx && (c.includes('განზ') || (c.includes('ერთ') && !c.includes('ფას') && c.length < 12)));
+            const nIdx = row.findIndex(c => c.includes('ნორმ'));
+            const sulIdx = row.findLastIndex(c => c.includes('სულ') || (c.includes('total') && !c.includes('sub')));
+            const matIdx = row.findIndex(c => c.includes('მასალ'));
+            const wageIdx = row.findIndex(c => c.includes('ხელფ') || (c.includes('ხელ') && c.length < 8));
+            const machIdx = row.findIndex(c => c.includes('მექ') || c.includes('მშენ.მ'));
+
+            if (cIdx >= 0) codeCol = cIdx;
+            if (uIdx >= 0) unitMeasCol = uIdx;
+            if (nIdx >= 0) normCoeffCol = nIdx;
+            if (qIdx >= 0) qtyCol = qIdx;
+            if (sulIdx >= 0) grandTotalCol = sulIdx;
+
+            // Simple single-price column (not in group)
+            const pIdx = row.findIndex((c, j) => j > (qIdx >= 0 ? qIdx : dIdx) && (c.includes('ფას') || c.includes('price')) && !c.includes('სულ') && matIdx < 0);
+            if (pIdx >= 0) simplePriceCol = pIdx;
+
+            // Check row below for sub-headers (ერთ.ფ. / ჯამი under მასალები/ხელფასი/მექ)
+            if (i + 1 < rows.length) {
+                const sub = rows[i + 1].map(c => String(c).toLowerCase().trim());
+                const hasSubHeaders = sub.some(c => c.includes('ერთ') || c.includes('ჯამ'));
+                if (hasSubHeaders) {
+                    headerRow2 = i + 1;
+                    // For each group column, find ერთ and ჯამ in the sub-row in that range
+                    const findInRange = (startCol, endCol, keyword) => {
+                        for (let j = Math.max(0, startCol); j < Math.min(sub.length, endCol); j++) {
+                            if (sub[j].includes(keyword)) return j;
+                        }
+                        return -1;
+                    };
+                    const nextGroup = (idx) => {
+                        // find next group-level column after idx
+                        const groups = [matIdx, wageIdx, machIdx, sulIdx].filter(g => g > idx).sort((a,b)=>a-b);
+                        return groups.length ? groups[0] : sub.length;
+                    };
+                    if (matIdx >= 0) {
+                        const end = nextGroup(matIdx);
+                        matPriceCol = findInRange(matIdx, end, 'ერთ');
+                        matTotalCol  = findInRange(matIdx, end, 'ჯამ');
+                        if (matTotalCol < 0) matTotalCol = findInRange(matIdx, end, 'total');
+                    }
+                    if (wageIdx >= 0) {
+                        const end = nextGroup(wageIdx);
+                        wagePriceCol = findInRange(wageIdx, end, 'ერთ');
+                        wageTotalCol  = findInRange(wageIdx, end, 'ჯამ');
+                    }
+                    if (machIdx >= 0) {
+                        const end = nextGroup(machIdx);
+                        machPriceCol = findInRange(machIdx, end, 'ერთ');
+                        machTotalCol  = findInRange(machIdx, end, 'ჯამ');
+                    }
+                }
             }
+            break;
         }
-        if (headerRowIdx === -1) continue;
-        const startRow = headerRowIdx + 1;
+
+        if (descCol < 0) continue;
+
+        // Start from after all header rows; also skip pure-number indexing rows (1,2,3…13)
+        let startRow = (headerRow2 >= 0 ? headerRow2 : headerRow1) + 1;
+        while (startRow < rows.length) {
+            const r = rows[startRow];
+            const nums = r.filter(c => typeof c === 'number' && Number.isInteger(c) && c > 0 && c <= 20);
+            if (nums.length >= 5) { startRow++; continue; }
+            break;
+        }
+
         let lineNum = items.length + 1;
         for (let i = startRow; i < rows.length; i++) {
             const row = rows[i];
             if (!row || row.every(c => !String(c).trim())) continue;
+
             const desc = String(row[descCol] || '').trim();
-            if (!desc || desc.length < 3) continue;
-            const code = codeCol >= 0 ? String(row[codeCol] || '').trim() : '';
-            const unit = unitCol >= 0 ? String(row[unitCol] || '').trim() : '';
-            const qty = qtyCol >= 0 ? parseFloat(String(row[qtyCol] || '0').replace(/[^\d.,]/g, '').replace(',', '.')) || 0 : 0;
-            const unitPrice = priceCol >= 0 ? parseFloat(String(row[priceCol] || '0').replace(/[^\d.,]/g, '').replace(',', '.')) || 0 : 0;
-            const totalPrice = totalCol >= 0 ? parseFloat(String(row[totalCol] || '0').replace(/[^\d.,]/g, '').replace(',', '.')) || 0 : unitPrice * qty;
-            if (!unitPrice && !totalPrice && !qty) continue;
-            items.push({ lineNum: lineNum++, code, description: desc, unit, quantity: qty, unitPrice, totalPrice });
+            if (!desc || desc.length < 2) continue;
+
+            const code       = codeCol >= 0     ? String(row[codeCol] || '').trim() : '';
+            const unit       = unitMeasCol >= 0  ? String(row[unitMeasCol] || '').trim() : '';
+            const normCoeff  = normCoeffCol >= 0 ? getNum(row[normCoeffCol]) : 1;
+            const qty        = qtyCol >= 0       ? getNum(row[qtyCol]) : 0;
+
+            const matUnit  = matPriceCol >= 0  ? getNum(row[matPriceCol])  : 0;
+            const matTot   = matTotalCol >= 0  ? getNum(row[matTotalCol])  : 0;
+            const wageUnit = wagePriceCol >= 0 ? getNum(row[wagePriceCol]) : 0;
+            const wageTot  = wageTotalCol >= 0 ? getNum(row[wageTotalCol]) : 0;
+            const machUnit = machPriceCol >= 0 ? getNum(row[machPriceCol]) : 0;
+            const machTot  = machTotalCol >= 0 ? getNum(row[machTotalCol]) : 0;
+            const grandTot = grandTotalCol >= 0 ? getNum(row[grandTotalCol]) : 0;
+
+            // Derive total unit price by priority:
+            // 1. simple price col  2. sum of components  3. grandTotal / qty
+            let unitPrice = simplePriceCol >= 0 ? getNum(row[simplePriceCol]) : 0;
+            if (!unitPrice && (matUnit || wageUnit || machUnit)) unitPrice = matUnit + wageUnit + machUnit;
+            if (!unitPrice && grandTot > 0 && qty > 0) unitPrice = grandTot / qty;
+
+            const totalPrice = grandTot || (unitPrice * qty);
+
+            // Skip section-header rows (no price and no code and no qty)
+            if (!unitPrice && !totalPrice && !qty && !code) continue;
+            // Skip rows that have only description (chapter headers)
+            if (!code && !qty && !unitPrice && desc.length > 3) continue;
+
+            items.push({
+                lineNum: lineNum++, code, description: desc, unit, quantity: qty,
+                normCoeff, unitPrice, totalPrice,
+                matUnitPrice: matUnit, matTotal: matTot,
+                wageUnitPrice: wageUnit, wageTotal: wageTot,
+                machUnitPrice: machUnit, machTotal: machTot,
+            });
         }
     }
     return items;
@@ -449,7 +549,21 @@ async function runMatchingEngine(lineItems, normYear, normQuarter, normType) {
     if (normYear) q.year = normYear;
     if (normQuarter) q.quarter = normQuarter;
     if (normType && normType !== 'all') q.normType = normType;
-    const norms = await NormEntry.find(q).lean();
+    let norms = await NormEntry.find(q).lean();
+    // If no norms found for the specific period, fall back to all available norms
+    if (norms.length === 0 && (normYear || normQuarter)) {
+        const qFallback = {};
+        if (normType && normType !== 'all') qFallback.normType = normType;
+        norms = await NormEntry.find(qFallback).lean();
+    }
+    if (norms.length === 0) {
+        // No norms at all — mark all as unmatched
+        return {
+            results: lineItems.map(item => ({ ...item, normCode: '', normDescription: '', normUnitPrice: null, normSource: '', deviation: null, matchScore: 0, lineStatus: 'ვერ შემოწმდა' })),
+            matchedLines: 0, violationCount: 0, warningCount: 0, okCount: 0, unmatchedCount: lineItems.length,
+            normDbEmpty: true,
+        };
+    }
     const codeIndex = {};
     for (const n of norms) { if (n.code) codeIndex[n.code.toUpperCase().replace(/[–—]/g, '-')] = n; }
     let matchedLines = 0, violationCount = 0, warningCount = 0, okCount = 0, unmatchedCount = 0;
@@ -1028,8 +1142,9 @@ api.post('/price-adequacy/check', estimateUpload.single('file'), async (req, res
         }
         if (lineItems.length === 0) return res.status(400).json({ error: 'ხარჯთაღრიცხვაში სტრიქონები ვერ მოიძებნა. შეამოწმეთ Excel სტრუქტურა.' });
         const effectiveNormType = normType || 'all';
-        const { results, matchedLines, violationCount, warningCount, okCount, unmatchedCount }
-            = await runMatchingEngine(lineItems, normYear ? parseInt(normYear) : null, normQuarter ? parseInt(normQuarter) : null, effectiveNormType);
+        const matchResult = await runMatchingEngine(lineItems, normYear ? parseInt(normYear) : null, normQuarter ? parseInt(normQuarter) : null, effectiveNormType);
+        if (matchResult.normDbEmpty) return res.status(400).json({ error: '⚠️ ნორმ-ბაზა ცარიელია. გთხოვთ ჯერ ჩატვირთოთ NER/SNIP Excel ფაილი «📊 ნორმ-ბაზა» გვერდზე, ან გამოიყენოთ «საცდელი NER ბაზა» ღილაკი.' });
+        const { results, matchedLines, violationCount, warningCount, okCount, unmatchedCount } = matchResult;
         // Collect which norm sources were actually used in matches
         const sourcesUsed = [...new Set(results.filter(r => r.normSource).map(r => r.normSource))];
         const sourcesLabel = sourcesUsed.length > 0 ? sourcesUsed.join(', ') : (effectiveNormType === 'all' ? 'ყველა ხელმისაწვდომი ნორმ-ბაზა' : effectiveNormType);
