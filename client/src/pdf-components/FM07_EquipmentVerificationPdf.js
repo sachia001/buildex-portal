@@ -28,16 +28,21 @@ const FM07_EquipmentVerificationPdf = ({ data = {} }) => {
           <View style={[s.tHead,{width:'20%'}]}><Text>კი / არა</Text></View>
           <View style={[s.tHead,{width:'26%'}]}><Text>შენიშვნა</Text></View>
         </View>
-        {['გარეგნული დათვალიერება','ჩვენების ნული (zero)','სერტიფიკატის ვადა','ნიშანდობლივი ვიზუალური შემოწმება','SI ერთეულების შესაბამისობა (§6.2.7)'].map((it,i) => (
+        {['გარეგნული დათვალიერება','ჩვენების ნული (zero)','სერტიფიკატის ვადა','ნიშანდობლივი ვიზუალური შემოწმება','SI ერთეულების შესაბამისობა (§6.2.7)'].map((it,i) => {
+          const vcKey = `vc${i+1}`;
+          const v = data[vcKey];
+          return (
           <View key={i} style={i%2===0?s.tRow:s.tRowAlt}>
             <View style={[s.tCell,{width:'5%'}]}><Text>{i+1}</Text></View>
             <View style={[s.tCell,{flex:1}]}><Text>{it}</Text></View>
             <View style={[s.tCell,{width:'20%'}]}>
-              <View style={{flexDirection:'row',gap:4}}><View style={s.box}/><Text style={{fontSize:7.5}}>კი</Text><View style={s.box}/><Text style={{fontSize:7.5}}>არა</Text></View>
+              {v
+                ? <Text style={{fontSize:8,fontWeight:'bold'}}>{v==='yes'?'კი ✓':'არა ✗'}</Text>
+                : <View style={{flexDirection:'row',gap:4}}><View style={s.box}/><Text style={{fontSize:7.5}}>კი</Text><View style={s.box}/><Text style={{fontSize:7.5}}>არა</Text></View>}
             </View>
             <View style={[s.tCell,{width:'26%',minHeight:16}]}/>
           </View>
-        ))}
+        )})}
       </View>
 
       <Text style={s.secH}>D. გამოყენების ისტორია / ვიზიტები</Text>

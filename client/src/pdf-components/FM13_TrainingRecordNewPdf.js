@@ -49,7 +49,12 @@ const FM13_TrainingRecordNewPdf = ({ data = {} }) => {
       <Text style={s.secH}>D. კომპეტენციის მეთოდი</Text>
       <View style={{flexDirection:'row',flexWrap:'wrap',gap:10,marginBottom:3,marginLeft:4}}>
         {['წერილობითი ტესტი','witnessing','ზედამხედველობა გამოყენებაზე','პრაქტიკული სავარჯიშო','ტექნიკური მენეჯერის შეფასება'].map(m => (
-          <View key={m} style={{flexDirection:'row',alignItems:'center',gap:3}}><View style={s.box}/><Text style={{fontSize:8}}>{m}</Text></View>
+          <View key={m} style={{flexDirection:'row',alignItems:'center',gap:3}}>
+            <View style={(data.competencyMethods||[]).includes(m)?s.boxChecked:s.box}>
+              {(data.competencyMethods||[]).includes(m)&&<Text style={{color:'#fff',fontSize:6,fontWeight:'bold'}}>✓</Text>}
+            </View>
+            <Text style={{fontSize:8}}>{m}</Text>
+          </View>
         ))}
       </View>
       <YesNoRow label="კომპეტენტურია:" yesNo={data.competent} />
@@ -57,7 +62,12 @@ const FM13_TrainingRecordNewPdf = ({ data = {} }) => {
       <Text style={s.secH}>E. სტატუსი</Text>
       <View style={{flexDirection:'row',gap:16,marginBottom:4,marginLeft:4}}>
         {['სრულად კომპეტენტური','ნაწილობრივ კომპეტენტური','კომპეტენტური არ არის'].map(t => (
-          <View key={t} style={{flexDirection:'row',alignItems:'center',gap:3}}><View style={s.box}/><Text style={{fontSize:8}}>{t}</Text></View>
+          <View key={t} style={{flexDirection:'row',alignItems:'center',gap:3}}>
+            <View style={data.statusResult===t?s.boxChecked:s.box}>
+              {data.statusResult===t&&<Text style={{color:'#fff',fontSize:6,fontWeight:'bold'}}>✓</Text>}
+            </View>
+            <Text style={{fontSize:8}}>{t}</Text>
+          </View>
         ))}
       </View>
       <FieldRow label="მომდევნო ტრენინგის თარიღი:" value={data.nextTraining} />

@@ -45,9 +45,11 @@ const FM11_InspectionPlanPdf = ({ data = {} }) => {
           <View style={[s.tHead,{width:'30%',...cc}]}><Text>გამოსაყენებელი კრიტერიუმები</Text></View>
           <View style={[s.tHead,{width:'16%',...cc}]}><Text>კომენტარი</Text></View>
         </View>
-        {[...Array(3)].map((_,i) => (
+        {(data.scopeCriteria && data.scopeCriteria.length > 0 ? data.scopeCriteria : [{},{},{}]).map((row,i) => (
           <View key={i} style={i%2===0?s.tRow:s.tRowAlt}>
-            <View style={[s.tCell,{flex:1,minHeight:18,...cc}]}/><View style={[s.tCell,{width:'30%',...cc}]}/><View style={[s.tCell,{width:'16%',...cc}]}/>
+            <View style={[s.tCell,{flex:1,minHeight:18,...cc}]}>{row.scope?<Text style={{fontSize:8}}>{row.scope}</Text>:null}</View>
+            <View style={[s.tCell,{width:'30%',...cc}]}>{row.criteria?<Text style={{fontSize:8}}>{row.criteria}</Text>:null}</View>
+            <View style={[s.tCell,{width:'16%',...cc}]}>{row.comment?<Text style={{fontSize:8}}>{row.comment}</Text>:null}</View>
           </View>
         ))}
       </View>
@@ -99,6 +101,7 @@ const FM11_InspectionPlanPdf = ({ data = {} }) => {
       <View style={{flexDirection:'row',justifyContent:'flex-end',marginTop:6}}>
         <View style={{width:'44%'}}>
           <Text style={{fontWeight:'bold',fontSize:8}}>ტექნიკური მენეჯერი (დამტკიცება):</Text>
+          {sigs[0]?.name?<Text style={{fontSize:7.5,marginBottom:1}}>{sigs[0].name}</Text>:null}
           {sigs[0]?.dataURL?<Image src={sigs[0].dataURL} style={s.sigImg}/>:<View style={{height:26}}/>}
           <View style={{borderTopWidth:0.5,borderTopColor:'#000',paddingTop:2}}>
             <Text style={{fontSize:7,textAlign:'center'}}>{sigs[0]?.date||'ხელმოწერა / თარიღი'}</Text>

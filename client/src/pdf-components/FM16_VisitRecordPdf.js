@@ -1,7 +1,6 @@
 import React from 'react';
-import { Page, Text, View, Document } from '@react-pdf/renderer';
+import { Page, Text, View, Document, Image } from '@react-pdf/renderer';
 import { s, WM, FormHeader, FormFooter } from './FormBase';
-import { Image } from '@react-pdf/renderer';
 
 const cc = { padding: 2, minHeight: 11 };
 const ch = { padding: 2, minHeight: 13 };

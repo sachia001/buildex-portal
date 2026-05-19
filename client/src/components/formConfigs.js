@@ -68,6 +68,10 @@ export const FORM_CONFIGS = {
         { id: 'documents',    label: 'შემოწმებული დოკუმენტები',        type: 'text' },
         { id: 'cases',        label: 'შემოწმებული საქმეები (№)',        type: 'text' },
       ]},
+      { label: 'B. შემოწმების ფარგლები (ISO §§)', fields: [
+        { id: 'auditScopes', label: 'შემოწმებული §§', type: 'multicheck',
+          options: ['§4','§5','§6.1','§6.2','§7.1','§7.3','§7.4','§8.1','§8.5','§8.6','§8.7'] },
+      ]},
       { label: 'C–D. შეუსაბამობები და CAPA', fields: [
         { id: 'nc1_desc',     label: 'NC1. შეუსაბამობის აღწერა',      type: 'textarea' },
         { id: 'nc1_clause',   label: 'NC1. ISO §',                    type: 'text' },
@@ -141,6 +145,13 @@ export const FORM_CONFIGS = {
         { id: 'nextCalibDate',     label: 'მომდევნო კალიბრაციის თარიღი', type: 'date' },
         { id: 'certNumber',        label: 'სერტიფიკატის №',              type: 'text' },
         { id: 'interval',          label: 'ინტერვალი (თვე)',              type: 'number' },
+      ]},
+      { label: 'C. შიდა ვერიფიკაცია', fields: [
+        { id: 'vc1', label: 'გარეგნული დათვალიერება',                 type: 'yesno' },
+        { id: 'vc2', label: 'ჩვენების ნული (zero)',                    type: 'yesno' },
+        { id: 'vc3', label: 'სერტიფიკატის ვადა',                      type: 'yesno' },
+        { id: 'vc4', label: 'ნიშანდობლივი ვიზუალური შემოწმება',       type: 'yesno' },
+        { id: 'vc5', label: 'SI ერთეულების შესაბამისობა (§6.2.7)',     type: 'yesno' },
       ]},
       { label: 'D. გამოყენების ისტორია (5 ჩანაწერი)', fields: [
         { id: 'h1_case',      label: 'H1. BE-CASE / ვიზიტი',    type: 'text' },
@@ -250,7 +261,7 @@ export const FORM_CONFIGS = {
         { id: 'capaNumber',  label: 'CAPA №',                   type: 'text' },
         { id: 'initDate',    label: 'ინიცირების თარიღი',        type: 'date' },
         { id: 'initiator',   label: 'ინიციატორი',               type: 'staff' },
-        { id: 'source',      label: 'წყარო', type: 'select', options: ['შიდა აუდიტი','გარე შემოწმება','საჩივარი','შეუსაბამო სამუშაო','ინციდენტი','ანალიზი'] },
+        { id: 'source',      label: 'წყარო', type: 'select', options: ['შიდა აუდიტი','გარე შემოწმება','საჩივარი','შეუსაბამო სამუშაო','ინციდენტი','სხვა'] },
         { id: 'isoClause',   label: 'ISO §',                    type: 'text' },
         { id: 'impact',      label: 'გავლენა', type: 'select', options: ['კრიტიკული','საშუალო','მცირე'] },
         { id: 'description', label: 'შეუსაბამობის აღწერა',      type: 'textarea' },
@@ -303,6 +314,15 @@ export const FORM_CONFIGS = {
         { id: 'techManager',    label: 'ტექნიკური მენეჯერი',           type: 'staff' },
         { id: 'specialNotes',   label: 'განსაკუთრებული მოთხოვნები / რისკები', type: 'textarea' },
       ]},
+      { label: 'B. ინსპექციის სფერო და კრიტერიუმები', fields: [
+        { id: 'scopeCriteria', label: 'სფეროები', type: 'tablerows', minRows: 2,
+          columns: [
+            { id: 'scope',    label: 'სფეროს დასახელება',         md: 5 },
+            { id: 'criteria', label: 'გამოსაყენებელი კრიტერიუმები', md: 5 },
+            { id: 'comment',  label: 'კომენტარი',                   md: 2 },
+          ],
+        },
+      ]},
       { label: 'D. ეტაპები', fields: [
         { id: 'stage1_date',        label: 'ეტ.1 თარიღი — დოკ. მომზადება',      type: 'date' },
         { id: 'stage1_responsible', label: 'ეტ.1 პასუხისმგებელი',               type: 'staff' },
@@ -344,6 +364,14 @@ export const FORM_CONFIGS = {
         { id: 'condition',        label: 'პირობები (პირობითი დამტ.)', type: 'text' },
         { id: 'validUntil',       label: 'ვალიდური ვადა',             type: 'date' },
       ]},
+      { label: '2. ISO §6.6 კრიტერიუმები', fields: [
+        { id: 'crit1', label: '§6.6.1 ინსპ. ობიექტის გამოცდილება',    type: 'yesno' },
+        { id: 'crit2', label: '§6.6.2 კვალიფიკაცია და აკრედიტაცია',   type: 'yesno' },
+        { id: 'crit3', label: '§6.6.3 კლიენტის ინსპექცია',             type: 'yesno' },
+        { id: 'crit4', label: '§6.6.4 ISO 17020',                      type: 'yesno' },
+        { id: 'crit5', label: 'FM-01 ანგარიშის შეფასება',              type: 'yesno' },
+        { id: 'crit6', label: 'PR-02 გამოცდილება ≥5 წელი',             type: 'yesno' },
+      ]},
       { label: 'C. კომპეტენციის ქულები (4 სფერო)', fields: [
         { id: 'comp1_scope',   label: 'C1. ინსპ. სფერო',    type: 'text' },
         { id: 'comp1_score',   label: 'C1. ქულა (1–5)',      type: 'number' },
@@ -373,11 +401,17 @@ export const FORM_CONFIGS = {
         { id: 'trainingDate', label: 'ტრენინგის თარიღი',            type: 'date' },
         { id: 'duration',     label: 'ხანგრძლივობა (საათი)',        type: 'number' },
         { id: 'location',     label: 'ადგილმდებარეობა',             type: 'text' },
-        { id: 'type',         label: 'ტრენინგის სახეობა', type: 'select', options: ['შიდა ანალიზი','გარე ტრენინგი','witnessing','ახალი ინსტ. ზედამხ.','ნორმატიული დოკ.','IT','სხვა'] },
+        { id: 'type',         label: 'ტრენინგის სახეობა', type: 'select', options: ['შიდა ანალიზი','გარე ტრენინგი','witnessing','ახალი ინსტრუმენტის ზედამხედველობა','ნორმატიული დოკუმენტი','IT','სხვა'] },
         { id: 'title',        label: 'სათაური / თემა',              type: 'text' },
         { id: 'organizer',    label: 'ორგანიზატორი / ინსტიტუტი',   type: 'text' },
         { id: 'competent',    label: 'კომპეტენტურია',               type: 'yesno' },
         { id: 'nextTraining', label: 'მომდევნო ტრენინგის თარიღი',  type: 'date' },
+      ]},
+      { label: 'D–E. კომპეტენციის მეთოდი და სტატუსი', fields: [
+        { id: 'competencyMethods', label: 'კომპეტენციის მეთოდი', type: 'multicheck',
+          options: ['წერილობითი ტესტი','witnessing','ზედამხედველობა გამოყენებაზე','პრაქტიკული სავარჯიშო','ტექნიკური მენეჯერის შეფასება'] },
+        { id: 'statusResult', label: 'სტატუსი', type: 'select',
+          options: ['სრულად კომპეტენტური','ნაწილობრივ კომპეტენტური','კომპეტენტური არ არის'] },
       ]},
       { label: 'C. ტრენინგის შინაარსი (დამატებითი ჩანაწერები)', fields: [
         { id: 't2_title',     label: 'C2. სათაური / თემა',          type: 'text' },
@@ -406,6 +440,12 @@ export const FORM_CONFIGS = {
         { id: 'detector',        label: 'გამომვლენი პირი',           type: 'staff' },
         { id: 'isoClause',       label: 'ISO §',                     type: 'text' },
         { id: 'description',     label: 'შეუსაბამობის აღწერა',       type: 'textarea' },
+      ]},
+      { label: '1b. დაუყოვნებელი ქმედება + §3 გადაუდებელი შეჩერება', fields: [
+        { id: 'immediateActions', label: 'იდენტ. ქმედება (§1)', type: 'multicheck',
+          options: ['სამუშაოს შეჩერება','ტექნიკური გადახედვა','კლიენტის შეტყობინება','გარე შემოწმება'] },
+        { id: 'suspensionActions', label: 'გადაუდებელი შეჩერება (§3)', type: 'multicheck',
+          options: ['კლიენტი — სამუშაო შეჩერება','ობიექტი — კორექცია','სხვა საქმეების გადახედვა','კლიენტთან გარკვევა საჭ. არ არის'] },
       ]},
       { label: '4–5. მართვა და ფესვური მიზეზი', fields: [
         { id: 'immediateAction', label: 'მიღებული ქმედება',          type: 'textarea' },
@@ -627,6 +667,17 @@ export const FORM_CONFIGS = {
         { id: 'date',                label: 'შედგენის თარიღი',             type: 'date' },
         { id: 'responsible',         label: 'პასუხისმგებელი / შემდგენი',  type: 'staff' },
         { id: 'witness',             label: 'მოწმე',                       type: 'staff' },
+      ]},
+      { label: 'B. გასანადგურებელი დოკუმენტების სია', fields: [
+        { id: 'docList', label: 'დოკუმენტების სია', type: 'tablerows', minRows: 3,
+          columns: [
+            { id: 'name',    label: 'დოკუმენტის სახელი / კოდი', md: 4 },
+            { id: 'version', label: 'ვერსია',                    md: 2 },
+            { id: 'expiry',  label: 'შენახვის ვადა (თ/თ)',        md: 2 },
+            { id: 'copies',  label: 'ასლების რ-ბა',               md: 2 },
+            { id: 'result',  label: 'შედეგი',                     md: 2, type: 'select', options: ['ფ','ც','ა.რ.'] },
+          ],
+        },
       ]},
       { label: 'C–D. განადგურება და შედეგი', fields: [
         { id: 'method',              label: 'განადგურების მეთოდი', type: 'select', options: ['შეშლა (ფიზიკური)','ციფრული წაშლა','სხვა'] },

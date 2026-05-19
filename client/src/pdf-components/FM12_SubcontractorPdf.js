@@ -44,16 +44,20 @@ const FM12_SubcontractorPdf = ({ data = {} }) => {
           <View style={[s.tHead,{width:'19%'}]}><Text>კი / არა</Text></View>
           <View style={[s.tHead,{width:'26%'}]}><Text>კომენტარი</Text></View>
         </View>
-        {[['6.6.1','ინსპექციის ობიექტის მუშაობის გამოცდილება'],['6.6.2','კვალიფიკაცია და აკრედიტაცია'],['6.6.3','კლიენტის ინსპექცია'],['6.6.4','ISO 17020'],['FM-01','ანგარიშის შეფასება'],['PR-02','გამოცდილება ≥5 წელი']].map(([cl,req],i) => (
+        {[['6.6.1','ინსპექციის ობიექტის მუშაობის გამოცდილება','crit1'],['6.6.2','კვალიფიკაცია და აკრედიტაცია','crit2'],['6.6.3','კლიენტის ინსპექცია','crit3'],['6.6.4','ISO 17020','crit4'],['FM-01','ანგარიშის შეფასება','crit5'],['PR-02','გამოცდილება ≥5 წელი','crit6']].map(([cl,req,key],i) => {
+          const v = data[key];
+          return (
           <View key={cl} style={i%2===0?s.tRow:s.tRowAlt}>
             <View style={[s.tCell,{width:'8%'}]}><Text>{cl}</Text></View>
             <View style={[s.tCell,{flex:1}]}><Text>{req}</Text></View>
             <View style={[s.tCell,{width:'19%'}]}>
-              <View style={{flexDirection:'row',gap:4}}><View style={s.box}/><Text style={{fontSize:7.5}}>კი</Text><View style={s.box}/><Text style={{fontSize:7.5}}>არა</Text></View>
+              {v
+                ? <Text style={{fontSize:8,fontWeight:'bold'}}>{v==='yes'?'კი ✓':'არა ✗'}</Text>
+                : <View style={{flexDirection:'row',gap:4}}><View style={s.box}/><Text style={{fontSize:7.5}}>კი</Text><View style={s.box}/><Text style={{fontSize:7.5}}>არა</Text></View>}
             </View>
             <View style={[s.tCell,{width:'26%',minHeight:17}]}/>
           </View>
-        ))}
+        )})}
       </View>
 
       <Text style={s.secH}>3. კომპეტენციის შეფასება (1–5)</Text>

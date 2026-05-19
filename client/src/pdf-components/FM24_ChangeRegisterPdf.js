@@ -38,6 +38,7 @@ const FM24_ChangeRegisterPdf = ({ data = {} }) => {
       <View style={{flexDirection:'row',justifyContent:'flex-end',marginTop:6}}>
         <View style={{width:'35%'}}>
           <Text style={{fontWeight:'bold',fontSize:9}}>ხარისხის მენეჯერი:</Text>
+          {sigs[0]?.name?<Text style={{fontSize:7.5,marginBottom:1}}>{sigs[0].name}</Text>:null}
           {sigs[0]?.dataURL?<Image src={sigs[0].dataURL} style={s.sigImg}/>:<View style={{height:32}}/>}
           <View style={{borderTopWidth:0.5,borderTopColor:'#000',paddingTop:2}}>
             <Text style={{fontSize:7.5,textAlign:'center'}}>{sigs[0]?.date||'ხელმოწერა / თარიღი'}</Text>

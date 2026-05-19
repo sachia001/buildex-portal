@@ -27,10 +27,14 @@ const FM25_LiquidationActPdf = ({ data = {} }) => {
           <View style={[s.tHead,{width:'15%',...cc}]}><Text>ასლების რაოდენობა</Text></View>
           <View style={[s.tHead,{width:'20%',...cc}]}><Text>შედეგი / ცნობა</Text></View>
         </View>
-        {[...Array(10)].map((_,i) => (
+        {(data.docList && data.docList.length > 0 ? data.docList : [...Array(10)].map(()=>({}))).map((row,i) => (
           <View key={i} style={i%2===0?s.tRow:s.tRowAlt}>
             <View style={[s.tCell,{width:'5%',...cc}]}><Text style={{fontSize:8}}>{i+1}</Text></View>
-            <View style={[s.tCell,{flex:1,...cc}]}/><View style={[s.tCell,{width:'12%',...cc}]}/><View style={[s.tCell,{width:'18%',...cc}]}/><View style={[s.tCell,{width:'15%',...cc}]}/><View style={[s.tCell,{width:'20%',...cc}]}/>
+            <View style={[s.tCell,{flex:1,...cc}]}>{row.name?<Text style={{fontSize:8}}>{row.name}</Text>:null}</View>
+            <View style={[s.tCell,{width:'12%',...cc}]}>{row.version?<Text style={{fontSize:8}}>{row.version}</Text>:null}</View>
+            <View style={[s.tCell,{width:'18%',...cc}]}>{row.expiry?<Text style={{fontSize:8}}>{row.expiry}</Text>:null}</View>
+            <View style={[s.tCell,{width:'15%',...cc}]}>{row.copies?<Text style={{fontSize:8}}>{row.copies}</Text>:null}</View>
+            <View style={[s.tCell,{width:'20%',...cc}]}>{row.result?<Text style={{fontSize:8}}>{row.result}</Text>:null}</View>
           </View>
         ))}
       </View>

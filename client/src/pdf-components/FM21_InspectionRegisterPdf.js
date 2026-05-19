@@ -61,6 +61,7 @@ const FM21_InspectionRegisterPdf = ({ data = {} }) => {
       <View style={{flexDirection:'row',justifyContent:'flex-end',marginTop:6}}>
         <View style={{width:'32%'}}>
           <Text style={{fontWeight:'bold',fontSize:8}}>ხარისხის მენეჯერი:</Text>
+          {sigs[0]?.name?<Text style={{fontSize:7.5,marginBottom:1}}>{sigs[0].name}</Text>:null}
           {sigs[0]?.dataURL?<Image src={sigs[0].dataURL} style={s.sigImg}/>:<View style={{height:24}}/>}
           <View style={{borderTopWidth:0.5,borderTopColor:'#000',paddingTop:2}}>
             <Text style={{fontSize:7,textAlign:'center'}}>{sigs[0]?.date||'ხელმოწერა / თარიღი'}</Text>

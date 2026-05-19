@@ -7,6 +7,7 @@ const fs = require('fs');
 const multer = require('multer');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const XLSX_LIB = require('xlsx');
 
 const JWT_SECRET = process.env.JWT_SECRET || 'buildex-secret-2026';
 
@@ -19,6 +20,8 @@ mongoose.connect(process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/buildexDB
     .catch(err => console.error('❌ ბაზის შეცდომა:', err));
 
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+app.use('/uploads/norms', express.static(path.join(__dirname, 'uploads/norms')));
+app.use('/uploads/estimates', express.static(path.join(__dirname, 'uploads/estimates')));
 
 // --- UPLOAD CONFIG ---
 const uploadDir = './uploads/docs/';
@@ -214,6 +217,66 @@ const CompanySettings = mongoose.model('CompanySettings', new mongoose.Schema({
     config: { type: Object, default: {} },
 }, { timestamps: true }));
 
+// --- PRICE ADEQUACY MODELS ---
+
+const NormFile = mongoose.model('NormFile', new mongoose.Schema({
+    originalName: String,
+    fileUrl: String,
+    normType: { type: String, default: 'NER' },
+    year: Number,
+    quarter: Number,
+    entryCount: { type: Number, default: 0 },
+}, { timestamps: true }));
+
+const NormEntry = mongoose.model('NormEntry', new mongoose.Schema({
+    normFileId: { type: mongoose.Schema.Types.ObjectId, ref: 'NormFile' },
+    normType: String,
+    year: Number,
+    quarter: Number,
+    code: { type: String, default: '' },
+    description: String,
+    unit: { type: String, default: '' },
+    unitPrice: Number,
+    chapter: { type: String, default: '' },
+    keywords: [String],
+}));
+
+const PriceAdequacyCheck = mongoose.model('PriceAdequacyCheck', new mongoose.Schema({
+    checkNumber: { type: String, unique: true },
+    caseId: { type: mongoose.Schema.Types.ObjectId, ref: 'Inspection', default: null },
+    caseNumber: { type: String, default: '' },
+    objectName: { type: String, default: '' },
+    checkDate: { type: Date, default: Date.now },
+    checkedBy: { type: String, default: '' },
+    estimateFileName: String,
+    normType: String,
+    normYear: Number,
+    normQuarter: Number,
+    totalLines: { type: Number, default: 0 },
+    matchedLines: { type: Number, default: 0 },
+    violationCount: { type: Number, default: 0 },
+    warningCount: { type: Number, default: 0 },
+    okCount: { type: Number, default: 0 },
+    unmatchedCount: { type: Number, default: 0 },
+    conclusion: { type: String, default: '' },
+    status: { type: String, default: 'შემოწმებული' },
+    lineItems: [new mongoose.Schema({
+        lineNum: Number,
+        code: { type: String, default: '' },
+        description: String,
+        unit: { type: String, default: '' },
+        quantity: { type: Number, default: 0 },
+        unitPrice: { type: Number, default: 0 },
+        totalPrice: { type: Number, default: 0 },
+        normCode: { type: String, default: '' },
+        normDescription: { type: String, default: '' },
+        normUnitPrice: { type: Number, default: null },
+        deviation: { type: Number, default: null },
+        matchScore: { type: Number, default: 0 },
+        lineStatus: { type: String, default: 'ვერ შემოწმდა' },
+    }, { _id: false })],
+}, { timestamps: true }));
+
 // --- HELPER: ნუმერაციის გენერატორი ---
 async function generateDocumentNumber(type, date = new Date()) {
     const yearFull = date.getFullYear();
@@ -262,8 +325,227 @@ async function generateDocumentNumber(type, date = new Date()) {
         case 'COMP': return `COMP-${seq}/${yearShort}`;
         case 'AUD':  return `AUD-${seq}/${yearShort}`;
         case 'CAR':  return `CAR-${seq}/${yearShort}`;
+        case 'PA':   return `PA-${seq4}/${yearShort}`;
         default: throw new Error("უცნობი კატეგორია");
     }
+}
+
+// =============================================
+// PRICE ADEQUACY — HELPERS
+// =============================================
+
+function extractKeywords(text) {
+    if (!text) return [];
+    return String(text).toLowerCase()
+        .replace(/[()[\]{}/\\,;:.!?«»""''–—]/g, ' ')
+        .split(/\s+/)
+        .filter(w => w.length > 2);
+}
+
+function kwMatchScore(words1, words2) {
+    if (!words1.length || !words2.length) return 0;
+    const set2 = new Set(words2);
+    const matches = words1.filter(w => set2.has(w)).length;
+    return matches / Math.max(words1.length, words2.length);
+}
+
+function parseNormExcel(buffer) {
+    const wb = XLSX_LIB.read(buffer, { type: 'buffer' });
+    const entries = [];
+    for (const sheetName of wb.SheetNames) {
+        const ws = wb.Sheets[sheetName];
+        const rows = XLSX_LIB.utils.sheet_to_json(ws, { header: 1, defval: '' });
+        let codeCol = -1, descCol = -1, unitCol = -1, priceCol = -1, headerRowIdx = -1;
+        for (let i = 0; i < Math.min(rows.length, 25); i++) {
+            const row = rows[i].map(c => String(c).toLowerCase().trim());
+            const dIdx = row.findIndex(c => c.includes('დასახ') || c.includes('სახელ') || c.includes('description') || c.includes('სამუშა'));
+            const pIdx = row.findIndex(c => (c.includes('ფას') || c.includes('price')) && !c.includes('სულ') && !c.includes('total'));
+            if (dIdx >= 0 || pIdx >= 0) {
+                headerRowIdx = i;
+                const cIdx = row.findIndex(c => c === 'კოდი' || c === '№' || c.includes('კოდ') || c === 'code');
+                const uIdx = row.findIndex(c => (c.includes('ერთ') && c.length < 15) || c === 'unit');
+                if (cIdx >= 0) codeCol = cIdx;
+                if (dIdx >= 0) descCol = dIdx;
+                if (uIdx >= 0) unitCol = uIdx;
+                if (pIdx >= 0) priceCol = pIdx;
+                break;
+            }
+        }
+        if (headerRowIdx === -1) {
+            for (let i = 0; i < Math.min(rows.length, 15); i++) {
+                if (rows[i].length >= 3 && /^[A-Za-zეE][0-9]/.test(String(rows[i][0]).trim())) {
+                    codeCol = 0; descCol = 1; unitCol = 2; priceCol = 3; headerRowIdx = i - 1; break;
+                }
+            }
+        }
+        const startRow = Math.max(0, headerRowIdx + 1);
+        let currentChapter = sheetName;
+        for (let i = startRow; i < rows.length; i++) {
+            const row = rows[i];
+            if (!row || row.every(c => !String(c).trim())) continue;
+            const code = codeCol >= 0 ? String(row[codeCol] || '').trim() : '';
+            const desc = descCol >= 0 ? String(row[descCol] || '').trim() : '';
+            const unit = unitCol >= 0 ? String(row[unitCol] || '').trim() : '';
+            const rawPrice = priceCol >= 0 ? String(row[priceCol] || '').trim() : '';
+            const unitPrice = parseFloat(rawPrice.replace(/[^\d.,]/g, '').replace(',', '.')) || 0;
+            if (desc && !unitPrice && !code && desc.length > 3) { currentChapter = desc; continue; }
+            if (desc && unitPrice > 0) {
+                entries.push({ code, description: desc, unit, unitPrice, chapter: currentChapter, keywords: extractKeywords(desc) });
+            }
+        }
+    }
+    return entries;
+}
+
+function parseCostEstimateExcel(buffer) {
+    const wb = XLSX_LIB.read(buffer, { type: 'buffer' });
+    const items = [];
+    for (const sheetName of wb.SheetNames) {
+        const ws = wb.Sheets[sheetName];
+        const rows = XLSX_LIB.utils.sheet_to_json(ws, { header: 1, defval: '' });
+        let codeCol = -1, descCol = -1, unitCol = -1, qtyCol = -1, priceCol = -1, totalCol = -1, headerRowIdx = -1;
+        for (let i = 0; i < Math.min(rows.length, 35); i++) {
+            const row = rows[i].map(c => String(c).toLowerCase().trim());
+            const dIdx = row.findIndex(c => c.includes('დასახ') || c.includes('სამუშა') || c.includes('description') || c.includes('სახელ'));
+            const qIdx = row.findIndex(c => c.includes('რაოდ') || c.includes('quantity') || c === 'qty');
+            const pIdx = row.findIndex(c => (c.includes('ფას') || c.includes('price')) && !c.includes('სულ') && !c.includes('total'));
+            const tIdx = row.findIndex(c => c.includes('სულ') || c.includes('total') || c === 'ჯამი');
+            const uIdx = row.findIndex(c => (c.includes('ერთ') && c.length < 15) || c === 'unit');
+            const cIdx = row.findIndex(c => c === 'კოდი' || c === '№' || c.includes('კოდ') || c === '#');
+            if (dIdx >= 0 && (pIdx >= 0 || tIdx >= 0 || qIdx >= 0)) {
+                headerRowIdx = i;
+                if (cIdx >= 0) codeCol = cIdx;
+                descCol = dIdx;
+                if (uIdx >= 0) unitCol = uIdx;
+                if (qIdx >= 0) qtyCol = qIdx;
+                if (pIdx >= 0) priceCol = pIdx;
+                if (tIdx >= 0) totalCol = tIdx;
+                break;
+            }
+        }
+        if (headerRowIdx === -1) continue;
+        const startRow = headerRowIdx + 1;
+        let lineNum = items.length + 1;
+        for (let i = startRow; i < rows.length; i++) {
+            const row = rows[i];
+            if (!row || row.every(c => !String(c).trim())) continue;
+            const desc = String(row[descCol] || '').trim();
+            if (!desc || desc.length < 3) continue;
+            const code = codeCol >= 0 ? String(row[codeCol] || '').trim() : '';
+            const unit = unitCol >= 0 ? String(row[unitCol] || '').trim() : '';
+            const qty = qtyCol >= 0 ? parseFloat(String(row[qtyCol] || '0').replace(/[^\d.,]/g, '').replace(',', '.')) || 0 : 0;
+            const unitPrice = priceCol >= 0 ? parseFloat(String(row[priceCol] || '0').replace(/[^\d.,]/g, '').replace(',', '.')) || 0 : 0;
+            const totalPrice = totalCol >= 0 ? parseFloat(String(row[totalCol] || '0').replace(/[^\d.,]/g, '').replace(',', '.')) || 0 : unitPrice * qty;
+            if (!unitPrice && !totalPrice && !qty) continue;
+            items.push({ lineNum: lineNum++, code, description: desc, unit, quantity: qty, unitPrice, totalPrice });
+        }
+    }
+    return items;
+}
+
+async function runMatchingEngine(lineItems, normYear, normQuarter, normType) {
+    const q = {};
+    if (normYear) q.year = normYear;
+    if (normQuarter) q.quarter = normQuarter;
+    if (normType && normType !== 'all') q.normType = normType;
+    const norms = await NormEntry.find(q).lean();
+    const codeIndex = {};
+    for (const n of norms) { if (n.code) codeIndex[n.code.toUpperCase().replace(/[–—]/g, '-')] = n; }
+    let matchedLines = 0, violationCount = 0, warningCount = 0, okCount = 0, unmatchedCount = 0;
+    const results = lineItems.map(item => {
+        let normMatch = null, mScore = 0;
+        if (item.code) {
+            const key = item.code.toUpperCase().replace(/[–—]/g, '-');
+            if (codeIndex[key]) { normMatch = codeIndex[key]; mScore = 1.0; }
+        }
+        if (!normMatch && item.description) {
+            const itemKw = extractKeywords(item.description);
+            let best = 0, bestNorm = null;
+            for (const n of norms) {
+                const score = kwMatchScore(itemKw, n.keywords);
+                if (score > best) { best = score; bestNorm = n; }
+            }
+            if (best >= 0.4) { normMatch = bestNorm; mScore = best; }
+        }
+        let lineStatus = 'ვერ შემოწმდა', deviation = null;
+        if (normMatch && item.unitPrice > 0 && normMatch.unitPrice > 0) {
+            matchedLines++;
+            deviation = ((item.unitPrice - normMatch.unitPrice) / normMatch.unitPrice) * 100;
+            if (deviation <= 5) { lineStatus = 'შესაბამისი'; okCount++; }
+            else if (deviation <= 15) { lineStatus = 'გაფრთხილება'; warningCount++; }
+            else { lineStatus = 'დარღვევა'; violationCount++; }
+        } else if (!normMatch) { unmatchedCount++; }
+        return {
+            ...item,
+            normCode: normMatch?.code || '',
+            normDescription: normMatch?.description || '',
+            normUnitPrice: normMatch?.unitPrice ?? null,
+            deviation: deviation !== null ? Math.round(deviation * 10) / 10 : null,
+            matchScore: Math.round(mScore * 100),
+            lineStatus,
+        };
+    });
+    return { results, matchedLines, violationCount, warningCount, okCount, unmatchedCount };
+}
+
+function generateWordReport(check) {
+    const fmtNum = n => n != null ? n.toLocaleString('ka-GE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '';
+    const fmtDev = d => d != null ? (d > 0 ? `+${d}%` : `${d}%`) : '—';
+    const statusBg = s => s === 'დარღვევა' ? '#fee2e2' : s === 'გაფრთხილება' ? '#fef9c3' : s === 'შესაბამისი' ? '#dcfce7' : '#f3f4f6';
+    const rows = check.lineItems.map((it, i) => `
+        <tr style="background:${statusBg(it.lineStatus)}">
+            <td style="text-align:center">${it.lineNum}</td>
+            <td>${it.code || ''}</td>
+            <td>${it.description || ''}</td>
+            <td style="text-align:center">${it.unit || ''}</td>
+            <td style="text-align:right">${it.quantity || ''}</td>
+            <td style="text-align:right">${fmtNum(it.unitPrice)}</td>
+            <td style="text-align:right">${fmtNum(it.normUnitPrice)}</td>
+            <td style="text-align:center">${fmtDev(it.deviation)}</td>
+            <td style="text-align:center"><b>${it.lineStatus}</b></td>
+        </tr>`).join('');
+    return `<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40">
+<head><meta charset="UTF-8"><title>${check.checkNumber}</title>
+<style>
+body{font-family:Sylfaen,Arial,sans-serif;font-size:10pt;margin:2cm}
+h1{font-size:14pt;text-align:center;color:#003366}
+h2{font-size:11pt;color:#003366;border-bottom:1px solid #003366;padding-bottom:3px}
+table{border-collapse:collapse;width:100%;font-size:8.5pt}
+th{background:#003366;color:#fff;padding:5px 4px;border:1px solid #001f45}
+td{border:1px solid #ccc;padding:3px 4px}
+.meta td{border:none;padding:2px 6px}
+.summary{display:flex;gap:20px;margin:10px 0}
+.card{border:1px solid #ccc;padding:8px 12px;min-width:100px;text-align:center}
+.card .num{font-size:18pt;font-weight:bold}
+.card .lbl{font-size:8pt;color:#666}
+.footer{margin-top:30px;border-top:1px solid #ccc;padding-top:10px}
+</style></head>
+<body>
+<h1>ფასწარმოქმნის ადეკვატურობის ინსპექციის ანგარიში</h1>
+<h2>1. ზოგადი ინფორმაცია</h2>
+<table class="meta"><tr><td><b>შემოწმების №:</b></td><td>${check.checkNumber}</td><td><b>თარიღი:</b></td><td>${new Date(check.checkDate).toLocaleDateString('ka-GE')}</td></tr>
+<tr><td><b>BE-CASE №:</b></td><td>${check.caseNumber || '—'}</td><td><b>ობიექტი:</b></td><td>${check.objectName || '—'}</td></tr>
+<tr><td><b>შემმოწმებელი:</b></td><td>${check.checkedBy || '—'}</td><td><b>ნორმ. ბაზა:</b></td><td>${check.normType || 'NER'}${check.normYear ? ' ' + check.normYear : ''}${check.normQuarter ? ' კვ.' + check.normQuarter : ''}</td></tr>
+<tr><td><b>ხარჯთაღრ. ფაილი:</b></td><td colspan="3">${check.estimateFileName || '—'}</td></tr></table>
+<h2>2. შემოწმების შედეგები</h2>
+<table class="meta">
+<tr><td><b>სულ პოზიცია:</b> ${check.totalLines}</td><td><b>შემოწმდა:</b> ${check.matchedLines}</td><td><b>შესაბამისი:</b> ${check.okCount}</td><td><b>გაფრთხ.:</b> ${check.warningCount}</td><td><b>დარღვევა:</b> ${check.violationCount}</td><td><b>ვერ შემოწ.:</b> ${check.unmatchedCount}</td></tr>
+</table>
+<h2>3. დასკვნა</h2>
+<p>${check.conclusion || '—'}</p>
+<h2>4. ხარჯთაღრიცხვის ანალიზი</h2>
+<table>
+<tr><th>#</th><th>კოდი</th><th>დასახელება</th><th>ერთ.</th><th>რაოდ.</th><th>ხარჯთ. ფასი (₾)</th><th>ნორმ. ფასი (₾)</th><th>გადახ. %</th><th>სტატუსი</th></tr>
+${rows}
+</table>
+<div class="footer">
+<table class="meta"><tr>
+<td style="width:30%"><b>შემმოწმებელი:</b><br><br>_______________________<br><small>${check.checkedBy || ''}</small></td>
+<td style="width:30%"><b>ტექნიკური მენეჯერი:</b><br><br>_______________________</td>
+<td style="width:30%"><b>ხარისხის მენეჯერი:</b><br><br>_______________________</td>
+</tr></table>
+</div>
+</body></html>`;
 }
 
 // =============================================
@@ -662,6 +944,137 @@ api.put('/company-settings', async (req, res) => {
         );
         res.json(settings);
     } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// --- PRICE ADEQUACY: NORM MANAGEMENT ---
+const normsUploadDir = './uploads/norms/';
+const estimateUploadDir = './uploads/estimates/';
+if (!fs.existsSync(normsUploadDir)) fs.mkdirSync(normsUploadDir, { recursive: true });
+if (!fs.existsSync(estimateUploadDir)) fs.mkdirSync(estimateUploadDir, { recursive: true });
+
+const normUpload = multer({ storage: multer.diskStorage({
+    destination: (req, file, cb) => cb(null, normsUploadDir),
+    filename: (req, file, cb) => {
+        const safeName = Buffer.from(file.originalname, 'latin1').toString('utf8').replace(/\s+/g, '_');
+        cb(null, Date.now() + '-' + safeName);
+    }
+}) });
+const estimateUpload = multer({ storage: multer.diskStorage({
+    destination: (req, file, cb) => cb(null, estimateUploadDir),
+    filename: (req, file, cb) => {
+        const safeName = Buffer.from(file.originalname, 'latin1').toString('utf8').replace(/\s+/g, '_');
+        cb(null, Date.now() + '-' + safeName);
+    }
+}) });
+
+api.post('/norms/upload', normUpload.single('file'), async (req, res) => {
+    if (!['admin', 'quality_manager'].includes(req.user.role))
+        return res.status(403).json({ error: 'ნების ჩატვირთვის უფლება მხოლოდ ადმინს და ხარ.მენეჯერს აქვს' });
+    try {
+        if (!req.file) return res.status(400).json({ error: 'ფაილი არ არის' });
+        const { normType = 'NER', year, quarter } = req.body;
+        const buffer = fs.readFileSync(req.file.path);
+        const parsed = parseNormExcel(buffer);
+        if (parsed.length === 0) return res.status(400).json({ error: 'ფაილში ნორმები ვერ მოიძებნა. შეამოწმეთ Excel ფორმატი.' });
+        const normFile = await NormFile.create({
+            originalName: Buffer.from(req.file.originalname, 'latin1').toString('utf8'),
+            fileUrl: `uploads/norms/${req.file.filename}`,
+            normType, year: parseInt(year) || new Date().getFullYear(), quarter: parseInt(quarter) || 1, entryCount: parsed.length,
+        });
+        await NormEntry.insertMany(parsed.map(e => ({ normFileId: normFile._id, normType, year: parseInt(year) || new Date().getFullYear(), quarter: parseInt(quarter) || 1, ...e })));
+        res.json({ normFile, entryCount: parsed.length });
+    } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+api.get('/norms/files', async (req, res) => {
+    try { res.json(await NormFile.find().sort({ createdAt: -1 })); }
+    catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+api.delete('/norms/files/:id', async (req, res) => {
+    if (req.user.role !== 'admin') return res.status(403).json({ error: 'წაშლის უფლება არ გაქვთ' });
+    try {
+        const file = await NormFile.findByIdAndDelete(req.params.id);
+        if (file) await NormEntry.deleteMany({ normFileId: file._id });
+        res.json({ msg: 'წაიშალა' });
+    } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+api.get('/norms/entries', async (req, res) => {
+    try {
+        const { normFileId, search, page = 1, limit = 100 } = req.query;
+        const q = {};
+        if (normFileId) q.normFileId = normFileId;
+        if (search) q.$or = [{ code: { $regex: search, $options: 'i' } }, { description: { $regex: search, $options: 'i' } }];
+        const total = await NormEntry.countDocuments(q);
+        const entries = await NormEntry.find(q).skip((page - 1) * parseInt(limit)).limit(parseInt(limit));
+        res.json({ entries, total, pages: Math.ceil(total / parseInt(limit)) });
+    } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// --- PRICE ADEQUACY: CHECKS ---
+api.post('/price-adequacy/check', estimateUpload.single('file'), async (req, res) => {
+    try {
+        if (!req.file) return res.status(400).json({ error: 'ხარჯთაღრიცხვის ფაილი არ არის' });
+        const { caseId, caseNumber, objectName, normYear, normQuarter, normType, checkedBy } = req.body;
+        const buffer = fs.readFileSync(req.file.path);
+        const ext = path.extname(req.file.originalname).toLowerCase();
+        let lineItems = [];
+        if (['.xlsx', '.xls', '.xlsm'].includes(ext)) {
+            lineItems = parseCostEstimateExcel(buffer);
+        } else {
+            return res.status(400).json({ error: 'Excel ფორმატი (.xlsx, .xls) მხარდაჭერილია' });
+        }
+        if (lineItems.length === 0) return res.status(400).json({ error: 'ხარჯთაღრიცხვაში სტრიქონები ვერ მოიძებნა. შეამოწმეთ Excel სტრუქტურა.' });
+        const { results, matchedLines, violationCount, warningCount, okCount, unmatchedCount }
+            = await runMatchingEngine(lineItems, normYear ? parseInt(normYear) : null, normQuarter ? parseInt(normQuarter) : null, normType);
+        const checkNum = await generateDocumentNumber('PA');
+        let conclusion = violationCount > 0
+            ? `ხარჯთაღრიცხვაში გამოვლენილია ${violationCount} პოზიცია, სადაც ერთეული ფასი აღემატება მოქმედ ნებადართულ ელემენტარულ ფასდებს 15%-ზე მეტით. შეუსაბამობა მოითხოვს კორექტირებას.`
+            : warningCount > 0
+            ? `ხარჯთაღრიცხვაში ${warningCount} პოზიციაში ფასი 5–15%-ით აღემატება ნორმას. რეკომენდებულია დამატებითი დასაბუთება.`
+            : matchedLines > 0
+            ? `ხარჯთაღრიცხვის ${matchedLines} შემოწმებული პოზიცია შეესაბამება მოქმედ ნებადართულ ელემენტარულ ფასდებს.`
+            : `ხარჯთაღრიცხვა ვერ შეუსაბამა ნორმატიულ ბაზას — საჭიროა ნორმ-ბაზის განახლება ან ხელით გადამოწმება.`;
+        const check = await PriceAdequacyCheck.create({
+            checkNumber: checkNum, caseId: caseId || null, caseNumber: caseNumber || '',
+            objectName: objectName || '', checkedBy: checkedBy || req.user.username,
+            estimateFileName: Buffer.from(req.file.originalname, 'latin1').toString('utf8'),
+            normType: normType || 'NER', normYear: normYear ? parseInt(normYear) : null, normQuarter: normQuarter ? parseInt(normQuarter) : null,
+            totalLines: lineItems.length, matchedLines, violationCount, warningCount, okCount, unmatchedCount, conclusion, lineItems: results,
+        });
+        res.json(check);
+    } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+api.get('/price-adequacy', async (req, res) => {
+    try { res.json(await PriceAdequacyCheck.find({}, '-lineItems').sort({ createdAt: -1 })); }
+    catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+api.get('/price-adequacy/:id', async (req, res) => {
+    try {
+        const check = await PriceAdequacyCheck.findById(req.params.id);
+        if (!check) return res.status(404).json({ error: 'ვერ მოიძებნა' });
+        res.json(check);
+    } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+api.get('/price-adequacy/:id/word', async (req, res) => {
+    try {
+        const check = await PriceAdequacyCheck.findById(req.params.id);
+        if (!check) return res.status(404).json({ error: 'ვერ მოიძებნა' });
+        const html = generateWordReport(check);
+        res.setHeader('Content-Type', 'application/msword');
+        res.setHeader('Content-Disposition', `attachment; filename*=UTF-8''${encodeURIComponent(check.checkNumber + '.doc')}`);
+        res.send(html);
+    } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+api.delete('/price-adequacy/:id', async (req, res) => {
+    if (req.user.role !== 'admin') return res.status(403).json({ error: 'წაშლის უფლება არ გაქვთ' });
+    try { await PriceAdequacyCheck.findByIdAndDelete(req.params.id); res.json({ msg: 'წაიშალა' }); }
+    catch (err) { res.status(500).json({ error: err.message }); }
 });
 
 // --- AUTH ROUTES (public — no JWT required) ---

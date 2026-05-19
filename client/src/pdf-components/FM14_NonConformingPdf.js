@@ -16,7 +16,12 @@ const FM14_NonConformingPdf = ({ data = {} }) => {
       <FieldRow  label="გამომვლენი პირი:"          value={data.detector} />
       <View style={{flexDirection:'row',flexWrap:'wrap',gap:10,marginBottom:4,marginLeft:4}}>
         {['სამუშაოს შეჩერება','ტექნიკური გადახედვა','კლიენტის შეტყობინება','გარე შემოწმება'].map(t => (
-          <View key={t} style={{flexDirection:'row',alignItems:'center',gap:3}}><View style={s.box}/><Text style={{fontSize:8}}>{t}</Text></View>
+          <View key={t} style={{flexDirection:'row',alignItems:'center',gap:3}}>
+            <View style={(data.immediateActions||[]).includes(t)?s.boxChecked:s.box}>
+              {(data.immediateActions||[]).includes(t)&&<Text style={{color:'#fff',fontSize:6,fontWeight:'bold'}}>✓</Text>}
+            </View>
+            <Text style={{fontSize:8}}>{t}</Text>
+          </View>
         ))}
       </View>
 
@@ -26,9 +31,12 @@ const FM14_NonConformingPdf = ({ data = {} }) => {
 
       <Text style={s.secH}>3. გადაუდებელი შეჩერება (§8.7.2)</Text>
       <View style={{gap:3,marginBottom:4,marginLeft:4}}>
-        {['ა. გამოვლენილია კლიენტი — სამუშაო შეჩერება','ა. ინსპექციის ობიექტი — კორექცია','სხვა ინსპექციის საქმეების გადახედვა','ა. ეს გამოვლენა — კლიენტთან გარკვევა არ არის საჭირო'].map((t,i) => (
+        {[['კლიენტი — სამუშაო შეჩერება','კლიენტი — სამუშაო შეჩერება'],['ობიექტი — კორექცია','ობიექტი — კორექცია'],['სხვა საქმეების გადახედვა','სხვა საქმეების გადახედვა'],['კლიენტთან გარკვევა საჭ. არ არის','კლიენტთან გარკვევა საჭ. არ არის']].map(([key,lbl],i) => (
           <View key={i} style={{flexDirection:'row',alignItems:'center',gap:4}}>
-            <View style={s.box}/><Text style={{fontSize:8}}>{t}</Text>
+            <View style={(data.suspensionActions||[]).includes(key)?s.boxChecked:s.box}>
+              {(data.suspensionActions||[]).includes(key)&&<Text style={{color:'#fff',fontSize:6,fontWeight:'bold'}}>✓</Text>}
+            </View>
+            <Text style={{fontSize:8}}>{lbl}</Text>
           </View>
         ))}
       </View>

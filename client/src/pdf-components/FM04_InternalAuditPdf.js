@@ -30,7 +30,11 @@ const FM04_InternalAuditPdf = ({ data = {} }) => {
           <View key={cl} style={i%2===0?s.tRow:s.tRowAlt}>
             <View style={[s.tCell,{width:'9%',...cc}]}><Text>{cl}</Text></View>
             <View style={[s.tCell,{flex:1,...cc}]}><Text>{req}</Text></View>
-            <View style={[s.tCell,{width:'16%',...cc}]}/>
+            <View style={[s.tCell,{width:'16%',...cc,alignItems:'center'}]}>
+              {(data.auditScopes||[]).includes(cl)
+                ? <Text style={{fontSize:10,color:'#003366',fontWeight:'bold'}}>✓</Text>
+                : <View style={s.box}/>}
+            </View>
           </View>
         ))}
       </View>

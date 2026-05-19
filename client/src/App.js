@@ -21,6 +21,8 @@ import InternalAuditPage from './pages/InternalAuditPage';
 import CorrectiveActionsPage from './pages/CorrectiveActionsPage';
 import Login from './components/Login';
 import ChangePassword from './components/ChangePassword';
+import PriceAdequacyPage from './pages/PriceAdequacyPage';
+import NormsAdminPage from './pages/NormsAdminPage';
 
 // Attach token to every axios request
 axios.interceptors.request.use(config => {
@@ -63,7 +65,9 @@ const Navbar = ({ username, role, onLogout }) => {
         complaints:  ['admin', 'quality_manager'].includes(role),
         audits:      ['admin', 'quality_manager'].includes(role),
         corrections: ['admin', 'quality_manager'].includes(role),
-        companyDocs: ['admin'].includes(role),
+        companyDocs:   ['admin'].includes(role),
+        priceAdequacy: ['admin', 'quality_manager', 'tech_manager'].includes(role),
+        normsAdmin:    ['admin', 'quality_manager'].includes(role),
     };
 
     return (
@@ -104,6 +108,12 @@ const Navbar = ({ username, role, onLogout }) => {
                     )}
                     {show.companyDocs && (
                         <Link className="btn btn-light fw-bold text-secondary border-0" to="/company-docs">🏢 კომპანია</Link>
+                    )}
+                    {show.priceAdequacy && (
+                        <Link className="btn btn-light fw-bold text-secondary border-0" to="/price-adequacy">💰 ფასადეკ.</Link>
+                    )}
+                    {show.normsAdmin && (
+                        <Link className="btn btn-light fw-bold text-secondary border-0" to="/norms-admin">📊 ნორმ-ბაზა</Link>
                     )}
                     {show.staff && (
                         <Link className="btn btn-primary fw-bold px-4 shadow-sm rounded-pill" to="/admin">👥 პერსონალი</Link>
@@ -210,6 +220,8 @@ function AppContent() {
                     <Route path="/contract-generator" element={<ContractGenerator />} />
                     <Route path="/company-docs" element={<CompanyDocsPage role={role} />} />
                     <Route path="/change-password" element={<ChangePassword />} />
+                    <Route path="/price-adequacy" element={<PriceAdequacyPage role={role} />} />
+                    <Route path="/norms-admin" element={<NormsAdminPage role={role} />} />
                     <Route path="*" element={
                         <div className="text-center mt-5">
                             <h1 className="display-1 fw-bold text-muted">404</h1>
