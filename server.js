@@ -621,12 +621,40 @@ async function runMatchingEngine(lineItems, normYear, normQuarter, normType) {
     const codeIndex = {};
     for (const n of norms) { if (n.code) codeIndex[n.code.toUpperCase().replace(/[–—]/g, '-')] = n; }
     let matchedLines = 0, violationCount = 0, warningCount = 0, okCount = 0, unmatchedCount = 0;
+
+    // Detect row type for resource estimates
+    const isLaborRow = (item) => {
+        const d = (item.description || '').toLowerCase();
+        const u = (item.unit || '').toLowerCase();
+        return d.includes('შრომ') || d.includes('ხელ/ხ') || u.includes('კაც') || u.includes('ადამ') || u.includes('კ/სთ') || u.includes('კ/დ');
+    };
+    const isMachRow = (item) => {
+        const d = (item.description || '').toLowerCase();
+        const u = (item.unit || '').toLowerCase();
+        return d.includes('მანქ') || d.includes('მექ-') || u.includes('მ/სთ') || u.includes('მ-სთ') || u.includes('მ/ც') || u.includes('მ/ს');
+    };
+    // A "section header" row: has a work-code (like 1.1, 2.3) and quantity but no prices
+    const isSectionRow = (item) => item.code && !item.unitPrice && item.quantity > 0 && !item.matUnitPrice && !item.wageUnitPrice && !item.machUnitPrice;
+
     const results = lineItems.map(item => {
+        // Section header rows (SNIP work positions) — not priceable, skip matching
+        if (isSectionRow(item)) {
+            return { ...item, normCode: '', normDescription: '', normUnitPrice: null, normSource: '', deviation: null, matchScore: 0, lineStatus: 'სამ.პოზ.' };
+        }
+
+        // For resource rows: determine which price to compare
+        // Labor row → compare wageUnitPrice; Machinery row → machUnitPrice; else → unitPrice (total)
+        const comparePrice = isLaborRow(item) && item.wageUnitPrice > 0 ? item.wageUnitPrice
+            : isMachRow(item) && item.machUnitPrice > 0 ? item.machUnitPrice
+            : item.unitPrice;
+
         let normMatch = null, mScore = 0;
+        // Code-based match (exact)
         if (item.code) {
             const key = item.code.toUpperCase().replace(/[–—]/g, '-');
             if (codeIndex[key]) { normMatch = codeIndex[key]; mScore = 1.0; }
         }
+        // Keyword match
         if (!normMatch && item.description) {
             const itemKw = extractKeywords(item.description);
             let best = 0, bestNorm = null;
@@ -636,14 +664,17 @@ async function runMatchingEngine(lineItems, normYear, normQuarter, normType) {
             }
             if (best >= 0.22) { normMatch = bestNorm; mScore = best; }
         }
+
         let lineStatus = 'ვერ შემოწმდა', deviation = null;
-        if (normMatch && item.unitPrice > 0 && normMatch.unitPrice > 0) {
+        if (normMatch && comparePrice > 0 && normMatch.unitPrice > 0) {
             matchedLines++;
-            deviation = ((item.unitPrice - normMatch.unitPrice) / normMatch.unitPrice) * 100;
+            deviation = ((comparePrice - normMatch.unitPrice) / normMatch.unitPrice) * 100;
+            // Prices BELOW norm are always OK (cheaper is fine)
             if (deviation <= 5) { lineStatus = 'შესაბამისი'; okCount++; }
             else if (deviation <= 15) { lineStatus = 'გაფრთხილება'; warningCount++; }
             else { lineStatus = 'დარღვევა'; violationCount++; }
         } else if (!normMatch) { unmatchedCount++; }
+
         return {
             ...item,
             normCode: normMatch?.code || '',
@@ -1408,6 +1439,54 @@ api.post('/norms/seed-demo', async (req, res) => {
             { chapter:'კეთილმოწყ. სამ.', code:'R8-1-1', description:'სანიტარ. სახ. ნ. (გათ.) ხელ.',                 unit:'ც.', unitPrice:35.00 },
             { chapter:'კეთილმოწყ. სამ.', code:'R8-2-1', description:'ბოძი სარეკლამო/მაჩვ. ნ. მოწ.',                unit:'ც.', unitPrice:280.00 },
             { chapter:'კეთილმოწყ. სამ.', code:'R8-3-1', description:'გრუნტის (ნიადაგის) ამოღება თხრილიდან, სისუფ.', unit:'მ³', unitPrice:25.00 },
+
+            // ===== რესურსული ნორმები (შრომა / მასალები / მექანიზმები) =====
+            // შრომის ტარიფები (კაც/სთ)
+            { chapter:'შრომის ნორმები', code:'L1-1', description:'შრომის დანახარჯი — მუშა საბაზო კატეგ. (1-3 კატ.)',      unit:'კაც/სთ', unitPrice:9.00 },
+            { chapter:'შრომის ნორმები', code:'L1-2', description:'შრომის დანახარჯი — კვალიფ. მუშა (4-5 კატ.)',            unit:'კაც/სთ', unitPrice:14.00 },
+            { chapter:'შრომის ნორმები', code:'L1-3', description:'შრომის დანახარჯი — სპეციალისტი (6+ კატ.)',              unit:'კაც/სთ', unitPrice:22.00 },
+            { chapter:'შრომის ნორმები', code:'L1-4', description:'შრომის ხარჯი (ადამ/სთ) — ზოგადი სამუშ.',               unit:'ადამ/სთ', unitPrice:9.00 },
+            { chapter:'შრომის ნორმები', code:'L1-5', description:'ხელფასი, შრომის დანახარჯი (კ/სთ)',                      unit:'კ/სთ',   unitPrice:9.00 },
+            { chapter:'შრომის ნორმები', code:'L1-6', description:'ხელფასი — შრომის ნორმა (ადამ/დ)',                        unit:'ადამ/დ', unitPrice:72.00 },
+
+            // მასალების ნორმატიული ფასები
+            { chapter:'მასალების ნორმები', code:'M1-1', description:'ქვიშა (ბუნებრივი, სამდინარო)',         unit:'მ³',  unitPrice:28.00 },
+            { chapter:'მასალების ნორმები', code:'M1-2', description:'ქვიშა სამშენებლო, გარეცხილი',          unit:'მ³',  unitPrice:32.00 },
+            { chapter:'მასალების ნორმები', code:'M2-1', description:'ღორღი (კენჭი) ბუნებრივი 20-40მმ',      unit:'მ³',  unitPrice:40.00 },
+            { chapter:'მასალების ნორმები', code:'M2-2', description:'ქვა-ღორღი ნაყარი (ნაფქვავი)',          unit:'მ³',  unitPrice:45.00 },
+            { chapter:'მასალების ნორმები', code:'M3-1', description:'ცემენტი M400/M500 ტომარა 50კგ',        unit:'ტ',   unitPrice:165.00 },
+            { chapter:'მასალების ნორმები', code:'M3-2', description:'ცემენტი სამუშ. (ნაყარი)',              unit:'კგ',  unitPrice:0.18 },
+            { chapter:'მასალების ნორმები', code:'M4-1', description:'ბეტონი M200 (B15) მზა',               unit:'მ³',  unitPrice:235.00 },
+            { chapter:'მასალების ნორმები', code:'M4-2', description:'ბეტონი M300 (B22.5) მზა',             unit:'მ³',  unitPrice:295.00 },
+            { chapter:'მასალების ნორმები', code:'M4-3', description:'ბეტონი M150 გამონასხები',             unit:'მ³',  unitPrice:190.00 },
+            { chapter:'მასალების ნორმები', code:'M5-1', description:'ასფალტბეტონი მარცვლოვანი (ცხელი)',    unit:'ტ',   unitPrice:135.00 },
+            { chapter:'მასალების ნორმები', code:'M5-2', description:'ასფალტბეტონის ნარევი მზა',            unit:'მ³',  unitPrice:290.00 },
+            { chapter:'მასალების ნორმები', code:'M6-1', description:'PVC მილი კანალ. D110 (1მ)',            unit:'გ.მ', unitPrice:18.00 },
+            { chapter:'მასალების ნორმები', code:'M6-2', description:'PVC მილი D160',                       unit:'გ.მ', unitPrice:28.00 },
+            { chapter:'მასალების ნორმები', code:'M6-3', description:'HDPE პოლიეთ. მილი D110',              unit:'გ.მ', unitPrice:22.00 },
+            { chapter:'მასალების ნორმები', code:'M6-4', description:'HDPE მილი D200',                      unit:'გ.მ', unitPrice:42.00 },
+            { chapter:'მასალების ნორმები', code:'M7-1', description:'ბორდიური ქვა ევრო (1მ)',              unit:'გ.მ', unitPrice:20.00 },
+            { chapter:'მასალების ნორმები', code:'M7-2', description:'ბორდიური სახ. ბეტ.',                  unit:'ც',   unitPrice:8.50 },
+            { chapter:'მასალების ნორმები', code:'M8-1', description:'არმატურა (ფოლადი) A-III d12',        unit:'კგ',  unitPrice:2.50 },
+            { chapter:'მასალების ნორმები', code:'M8-2', description:'ფოლადის არმ. ბადე, ლითონი სხვ.',    unit:'კგ',  unitPrice:2.60 },
+            { chapter:'მასალების ნორმები', code:'M9-1', description:'ბიტუმი სამდ. (ემულსია)',             unit:'კგ',  unitPrice:1.80 },
+            { chapter:'მასალების ნორმები', code:'M9-2', description:'ბიტუმი ნავთობის BND 60/90',         unit:'ტ',   unitPrice:850.00 },
+
+            // მექანიზმების (მ/სთ) ნორმატიული ტარიფები
+            { chapter:'მექ. ნორმები', code:'MC1-1', description:'ექსკავატორი (კოვზი 0.4-0.65 მ³)',        unit:'მ/სთ', unitPrice:175.00 },
+            { chapter:'მექ. ნორმები', code:'MC1-2', description:'ექსკავატორი მცირე (0.15-0.25 მ³)',       unit:'მ/სთ', unitPrice:120.00 },
+            { chapter:'მექ. ნორმები', code:'MC2-1', description:'ბულდოზერი (160-200 ც.ძ.)',               unit:'მ/სთ', unitPrice:145.00 },
+            { chapter:'მექ. ნორმები', code:'MC2-2', description:'ბულდოზერი მსუბ. (95-130 ც.ძ.)',          unit:'მ/სთ', unitPrice:110.00 },
+            { chapter:'მექ. ნორმები', code:'MC3-1', description:'ვიბრო-კატოკი (ვიბრო-ტკეპნა)',            unit:'მ/სთ', unitPrice:95.00 },
+            { chapter:'მექ. ნორმები', code:'MC3-2', description:'ვიბრო-ფილა, ვიბრო-ტკეპნი (მცირე)',       unit:'მ/სთ', unitPrice:55.00 },
+            { chapter:'მექ. ნორმები', code:'MC4-1', description:'ასფ.-გამყ. (ასფალტ-ხელსაწყო)',           unit:'მ/სთ', unitPrice:215.00 },
+            { chapter:'მექ. ნორმები', code:'MC4-2', description:'ასფ. განმ. (ასფ. ფრეზი)',                unit:'მ/სთ', unitPrice:280.00 },
+            { chapter:'მექ. ნორმები', code:'MC5-1', description:'თვითმრ. ავტო (10-15 ტ)',                 unit:'მ/სთ', unitPrice:95.00 },
+            { chapter:'მექ. ნორმები', code:'MC5-2', description:'ავტო-თვ.-სატ. (5-7 ტ)',                  unit:'მ/სთ', unitPrice:70.00 },
+            { chapter:'მექ. ნორმები', code:'MC6-1', description:'ბეტ.-მრ.-ავტ. (მიქსერი 6-8 მ³)',        unit:'მ/სთ', unitPrice:135.00 },
+            { chapter:'მექ. ნორმები', code:'MC7-1', description:'ამწე კრანი (10-16 ტ)',                   unit:'მ/სთ', unitPrice:180.00 },
+            { chapter:'მექ. ნორმები', code:'MC8-1', description:'კომპრეს. (ჰაე.-ქ. 6-10 ატმ.)',          unit:'მ/სთ', unitPrice:45.00 },
+            { chapter:'მექ. ნორმები', code:'MC9-1', description:'საბ.-სატ. (ავტ.-სამ.) წყ.-ტ.',          unit:'მ/სთ', unitPrice:85.00 },
         ];
 
         const normFile = await NormFile.create({

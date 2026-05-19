@@ -9,6 +9,7 @@ const STATUS_BADGE = {
     'გაფრთხილება': { bg: '#fef9c3', text: '#b45309' },
     'დარღვევა':    { bg: '#fee2e2', text: '#b91c1c' },
     'ვერ შემოწმდა': { bg: '#f3f4f6', text: '#6b7280' },
+    'სამ.პოზ.':    { bg: '#e8f0f7', text: '#003366' },
 };
 
 const fmtN = n => n != null ? Number(n).toLocaleString('ka-GE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '—';
@@ -443,7 +444,7 @@ export default function PriceAdequacyPage({ role }) {
                         <div className="card-header d-flex align-items-center gap-2" style={{ background: '#003366', color: '#fff' }}>
                             <span className="fw-bold">ხარჯთაღრიცხვის ანალიზი</span>
                             <div className="ms-auto d-flex gap-1 flex-wrap">
-                                {['all', 'შესაბამისი', 'გაფრთხილება', 'დარღვევა', 'ვერ შემოწმდა'].map(s => (
+                                {['all', 'შესაბამისი', 'გაფრთხილება', 'დარღვევა', 'ვერ შემოწმდა', 'სამ.პოზ.'].map(s => (
                                     <button key={s} className="btn btn-sm"
                                         style={{
                                             background: filterStatus === s ? '#fff' : 'transparent',
