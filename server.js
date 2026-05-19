@@ -271,6 +271,7 @@ const PriceAdequacyCheck = mongoose.model('PriceAdequacyCheck', new mongoose.Sch
         normCode: { type: String, default: '' },
         normDescription: { type: String, default: '' },
         normUnitPrice: { type: Number, default: null },
+        normSource: { type: String, default: '' },
         deviation: { type: Number, default: null },
         matchScore: { type: Number, default: 0 },
         lineStatus: { type: String, default: 'ვერ შემოწმდა' },
@@ -480,6 +481,7 @@ async function runMatchingEngine(lineItems, normYear, normQuarter, normType) {
             normCode: normMatch?.code || '',
             normDescription: normMatch?.description || '',
             normUnitPrice: normMatch?.unitPrice ?? null,
+            normSource: normMatch?.normType || '',
             deviation: deviation !== null ? Math.round(deviation * 10) / 10 : null,
             matchScore: Math.round(mScore * 100),
             lineStatus,
@@ -492,7 +494,7 @@ function generateWordReport(check) {
     const fmtNum = n => n != null ? n.toLocaleString('ka-GE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '';
     const fmtDev = d => d != null ? (d > 0 ? `+${d}%` : `${d}%`) : '—';
     const statusBg = s => s === 'დარღვევა' ? '#fee2e2' : s === 'გაფრთხილება' ? '#fef9c3' : s === 'შესაბამისი' ? '#dcfce7' : '#f3f4f6';
-    const rows = check.lineItems.map((it, i) => `
+    const rows = check.lineItems.map((it) => `
         <tr style="background:${statusBg(it.lineStatus)}">
             <td style="text-align:center">${it.lineNum}</td>
             <td>${it.code || ''}</td>
@@ -501,9 +503,12 @@ function generateWordReport(check) {
             <td style="text-align:right">${it.quantity || ''}</td>
             <td style="text-align:right">${fmtNum(it.unitPrice)}</td>
             <td style="text-align:right">${fmtNum(it.normUnitPrice)}</td>
+            <td style="text-align:center">${it.normSource || ''}</td>
             <td style="text-align:center">${fmtDev(it.deviation)}</td>
             <td style="text-align:center"><b>${it.lineStatus}</b></td>
         </tr>`).join('');
+    const sourcesUsed = [...new Set(check.lineItems.filter(r => r.normSource).map(r => r.normSource))];
+    const normLabel = sourcesUsed.length > 0 ? sourcesUsed.join(', ') : (check.normType || 'ყველა');
     return `<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40">
 <head><meta charset="UTF-8"><title>${check.checkNumber}</title>
 <style>
@@ -514,10 +519,6 @@ table{border-collapse:collapse;width:100%;font-size:8.5pt}
 th{background:#003366;color:#fff;padding:5px 4px;border:1px solid #001f45}
 td{border:1px solid #ccc;padding:3px 4px}
 .meta td{border:none;padding:2px 6px}
-.summary{display:flex;gap:20px;margin:10px 0}
-.card{border:1px solid #ccc;padding:8px 12px;min-width:100px;text-align:center}
-.card .num{font-size:18pt;font-weight:bold}
-.card .lbl{font-size:8pt;color:#666}
 .footer{margin-top:30px;border-top:1px solid #ccc;padding-top:10px}
 </style></head>
 <body>
@@ -525,7 +526,7 @@ td{border:1px solid #ccc;padding:3px 4px}
 <h2>1. ზოგადი ინფორმაცია</h2>
 <table class="meta"><tr><td><b>შემოწმების №:</b></td><td>${check.checkNumber}</td><td><b>თარიღი:</b></td><td>${new Date(check.checkDate).toLocaleDateString('ka-GE')}</td></tr>
 <tr><td><b>BE-CASE №:</b></td><td>${check.caseNumber || '—'}</td><td><b>ობიექტი:</b></td><td>${check.objectName || '—'}</td></tr>
-<tr><td><b>შემმოწმებელი:</b></td><td>${check.checkedBy || '—'}</td><td><b>ნორმ. ბაზა:</b></td><td>${check.normType || 'NER'}${check.normYear ? ' ' + check.normYear : ''}${check.normQuarter ? ' კვ.' + check.normQuarter : ''}</td></tr>
+<tr><td><b>შემმოწმებელი:</b></td><td>${check.checkedBy || '—'}</td><td><b>ნორმ. წყარო:</b></td><td>${normLabel}${check.normYear ? ' ' + check.normYear : ''}${check.normQuarter ? ' კვ.' + check.normQuarter : ''}</td></tr>
 <tr><td><b>ხარჯთაღრ. ფაილი:</b></td><td colspan="3">${check.estimateFileName || '—'}</td></tr></table>
 <h2>2. შემოწმების შედეგები</h2>
 <table class="meta">
@@ -535,7 +536,7 @@ td{border:1px solid #ccc;padding:3px 4px}
 <p>${check.conclusion || '—'}</p>
 <h2>4. ხარჯთაღრიცხვის ანალიზი</h2>
 <table>
-<tr><th>#</th><th>კოდი</th><th>დასახელება</th><th>ერთ.</th><th>რაოდ.</th><th>ხარჯთ. ფასი (₾)</th><th>ნორმ. ფასი (₾)</th><th>გადახ. %</th><th>სტატუსი</th></tr>
+<tr><th>#</th><th>კოდი</th><th>დასახელება</th><th>ერთ.</th><th>რაოდ.</th><th>ხარჯთ. ფასი (₾)</th><th>ნორმ. ფასი (₾)</th><th>ნორმ. წყარო</th><th>გადახ. %</th><th>სტატუსი</th></tr>
 ${rows}
 </table>
 <div class="footer">
@@ -1026,21 +1027,25 @@ api.post('/price-adequacy/check', estimateUpload.single('file'), async (req, res
             return res.status(400).json({ error: 'Excel ფორმატი (.xlsx, .xls) მხარდაჭერილია' });
         }
         if (lineItems.length === 0) return res.status(400).json({ error: 'ხარჯთაღრიცხვაში სტრიქონები ვერ მოიძებნა. შეამოწმეთ Excel სტრუქტურა.' });
+        const effectiveNormType = normType || 'all';
         const { results, matchedLines, violationCount, warningCount, okCount, unmatchedCount }
-            = await runMatchingEngine(lineItems, normYear ? parseInt(normYear) : null, normQuarter ? parseInt(normQuarter) : null, normType);
+            = await runMatchingEngine(lineItems, normYear ? parseInt(normYear) : null, normQuarter ? parseInt(normQuarter) : null, effectiveNormType);
+        // Collect which norm sources were actually used in matches
+        const sourcesUsed = [...new Set(results.filter(r => r.normSource).map(r => r.normSource))];
+        const sourcesLabel = sourcesUsed.length > 0 ? sourcesUsed.join(', ') : (effectiveNormType === 'all' ? 'ყველა ხელმისაწვდომი ნორმ-ბაზა' : effectiveNormType);
         const checkNum = await generateDocumentNumber('PA');
         let conclusion = violationCount > 0
-            ? `ხარჯთაღრიცხვაში გამოვლენილია ${violationCount} პოზიცია, სადაც ერთეული ფასი აღემატება მოქმედ ნებადართულ ელემენტარულ ფასდებს 15%-ზე მეტით. შეუსაბამობა მოითხოვს კორექტირებას.`
+            ? `ხარჯთაღრიცხვაში გამოვლენილია ${violationCount} პოზიცია, სადაც ერთეული ფასი 15%-ზე მეტით აღემატება სანორმო ფასდებს (${sourcesLabel}). შეუსაბამობა მოითხოვს კორექტირებას ან დასაბუთებას.`
             : warningCount > 0
-            ? `ხარჯთაღრიცხვაში ${warningCount} პოზიციაში ფასი 5–15%-ით აღემატება ნორმას. რეკომენდებულია დამატებითი დასაბუთება.`
+            ? `ხარჯთაღრიცხვაში ${warningCount} პოზიციაში ფასი 5–15%-ით აღემატება სანორმო ფასდებს (${sourcesLabel}). რეკომენდებულია დამატებითი დასაბუთება.`
             : matchedLines > 0
-            ? `ხარჯთაღრიცხვის ${matchedLines} შემოწმებული პოზიცია შეესაბამება მოქმედ ნებადართულ ელემენტარულ ფასდებს.`
+            ? `ხარჯთაღრიცხვის ${matchedLines} შემოწმებული პოზიცია შეესაბამება მოქმედ სანორმო ფასდებს (${sourcesLabel}).`
             : `ხარჯთაღრიცხვა ვერ შეუსაბამა ნორმატიულ ბაზას — საჭიროა ნორმ-ბაზის განახლება ან ხელით გადამოწმება.`;
         const check = await PriceAdequacyCheck.create({
             checkNumber: checkNum, caseId: caseId || null, caseNumber: caseNumber || '',
             objectName: objectName || '', checkedBy: checkedBy || req.user.username,
             estimateFileName: Buffer.from(req.file.originalname, 'latin1').toString('utf8'),
-            normType: normType || 'NER', normYear: normYear ? parseInt(normYear) : null, normQuarter: normQuarter ? parseInt(normQuarter) : null,
+            normType: effectiveNormType, normYear: normYear ? parseInt(normYear) : null, normQuarter: normQuarter ? parseInt(normQuarter) : null,
             totalLines: lineItems.length, matchedLines, violationCount, warningCount, okCount, unmatchedCount, conclusion, lineItems: results,
         });
         res.json(check);

@@ -17,7 +17,10 @@ const cc = { padding: 2 };
 const PriceAdequacyReportPdf = ({ data = {} }) => {
   const sigs = data.sigs || [];
   const items = data.lineItems || [];
-  const normLabel = [data.normType || 'NER', data.normYear, data.normQuarter ? `კვ.${data.normQuarter}` : null].filter(Boolean).join(' ');
+  const sourcesUsed = [...new Set((data.lineItems || []).filter(r => r.normSource).map(r => r.normSource))];
+  const normLabel = sourcesUsed.length > 0
+    ? sourcesUsed.join(', ') + (data.normYear ? ` ${data.normYear}` : '') + (data.normQuarter ? ` კვ.${data.normQuarter}` : '')
+    : [data.normType || 'ყველა', data.normYear, data.normQuarter ? `კვ.${data.normQuarter}` : null].filter(Boolean).join(' ');
 
   return (
     <Document>
@@ -61,29 +64,31 @@ const PriceAdequacyReportPdf = ({ data = {} }) => {
         <Text style={s.secH}>4. ხარჯთაღრიცხვის ანალიზი</Text>
         <View style={[s.tBorder, { marginBottom: 4 }]}>
           <View style={s.tHeader}>
-            <View style={[s.tHead, { width: '5%', ...cc }]}><Text>#</Text></View>
-            <View style={[s.tHead, { width: '9%', ...cc }]}><Text>კოდი</Text></View>
+            <View style={[s.tHead, { width: '4%', ...cc }]}><Text>#</Text></View>
+            <View style={[s.tHead, { width: '8%', ...cc }]}><Text>კოდი</Text></View>
             <View style={[s.tHead, { flex: 1, ...cc }]}><Text>დასახელება</Text></View>
-            <View style={[s.tHead, { width: '6%', ...cc }]}><Text>ერთ.</Text></View>
-            <View style={[s.tHead, { width: '7%', ...cc }]}><Text>რაოდ.</Text></View>
-            <View style={[s.tHead, { width: '10%', ...cc }]}><Text>ხარჯთ.ფ.</Text></View>
-            <View style={[s.tHead, { width: '10%', ...cc }]}><Text>ნორმ.ფ.</Text></View>
+            <View style={[s.tHead, { width: '5%', ...cc }]}><Text>ერთ.</Text></View>
+            <View style={[s.tHead, { width: '6%', ...cc }]}><Text>რაოდ.</Text></View>
+            <View style={[s.tHead, { width: '9%', ...cc }]}><Text>ხარჯთ.ფ.</Text></View>
+            <View style={[s.tHead, { width: '9%', ...cc }]}><Text>ნორმ.ფ.</Text></View>
+            <View style={[s.tHead, { width: '8%', ...cc }]}><Text>ნ.წყარო</Text></View>
             <View style={[s.tHead, { width: '7%', ...cc }]}><Text>გადახ.%</Text></View>
-            <View style={[s.tHead, { width: '12%', ...cc }]}><Text>სტატუსი</Text></View>
+            <View style={[s.tHead, { width: '11%', ...cc }]}><Text>სტატუსი</Text></View>
           </View>
           {items.map((it, i) => {
             const bg = STATUS_COLOR[it.lineStatus] || '#fff';
             return (
               <View key={i} style={{ flexDirection: 'row', borderBottomWidth: 0.5, borderBottomColor: '#ccc', backgroundColor: bg }}>
-                <View style={[s.tCell, { width: '5%', ...cc }]}><Text style={{ fontSize: 7 }}>{it.lineNum}</Text></View>
-                <View style={[s.tCell, { width: '9%', ...cc }]}><Text style={{ fontSize: 7 }}>{it.code || ''}</Text></View>
+                <View style={[s.tCell, { width: '4%', ...cc }]}><Text style={{ fontSize: 7 }}>{it.lineNum}</Text></View>
+                <View style={[s.tCell, { width: '8%', ...cc }]}><Text style={{ fontSize: 7 }}>{it.code || ''}</Text></View>
                 <View style={[s.tCell, { flex: 1, ...cc }]}><Text style={{ fontSize: 7 }}>{it.description || ''}</Text></View>
-                <View style={[s.tCell, { width: '6%', ...cc }]}><Text style={{ fontSize: 7 }}>{it.unit || ''}</Text></View>
-                <View style={[s.tCell, { width: '7%', ...cc }]}><Text style={{ fontSize: 7 }}>{it.quantity || ''}</Text></View>
-                <View style={[s.tCell, { width: '10%', ...cc }]}><Text style={{ fontSize: 7 }}>{fmtN(it.unitPrice)}</Text></View>
-                <View style={[s.tCell, { width: '10%', ...cc }]}><Text style={{ fontSize: 7 }}>{fmtN(it.normUnitPrice)}</Text></View>
+                <View style={[s.tCell, { width: '5%', ...cc }]}><Text style={{ fontSize: 7 }}>{it.unit || ''}</Text></View>
+                <View style={[s.tCell, { width: '6%', ...cc }]}><Text style={{ fontSize: 7 }}>{it.quantity || ''}</Text></View>
+                <View style={[s.tCell, { width: '9%', ...cc }]}><Text style={{ fontSize: 7 }}>{fmtN(it.unitPrice)}</Text></View>
+                <View style={[s.tCell, { width: '9%', ...cc }]}><Text style={{ fontSize: 7 }}>{fmtN(it.normUnitPrice)}</Text></View>
+                <View style={[s.tCell, { width: '8%', ...cc }]}><Text style={{ fontSize: 7, color: '#003366' }}>{it.normSource || ''}</Text></View>
                 <View style={[s.tCell, { width: '7%', ...cc }]}><Text style={{ fontSize: 7, fontWeight: it.deviation != null && Math.abs(it.deviation) > 5 ? 'bold' : 'normal' }}>{fmtD(it.deviation)}</Text></View>
-                <View style={[s.tCell, { width: '12%', ...cc }]}><Text style={{ fontSize: 7, fontWeight: 'bold' }}>{it.lineStatus}</Text></View>
+                <View style={[s.tCell, { width: '11%', ...cc }]}><Text style={{ fontSize: 7, fontWeight: 'bold' }}>{it.lineStatus}</Text></View>
               </View>
             );
           })}

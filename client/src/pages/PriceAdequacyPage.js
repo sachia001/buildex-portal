@@ -23,7 +23,7 @@ export default function PriceAdequacyPage({ role }) {
     const [caseData, setCaseData] = useState(null);
     const [normYear, setNormYear] = useState(new Date().getFullYear());
     const [normQuarter, setNormQuarter] = useState(1);
-    const [normType, setNormType] = useState('NER');
+    const [normType, setNormType] = useState('all');
     const [estimateFile, setEstimateFile] = useState(null);
     const [checking, setChecking] = useState(false);
     const [msg, setMsg] = useState(null);
@@ -127,18 +127,21 @@ export default function PriceAdequacyPage({ role }) {
             'რაოდენობა': it.quantity || '',
             'ხარჯთ. ერთ.ფ. (₾)': it.unitPrice || '',
             'ნორმ. ერთ.ფ. (₾)': it.normUnitPrice ?? '',
+            'ნორმ. წყარო': it.normSource || '',
             'გადახრა %': it.deviation ?? '',
             'სტატუსი': it.lineStatus || '',
             'ნორმ. კოდი': it.normCode || '',
             'ნორმ. დასახელება': it.normDescription || '',
             'ხარჯთ. ჯამი (₾)': it.totalPrice || '',
         }));
+        const srcUsed = [...new Set((activeCheck.lineItems || []).filter(r => r.normSource).map(r => r.normSource))];
+        const normLabelXlsx = srcUsed.length > 0 ? srcUsed.join(', ') : (activeCheck.normType || 'ყველა');
         const summary = [
             { '#': 'შემოწმება', 'კოდი': activeCheck.checkNumber },
             { '#': 'BE-CASE', 'კოდი': activeCheck.caseNumber || '—' },
             { '#': 'ობიექტი', 'კოდი': activeCheck.objectName || '—' },
             { '#': 'თარიღი', 'კოდი': new Date(activeCheck.checkDate).toLocaleDateString('ka-GE') },
-            { '#': 'ნორმ. ბაზა', 'კოდი': [activeCheck.normType, activeCheck.normYear, activeCheck.normQuarter ? `კვ.${activeCheck.normQuarter}` : null].filter(Boolean).join(' ') },
+            { '#': 'ნორმ. წყაროები', 'კოდი': normLabelXlsx + (activeCheck.normYear ? ` ${activeCheck.normYear}` : '') + (activeCheck.normQuarter ? ` კვ.${activeCheck.normQuarter}` : '') },
             { '#': 'სულ პოზ.', 'კოდი': activeCheck.totalLines },
             { '#': 'შესაბამ.', 'კოდი': activeCheck.okCount },
             { '#': 'გაფრთხ.', 'კოდი': activeCheck.warningCount },
@@ -160,7 +163,10 @@ export default function PriceAdequacyPage({ role }) {
         filterStatus === 'all' || it.lineStatus === filterStatus
     ) || [];
 
-    const normLabel = (c) => [c.normType, c.normYear, c.normQuarter ? `კვ.${c.normQuarter}` : null].filter(Boolean).join(' ');
+    const normLabel = (c) => {
+        const base = c.normType === 'all' ? 'ყველა' : (c.normType || 'ყველა');
+        return [base, c.normYear, c.normQuarter ? `კვ.${c.normQuarter}` : null].filter(Boolean).join(' ');
+    };
 
     return (
         <div className="container-fluid py-3" style={{ maxWidth: 1400 }}>
@@ -243,7 +249,7 @@ export default function PriceAdequacyPage({ role }) {
                             <div className="card-body">
                                 <label className="form-label fw-bold small">ნორმის სახეობა</label>
                                 <select className="form-select form-select-sm mb-2" value={normType} onChange={e => setNormType(e.target.value)}>
-                                    {['NER', 'მშენ. კავშირი', 'SNIP', 'SNiP', 'SHNEB', 'all', 'სხვა'].map(t => <option key={t} value={t}>{t === 'all' ? 'ყველა' : t}</option>)}
+                                    {['all', 'NER', 'მშენ. კავშირი', 'SNIP', 'SNiP', 'SHNEB', 'სხვა'].map(t => <option key={t} value={t}>{t === 'all' ? '✅ ყველა ნორმ-ბაზა' : t}</option>)}
                                 </select>
 
                                 <div className="row g-2 mb-3">
@@ -298,7 +304,7 @@ export default function PriceAdequacyPage({ role }) {
                         <div className="text-center text-muted small">
                             სისტემა ავტომატურად:<br />
                             1. გაარჩევს ხარჯთაღრ. Excel-ს<br />
-                            2. შეადარებს NER ნორმებს<br />
+                            2. შეადარებს ყველა ნორმ-ბაზას<br />
                             3. გამოთვლის გადახრებს<br />
                             4. შექმნის ანგარიშს
                         </div>
@@ -450,20 +456,21 @@ export default function PriceAdequacyPage({ role }) {
                                 <thead style={{ background: '#f0f4f8', position: 'sticky', top: 0 }}>
                                     <tr>
                                         <th style={{ width: 40 }}>#</th>
-                                        <th style={{ width: 90 }}>კოდი</th>
+                                        <th style={{ width: 80 }}>კოდი</th>
                                         <th>დასახელება</th>
                                         <th style={{ width: 50 }}>ერთ.</th>
-                                        <th style={{ width: 60 }}>რაოდ.</th>
-                                        <th style={{ width: 90 }}>ხარჯთ. ₾</th>
-                                        <th style={{ width: 90 }}>ნორმ. ₾</th>
-                                        <th style={{ width: 70 }}>გადახ.%</th>
-                                        <th style={{ width: 110 }}>სტატუსი</th>
-                                        <th style={{ width: 60 }}>შ.%</th>
+                                        <th style={{ width: 55 }}>რაოდ.</th>
+                                        <th style={{ width: 80 }}>ხარჯთ. ₾</th>
+                                        <th style={{ width: 80 }}>ნორმ. ₾</th>
+                                        <th style={{ width: 75 }}>ნ.წყარო</th>
+                                        <th style={{ width: 65 }}>გადახ.%</th>
+                                        <th style={{ width: 100 }}>სტატუსი</th>
+                                        <th style={{ width: 55 }}>შ.%</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {filteredItems.length === 0
-                                        ? <tr><td colSpan={10} className="text-center text-muted py-4">შედეგები ვერ მოიძებნა</td></tr>
+                                        ? <tr><td colSpan={11} className="text-center text-muted py-4">შედეგები ვერ მოიძებნა</td></tr>
                                         : filteredItems.map((it, i) => {
                                             const sc = STATUS_BADGE[it.lineStatus] || STATUS_BADGE['ვერ შემოწმდა'];
                                             const devAbs = it.deviation != null ? Math.abs(it.deviation) : 0;
@@ -483,6 +490,11 @@ export default function PriceAdequacyPage({ role }) {
                                                     <td>{it.quantity || ''}</td>
                                                     <td className="fw-bold">{fmtN(it.unitPrice)}</td>
                                                     <td>{fmtN(it.normUnitPrice)}</td>
+                                                    <td>
+                                                        {it.normSource
+                                                            ? <span className="badge" style={{ background: '#e8f0f7', color: '#003366', fontSize: '0.65rem' }}>{it.normSource}</span>
+                                                            : <span className="text-muted">—</span>}
+                                                    </td>
                                                     <td>
                                                         <span style={{
                                                             fontWeight: 'bold',
