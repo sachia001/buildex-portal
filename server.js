@@ -30,26 +30,30 @@ if (CLOUDINARY_OK) {
     console.warn('⚠️  CLOUDINARY_* env vars არ არის — ფაილები ლოკალურ დისკზე ინახება (Railway restart-ზე წაიშლება)');
 }
 
-// Upload buffer → Cloudinary (standard upload, URL hidden server-side)
+// Upload buffer → Cloudinary via base64 data URI (free-plan compatible)
 // Security: URL never sent to client — downloads proxied through authenticated API
 async function uploadToCloudinary(buffer, originalName, folder = 'buildex-procedures') {
-    // Use a random UUID prefix so the public_id is unguessable
     const crypto = require('crypto');
     const uid    = crypto.randomBytes(16).toString('hex');
-    const ext    = require('path').extname(originalName) || '';
-    return new Promise((resolve, reject) => {
-        const stream = cloudinary.uploader.upload_stream(
-            {
-                resource_type: 'raw',
-                type:          'upload',   // free-plan compatible
-                folder,
-                public_id:     uid,        // random, unguessable ID
-                overwrite:     false,
-            },
-            (err, result) => { if (err) reject(err); else resolve({ ...result, ext }); }
-        );
-        stream.end(buffer);
+    const ext    = path.extname(originalName).toLowerCase() || '';
+    const mimeMap = {
+        '.pdf':  'application/pdf',
+        '.docx': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        '.doc':  'application/msword',
+        '.xlsx': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        '.xls':  'application/vnd.ms-excel',
+    };
+    const mime    = mimeMap[ext] || 'application/octet-stream';
+    const dataUri = `data:${mime};base64,${buffer.toString('base64')}`;
+
+    const result = await cloudinary.uploader.upload(dataUri, {
+        resource_type: 'raw',
+        type:          'upload',
+        folder,
+        public_id:     uid,
+        overwrite:     false,
     });
+    return result;
 }
 
 // Delete from Cloudinary by public_id
