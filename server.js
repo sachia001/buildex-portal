@@ -14,17 +14,22 @@ const JWT_SECRET = process.env.JWT_SECRET || 'buildex-secret-2026';
 // ─── Cloudinary (secure document storage) ────────────────────────────────────
 const cloudinary = require('cloudinary').v2;
 const CLOUDINARY_OK = !!(
-    process.env.CLOUDINARY_CLOUD_NAME &&
-    process.env.CLOUDINARY_API_KEY &&
-    process.env.CLOUDINARY_API_SECRET
+    process.env.CLOUDINARY_URL ||
+    (process.env.CLOUDINARY_CLOUD_NAME &&
+     process.env.CLOUDINARY_API_KEY &&
+     process.env.CLOUDINARY_API_SECRET)
 );
 if (CLOUDINARY_OK) {
-    cloudinary.config({
-        cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-        api_key:    process.env.CLOUDINARY_API_KEY,
-        api_secret: process.env.CLOUDINARY_API_SECRET,
-        secure:     true,
-    });
+    if (!process.env.CLOUDINARY_URL) {
+        // Manual config when individual vars are set (not CLOUDINARY_URL)
+        cloudinary.config({
+            cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+            api_key:    process.env.CLOUDINARY_API_KEY,
+            api_secret: process.env.CLOUDINARY_API_SECRET,
+            secure:     true,
+        });
+    }
+    // If CLOUDINARY_URL is set, SDK auto-configures from it
     console.log('☁️  Cloudinary კონფიგურირებულია');
 } else {
     console.warn('⚠️  CLOUDINARY_* env vars არ არის — ფაილები ლოკალურ დისკზე ინახება (Railway restart-ზე წაიშლება)');
