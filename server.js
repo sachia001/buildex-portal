@@ -30,19 +30,23 @@ if (CLOUDINARY_OK) {
     console.warn('⚠️  CLOUDINARY_* env vars არ არის — ფაილები ლოკალურ დისკზე ინახება (Railway restart-ზე წაიშლება)');
 }
 
-// Upload buffer → Cloudinary (private, raw resource)
+// Upload buffer → Cloudinary (standard upload, URL hidden server-side)
+// Security: URL never sent to client — downloads proxied through authenticated API
 async function uploadToCloudinary(buffer, originalName, folder = 'buildex-procedures') {
-    const safeName = originalName.replace(/[^a-zA-Z0-9._-]/g, '_');
+    // Use a random UUID prefix so the public_id is unguessable
+    const crypto = require('crypto');
+    const uid    = crypto.randomBytes(16).toString('hex');
+    const ext    = require('path').extname(originalName) || '';
     return new Promise((resolve, reject) => {
         const stream = cloudinary.uploader.upload_stream(
             {
                 resource_type: 'raw',
-                type:          'private',     // NOT publicly accessible by URL
+                type:          'upload',   // free-plan compatible
                 folder,
-                public_id:     Date.now() + '_' + safeName,
+                public_id:     uid,        // random, unguessable ID
                 overwrite:     false,
             },
-            (err, result) => { if (err) reject(err); else resolve(result); }
+            (err, result) => { if (err) reject(err); else resolve({ ...result, ext }); }
         );
         stream.end(buffer);
     });
@@ -51,18 +55,25 @@ async function uploadToCloudinary(buffer, originalName, folder = 'buildex-proced
 // Delete from Cloudinary by public_id
 async function deleteFromCloudinary(publicId) {
     if (!publicId || !CLOUDINARY_OK) return;
-    try { await cloudinary.uploader.destroy(publicId, { resource_type: 'raw', type: 'private', invalidate: true }); }
+    try { await cloudinary.uploader.destroy(publicId, { resource_type: 'raw', type: 'upload', invalidate: true }); }
     catch (e) { console.error('Cloudinary delete error:', e.message); }
 }
 
-// Generate a short-lived signed download URL (60 seconds)
-function signedDownloadUrl(publicId) {
-    return cloudinary.url(publicId, {
-        resource_type: 'raw',
-        type:          'private',
-        sign_url:      true,
-        expires_at:    Math.floor(Date.now() / 1000) + 60,
-        attachment:    true,   // forces browser to download, not open
+// Proxy-download: fetch raw bytes from Cloudinary and stream to client
+// This way the Cloudinary URL is NEVER exposed to the browser
+async function proxyCloudinaryDownload(secureUrl, res, filename) {
+    const https = require('https');
+    const http  = require('http');
+    const lib   = secureUrl.startsWith('https') ? https : http;
+    return new Promise((resolve, reject) => {
+        lib.get(secureUrl, (stream) => {
+            res.setHeader('Content-Disposition', `attachment; filename*=UTF-8''${encodeURIComponent(filename)}`);
+            res.setHeader('Content-Type', stream.headers['content-type'] || 'application/octet-stream');
+            if (stream.headers['content-length']) res.setHeader('Content-Length', stream.headers['content-length']);
+            stream.pipe(res);
+            stream.on('end', resolve);
+            stream.on('error', reject);
+        }).on('error', reject);
     });
 }
 // ─────────────────────────────────────────────────────────────────────────────
@@ -816,7 +827,8 @@ const ProcedureDoc = mongoose.model('ProcedureDoc', new mongoose.Schema({
     category:      { type: String, default: 'procedure' },
     version:       { type: String, default: '1.0' },
     // Cloudinary fields (set when CLOUDINARY_OK)
-    cloudinaryId:  { type: String, default: '' },    // public_id for signed URL + deletion
+    cloudinaryId:  { type: String, default: '' },    // public_id for deletion
+    cloudinaryUrl: { type: String, default: '' },    // secure_url — used for proxy download
     // Legacy / fallback local path
     filePath:      { type: String, default: '' },
     originalName:  { type: String },
@@ -1810,27 +1822,31 @@ app.use('/api/auth', authRouter);
 api.get('/procedures', async (req, res) => {
     try {
         const docs = await ProcedureDoc.find()
-            .select('-cloudinaryId')   // never send Cloudinary ID to client
+            .select('-cloudinaryId -cloudinaryUrl')   // never expose Cloudinary URLs to client
             .sort({ code: 1 });
         res.json(docs);
     } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
 // ── Authenticated download ────────────────────────────────────────
-// Returns a 60-second signed URL (Cloudinary) or streams local file.
+// Proxy-streams the file from Cloudinary (URL never exposed to browser).
+// Falls back to local disk for legacy / dev environments.
 // Requires JWT — no direct static access possible.
 api.get('/procedures/:id/download', requireAuth, async (req, res) => {
     try {
         const doc = await ProcedureDoc.findById(req.params.id);
         if (!doc) return res.status(404).json({ error: 'ვერ მოიძებნა' });
 
-        if (doc.cloudinaryId && CLOUDINARY_OK) {
-            // Short-lived signed URL — valid 60 seconds, forces download
-            const url = signedDownloadUrl(doc.cloudinaryId);
-            return res.redirect(url);
+        // Cloudinary path — proxy so the raw URL never reaches the browser
+        if (doc.cloudinaryUrl && CLOUDINARY_OK) {
+            return await proxyCloudinaryDownload(
+                doc.cloudinaryUrl,
+                res,
+                doc.originalName || doc.code || 'document'
+            );
         }
 
-        // Fallback: local file (development / pre-migration)
+        // Fallback: local file (development / pre-Cloudinary uploads)
         const abs = path.join(__dirname, (doc.filePath || '').replace(/^\//, ''));
         if (doc.filePath && fs.existsSync(abs)) {
             return res.download(abs, doc.originalName || path.basename(abs));
@@ -1850,18 +1866,20 @@ api.post('/procedures', procUpload.single('file'), async (req, res) => {
         const { code, title, category, version, notes } = req.body;
         const originalName = Buffer.from(req.file.originalname, 'latin1').toString('utf8');
 
-        let cloudinaryId = '';
+        let cloudinaryId  = '';
+        let cloudinaryUrl = '';
         let filePath = '';
 
         if (CLOUDINARY_OK) {
-            // Upload buffer to Cloudinary private storage
+            // Upload buffer to Cloudinary (free-plan type: 'upload')
             const result = await uploadToCloudinary(
                 req.file.buffer,
                 originalName,
                 `buildex-procedures/${category || 'procedure'}`
             );
-            cloudinaryId = result.public_id;
-            filePath = '';  // not needed — we use cloudinaryId
+            cloudinaryId  = result.public_id;
+            cloudinaryUrl = result.secure_url || '';
+            filePath = '';
         } else {
             // Fallback: disk (already written by multer diskStorage)
             filePath = `/uploads/procedures/${req.file.filename}`;
@@ -1873,6 +1891,7 @@ api.post('/procedures', procUpload.single('file'), async (req, res) => {
             category:     category || 'procedure',
             version:      version || '2.0',
             cloudinaryId,
+            cloudinaryUrl,
             filePath,
             originalName,
             fileSize:     req.file.size || 0,
@@ -1909,8 +1928,9 @@ api.put('/procedures/:id', procUpload.single('file'), async (req, res) => {
                     originalName,
                     `buildex-procedures/${doc.category || 'procedure'}`
                 );
-                doc.cloudinaryId = result.public_id;
-                doc.filePath     = '';
+                doc.cloudinaryId  = result.public_id;
+                doc.cloudinaryUrl = result.secure_url || '';
+                doc.filePath      = '';
             } else {
                 // Delete old local file
                 if (doc.filePath) {
