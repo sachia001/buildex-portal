@@ -451,22 +451,36 @@ export default function ProceduresPage({ role }) {
 
   const downloadDoc = async (doc) => {
     try {
-      const res = await axios.get(doc.filePath, {
+      // Server returns a 60-second signed redirect URL — open in same tab triggers download
+      const res = await axios.get(`/api/procedures/${doc._id}/download`, {
+        headers: { Authorization: `Bearer ${token}` },
+        maxRedirects: 0,          // capture the redirect URL ourselves
+        validateStatus: s => s === 302 || s === 200 || s < 400,
+      });
+      // If server redirected → open that signed URL directly
+      const redirectUrl = res.headers?.location || res.request?.responseURL;
+      if (redirectUrl) {
+        const a = document.createElement('a');
+        a.href = redirectUrl;
+        a.download = doc.originalName || doc.code;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        return;
+      }
+      // Fallback: blob download (local file)
+      const blob = await axios.get(`/api/procedures/${doc._id}/download`, {
         headers: { Authorization: `Bearer ${token}` },
         responseType: 'blob',
       });
-      const url = URL.createObjectURL(new Blob([res.data]));
+      const url = URL.createObjectURL(new Blob([blob.data]));
       const a = document.createElement('a');
       a.href = url;
-      a.download = doc.originalName || (doc.code + '_' + doc.title);
-      a.click();
-      URL.revokeObjectURL(url);
-    } catch {
-      // fallback: direct link
-      const a = document.createElement('a');
-      a.href = doc.filePath;
       a.download = doc.originalName || doc.code;
       a.click();
+      URL.revokeObjectURL(url);
+    } catch (e) {
+      alert('ჩამოტვირთვა ვერ მოხდა: ' + (e.response?.status === 401 ? 'ავტორიზაცია საჭიროა' : e.message));
     }
   };
 
@@ -643,10 +657,17 @@ export default function ProceduresPage({ role }) {
                         <td className="px-2 text-muted" style={{ fontSize: '0.75rem' }}>{up?.version || '—'}</td>
                         <td className="px-2 text-muted" style={{ fontSize: '0.72rem' }}>
                           {up ? new Date(up.updatedAt).toLocaleDateString('ka-GE') : '—'}
+                          {up?.fileSize > 0 && (
+                            <div style={{ fontSize: '0.65rem', color: '#aaa' }}>
+                              {up.fileSize > 1048576
+                                ? (up.fileSize / 1048576).toFixed(1) + ' MB'
+                                : Math.round(up.fileSize / 1024) + ' KB'}
+                            </div>
+                          )}
                         </td>
                         <td className="px-2 text-center">
                           {up
-                            ? <span style={{ color: '#15803d', fontWeight: 700, fontSize: '0.72rem' }}>✅ ატვირთ.</span>
+                            ? <span style={{ color: '#15803d', fontWeight: 700, fontSize: '0.72rem' }}>✅ ☁️ ატვირთ.</span>
                             : <span style={{ color: '#b45309', fontWeight: 700, fontSize: '0.72rem' }}>⚠️ ცარიელი</span>
                           }
                         </td>

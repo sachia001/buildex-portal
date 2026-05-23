@@ -11,6 +11,62 @@ const XLSX_LIB = require('xlsx');
 
 const JWT_SECRET = process.env.JWT_SECRET || 'buildex-secret-2026';
 
+// ─── Cloudinary (secure document storage) ────────────────────────────────────
+const cloudinary = require('cloudinary').v2;
+const CLOUDINARY_OK = !!(
+    process.env.CLOUDINARY_CLOUD_NAME &&
+    process.env.CLOUDINARY_API_KEY &&
+    process.env.CLOUDINARY_API_SECRET
+);
+if (CLOUDINARY_OK) {
+    cloudinary.config({
+        cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+        api_key:    process.env.CLOUDINARY_API_KEY,
+        api_secret: process.env.CLOUDINARY_API_SECRET,
+        secure:     true,
+    });
+    console.log('☁️  Cloudinary კონფიგურირებულია');
+} else {
+    console.warn('⚠️  CLOUDINARY_* env vars არ არის — ფაილები ლოკალურ დისკზე ინახება (Railway restart-ზე წაიშლება)');
+}
+
+// Upload buffer → Cloudinary (private, raw resource)
+async function uploadToCloudinary(buffer, originalName, folder = 'buildex-procedures') {
+    const safeName = originalName.replace(/[^a-zA-Z0-9._-]/g, '_');
+    return new Promise((resolve, reject) => {
+        const stream = cloudinary.uploader.upload_stream(
+            {
+                resource_type: 'raw',
+                type:          'private',     // NOT publicly accessible by URL
+                folder,
+                public_id:     Date.now() + '_' + safeName,
+                overwrite:     false,
+            },
+            (err, result) => { if (err) reject(err); else resolve(result); }
+        );
+        stream.end(buffer);
+    });
+}
+
+// Delete from Cloudinary by public_id
+async function deleteFromCloudinary(publicId) {
+    if (!publicId || !CLOUDINARY_OK) return;
+    try { await cloudinary.uploader.destroy(publicId, { resource_type: 'raw', type: 'private', invalidate: true }); }
+    catch (e) { console.error('Cloudinary delete error:', e.message); }
+}
+
+// Generate a short-lived signed download URL (60 seconds)
+function signedDownloadUrl(publicId) {
+    return cloudinary.url(publicId, {
+        resource_type: 'raw',
+        type:          'private',
+        sign_url:      true,
+        expires_at:    Math.floor(Date.now() / 1000) + 60,
+        attachment:    true,   // forces browser to download, not open
+    });
+}
+// ─────────────────────────────────────────────────────────────────────────────
+
 const app = express();
 app.use(cors());
 app.use(express.json());
@@ -19,9 +75,12 @@ mongoose.connect(process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/buildexDB
     .then(() => console.log('✅ ბაზა და რეგლამენტი ჩაიტვირთა!'))
     .catch(err => console.error('❌ ბაზის შეცდომა:', err));
 
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
-app.use('/uploads/norms', express.static(path.join(__dirname, 'uploads/norms')));
+// Public static (non-procedure files — norms, estimates, doc uploads)
+app.use('/uploads/norms',     express.static(path.join(__dirname, 'uploads/norms')));
 app.use('/uploads/estimates', express.static(path.join(__dirname, 'uploads/estimates')));
+app.use('/uploads/docs',      express.static(path.join(__dirname, 'uploads/docs')));
+// NOTE: /uploads/procedures is intentionally NOT served as static —
+//       all procedure downloads go through the authenticated API endpoint.
 
 // --- UPLOAD CONFIG ---
 const uploadDir = './uploads/docs/';
@@ -752,14 +811,18 @@ ${rows}
 // PROCEDURE MODEL
 // ─────────────────────────────────────────────
 const ProcedureDoc = mongoose.model('ProcedureDoc', new mongoose.Schema({
-    code:        { type: String, required: true },       // e.g. BE-PR-01
-    title:       { type: String, required: true },
-    category:    { type: String, default: 'procedure' }, // 'procedure' | 'manual' | 'index'
-    version:     { type: String, default: '1.0' },
-    filePath:    { type: String },
-    originalName:{ type: String },
-    uploadedBy:  { type: String },
-    notes:       { type: String, default: '' },
+    code:          { type: String, required: true },
+    title:         { type: String, required: true },
+    category:      { type: String, default: 'procedure' },
+    version:       { type: String, default: '1.0' },
+    // Cloudinary fields (set when CLOUDINARY_OK)
+    cloudinaryId:  { type: String, default: '' },    // public_id for signed URL + deletion
+    // Legacy / fallback local path
+    filePath:      { type: String, default: '' },
+    originalName:  { type: String },
+    uploadedBy:    { type: String },
+    notes:         { type: String, default: '' },
+    fileSize:      { type: Number, default: 0 },     // bytes
 }, { timestamps: true }));
 
 // CHECKLIST SESSION MODEL
@@ -775,47 +838,135 @@ const ChecklistSession = mongoose.model('ChecklistSession', new mongoose.Schema(
     qmSig:         { type: String, default: '' },
 }, { timestamps: true }));
 
-// Multer for procedure uploads
+// Multer for procedure uploads — memory storage (buffer sent to Cloudinary)
+// Fallback: if Cloudinary not configured, save to local disk
 const procUploadDir = './uploads/procedures/';
 if (!fs.existsSync(procUploadDir)) fs.mkdirSync(procUploadDir, { recursive: true });
-const procStorage = multer.diskStorage({
-    destination: (req, file, cb) => cb(null, procUploadDir),
-    filename: (req, file, cb) => {
-        const safe = Buffer.from(file.originalname, 'latin1').toString('utf8').replace(/\s+/g, '_');
-        cb(null, Date.now() + '-' + safe);
-    }
-});
-const procUpload = multer({ storage: procStorage, limits: { fileSize: 50 * 1024 * 1024 } });
 
-// Seed default procedures from uploads/procedures/ directory
+const procUpload = multer({
+    storage: CLOUDINARY_OK
+        ? multer.memoryStorage()
+        : multer.diskStorage({
+            destination: (req, file, cb) => cb(null, procUploadDir),
+            filename:    (req, file, cb) => {
+                const safe = Buffer.from(file.originalname, 'latin1').toString('utf8').replace(/\s+/g, '_');
+                cb(null, Date.now() + '-' + safe);
+            },
+        }),
+    limits: { fileSize: 50 * 1024 * 1024 }, // 50 MB
+    fileFilter: (req, file, cb) => {
+        const allowed = ['.docx', '.doc', '.pdf', '.xlsx', '.xls'];
+        const ext = path.extname(file.originalname).toLowerCase();
+        if (allowed.includes(ext)) cb(null, true);
+        else cb(new Error('დაუშვებელი ფორმატი. დასაშვებია: docx, doc, pdf, xlsx'));
+    },
+});
+
+// Folder → category/docType mapping
+const PROC_FOLDER_MAP = {
+    'A_ხარისხის_სახელმძღვანელო': 'manual',
+    'B_პროცედურები':             'procedure',
+    'C_სამუშაო_ინსტრუქციები':   'instruction',
+    'D_სამუშაო_აღწერილობები':   'job_description',
+    'E_ფორმები_და_შაბლონები':   'form',
+    'F_პოლიტიკები':              'policy',
+    'G_რისკების_მართვა':         'risk',
+    'H_ბრძანებები':              'order',
+};
+const PROC_TITLE_MAP = {
+    'QM-01':'ხარისხის სახელმძღვანელო',
+    'BE-PR-01':'განაცხადების მიღება და კლიენტებთან ხელშეკრულება',
+    'BE-PR-02':'სახელშეკრულებო მოთხოვნათა შეთანხმება',
+    'BE-PR-03':'ინსპექტირების დაგეგმვა',
+    'BE-PR-04':'ინსპექტირების ჩატარება',
+    'BE-PR-05':'შედეგების გაფორმება',
+    'BE-PR-06':'ინსპექციის ანგარიშის გაცემა',
+    'BE-PR-07':'საჩივრებისა და აპელაციების განხილვა',
+    'BE-PR-08':'შეუსაბამო სამუშაოს მართვა',
+    'BE-PR-09':'კორექტირებითი ქმედებები (CAPA)',
+    'BE-PR-10':'შიდა აუდიტი',
+    'BE-PR-11':'მენეჯმენტის მიმოხილვა',
+    'BE-PR-12':'დოკუმენტების მართვა',
+    'BE-PR-13':'ჩანაწერების მართვა',
+    'BE-PR-14':'პერსონალის კვალიფიკაცია და ტრენინგი',
+    'BE-PR-15':'მოწყობილობის მართვა და კალიბრაცია',
+    'BE-PR-MAIN':'ინსპექტირების სრული პროცესი',
+    'BE-PR-SET':'პროცედურების სარჩევი (ინდექსი)',
+    'BE-WI-01':'ხარჯთაღრიცხვის შესაბამისობის შემოწმება',
+    'BE-WI-02':'შესრულებული სამუშაოს ფორმა 2',
+    'BE-WI-03':'ფასწარმოქმნის ადეკვატურობის შემოწმება',
+    'BE-WI-04':'ტექნიკური ზედამხედველობა',
+    'HR-JD-001':'აღმასრულებელი დირექტორის სამუშაო აღწერილობა',
+    'HR-JD-002':'ხარისხის მენეჯერის სამუშაო აღწერილობა',
+    'HR-JD-003':'ტექნიკური მენეჯერის სამუშაო აღწერილობა',
+    'HR-JD-004':'ინსპექტორის სამუშაო აღწერილობა',
+    'HR-JD-005':'ადმინისტრატორის სამუშაო აღწერილობა',
+    'FM-01':'ინსპექტირების ანგარიში',
+    'FM-02':'მიუკერძოებლობის დეკლარაცია',
+    'FM-03':'კონფიდენციალობის შეთანხმება',
+    'FM-04':'შიდა აუდიტის გეგმა და ანგარიში',
+    'FM-05':'მომსახურების ხელშეკრულება',
+    'FM-06':'საჩივრის / აპელაციის ფორმა',
+    'FM-07':'მოწყობილობის ვერიფიკაცია',
+    'FM-08':'კომპეტენციის შეფასება',
+    'FM-09':'ხელშეკრულების განხილვა',
+    'FM-10':'CAPA ფორმა',
+    'FM-11':'ინსპექტირების გეგმა',
+    'FM-12':'ქვეკონტრაქტორის შეფასება',
+    'FM-13':'ტრენინგის ჩანაწერი',
+    'FM-14':'შეუსაბამო სამუშაო',
+    'FM-15':'მენეჯმენტის ანალიზი',
+    'FM-16':'ვიზიტის ჩანაწერი',
+    'FM-18':'განაცხადის ფორმა',
+    'FM-21':'ინსპექტირების რეგისტრი',
+    'FM-22':'გაცნობის ფურცელი',
+    'FM-23':'დოკუმენტში ცვლილების წინადადება',
+    'FM-24':'ცვლილებების რეგისტრაცია',
+    'FM-25':'ლიკვიდაციის აქტი',
+    'POL-01':'მიუკერძოებლობის პოლიტიკა',
+    'POL-02':'კონფიდენციალობის პოლიტიკა',
+    'POL-03':'ხარისხის პოლიტიკა',
+    'POL-04':'IT და მონაცემთა უსაფრთხოების პოლიტიკა',
+    'RM-01':'რისკების რეესტრი',
+    'ORD-01':'ბრძანება №01',
+    'ORD-02':'ბრძანება №02',
+    'ORD-03':'ბრძანება №03',
+    'ORD-04':'ბრძანება №04',
+    'ORD-05':'ბრძანება №05',
+};
+
 async function seedProcedures() {
     try {
         const procDir = path.join(__dirname, 'uploads/procedures');
         if (!fs.existsSync(procDir)) return;
-        const files = fs.readdirSync(procDir).filter(f => f.endsWith('.docx'));
-        for (const fname of files) {
-            // Decode filename (may be URL-encoded or latin1)
-            let displayName = fname;
-            try { displayName = decodeURIComponent(fname); } catch {}
-            // Extract code from filename
-            const codeMatch = displayName.match(/BE-PR-\d+|BE-PR-SET/i);
-            const code = codeMatch ? codeMatch[0].toUpperCase() : displayName.replace(/[-_\d]/g, '').replace('.docx','');
-            const isManual = displayName.includes('ხარისხის') || displayName.toLowerCase().includes('manual');
-            const isIndex  = displayName.includes('SET') || displayName.includes('index');
-            const existing = await ProcedureDoc.findOne({ filePath: `/uploads/procedures/${fname}` });
-            if (!existing) {
-                await ProcedureDoc.create({
-                    code: isManual ? 'QM-01' : isIndex ? 'BE-PR-SET' : code,
-                    title: isManual ? 'ხარისხის სახელმძღვანელო' : isIndex ? 'პროცედურების სარჩევი' : `პროცედურა ${code}`,
-                    category: isManual ? 'manual' : isIndex ? 'index' : 'procedure',
-                    version: '1.0',
-                    filePath: `/uploads/procedures/${fname}`,
-                    originalName: displayName,
-                    uploadedBy: 'system',
-                });
+        let seeded = 0;
+        // Walk subfolders
+        const entries = fs.readdirSync(procDir, { withFileTypes: true });
+        for (const entry of entries) {
+            const exts = ['.docx', '.doc', '.pdf', '.xlsx'];
+            const scanFiles = (subPath, category) => {
+                const files = fs.readdirSync(subPath).filter(f => exts.some(e => f.endsWith(e)));
+                return files.map(f => ({ fname: f, fullPath: path.join(subPath, f), category, relPath: `/uploads/procedures/${entry.name}/${f}` }));
+            };
+            let filesToProcess = [];
+            if (entry.isDirectory() && PROC_FOLDER_MAP[entry.name]) {
+                filesToProcess = scanFiles(path.join(procDir, entry.name), PROC_FOLDER_MAP[entry.name]);
+            } else if (!entry.isDirectory() && exts.some(e => entry.name.endsWith(e))) {
+                filesToProcess = [{ fname: entry.name, fullPath: path.join(procDir, entry.name), category: 'procedure', relPath: `/uploads/procedures/${entry.name}` }];
+            }
+            for (const { fname, relPath, category } of filesToProcess) {
+                const existing = await ProcedureDoc.findOne({ filePath: relPath });
+                if (existing) continue;
+                // Extract code: match BE-PR-XX, BE-WI-XX, HR-JD-XXX, FM-XX, POL-XX, RM-XX, ORD-XX, QM-XX
+                const codeMatch = fname.match(/(?:BE-PR-(?:MAIN|SET|\d+)|BE-WI-\d+|HR-JD-\d+|FM-\d+|POL-\d+|RM-\d+|ORD-\d+|QM-\d+)/i);
+                const code = codeMatch ? codeMatch[0].toUpperCase() : fname.replace(/[_v\d.]+$/,'').replace(/_/g,'-');
+                const title = PROC_TITLE_MAP[code] || fname.replace(/_v2_2026\.\w+$/,'').replace(/_/g,' ');
+                const verMatch = fname.match(/v(\d+)/i);
+                await ProcedureDoc.create({ code, title, category, version: verMatch ? verMatch[1]+'.0' : '2.0', filePath: relPath, originalName: fname, uploadedBy: 'system' });
+                seeded++;
             }
         }
-        console.log('✅ პროცედურები ჩაიტვირთა');
+        console.log(`✅ პროცედურები ჩაიტვირთა: ${seeded} ახალი`);
     } catch (e) { console.error('Procedure seed error:', e.message); }
 }
 mongoose.connection.once('open', seedProcedures);
@@ -1651,73 +1802,146 @@ authRouter.delete('/users/:id', requireAuth, async (req, res) => {
 
 app.use('/api/auth', authRouter);
 
-// ─────────────────────────────────────────────
-// PROCEDURE ROUTES
-// ─────────────────────────────────────────────
-app.use('/uploads/procedures', express.static(path.join(__dirname, 'uploads/procedures')));
+// ═════════════════════════════════════════════════════════════════
+// PROCEDURE ROUTES — Cloudinary-backed secure storage
+// ═════════════════════════════════════════════════════════════════
 
-// List all procedures
+// List all procedures (metadata only — no file URLs exposed)
 api.get('/procedures', async (req, res) => {
     try {
-        const docs = await ProcedureDoc.find().sort({ code: 1 });
+        const docs = await ProcedureDoc.find()
+            .select('-cloudinaryId')   // never send Cloudinary ID to client
+            .sort({ code: 1 });
         res.json(docs);
     } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-// Upload new procedure
+// ── Authenticated download ────────────────────────────────────────
+// Returns a 60-second signed URL (Cloudinary) or streams local file.
+// Requires JWT — no direct static access possible.
+api.get('/procedures/:id/download', requireAuth, async (req, res) => {
+    try {
+        const doc = await ProcedureDoc.findById(req.params.id);
+        if (!doc) return res.status(404).json({ error: 'ვერ მოიძებნა' });
+
+        if (doc.cloudinaryId && CLOUDINARY_OK) {
+            // Short-lived signed URL — valid 60 seconds, forces download
+            const url = signedDownloadUrl(doc.cloudinaryId);
+            return res.redirect(url);
+        }
+
+        // Fallback: local file (development / pre-migration)
+        const abs = path.join(__dirname, (doc.filePath || '').replace(/^\//, ''));
+        if (doc.filePath && fs.existsSync(abs)) {
+            return res.download(abs, doc.originalName || path.basename(abs));
+        }
+
+        res.status(404).json({ error: 'ფაილი ვერ მოიძებნა' });
+    } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// ── Upload new procedure ──────────────────────────────────────────
 api.post('/procedures', procUpload.single('file'), async (req, res) => {
     try {
         if (!['admin', 'quality_manager'].includes(req.user.role))
             return res.status(403).json({ error: 'უფლება არ გაქვთ' });
+        if (!req.file) return res.status(400).json({ error: 'ფაილი სავალდებულოა' });
+
         const { code, title, category, version, notes } = req.body;
-        if (!req.file) return res.status(400).json({ error: 'ფაილი არ არის' });
-        const filePath = `/uploads/procedures/${req.file.filename}`;
+        const originalName = Buffer.from(req.file.originalname, 'latin1').toString('utf8');
+
+        let cloudinaryId = '';
+        let filePath = '';
+
+        if (CLOUDINARY_OK) {
+            // Upload buffer to Cloudinary private storage
+            const result = await uploadToCloudinary(
+                req.file.buffer,
+                originalName,
+                `buildex-procedures/${category || 'procedure'}`
+            );
+            cloudinaryId = result.public_id;
+            filePath = '';  // not needed — we use cloudinaryId
+        } else {
+            // Fallback: disk (already written by multer diskStorage)
+            filePath = `/uploads/procedures/${req.file.filename}`;
+        }
+
         const doc = await ProcedureDoc.create({
-            code, title, category: category || 'procedure',
-            version: version || '1.0', filePath,
-            originalName: Buffer.from(req.file.originalname, 'latin1').toString('utf8'),
-            uploadedBy: req.user.username, notes: notes || '',
+            code:         code || '',
+            title:        title || originalName,
+            category:     category || 'procedure',
+            version:      version || '2.0',
+            cloudinaryId,
+            filePath,
+            originalName,
+            fileSize:     req.file.size || 0,
+            uploadedBy:   req.user.username,
+            notes:        notes || '',
         });
         res.json(doc);
     } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-// Replace/update a procedure (new file version)
+// ── Replace / update ──────────────────────────────────────────────
 api.put('/procedures/:id', procUpload.single('file'), async (req, res) => {
     try {
         if (!['admin', 'quality_manager'].includes(req.user.role))
             return res.status(403).json({ error: 'უფლება არ გაქვთ' });
         const doc = await ProcedureDoc.findById(req.params.id);
         if (!doc) return res.status(404).json({ error: 'ვერ მოიძებნა' });
-        const { title, version, notes } = req.body;
-        if (title) doc.title = title;
-        if (version) doc.version = version;
-        if (notes !== undefined) doc.notes = notes;
+
+        const { title, version, notes, code, category } = req.body;
+        if (title    !== undefined) doc.title    = title;
+        if (version  !== undefined) doc.version  = version;
+        if (notes    !== undefined) doc.notes    = notes;
+        if (code     !== undefined) doc.code     = code;
+        if (category !== undefined) doc.category = category;
+
         if (req.file) {
-            // delete old file if it exists in our uploads dir
-            const oldAbs = path.join(__dirname, doc.filePath.replace(/^\//, ''));
-            if (fs.existsSync(oldAbs) && doc.filePath.includes('/uploads/procedures/')) {
-                try { fs.unlinkSync(oldAbs); } catch {}
+            const originalName = Buffer.from(req.file.originalname, 'latin1').toString('utf8');
+            if (CLOUDINARY_OK) {
+                // Delete old Cloudinary file
+                if (doc.cloudinaryId) await deleteFromCloudinary(doc.cloudinaryId);
+                // Upload new one
+                const result = await uploadToCloudinary(
+                    req.file.buffer,
+                    originalName,
+                    `buildex-procedures/${doc.category || 'procedure'}`
+                );
+                doc.cloudinaryId = result.public_id;
+                doc.filePath     = '';
+            } else {
+                // Delete old local file
+                if (doc.filePath) {
+                    const oldAbs = path.join(__dirname, doc.filePath.replace(/^\//, ''));
+                    if (fs.existsSync(oldAbs)) try { fs.unlinkSync(oldAbs); } catch {}
+                }
+                doc.filePath = `/uploads/procedures/${req.file.filename}`;
             }
-            doc.filePath = `/uploads/procedures/${req.file.filename}`;
-            doc.originalName = Buffer.from(req.file.originalname, 'latin1').toString('utf8');
-            doc.uploadedBy = req.user.username;
+            doc.originalName = originalName;
+            doc.fileSize     = req.file.size || 0;
+            doc.uploadedBy   = req.user.username;
         }
         await doc.save();
         res.json(doc);
     } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-// Delete a procedure
+// ── Delete procedure ──────────────────────────────────────────────
 api.delete('/procedures/:id', async (req, res) => {
     try {
         if (!['admin', 'quality_manager'].includes(req.user.role))
             return res.status(403).json({ error: 'უფლება არ გაქვთ' });
         const doc = await ProcedureDoc.findByIdAndDelete(req.params.id);
         if (!doc) return res.status(404).json({ error: 'ვერ მოიძებნა' });
-        const abs = path.join(__dirname, doc.filePath.replace(/^\//, ''));
-        if (fs.existsSync(abs) && doc.filePath.includes('/uploads/procedures/')) {
-            try { fs.unlinkSync(abs); } catch {}
+
+        // Remove from Cloudinary
+        if (doc.cloudinaryId) await deleteFromCloudinary(doc.cloudinaryId);
+        // Remove local fallback file
+        if (doc.filePath) {
+            const abs = path.join(__dirname, doc.filePath.replace(/^\//, ''));
+            if (fs.existsSync(abs)) try { fs.unlinkSync(abs); } catch {}
         }
         res.json({ ok: true });
     } catch (e) { res.status(500).json({ error: e.message }); }
