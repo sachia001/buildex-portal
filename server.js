@@ -68,22 +68,19 @@ async function deleteFromCloudinary(publicId) {
     catch (e) { console.error('Cloudinary delete error:', e.message); }
 }
 
-// Proxy-download: fetch raw bytes from Cloudinary and stream to client
-// This way the Cloudinary URL is NEVER exposed to the browser
+// Proxy-download: fetch raw bytes from Cloudinary and send to client
+// Uses Node 20 built-in fetch (auto-follows redirects).
+// The Cloudinary URL is NEVER exposed to the browser.
 async function proxyCloudinaryDownload(secureUrl, res, filename) {
-    const https = require('https');
-    const http  = require('http');
-    const lib   = secureUrl.startsWith('https') ? https : http;
-    return new Promise((resolve, reject) => {
-        lib.get(secureUrl, (stream) => {
-            res.setHeader('Content-Disposition', `attachment; filename*=UTF-8''${encodeURIComponent(filename)}`);
-            res.setHeader('Content-Type', stream.headers['content-type'] || 'application/octet-stream');
-            if (stream.headers['content-length']) res.setHeader('Content-Length', stream.headers['content-length']);
-            stream.pipe(res);
-            stream.on('end', resolve);
-            stream.on('error', reject);
-        }).on('error', reject);
-    });
+    const response = await fetch(secureUrl);
+    if (!response.ok) throw new Error(`Cloudinary: ${response.status} ${response.statusText}`);
+    const arrayBuffer = await response.arrayBuffer();
+    const buffer = Buffer.from(arrayBuffer);
+    const safeFilename = (filename || 'document').replace(/[^\w\-. ]/g, '_');
+    res.setHeader('Content-Disposition', `attachment; filename*=UTF-8''${encodeURIComponent(safeFilename)}`);
+    res.setHeader('Content-Type', response.headers.get('content-type') || 'application/octet-stream');
+    res.setHeader('Content-Length', buffer.length);
+    res.end(buffer);
 }
 // ─────────────────────────────────────────────────────────────────────────────
 
