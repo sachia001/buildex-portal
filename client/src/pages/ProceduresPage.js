@@ -270,8 +270,12 @@ function FormCard({ icon, code, title, desc, pdf, fileName, linkTo, color, fill 
 
 // ═══════════════════════════════════════════════════════════════════
 // Upload / Edit Modal
+// prefill  — catalog meta for new upload  { code, title, category }
+// existing — full DB doc for editing      { _id, code, title, ... }
 // ═══════════════════════════════════════════════════════════════════
-function ProcUploadModal({ show, onHide, onSaved, existing, defaultCategory }) {
+function ProcUploadModal({ show, onHide, onSaved, existing, prefill, defaultCategory }) {
+  const isEdit = !!(existing?._id);
+
   const [code, setCode]         = useState('');
   const [title, setTitle]       = useState('');
   const [category, setCategory] = useState(defaultCategory || 'procedure');
@@ -283,35 +287,33 @@ function ProcUploadModal({ show, onHide, onSaved, existing, defaultCategory }) {
   const fileRef                 = useRef();
   const token = localStorage.getItem('token');
 
+  // Re-populate every time the modal opens or target changes
   useEffect(() => {
-    if (existing) {
-      setCode(existing.code || '');
-      setTitle(existing.title || '');
-      setCategory(existing.category || defaultCategory || 'procedure');
-      setVersion(existing.version || '2.0');
-      setNotes(existing.notes || '');
-    } else {
-      setCode(''); setTitle('');
-      setCategory(defaultCategory || 'procedure');
-      setVersion('2.0'); setNotes('');
-    }
-    setFile(null); setErr('');
-  }, [existing, show, defaultCategory]);
+    if (!show) return;
+    const src = existing || prefill || {};
+    setCode(src.code     || '');
+    setTitle(src.title   || '');
+    setCategory(src.category || defaultCategory || 'procedure');
+    setVersion(src.version   || '2.0');
+    setNotes(src.notes       || '');
+    setFile(null);
+    setErr('');
+  }, [show, existing, prefill, defaultCategory]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleSave = async () => {
     if (!title.trim()) { setErr('სათაური სავალდებულოა'); return; }
-    if (!existing && !file) { setErr('ფაილი სავალდებულოა'); return; }
+    if (!isEdit && !file)  { setErr('ფაილი სავალდებულოა'); return; }
     setSaving(true);
     try {
       const fd = new FormData();
-      fd.append('code', code);
-      fd.append('title', title);
+      fd.append('code',     code);
+      fd.append('title',    title);
       fd.append('category', category);
-      fd.append('version', version);
-      fd.append('notes', notes);
+      fd.append('version',  version);
+      fd.append('notes',    notes);
       if (file) fd.append('file', file);
       const headers = { Authorization: `Bearer ${token}` };
-      if (existing?._id) {
+      if (isEdit) {
         await axios.put(`/api/procedures/${existing._id}`, fd, { headers });
       } else {
         await axios.post('/api/procedures', fd, { headers });
@@ -327,49 +329,70 @@ function ProcUploadModal({ show, onHide, onSaved, existing, defaultCategory }) {
     <Modal show={show} onHide={onHide} centered>
       <Modal.Header closeButton style={{ background: '#003366', color: '#fff' }}>
         <Modal.Title style={{ fontSize: '1rem' }}>
-          {existing?._id ? '✏️ დოკუმენტის განახლება' : '📤 დოკუმენტის ატვირთვა'}
+          {isEdit ? '✏️ დოკუმენტის განახლება' : '📤 დოკუმენტის ატვირთვა'}
         </Modal.Title>
       </Modal.Header>
       <Modal.Body>
         {err && <div className="alert alert-danger py-1 small">{err}</div>}
+
+        {/* Code + Category on one line */}
+        <div className="d-flex gap-2 mb-2">
+          <Form.Group style={{ flex: '0 0 140px' }}>
+            <Form.Label className="small fw-bold mb-1">კოდი</Form.Label>
+            <Form.Control size="sm" value={code}
+              onChange={e => setCode(e.target.value)}
+              placeholder="BE-PR-01"
+              readOnly={!!(prefill?.code && !isEdit)}
+              style={prefill?.code && !isEdit ? { background: '#f0f4f8', fontWeight: 600 } : {}} />
+          </Form.Group>
+          <Form.Group style={{ flex: 1 }}>
+            <Form.Label className="small fw-bold mb-1">კატეგორია</Form.Label>
+            <Form.Select size="sm" value={category} onChange={e => setCategory(e.target.value)}>
+              {catOptions.map(c => (
+                <option key={c.key} value={c.key}>{c.label}</option>
+              ))}
+            </Form.Select>
+          </Form.Group>
+        </div>
+
         <Form.Group className="mb-2">
-          <Form.Label className="small fw-bold">კატეგორია</Form.Label>
-          <Form.Select size="sm" value={category} onChange={e => setCategory(e.target.value)}>
-            {catOptions.map(c => (
-              <option key={c.key} value={c.key}>{c.label}</option>
-            ))}
-          </Form.Select>
+          <Form.Label className="small fw-bold mb-1">სრული სახელი *</Form.Label>
+          <Form.Control size="sm" value={title}
+            onChange={e => setTitle(e.target.value)}
+            placeholder="დოკუმენტის სრული სახელი"
+            readOnly={!!(prefill?.title && !isEdit)}
+            style={prefill?.title && !isEdit ? { background: '#f0f4f8', fontWeight: 500 } : {}} />
         </Form.Group>
+
         <Form.Group className="mb-2">
-          <Form.Label className="small fw-bold">კოდი (მაგ. BE-PR-01, FM-09, POL-02)</Form.Label>
-          <Form.Control size="sm" value={code} onChange={e => setCode(e.target.value)} placeholder="BE-PR-01" />
+          <Form.Label className="small fw-bold mb-1">ვერსია</Form.Label>
+          <Form.Control size="sm" value={version}
+            onChange={e => setVersion(e.target.value)} placeholder="2.0" />
         </Form.Group>
+
         <Form.Group className="mb-2">
-          <Form.Label className="small fw-bold">სრული სახელი *</Form.Label>
-          <Form.Control size="sm" value={title} onChange={e => setTitle(e.target.value)} placeholder="დოკუმენტის სრული სახელი" />
-        </Form.Group>
-        <Form.Group className="mb-2">
-          <Form.Label className="small fw-bold">ვერსია</Form.Label>
-          <Form.Control size="sm" value={version} onChange={e => setVersion(e.target.value)} placeholder="2.0" />
-        </Form.Group>
-        <Form.Group className="mb-2">
-          <Form.Label className="small fw-bold">
+          <Form.Label className="small fw-bold mb-1">
             ფაილი (.docx / .pdf / .xlsx)
-            {existing?._id && ' — სურვილისამებრ (ჩაანაცვლებს)'}
+            {isEdit && <span className="text-muted fw-normal"> — სურვილისამებრ (ჩაანაცვლებს)</span>}
           </Form.Label>
           <input ref={fileRef} type="file" className="form-control form-control-sm"
             accept=".docx,.doc,.pdf,.xlsx"
             onChange={e => setFile(e.target.files[0])} />
         </Form.Group>
-        <Form.Group className="mb-2">
-          <Form.Label className="small fw-bold">შენიშვნები</Form.Label>
-          <Form.Control as="textarea" size="sm" rows={2} value={notes} onChange={e => setNotes(e.target.value)} />
+
+        {/* Notes — always visible, highlighted when has content */}
+        <Form.Group className="mb-1">
+          <Form.Label className="small fw-bold mb-1">შენიშვნა / კომენტარი</Form.Label>
+          <Form.Control as="textarea" size="sm" rows={2} value={notes}
+            onChange={e => setNotes(e.target.value)}
+            placeholder="მაგ. ვერსია 2.0, განახლდა 2026-05..."
+            style={notes ? { background: '#fffbeb', borderColor: '#d97706' } : {}} />
         </Form.Group>
       </Modal.Body>
       <Modal.Footer>
         <Button variant="secondary" size="sm" onClick={onHide}>გაუქმება</Button>
         <Button variant="primary" size="sm" onClick={handleSave} disabled={saving}>
-          {saving ? '⏳ ...' : existing?._id ? '💾 განახლება' : '📤 ატვირთვა'}
+          {saving ? '⏳ ...' : isEdit ? '💾 განახლება' : '📤 ატვირთვა'}
         </Button>
       </Modal.Footer>
     </Modal>
@@ -399,7 +422,8 @@ export default function ProceduresPage({ role }) {
   const [docs, setDocs]             = useState([]);
   const [loading, setLoading]       = useState(false);
   const [showModal, setShowModal]   = useState(false);
-  const [editing, setEditing]       = useState(null);
+  const [editing, setEditing]       = useState(null);  // full DB doc (has _id) — for editing
+  const [prefill, setPrefill]       = useState(null);  // catalog meta — pre-fills new upload
   const [msg, setMsg]               = useState(null);
   const token = localStorage.getItem('token');
   const headers = { Authorization: `Bearer ${token}` };
@@ -556,7 +580,7 @@ export default function ProceduresPage({ role }) {
             {canEdit && (
               <button
                 className="ms-auto"
-                onClick={() => { setEditing(null); setShowModal(true); }}
+                onClick={() => { setEditing(null); setPrefill(null); setShowModal(true); }}
                 style={{
                   padding: '4px 14px', borderRadius: 6, border: '1.5px solid #0d6efd',
                   background: '#0d6efd', color: '#fff', fontWeight: 700, fontSize: '0.78rem', cursor: 'pointer',
@@ -597,7 +621,15 @@ export default function ProceduresPage({ role }) {
                         </td>
                         <td className="px-2">
                           <div style={{ fontWeight: 500, color: '#1a1a2e' }}>{up ? up.title : item.title}</div>
-                          {up?.notes && <div className="text-muted" style={{ fontSize: '0.68rem' }}>{up.notes}</div>}
+                          {up?.notes && (
+                            <div style={{
+                              marginTop: 2, fontSize: '0.68rem', color: '#92400e',
+                              background: '#fef3c7', borderRadius: 3,
+                              padding: '1px 6px', display: 'inline-block',
+                            }}>
+                              💬 {up.notes}
+                            </div>
+                          )}
                         </td>
                         <td className="px-2">
                           <span style={{
@@ -619,32 +651,51 @@ export default function ProceduresPage({ role }) {
                           }
                         </td>
                         <td className="px-2">
-                          <div className="d-flex gap-1">
+                          <div className="d-flex gap-1 align-items-center">
                             {up && (
                               <button
                                 className="btn btn-sm btn-outline-primary py-0 px-2"
                                 style={{ fontSize: '0.7rem' }}
                                 onClick={() => downloadDoc(up)}
+                                title="გადმოტვირთვა"
                               >
                                 ⬇️ გადმოტვ.
                               </button>
                             )}
-                            {canEdit && (
+                            {canEdit && !up && (
+                              // New upload — pre-fill code+title from catalog
                               <button
-                                className="btn btn-sm btn-outline-secondary py-0 px-2"
+                                className="btn btn-sm btn-primary py-0 px-2"
                                 style={{ fontSize: '0.7rem' }}
+                                title="ატვირთვა"
                                 onClick={() => {
-                                  setEditing(up || { code: item.code, title: item.title, category: item.category });
+                                  setEditing(null);
+                                  setPrefill({ code: item.code, title: item.title, category: item.category });
                                   setShowModal(true);
                                 }}
                               >
-                                {up ? '✏️' : '📤'}
+                                📤 ატვირთვა
+                              </button>
+                            )}
+                            {canEdit && up && (
+                              <button
+                                className="btn btn-sm btn-outline-secondary py-0 px-2"
+                                style={{ fontSize: '0.7rem' }}
+                                title="განახლება / ჩანაცვლება"
+                                onClick={() => {
+                                  setEditing(up);
+                                  setPrefill(null);
+                                  setShowModal(true);
+                                }}
+                              >
+                                ✏️
                               </button>
                             )}
                             {canEdit && up && (
                               <button
                                 className="btn btn-sm btn-outline-danger py-0 px-2"
                                 style={{ fontSize: '0.7rem' }}
+                                title="წაშლა"
                                 onClick={() => handleDelete(up)}
                               >
                                 🗑️
@@ -680,7 +731,7 @@ export default function ProceduresPage({ role }) {
                             <button className="btn btn-sm btn-outline-primary py-0 px-2" style={{ fontSize: '0.7rem' }} onClick={() => downloadDoc(doc)}>⬇️ გადმოტვ.</button>
                             {canEdit && (
                               <>
-                                <button className="btn btn-sm btn-outline-secondary py-0 px-2" style={{ fontSize: '0.7rem' }} onClick={() => { setEditing(doc); setShowModal(true); }}>✏️</button>
+                                <button className="btn btn-sm btn-outline-secondary py-0 px-2" style={{ fontSize: '0.7rem' }} onClick={() => { setEditing(doc); setPrefill(null); setShowModal(true); }}>✏️</button>
                                 <button className="btn btn-sm btn-outline-danger py-0 px-2" style={{ fontSize: '0.7rem' }} onClick={() => handleDelete(doc)}>🗑️</button>
                               </>
                             )}
@@ -738,11 +789,17 @@ export default function ProceduresPage({ role }) {
       {/* Upload / Edit Modal */}
       <ProcUploadModal
         show={showModal}
-        onHide={() => setShowModal(false)}
-        existing={editing?._id ? editing : null}
-        defaultCategory={activeCat !== 'all' ? activeCat : (editing?.category || 'procedure')}
+        onHide={() => { setShowModal(false); setEditing(null); setPrefill(null); }}
+        existing={editing}
+        prefill={prefill}
+        defaultCategory={
+          activeCat !== 'all' ? activeCat
+          : prefill?.category || editing?.category || 'procedure'
+        }
         onSaved={() => {
           setShowModal(false);
+          setEditing(null);
+          setPrefill(null);
           fetchDocs();
           setMsg({ type: 'success', text: '✅ დოკუმენტი შენახულია' });
         }}
