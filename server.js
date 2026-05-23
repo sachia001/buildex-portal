@@ -748,6 +748,78 @@ ${rows}
 </body></html>`;
 }
 
+// ─────────────────────────────────────────────
+// PROCEDURE MODEL
+// ─────────────────────────────────────────────
+const ProcedureDoc = mongoose.model('ProcedureDoc', new mongoose.Schema({
+    code:        { type: String, required: true },       // e.g. BE-PR-01
+    title:       { type: String, required: true },
+    category:    { type: String, default: 'procedure' }, // 'procedure' | 'manual' | 'index'
+    version:     { type: String, default: '1.0' },
+    filePath:    { type: String },
+    originalName:{ type: String },
+    uploadedBy:  { type: String },
+    notes:       { type: String, default: '' },
+}, { timestamps: true }));
+
+// CHECKLIST SESSION MODEL
+const ChecklistSession = mongoose.model('ChecklistSession', new mongoose.Schema({
+    sessionNumber: { type: String },
+    period:        { type: String },
+    checkDate:     { type: Date, default: Date.now },
+    createdBy:     { type: String },
+    state:         { type: mongoose.Schema.Types.Mixed, default: {} }, // full checklist state
+    conclusion:    { type: String, default: '' },
+    nextCheckDate: { type: Date },
+    directorSig:   { type: String, default: '' },
+    qmSig:         { type: String, default: '' },
+}, { timestamps: true }));
+
+// Multer for procedure uploads
+const procUploadDir = './uploads/procedures/';
+if (!fs.existsSync(procUploadDir)) fs.mkdirSync(procUploadDir, { recursive: true });
+const procStorage = multer.diskStorage({
+    destination: (req, file, cb) => cb(null, procUploadDir),
+    filename: (req, file, cb) => {
+        const safe = Buffer.from(file.originalname, 'latin1').toString('utf8').replace(/\s+/g, '_');
+        cb(null, Date.now() + '-' + safe);
+    }
+});
+const procUpload = multer({ storage: procStorage, limits: { fileSize: 50 * 1024 * 1024 } });
+
+// Seed default procedures from uploads/procedures/ directory
+async function seedProcedures() {
+    try {
+        const procDir = path.join(__dirname, 'uploads/procedures');
+        if (!fs.existsSync(procDir)) return;
+        const files = fs.readdirSync(procDir).filter(f => f.endsWith('.docx'));
+        for (const fname of files) {
+            // Decode filename (may be URL-encoded or latin1)
+            let displayName = fname;
+            try { displayName = decodeURIComponent(fname); } catch {}
+            // Extract code from filename
+            const codeMatch = displayName.match(/BE-PR-\d+|BE-PR-SET/i);
+            const code = codeMatch ? codeMatch[0].toUpperCase() : displayName.replace(/[-_\d]/g, '').replace('.docx','');
+            const isManual = displayName.includes('ხარისხის') || displayName.toLowerCase().includes('manual');
+            const isIndex  = displayName.includes('SET') || displayName.includes('index');
+            const existing = await ProcedureDoc.findOne({ filePath: `/uploads/procedures/${fname}` });
+            if (!existing) {
+                await ProcedureDoc.create({
+                    code: isManual ? 'QM-01' : isIndex ? 'BE-PR-SET' : code,
+                    title: isManual ? 'ხარისხის სახელმძღვანელო' : isIndex ? 'პროცედურების სარჩევი' : `პროცედურა ${code}`,
+                    category: isManual ? 'manual' : isIndex ? 'index' : 'procedure',
+                    version: '1.0',
+                    filePath: `/uploads/procedures/${fname}`,
+                    originalName: displayName,
+                    uploadedBy: 'system',
+                });
+            }
+        }
+        console.log('✅ პროცედურები ჩაიტვირთა');
+    } catch (e) { console.error('Procedure seed error:', e.message); }
+}
+mongoose.connection.once('open', seedProcedures);
+
 // =============================================
 // API ROUTER — ყველა API route ერთ Router-ში
 // =============================================
@@ -1578,6 +1650,146 @@ authRouter.delete('/users/:id', requireAuth, async (req, res) => {
 });
 
 app.use('/api/auth', authRouter);
+
+// ─────────────────────────────────────────────
+// PROCEDURE ROUTES
+// ─────────────────────────────────────────────
+app.use('/uploads/procedures', express.static(path.join(__dirname, 'uploads/procedures')));
+
+// List all procedures
+api.get('/procedures', async (req, res) => {
+    try {
+        const docs = await ProcedureDoc.find().sort({ code: 1 });
+        res.json(docs);
+    } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// Upload new procedure
+api.post('/procedures', procUpload.single('file'), async (req, res) => {
+    try {
+        if (!['admin', 'quality_manager'].includes(req.user.role))
+            return res.status(403).json({ error: 'უფლება არ გაქვთ' });
+        const { code, title, category, version, notes } = req.body;
+        if (!req.file) return res.status(400).json({ error: 'ფაილი არ არის' });
+        const filePath = `/uploads/procedures/${req.file.filename}`;
+        const doc = await ProcedureDoc.create({
+            code, title, category: category || 'procedure',
+            version: version || '1.0', filePath,
+            originalName: Buffer.from(req.file.originalname, 'latin1').toString('utf8'),
+            uploadedBy: req.user.username, notes: notes || '',
+        });
+        res.json(doc);
+    } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// Replace/update a procedure (new file version)
+api.put('/procedures/:id', procUpload.single('file'), async (req, res) => {
+    try {
+        if (!['admin', 'quality_manager'].includes(req.user.role))
+            return res.status(403).json({ error: 'უფლება არ გაქვთ' });
+        const doc = await ProcedureDoc.findById(req.params.id);
+        if (!doc) return res.status(404).json({ error: 'ვერ მოიძებნა' });
+        const { title, version, notes } = req.body;
+        if (title) doc.title = title;
+        if (version) doc.version = version;
+        if (notes !== undefined) doc.notes = notes;
+        if (req.file) {
+            // delete old file if it exists in our uploads dir
+            const oldAbs = path.join(__dirname, doc.filePath.replace(/^\//, ''));
+            if (fs.existsSync(oldAbs) && doc.filePath.includes('/uploads/procedures/')) {
+                try { fs.unlinkSync(oldAbs); } catch {}
+            }
+            doc.filePath = `/uploads/procedures/${req.file.filename}`;
+            doc.originalName = Buffer.from(req.file.originalname, 'latin1').toString('utf8');
+            doc.uploadedBy = req.user.username;
+        }
+        await doc.save();
+        res.json(doc);
+    } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// Delete a procedure
+api.delete('/procedures/:id', async (req, res) => {
+    try {
+        if (!['admin', 'quality_manager'].includes(req.user.role))
+            return res.status(403).json({ error: 'უფლება არ გაქვთ' });
+        const doc = await ProcedureDoc.findByIdAndDelete(req.params.id);
+        if (!doc) return res.status(404).json({ error: 'ვერ მოიძებნა' });
+        const abs = path.join(__dirname, doc.filePath.replace(/^\//, ''));
+        if (fs.existsSync(abs) && doc.filePath.includes('/uploads/procedures/')) {
+            try { fs.unlinkSync(abs); } catch {}
+        }
+        res.json({ ok: true });
+    } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// ─────────────────────────────────────────────
+// CHECKLIST SESSION ROUTES
+// ─────────────────────────────────────────────
+api.get('/checklists', async (req, res) => {
+    try {
+        const list = await ChecklistSession.find().sort({ createdAt: -1 }).limit(50);
+        res.json(list);
+    } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+api.get('/checklists/:id', async (req, res) => {
+    try {
+        const s = await ChecklistSession.findById(req.params.id);
+        if (!s) return res.status(404).json({ error: 'ვერ მოიძებნა' });
+        res.json(s);
+    } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+api.post('/checklists', async (req, res) => {
+    try {
+        const num = await generateDocumentNumber('MON');
+        const s = await ChecklistSession.create({
+            ...req.body,
+            sessionNumber: req.body.sessionNumber || num,
+            createdBy: req.user.username,
+        });
+        res.json(s);
+    } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+api.put('/checklists/:id', async (req, res) => {
+    try {
+        const s = await ChecklistSession.findByIdAndUpdate(req.params.id, req.body, { new: true });
+        if (!s) return res.status(404).json({ error: 'ვერ მოიძებნა' });
+        res.json(s);
+    } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+api.delete('/checklists/:id', async (req, res) => {
+    try {
+        if (req.user.role !== 'admin') return res.status(403).json({ error: 'მხოლოდ ადმინი' });
+        await ChecklistSession.findByIdAndDelete(req.params.id);
+        res.json({ ok: true });
+    } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// ─────────────────────────────────────────────
+// AI ANALYSIS PROXY (Anthropic)
+// ─────────────────────────────────────────────
+api.post('/checklist-analyze', async (req, res) => {
+    try {
+        const { prompt } = req.body;
+        if (!prompt) return res.status(400).json({ error: 'prompt საჭიროა' });
+        const apiKey = process.env.ANTHROPIC_API_KEY;
+        if (!apiKey) return res.status(503).json({ error: 'ANTHROPIC_API_KEY არ არის კონფიგურირებული. Railway-ზე დაამატეთ env variable.' });
+
+        const Anthropic = require('@anthropic-ai/sdk');
+        const client = new Anthropic({ apiKey });
+        const message = await client.messages.create({
+            model: 'claude-sonnet-4-5',
+            max_tokens: 1024,
+            messages: [{ role: 'user', content: prompt }],
+        });
+        const text = message.content.filter(b => b.type === 'text').map(b => b.text).join('');
+        res.json({ text });
+    } catch (e) { res.status(500).json({ error: e.message }); }
+});
 
 // Mount the API router — BEFORE static file serving
 app.use('/api', api);

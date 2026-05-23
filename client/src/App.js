@@ -23,6 +23,8 @@ import Login from './components/Login';
 import ChangePassword from './components/ChangePassword';
 import PriceAdequacyPage from './pages/PriceAdequacyPage';
 import NormsAdminPage from './pages/NormsAdminPage';
+import ChecklistPage from './pages/ChecklistPage';
+import ProceduresPage from './pages/ProceduresPage';
 
 // Attach token to every axios request
 axios.interceptors.request.use(config => {
@@ -68,6 +70,8 @@ const Navbar = ({ username, role, onLogout }) => {
         companyDocs:   ['admin'].includes(role),
         priceAdequacy: ['admin', 'quality_manager', 'tech_manager'].includes(role),
         normsAdmin:    ['admin', 'quality_manager'].includes(role),
+        checklist:     ['admin', 'quality_manager'].includes(role),
+        procedures:    ['admin', 'quality_manager', 'tech_manager', 'inspector'].includes(role),
     };
 
     return (
@@ -114,6 +118,12 @@ const Navbar = ({ username, role, onLogout }) => {
                     )}
                     {show.normsAdmin && (
                         <Link className="btn btn-light fw-bold text-secondary border-0" to="/norms-admin">📊 ნორმ-ბაზა</Link>
+                    )}
+                    {show.checklist && (
+                        <Link className="btn btn-light fw-bold text-secondary border-0" to="/checklist">📋 ჩეკლისტი</Link>
+                    )}
+                    {show.procedures && (
+                        <Link className="btn btn-light fw-bold text-secondary border-0" to="/procedures">📂 პროცედ.</Link>
                     )}
                     {show.staff && (
                         <Link className="btn btn-primary fw-bold px-4 shadow-sm rounded-pill" to="/admin">👥 პერსონალი</Link>
@@ -222,6 +232,8 @@ function AppContent() {
                     <Route path="/change-password" element={<ChangePassword />} />
                     <Route path="/price-adequacy" element={<PriceAdequacyPage role={role} />} />
                     <Route path="/norms-admin" element={<NormsAdminPage role={role} />} />
+                    <Route path="/checklist" element={<ChecklistPage role={role} />} />
+                    <Route path="/procedures" element={<ProceduresPage role={role} />} />
                     <Route path="*" element={
                         <div className="text-center mt-5">
                             <h1 className="display-1 fw-bold text-muted">404</h1>
