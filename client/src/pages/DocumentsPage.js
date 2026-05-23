@@ -109,27 +109,28 @@ const DocumentsPage = () => (
     {/* ── 1. ბლანკები / გენერატორები ── */}
     <SectionTitle icon="🏢" title="ბლანკები და გენერატორები" color="#003366" />
     <Row className="g-2">
-      <DocCard icon="📄" code="ბლანკი" title="ოფიციალური ბლანკი"    desc="ლოგო და რეკვიზიტები"           pdf={<BlankLetterhead />} fileName="ბილდექს_ბლანკი" color="primary" />
-      <DocCard icon="⚖️" code="ბრძანება" title="ბრძანების გენერატორი" desc="დანიშვნა / შვებულება / მივლინება" linkTo="/order-generator" color="primary" />
-      <DocCard icon="🤝" code="შრ. ხელშ." title="შრომის ხელშეკრულება"  desc="+ 2 დანართი"                   linkTo="/contract-generator" color="primary" />
-      <DocCard icon="📑" code="მომს. ხელშ." title="მომსახურების ხელშეკრულება" desc="BE-PR-01..04"            linkTo="/company-docs" color="primary" />
+      <DocCard icon="📄" code="ბლანკი" title="ოფიციალური ბლანკი"    desc="შეავსეთ ადრესატი, სათაური, ტექსტი — გამოიყენება წერილებისა და შიდა ბრძანებებისთვის" pdf={<BlankLetterhead />} fileName="ბილდექს_ბლანკი" color="primary" fillConfig={FORM_CONFIGS['BLANK']} />
+      <DocCard icon="⚖️" code="ბრძანება" title="ბრძანების გენერატორი" desc="ავტომატური ბრძანება — დანიშვნა, შვებულება, მივლინება; ავტo ნომრაცია და თარიღი" linkTo="/order-generator" color="primary" />
+      <DocCard icon="🤝" code="შრ. ხელშ." title="შრომის ხელშეკრულება"  desc="შრომის ხელშეკრ. + 2 სავალდებულო დანართი — ავტომ. ნომრაცია და გვ.-ები"  linkTo="/contract-generator" color="primary" />
+      <DocCard icon="📑" code="მომს. ხელშ." title="მომსახურების ხელშეკრულება" desc="კლიენტთან მომსახ. ხელშეკრ. — BE-PR-01..04 სფეროების ჩამატება, ფასი, ვადები" linkTo="/company-docs" color="primary" />
     </Row>
 
     {/* ── 2. ინსპექტირების ფორმები ── */}
     <SectionTitle icon="🔍" title="ინსპექტირების ფორმები" color="#0d6efd" />
     <Row className="g-2">
-      <DocCard icon="📝" code="FM-18" title="განცხადების ფორმა"       desc="ინსპექციის მოთხოვნა"
-        pdf={<BlankApplicationForm />} fileName="FM-18_განცხადება" color="info" />
-      <DocCard icon="📋" code="FM-09" title="ხელშეკრულების განხილვა"  desc="ISO §7.1"
+      <DocCard icon="📝" code="FM-18" title="განცხადების ფორმა"       desc="კლიენტი ავსებს — ორგ., წარმ., ობიექტი, სფეროს შერჩევა (BE-PR-01..04), თანდართ. დოკ."
+        pdf={<BlankApplicationForm />} fileName="FM-18_განცხადება" color="info"
+        fillConfig={FORM_CONFIGS['FM-18']} />
+      <DocCard icon="📋" code="FM-09" title="ხელშეკრულების განხილვა"  desc="ISO §7.1 — კლ. მოთხ., სფერო, ვადები, კონფლ. შემოწ., კვალ. მენ. ვიზა"
         pdf={<FM09_ContractReviewPdf />} fileName="FM-09_ხელშ_განხ" color="info"
         fillConfig={FORM_CONFIGS['FM-09']} />
-      <DocCard icon="🗺️" code="FM-11" title="ინსპექციის გეგმა"        desc="ISO §7.1"
+      <DocCard icon="🗺️" code="FM-11" title="ინსპექციის გეგმა"        desc="ISO §7.1 — ვიზ. თ., ინსპ., ეტაპი, მოქ. სტანდ., მოთხ. საბ., ხელშ. №"
         pdf={<FM11_InspectionPlanPdf />} fileName="FM-11_ინსპ_გეგმა" color="info"
         fillConfig={FORM_CONFIGS['FM-11']} />
-      <DocCard icon="📍" code="FM-16" title="ვიზიტის ჩანაწერი"        desc="ISO §7.3"
+      <DocCard icon="📍" code="FM-16" title="ვიზიტის ჩანაწერი"        desc="ISO §7.3 — ვიზ. #, ობ., ინსპ., C-ინსპ. 3 ჩ., D-დეფ. 5 ჩ., E-ფოტო, F-შეუსაბ."
         pdf={<FM16_VisitRecordPdf />} fileName="FM-16_ვიზ_ჩანაწ" color="info"
         fillConfig={FORM_CONFIGS['FM-16']} />
-      <DocCard icon="📊" code="FM-21" title="ინსპექციების რეგისტრი"   desc="ISO §7.3 (ჟურნალი)"
+      <DocCard icon="📊" code="FM-21" title="ინსპექციების რეგისტრი"   desc="ISO §7.3 ჟურნალი — ყველა საქმე ერთ ადგ-ში, პერ., ხარ. მენ. ვიზა"
         pdf={<FM21_InspectionRegisterPdf />} fileName="FM-21_ინსპ_რეგ" color="info"
         fillConfig={FORM_CONFIGS['FM-21']} />
     </Row>
@@ -137,16 +138,16 @@ const DocumentsPage = () => (
     {/* ── 3. პერსონალი და კომპეტენცია ── */}
     <SectionTitle icon="👥" title="პერსონალი და კომპეტენცია" color="#198754" />
     <Row className="g-2">
-      <DocCard icon="⚖️" code="FM-02" title="მიუკერძოებლობის დეკლარაცია" desc="ISO §4"
+      <DocCard icon="⚖️" code="FM-02" title="მიუკერძოებლობის დეკლარაცია" desc="ISO §4 — პირ. მონ., 4 ავტ. სფ. (BE-PR-01..04), 5 კონფლ. კატ. კი/არა, ხელმოწ."
         pdf={<ImpartialityDeclarationPdf data={{}} />} fileName="FM-02_მიუკ_დეკლ" color="success"
         fillConfig={FORM_CONFIGS['FM-02']} />
-      <DocCard icon="🤐" code="FM-03" title="კონფიდენციალობის შეთანხმება" desc="ISO §5 — 5 წელი"
+      <DocCard icon="🤐" code="FM-03" title="კონფიდენციალობის შეთანხმება" desc="ISO §5 — სახ./გვ., თანამდ., თარ.; 5 წლიანი შენახვა; თ/ებ-ის ხელმოწ."
         pdf={<ConfidentialityAgreementPdf data={{}} />} fileName="FM-03_კონფ_შეთ" color="success"
         fillConfig={FORM_CONFIGS['FM-03']} />
-      <DocCard icon="🎯" code="FM-08" title="კომპეტენციის შეფასება"       desc="ISO §6.1"
+      <DocCard icon="🎯" code="FM-08" title="კომპეტენციის შეფასება"       desc="ISO §6.1 — 6 კრიტ. (კი/არა), 4 ინსპ. სფ. × ქ. 1–5, სტ. + გადაწ."
         pdf={<FM08_CompetencyAssessmentPdf />} fileName="FM-08_კომპ_შეფ" color="success"
         fillConfig={FORM_CONFIGS['FM-08']} />
-      <DocCard icon="📚" code="FM-13" title="ტრენინგის ჩანაწერი"          desc="ISO §6.1 — 5 წელი"
+      <DocCard icon="📚" code="FM-13" title="ტრენინგის ჩანაწერი"          desc="ISO §6.1 — სახ., ტრ. სახ., ხანგ., ორგ., კომპ. მეთ., სტ., შემდ. ვ.; 5 წ. შ."
         pdf={<FM13_TrainingRecordNewPdf />} fileName="FM-13_ტრენ_ჩანაწ" color="success"
         fillConfig={FORM_CONFIGS['FM-13']} />
     </Row>
@@ -154,19 +155,19 @@ const DocumentsPage = () => (
     {/* ── 4. ხარისხის მართვა ── */}
     <SectionTitle icon="🛡️" title="ხარისხის მართვა" color="#dc3545" />
     <Row className="g-2">
-      <DocCard icon="📣" code="FM-06" title="საჩივარი / აპელაცია"           desc="ISO §7.5/7.7/7.8"
+      <DocCard icon="📣" code="FM-06" title="საჩივარი / აპელაცია"           desc="ISO §7.5/7.7 — შეტ. ინფ., ტიპი, ფ.მ.ა., CAPA №, 3 ეტ., საბ. გადაწ."
         pdf={<FM06_ComplaintAppealPdf />} fileName="FM-06_საჩ_აპ" color="danger"
         fillConfig={FORM_CONFIGS['FM-06']} />
-      <DocCard icon="⚠️" code="FM-10" title="CAPA — მაკორექტირებელი ქმ."   desc="ISO §8.5"
+      <DocCard icon="⚠️" code="FM-10" title="CAPA — მაკორექტირებელი ქმ."   desc="ISO §8.5 — NC/HA №, ტიპი, ფ.მ.ა., მაკ. ქმ. + ვადა, ეფ. შემ., ვიზა"
         pdf={<FM10_CAPAFormPdf />} fileName="FM-10_CAPA" color="danger"
         fillConfig={FORM_CONFIGS['FM-10']} />
-      <DocCard icon="🚫" code="FM-14" title="შეუსაბამო სამუშაოს მართვა"    desc="ISO §8.7"
+      <DocCard icon="🚫" code="FM-14" title="შეუსაბამო სამუშაოს მართვა"    desc="ISO §8.7 — NC №, გამოვლ. თ., გადაუდ. ქმ., ფ.მ., CAPA №, დახ. ვ."
         pdf={<FM14_NonConformingPdf />} fileName="FM-14_შეუსაბ" color="danger"
         fillConfig={FORM_CONFIGS['FM-14']} />
-      <DocCard icon="🔎" code="FM-04" title="შიდა აუდიტი — გეგმა & ანგარ." desc="ISO §8.6 — წელიწადში 2-ჯერ"
+      <DocCard icon="🔎" code="FM-04" title="შიდა აუდიტი — გეგმა & ანგარ." desc="ISO §8.6 — №, პ., §§, შემ. დოკ/საქ., NC-ები + CAPA, ეფ. სტ.; წელ-ში 2-ჯ."
         pdf={<FM04_InternalAuditPdf />} fileName="FM-04_შ_აუდ" color="danger"
         fillConfig={FORM_CONFIGS['FM-04']} />
-      <DocCard icon="📈" code="FM-15" title="მართვის ანალიზი — სხდ. ოქმი"  desc="ISO §8.5"
+      <DocCard icon="📈" code="FM-15" title="მართვის ანალიზი — სხდ. ოქმი"  desc="ISO §8.9 — სხდ. №, მონ., შეყვ. 7 პ., 4 გადაწ. + ვ., ეფ. შეფ."
         pdf={<FM15_MgmtReviewPdf />} fileName="FM-15_მენ_ანალ" color="danger"
         fillConfig={FORM_CONFIGS['FM-15']} />
     </Row>
@@ -174,10 +175,10 @@ const DocumentsPage = () => (
     {/* ── 5. მოწყობილობა და ქვეკონტრაქტირება ── */}
     <SectionTitle icon="🔧" title="მოწყობილობა და ქვეკონტრაქტირება" color="#fd7e14" />
     <Row className="g-2">
-      <DocCard icon="🔩" code="FM-07" title="მოწყობილობის ვერიფიკაცია"   desc="ISO §6.2"
+      <DocCard icon="🔩" code="FM-07" title="მოწყობილობის ვერიფიკაცია"   desc="ISO §6.2 — სახ., სერ. №, kal. ვ., შემ. kal. ვ., ინტ., კლ., სტ., ვიზა"
         pdf={<FM07_EquipmentVerificationPdf />} fileName="FM-07_მოწყ_ვერ" color="warning"
         fillConfig={FORM_CONFIGS['FM-07']} />
-      <DocCard icon="🏗️" code="FM-12" title="ქვეკონტრაქტორის შეფასება"   desc="ISO §6.6"
+      <DocCard icon="🏗️" code="FM-12" title="ქვეკონტრაქტორის შეფასება"   desc="ISO §6.6 — სახ., 6 შ. კრიტ. (კი/არა), ჯ. ქ. (0–6), სტ., ვიზა"
         pdf={<FM12_SubcontractorPdf />} fileName="FM-12_ქვეკ_შეფ" color="warning"
         fillConfig={FORM_CONFIGS['FM-12']} />
     </Row>
@@ -185,16 +186,16 @@ const DocumentsPage = () => (
     {/* ── 6. დოკუმენტაციის მართვა ── */}
     <SectionTitle icon="🗂️" title="დოკუმენტაციის მართვა" color="#6f42c1" />
     <Row className="g-2">
-      <DocCard icon="👁️" code="FM-22" title="გაცნობის ფურცელი"             desc="ISO §6.1 — 5 სამ. დღე"
+      <DocCard icon="👁️" code="FM-22" title="გაცნობის ფურცელი"             desc="BE-PR-05 — დოკ. სახ., ძვ.→ახ. ვ., ცვლ. აღ., ვ. 5 სამ. დღ., ხელმ. ყ. პ."
         pdf={<FM22_FamiliarizationPdf />} fileName="FM-22_გაცნ_ფ" color="secondary"
         fillConfig={FORM_CONFIGS['FM-22']} />
-      <DocCard icon="✍️" code="FM-23" title="ცვლილების წინადადება"         desc="PR-01"
+      <DocCard icon="✍️" code="FM-23" title="ცვლილების წინადადება"         desc="BE-PR-05 — ინიც., DCR №, ძვ./ახ. ტ., მიზ., მოწ./უარ. გად., ძ.ა. ვ."
         pdf={<FM23_DocChangePdf />} fileName="FM-23_ცვლ_წინ" color="secondary"
         fillConfig={FORM_CONFIGS['FM-23']} />
-      <DocCard icon="📒" code="FM-24" title="ცვლილებების რეგისტრი"         desc="PR-01 (ჟურნალი)"
+      <DocCard icon="📒" code="FM-24" title="ცვლილებების რეგისტრი"         desc="BE-PR-05 ჟ. — ყველა ცვლ. ერთ ადგ., პ., ხარ. მენ. ვიზა; ათწ. შ."
         pdf={<FM24_ChangeRegisterPdf />} fileName="FM-24_ცვლ_რეგ" color="secondary"
         fillConfig={FORM_CONFIGS['FM-24']} />
-      <DocCard icon="🗑️" code="FM-25" title="ლიკვიდაციის (განადგ.) აქტი"  desc="PR-02 §6"
+      <DocCard icon="🗑️" code="FM-25" title="ლიკვიდაციის (განადგ.) აქტი"  desc="BE-PR-06 §6 — დოკ. სია, განადგ. მეთ., ყველა ასლი, FM-24 განახ., ვ."
         pdf={<FM25_LiquidationActPdf />} fileName="FM-25_ლიკვ" color="secondary"
         fillConfig={FORM_CONFIGS['FM-25']} />
     </Row>
