@@ -130,7 +130,7 @@ const ALL_DOCS_META = [
 
   // C — სამუშაო ინსტრუქციები
   { code: 'BE-WI-01',    category: 'instruction',      title: 'ხარჯთაღრიცხვის შესაბამისობის შემოწმება',             icon: '📐' },
-  { code: 'BE-WI-02',    category: 'instruction',      title: 'შესრულებული სამუშაოს ფორმა 2',                        icon: '📝' },
+  { code: 'BE-WI-02',    category: 'instruction',      title: 'შესრულებული სამუშაოს ფორმა',                          icon: '📝' },
   { code: 'BE-WI-03',    category: 'instruction',      title: 'ფასწარმოქმნის ადეკვატურობის შემოწმება',              icon: '💰' },
   { code: 'BE-WI-04',    category: 'instruction',      title: 'ტექნიკური ზედამხედველობა',                           icon: '👷' },
 
@@ -147,22 +147,22 @@ const ALL_DOCS_META = [
   { code: 'FM-03',       category: 'form',             title: 'კონფიდენციალობის შეთანხმება',                          icon: '🤐' },
   { code: 'FM-04',       category: 'form',             title: 'შიდა აუდიტის გეგმა და ანგარიში',                      icon: '🔎' },
   { code: 'FM-05',       category: 'form',             title: 'მომსახურების ხელშეკრულება',                           icon: '📃' },
-  { code: 'FM-06',       category: 'form',             title: 'საჩივრის / აპელაციის ფორმა',                          icon: '📣' },
+  { code: 'FM-06',       category: 'form',             title: 'საჩივრის და აპელაციის ფორმა',                         icon: '📣' },
   { code: 'FM-07',       category: 'form',             title: 'მოწყობილობის ვერიფიკაცია',                            icon: '🔩' },
   { code: 'FM-08',       category: 'form',             title: 'კომპეტენციის შეფასება',                               icon: '🎯' },
   { code: 'FM-09',       category: 'form',             title: 'ხელშეკრულების განხილვა',                              icon: '📋' },
-  { code: 'FM-10',       category: 'form',             title: 'CAPA — კორექტირებითი ქმედების ფორმა',                 icon: '⚠️' },
+  { code: 'FM-10',       category: 'form',             title: 'კორექტირებული ქმედების ჩანაწერი (CAPA)',               icon: '⚠️' },
   { code: 'FM-11',       category: 'form',             title: 'ინსპექტირების გეგმა',                                 icon: '🗺️' },
   { code: 'FM-12',       category: 'form',             title: 'ქვეკონტრაქტორის შეფასება',                           icon: '🏗️' },
   { code: 'FM-13',       category: 'form',             title: 'ტრენინგის ჩანაწერი',                                  icon: '📚' },
   { code: 'FM-14',       category: 'form',             title: 'შეუსაბამო სამუშაო',                                   icon: '🚫' },
-  { code: 'FM-15',       category: 'form',             title: 'მენეჯმენტის ანალიზი',                                 icon: '📈' },
+  { code: 'FM-15',       category: 'form',             title: 'მენეჯმენტის ანალიზის ოქმი',                           icon: '📈' },
   { code: 'FM-16',       category: 'form',             title: 'ვიზიტის ჩანაწერი',                                    icon: '📍' },
-  { code: 'FM-18',       category: 'form',             title: 'განაცხადის ფორმა',                                    icon: '📝' },
+  { code: 'FM-18',       category: 'form',             title: 'GAC-ის განაცხადის ფორმა',                             icon: '📝' },
   { code: 'FM-21',       category: 'form',             title: 'ინსპექტირების რეგისტრი',                              icon: '📊' },
   { code: 'FM-22',       category: 'form',             title: 'გაცნობის ფურცელი',                                    icon: '👁️' },
   { code: 'FM-23',       category: 'form',             title: 'დოკუმენტში ცვლილების წინადადება',                     icon: '✍️' },
-  { code: 'FM-24',       category: 'form',             title: 'ცვლილებების რეგისტრაცია',                             icon: '📒' },
+  { code: 'FM-24',       category: 'form',             title: 'ცვლილების რეგისტრაცია',                               icon: '📒' },
   { code: 'FM-25',       category: 'form',             title: 'ლიკვიდაციის აქტი',                                   icon: '🗑️' },
 
   // F — პოლიტიკები
