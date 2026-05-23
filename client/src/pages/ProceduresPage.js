@@ -110,23 +110,23 @@ const ALL_DOCS_META = [
   { code: 'QM-01',       category: 'manual',          title: 'ხარისხის სახელმძღვანელო',                               icon: '📖' },
 
   // B — პროცედურები
-  { code: 'BE-PR-SET',   category: 'procedure',        title: 'პროცედურების სარჩევი (ინდექსი)',                        icon: '📑' },
-  { code: 'BE-PR-MAIN',  category: 'procedure',        title: 'ინსპექტირების სრული პროცესი',                          icon: '📋' },
-  { code: 'BE-PR-01',    category: 'procedure',        title: 'განაცხადების მიღება და კლიენტებთან ხელშეკრულება',     icon: '📋' },
-  { code: 'BE-PR-02',    category: 'procedure',        title: 'სახელშეკრულებო მოთხოვნათა შეთანხმება',                icon: '🤝' },
-  { code: 'BE-PR-03',    category: 'procedure',        title: 'ინსპექტირების დაგეგმვა',                               icon: '🗺️' },
-  { code: 'BE-PR-04',    category: 'procedure',        title: 'ინსპექტირების ჩატარება',                               icon: '🔍' },
-  { code: 'BE-PR-05',    category: 'procedure',        title: 'შედეგების გაფორმება',                                  icon: '📊' },
-  { code: 'BE-PR-06',    category: 'procedure',        title: 'ინსპექციის ანგარიშის გაცემა',                          icon: '📤' },
-  { code: 'BE-PR-07',    category: 'procedure',        title: 'საჩივრებისა და აპელაციების განხილვა',                  icon: '📣' },
-  { code: 'BE-PR-08',    category: 'procedure',        title: 'შეუსაბამო სამუშაოს მართვა',                           icon: '🚫' },
-  { code: 'BE-PR-09',    category: 'procedure',        title: 'კორექტირებითი ქმედებები (CAPA)',                       icon: '⚙️' },
-  { code: 'BE-PR-10',    category: 'procedure',        title: 'შიდა აუდიტი',                                         icon: '🔎' },
-  { code: 'BE-PR-11',    category: 'procedure',        title: 'მენეჯმენტის მიმოხილვა',                               icon: '📈' },
-  { code: 'BE-PR-12',    category: 'procedure',        title: 'დოკუმენტების მართვა',                                  icon: '🗂️' },
-  { code: 'BE-PR-13',    category: 'procedure',        title: 'ჩანაწერების მართვა',                                   icon: '📁' },
-  { code: 'BE-PR-14',    category: 'procedure',        title: 'პერსონალის კვალიფიკაცია და ტრენინგი',                 icon: '👥' },
-  { code: 'BE-PR-15',    category: 'procedure',        title: 'მოწყობილობის მართვა და კალიბრაცია',                   icon: '🔧' },
+  { code: 'BE-PR-SET',   category: 'procedure',        title: 'პროცედურების სარჩევი (ინდექსი)',                                                      icon: '📑' },
+  { code: 'BE-PR-MAIN',  category: 'procedure',        title: 'ინსპექტირების სრული პროცესი',                                                         icon: '📋' },
+  { code: 'BE-PR-01',    category: 'procedure',        title: 'ხარჯთაღრიცხვის პროექტთან შესაბამისობის ინსპექტირების სამუშაო პროცედურა',             icon: '📋' },
+  { code: 'BE-PR-02',    category: 'procedure',        title: 'შესრულებული სამუშაოებისა და ფორმა №2-ის ინსპექტირების სამუშაო პროცედურა',            icon: '🤝' },
+  { code: 'BE-PR-03',    category: 'procedure',        title: 'ხარჯთაღრიცხვის ფასწარმოქმნის ადეკვატურობის ინსპექტირების სამუშაო პროცედურა',        icon: '🗺️' },
+  { code: 'BE-PR-04',    category: 'procedure',        title: 'ტექნიკური ზედამხედველობა–ინსპექტირების სამუშაო პროცედურა',                           icon: '🔍' },
+  { code: 'BE-PR-05',    category: 'procedure',        title: 'დოკუმენტებისა და გარე ნორმატიული დოკუმენტების მართვის პროცედურა',                    icon: '📊' },
+  { code: 'BE-PR-06',    category: 'procedure',        title: 'ჩანაწერების, არქივისა და მონაცემთა დაცვის მართვის პროცედურა',                        icon: '📤' },
+  { code: 'BE-PR-07',    category: 'procedure',        title: 'მიუკერძოებლობისა და კონფიდენციალურობის უზრუნველყოფის პროცედურა',                    icon: '📣' },
+  { code: 'BE-PR-08',    category: 'procedure',        title: 'პერსონალის კომპეტენციის, უფლებამოსილების და მონიტორინგის პროცედურა',                 icon: '👥' },
+  { code: 'BE-PR-09',    category: 'procedure',        title: 'განაცხადის, ხელშეკრულების და სამუშაოს მიღების განხილვის პროცედურა',                  icon: '⚙️' },
+  { code: 'BE-PR-10',    category: 'procedure',        title: 'საჩივრებისა და აპელაციების მართვის პროცედურა',                                        icon: '🔎' },
+  { code: 'BE-PR-11',    category: 'procedure',        title: 'შიდა აუდიტის პროცედურა',                                                              icon: '📈' },
+  { code: 'BE-PR-12',    category: 'procedure',        title: 'მენეჯმენტის ანალიზის პროცედურა',                                                      icon: '🗂️' },
+  { code: 'BE-PR-13',    category: 'procedure',        title: 'შეუსაბამობების, კორექციისა და მაკორექტირებელი მოქმედებების (CAPA) პროცედურა',         icon: '📁' },
+  { code: 'BE-PR-14',    category: 'procedure',        title: 'აღჭურვილობის, გაზომვის საშუალებებისა და ქვეკონტრაქტირების მართვის პროცედურა',       icon: '🔧' },
+  { code: 'BE-PR-15',    category: 'procedure',        title: 'ინსპექტირების ანგარიშების, დასკვნებისა და სერტიფიკატების გაცემის პროცედურა',         icon: '📄' },
 
   // C — სამუშაო ინსტრუქციები
   { code: 'BE-WI-01',    category: 'instruction',      title: 'ხარჯთაღრიცხვის შესაბამისობის შემოწმება',             icon: '📐' },
@@ -135,11 +135,11 @@ const ALL_DOCS_META = [
   { code: 'BE-WI-04',    category: 'instruction',      title: 'ტექნიკური ზედამხედველობა',                           icon: '👷' },
 
   // D — სამუშაო აღწერილობები
-  { code: 'HR-JD-001',   category: 'job_description',  title: 'აღმასრულებელი დირექტორის სამუშაო აღწერილობა',       icon: '👔' },
-  { code: 'HR-JD-002',   category: 'job_description',  title: 'ხარისხის მენეჯერის სამუშაო აღწერილობა',              icon: '✅' },
-  { code: 'HR-JD-003',   category: 'job_description',  title: 'ტექნიკური მენეჯერის სამუშაო აღწერილობა',             icon: '🔧' },
-  { code: 'HR-JD-004',   category: 'job_description',  title: 'ინსპექტორის სამუშაო აღწერილობა',                     icon: '🔍' },
-  { code: 'HR-JD-005',   category: 'job_description',  title: 'ადმინისტრატორის სამუშაო აღწერილობა',                 icon: '🗂️' },
+  { code: 'HR-JD-001',   category: 'job_description',  title: 'სამუშაო აღწერილობა — დირექტორი',                     icon: '👔' },
+  { code: 'HR-JD-002',   category: 'job_description',  title: 'სამუშაო აღწერილობა — ხარისხის მენეჯერი',             icon: '✅' },
+  { code: 'HR-JD-003',   category: 'job_description',  title: 'სამუშაო აღწერილობა — ტექნიკური მენეჯერი',            icon: '🔧' },
+  { code: 'HR-JD-004',   category: 'job_description',  title: 'სამუშაო აღწერილობა — ინსპექტორი',                    icon: '🔍' },
+  { code: 'HR-JD-005',   category: 'job_description',  title: 'სამუშაო აღწერილობა — ადმინისტრაციული მხარდაჭერა',   icon: '🗂️' },
 
   // E — ფორმები და შაბლონები
   { code: 'FM-01',       category: 'form',             title: 'ინსპექტირების ანგარიში',                              icon: '📄' },
@@ -175,11 +175,11 @@ const ALL_DOCS_META = [
   { code: 'RM-01',       category: 'risk',             title: 'რისკების რეესტრი',                                    icon: '⚠️' },
 
   // H — ბრძანებები
-  { code: 'ORD-01',      category: 'order',            title: 'ბრძანება №01',                                        icon: '📜' },
-  { code: 'ORD-02',      category: 'order',            title: 'ბრძანება №02',                                        icon: '📜' },
-  { code: 'ORD-03',      category: 'order',            title: 'ბრძანება №03',                                        icon: '📜' },
-  { code: 'ORD-04',      category: 'order',            title: 'ბრძანება №04',                                        icon: '📜' },
-  { code: 'ORD-05',      category: 'order',            title: 'ბრძანება №05',                                        icon: '📜' },
+  { code: 'ORD-01',      category: 'order',            title: 'ბრძანება — ხარისხის მენეჯერის დანიშვნა',             icon: '📜' },
+  { code: 'ORD-02',      category: 'order',            title: 'ბრძანება — ტექნიკური მენეჯერის დანიშვნა',            icon: '📜' },
+  { code: 'ORD-03',      category: 'order',            title: 'ბრძანება — ინსპექტორების დანიშვნა',                  icon: '📜' },
+  { code: 'ORD-04',      category: 'order',            title: 'ბრძანება — დოკუმენტების მართვის სისტემის დამტკიცება', icon: '📜' },
+  { code: 'ORD-05',      category: 'order',            title: 'ბრძანება — მიუკერძოებლობის კომიტეტის შექმნა',       icon: '📜' },
 ];
 
 // ═══════════════════════════════════════════════════════════════════
