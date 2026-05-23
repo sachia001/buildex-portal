@@ -377,6 +377,20 @@ function ProcUploadModal({ show, onHide, onSaved, existing, defaultCategory }) {
 }
 
 // ═══════════════════════════════════════════════════════════════════
+// Code normaliser — "QM-1" → "QM-01", "FM-9" → "FM-09", etc.
+// ═══════════════════════════════════════════════════════════════════
+function normalizeCode(code) {
+  if (!code) return '';
+  return code
+    .toUpperCase()
+    .trim()
+    // Pad every numeric segment to at least 2 digits: PR-1 → PR-01, JD-1 → JD-001 handled below
+    .replace(/-(\d+)/g, (_, n) => '-' + n.padStart(2, '0'))
+    // HR-JD needs 3 digits
+    .replace(/(HR-JD-)(\d{2})$/, (_, p, n) => p + '0' + n);
+}
+
+// ═══════════════════════════════════════════════════════════════════
 // MAIN PAGE
 // ═══════════════════════════════════════════════════════════════════
 export default function ProceduresPage({ role }) {
@@ -432,23 +446,20 @@ export default function ProceduresPage({ role }) {
     }
   };
 
-  // Merge catalog with uploaded docs
+  // Merge catalog with uploaded docs — normalised code matching
   const filteredMeta = activeCat === 'all'
     ? ALL_DOCS_META
     : ALL_DOCS_META.filter(m => m.category === activeCat);
 
   const mergedList = filteredMeta.map(meta => ({
     ...meta,
-    uploaded: docs.find(d => d.code === meta.code),
+    uploaded: docs.find(d => normalizeCode(d.code) === normalizeCode(meta.code)),
   }));
 
-  // Extra uploaded docs not in catalog
-  const extraDocs = docs.filter(d => {
-    const inMeta = ALL_DOCS_META.find(m => m.code === d.code);
-    if (!inMeta) return true;
-    if (activeCat === 'all') return false;
-    return false;
-  });
+  // Extra uploaded docs: only those that don't match ANY catalog entry
+  const extraDocs = docs.filter(d =>
+    !ALL_DOCS_META.find(m => normalizeCode(m.code) === normalizeCode(d.code))
+  );
 
   // Stats
   const uploadedCount = docs.length;
