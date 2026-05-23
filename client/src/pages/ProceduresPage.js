@@ -451,33 +451,25 @@ export default function ProceduresPage({ role }) {
 
   const downloadDoc = async (doc) => {
     try {
-      // Server returns a 60-second signed redirect URL — open in same tab triggers download
-      const res = await axios.get(`/api/procedures/${doc._id}/download`, {
-        headers: { Authorization: `Bearer ${token}` },
-        maxRedirects: 0,          // capture the redirect URL ourselves
-        validateStatus: s => s === 302 || s === 200 || s < 400,
-      });
-      // If server redirected → open that signed URL directly
-      const redirectUrl = res.headers?.location || res.request?.responseURL;
-      if (redirectUrl) {
-        const a = document.createElement('a');
-        a.href = redirectUrl;
-        a.download = doc.originalName || doc.code;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        return;
-      }
-      // Fallback: blob download (local file)
-      const blob = await axios.get(`/api/procedures/${doc._id}/download`, {
+      // Server proxy-streams the file — receive as blob and trigger download
+      const response = await axios.get(`/api/procedures/${doc._id}/download`, {
         headers: { Authorization: `Bearer ${token}` },
         responseType: 'blob',
       });
-      const url = URL.createObjectURL(new Blob([blob.data]));
+      // If server returned an error as JSON blob, surface it
+      if (response.data.type === 'application/json') {
+        const text = await response.data.text();
+        const json = JSON.parse(text);
+        throw new Error(json.error || 'სერვერის შეცდომა');
+      }
+      const fileName = doc.originalName || doc.code || 'document';
+      const url = URL.createObjectURL(response.data);
       const a = document.createElement('a');
       a.href = url;
-      a.download = doc.originalName || doc.code;
+      a.download = fileName;
+      document.body.appendChild(a);
       a.click();
+      document.body.removeChild(a);
       URL.revokeObjectURL(url);
     } catch (e) {
       alert('ჩამოტვირთვა ვერ მოხდა: ' + (e.response?.status === 401 ? 'ავტორიზაცია საჭიროა' : e.message));
