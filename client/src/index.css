@@ -206,6 +206,59 @@ h4, h5 { color: var(--primary); font-weight: 700; }
   box-shadow: var(--shadow-lg);
 }
 
+/* ── Page Container Utility ─────────────────────────────────────────── */
+.page-container {
+  padding: 24px;
+  max-width: 1600px;
+  margin: 0 auto;
+}
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 20px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border);
+}
+
+.page-header .page-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--primary);
+  margin: 0;
+}
+
+.page-header .page-subtitle {
+  font-size: 0.875rem;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 48px 24px;
+  color: var(--text-muted);
+}
+
+.empty-state .empty-icon {
+  font-size: 3rem;
+  margin-bottom: 12px;
+  opacity: 0.5;
+}
+
+.loading-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px;
+  gap: 12px;
+  color: var(--text-muted);
+}
+
 /* ── Navbar (custom) ────────────────────────────────────────────────── */
 .app-navbar {
   position: sticky;
@@ -223,7 +276,44 @@ h4, h5 { color: var(--primary); font-weight: 700; }
   gap: 0.5rem;
   padding: 0 1rem;
   flex-wrap: nowrap;
-  overflow-x: auto;
+  overflow: visible;
+}
+
+/* ── Nav Dropdowns (grouped menus) ──────────────────────────────────── */
+.nav-dropdown { position: relative; display: inline-block; }
+.nav-dropdown-menu {
+  position: absolute; top: calc(100% + 8px); left: 0;
+  background: white; border: 1px solid var(--border);
+  border-radius: var(--radius); box-shadow: var(--shadow-lg);
+  min-width: 220px; z-index: 9999; padding: 4px 0;
+  animation: navDropFadeIn 0.15s ease;
+}
+.nav-dropdown-menu a, .nav-dropdown-menu button {
+  display: block; width: 100%; text-align: left;
+  padding: 8px 16px; color: var(--text);
+  text-decoration: none; font-size: 0.85rem;
+  background: none; border: none; cursor: pointer;
+  transition: background 0.1s;
+}
+.nav-dropdown-menu a:hover, .nav-dropdown-menu button:hover {
+  background: #f0f4ff; color: var(--primary-light);
+}
+.nav-dropdown-menu a.active {
+  background: #eff6ff; color: var(--primary-light); font-weight: 600;
+}
+.nav-dropdown-toggle {
+  display: flex; align-items: center; gap: 4px;
+  padding: 6px 10px; border-radius: var(--radius-sm);
+  font-size: 0.83rem; font-weight: 500; color: var(--text-muted);
+  background: none; border: none; cursor: pointer;
+  transition: all 0.15s; white-space: nowrap;
+}
+.nav-dropdown-toggle:hover { background: #eff6ff; color: var(--primary-light); }
+.nav-dropdown-toggle.active { color: var(--primary-light); background: #eff6ff; }
+.nav-dropdown-toggle .caret { font-size: 0.7rem; opacity: 0.7; }
+@keyframes navDropFadeIn {
+  from { opacity:0; transform:translateY(-4px);}
+  to {opacity:1;transform:translateY(0);}
 }
 
 .app-navbar .brand-logo {

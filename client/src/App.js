@@ -45,30 +45,70 @@ const ROLE_LABELS = {
 };
 
 /* ── Nav link that highlights when active ─────────────────────── */
-const NavLink = ({ to, children }) => {
+const NavLink = ({ to, children, onClick }) => {
     const location = useLocation();
     const isActive = location.pathname === to || (to !== '/' && location.pathname.startsWith(to));
     return (
-        <Link className={`nav-link-item${isActive ? ' active' : ''}`} to={to}>
+        <Link className={`nav-link-item${isActive ? ' active' : ''}`} to={to} onClick={onClick}>
             {children}
         </Link>
     );
 };
 
+/* ── Grouped dropdown menu ─────────────────────────────────────── */
+const NavDropdown = ({ label, icon, items, openKey, currentOpen, onToggle, onAnyClick }) => {
+    const location = useLocation();
+    const isOpen = currentOpen === openKey;
+    const visibleItems = items.filter(i => i.show !== false);
+    if (visibleItems.length === 0) return null;
+    const anyActive = visibleItems.some(i => location.pathname === i.to || (i.to !== '/' && location.pathname.startsWith(i.to)));
+
+    return (
+        <div className="nav-dropdown">
+            <button
+                className={`nav-dropdown-toggle${isOpen || anyActive ? ' active' : ''}`}
+                onClick={(e) => { e.stopPropagation(); onToggle(isOpen ? null : openKey); }}
+            >
+                {icon} {label} <span className="caret">▾</span>
+            </button>
+            {isOpen && (
+                <div className="nav-dropdown-menu">
+                    {visibleItems.map(item => {
+                        const itemActive = location.pathname === item.to || (item.to !== '/' && location.pathname.startsWith(item.to));
+                        return (
+                            <Link
+                                key={item.to}
+                                to={item.to}
+                                className={itemActive ? 'active' : ''}
+                                onClick={onAnyClick}
+                            >
+                                {item.label}
+                            </Link>
+                        );
+                    })}
+                </div>
+            )}
+        </div>
+    );
+};
+
 const Navbar = ({ username, role, onLogout }) => {
-    const [dropOpen, setDropOpen] = useState(false);
-    const dropRef = useRef(null);
+    const [openDropdown, setOpenDropdown] = useState(null); // 'user' | 'ops' | 'docs' | ...
+    const navRef = useRef(null);
 
     useEffect(() => {
         const handler = (e) => {
-            if (dropRef.current && !dropRef.current.contains(e.target)) setDropOpen(false);
+            if (navRef.current && !navRef.current.contains(e.target)) setOpenDropdown(null);
         };
         document.addEventListener('mousedown', handler);
         return () => document.removeEventListener('mousedown', handler);
     }, []);
 
+    const closeAll = () => setOpenDropdown(null);
+
     const show = {
         inspections:   ['admin', 'chancellor', 'tech_manager', 'inspector', 'quality_manager'].includes(role),
+        addInspection: ['admin', 'chancellor'].includes(role),
         documents:     ['admin', 'quality_manager'].includes(role),
         equipment:     ['admin', 'quality_manager'].includes(role),
         management:    ['admin', 'quality_manager'].includes(role),
@@ -85,11 +125,36 @@ const Navbar = ({ username, role, onLogout }) => {
         auditLog:      ['admin', 'quality_manager'].includes(role),
     };
 
+    const operationsItems = [
+        { to: '/inspections',     label: '📂 რეესტრი',        show: show.inspections },
+        { to: '/add-inspection',  label: '➕ ახალი საქმე',     show: show.addInspection },
+    ];
+    const docsItems = [
+        { to: '/documents',    label: '📄 დოკუმენტები',  show: show.documents },
+        { to: '/procedures',   label: '📑 პროცედურები',  show: show.procedures },
+        { to: '/norms-admin',  label: '📊 ნორმ-ბაზა',     show: show.normsAdmin },
+        { to: '/company-docs', label: '🏢 კომპანია',      show: show.companyDocs },
+    ];
+    const qualityItems = [
+        { to: '/checklist',           label: '✅ ჩეკლისტი',          show: show.checklist },
+        { to: '/management-review',   label: '📋 გადახედვა',         show: show.management },
+        { to: '/internal-audits',     label: '🔍 შიდა აუდიტი',       show: show.audits },
+        { to: '/corrective-actions',  label: '⚙️ CAR',               show: show.corrections },
+        { to: '/complaints',          label: '📨 საჩივრები',         show: show.complaints },
+        { to: '/audit-log',           label: '📋 აუდიტის ჟურნალი',  show: show.auditLog },
+    ];
+    const resourcesItems = [
+        { to: '/admin',          label: '👥 პერსონალი',     show: show.staff },
+        { to: '/equipment',      label: '🛠️ აპარატურა',      show: show.equipment },
+        { to: '/insurance',      label: '🛡️ დაზღვევა',       show: show.insurance },
+        { to: '/price-adequacy', label: '💰 ფასადეკვატ.',    show: show.priceAdequacy },
+    ];
+
     return (
-        <nav className="app-navbar">
+        <nav className="app-navbar" ref={navRef}>
             <div className="app-navbar navbar-inner">
                 {/* Brand */}
-                <Link className="brand-logo" to="/">
+                <Link className="brand-logo" to="/" onClick={closeAll}>
                     <img src="/logo.png" alt="Logo" style={{ height: '44px', flexShrink: 0 }} />
                     <div>
                         <div className="brand-name">ბილდექს ექსპერტიზა</div>
@@ -97,51 +162,57 @@ const Navbar = ({ username, role, onLogout }) => {
                     </div>
                 </Link>
 
-                {/* Nav links */}
-                <NavLink to="/">📊 მთავარი</NavLink>
+                {/* Home link */}
+                <NavLink to="/" onClick={closeAll}>📊 მთავარი</NavLink>
 
-                {show.inspections && <NavLink to="/inspections">📂 რეესტრი</NavLink>}
-                {show.procedures  && <NavLink to="/procedures">📂 პროცედ.</NavLink>}
-                {show.documents   && <NavLink to="/documents">📄 დოკ-ები</NavLink>}
-                {show.equipment   && <NavLink to="/equipment">🛠️ ხელსაწ.</NavLink>}
-                {show.management  && <NavLink to="/management-review">📋 გადახედვა</NavLink>}
-                {show.insurance   && <NavLink to="/insurance">🛡️ დაზღვ.</NavLink>}
-                {show.complaints  && <NavLink to="/complaints">📨 საჩივ.</NavLink>}
-                {show.audits      && <NavLink to="/internal-audits">🔍 შიდა აუდ.</NavLink>}
-                {show.corrections && <NavLink to="/corrective-actions">⚙️ CAR</NavLink>}
-                {show.companyDocs && <NavLink to="/company-docs">🏢 კომპ.</NavLink>}
-                {show.priceAdequacy && <NavLink to="/price-adequacy">💰 ფასად.</NavLink>}
-                {show.normsAdmin  && <NavLink to="/norms-admin">📊 ნორმ-ბ.</NavLink>}
-                {show.checklist   && <NavLink to="/checklist">✅ ჩეკლ.</NavLink>}
-                {show.auditLog    && <NavLink to="/audit-log">📋 აუდიტი</NavLink>}
-
-                {show.staff && (
-                    <Link className="nav-link-staff" to="/admin">👥 პერსონალი</Link>
-                )}
+                {/* Grouped dropdowns */}
+                <NavDropdown
+                    label="ოპერაციები" icon="📂" openKey="ops"
+                    items={operationsItems}
+                    currentOpen={openDropdown} onToggle={setOpenDropdown} onAnyClick={closeAll}
+                />
+                <NavDropdown
+                    label="დოკუმენტაცია" icon="📄" openKey="docs"
+                    items={docsItems}
+                    currentOpen={openDropdown} onToggle={setOpenDropdown} onAnyClick={closeAll}
+                />
+                <NavDropdown
+                    label="ხარისხი" icon="⚙️" openKey="quality"
+                    items={qualityItems}
+                    currentOpen={openDropdown} onToggle={setOpenDropdown} onAnyClick={closeAll}
+                />
+                <NavDropdown
+                    label="რესურსები" icon="🏗️" openKey="resources"
+                    items={resourcesItems}
+                    currentOpen={openDropdown} onToggle={setOpenDropdown} onAnyClick={closeAll}
+                />
 
                 {/* User dropdown */}
-                <div className="position-relative ms-auto flex-shrink-0" ref={dropRef}>
-                    <button className="user-pill" onClick={() => setDropOpen(o => !o)}>
+                <div className="nav-dropdown ms-auto flex-shrink-0">
+                    <button
+                        className="user-pill"
+                        onClick={(e) => { e.stopPropagation(); setOpenDropdown(openDropdown === 'user' ? null : 'user'); }}
+                    >
                         👤 <span style={{ fontWeight: 600 }}>{username}</span>
                         <span style={{ color: 'var(--text-muted)', fontSize: '0.75rem' }}>{ROLE_LABELS[role] || role}</span>
                         <span style={{ color: 'var(--text-muted)' }}>▾</span>
                     </button>
 
-                    {dropOpen && (
+                    {openDropdown === 'user' && (
                         <div className="user-dropdown">
                             <div className="role-label">{ROLE_LABELS[role] || role}</div>
                             <div className="drop-divider" />
                             <Link
                                 className="drop-item"
                                 to="/change-password"
-                                onClick={() => setDropOpen(false)}
+                                onClick={closeAll}
                             >
                                 🔑 პაროლის შეცვლა
                             </Link>
                             <div className="drop-divider" />
                             <button
                                 className="drop-item danger"
-                                onClick={() => { setDropOpen(false); onLogout(); }}
+                                onClick={() => { closeAll(); onLogout(); }}
                             >
                                 🚪 გასვლა
                             </button>
