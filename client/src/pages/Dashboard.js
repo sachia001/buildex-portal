@@ -56,58 +56,70 @@ const Dashboard = ({ role }) => {
     });
 
     // სტილები
-    const cardHeaderStyle = { backgroundColor: COLORS.primary, color: 'white', fontWeight: 'bold', padding: '10px 15px', fontSize: '0.9rem' };
-    const smallCardStyle = { borderLeft: '4px solid', height: '100%', backgroundColor: 'white', boxShadow: '0 2px 4px rgba(0,0,0,0.05)' };
+    const cardHeaderStyle = { fontWeight: '600', padding: '0.75rem 1.25rem', fontSize: '0.9rem' };
 
     return (
-        <div style={{ backgroundColor: '#eef2f6', minHeight: '100vh', paddingBottom: '40px', fontFamily: 'Arial, sans-serif' }}>
-            <Container fluid className="px-4 pt-4">
-                
+        <div style={{ minHeight: '100vh', paddingBottom: '40px' }}>
+            <Container fluid className="px-0 pt-0">
+
                 {/* 1. Header Area */}
-                <div className="d-flex justify-content-between align-items-center mb-4 bg-white p-3 rounded shadow-sm border-start border-5 border-primary">
+                <div className="d-flex justify-content-between align-items-center mb-4 bg-white p-3 rounded shadow-sm"
+                     style={{ borderLeft: '4px solid var(--primary)' }}>
                     <div>
-                        <h4 className="fw-bold m-0 text-dark">Buildex მართვის პანელი</h4>
-                        <span className="text-muted small">სისტემური სტატუსი: ონლაინ</span>
+                        <h4 className="page-title mb-0">ბილდექს მართვის პანელი</h4>
+                        <span className="page-subtitle">ISO/IEC 17020:2012 · სისტემური სტატუსი: ონლაინ</span>
                     </div>
                     <div className="d-flex gap-2">
-                        <Button variant="outline-dark" size="sm" onClick={() => navigate('/inspections')}>📜 რეესტრი</Button>
+                        <Button variant="outline-secondary" size="sm" onClick={() => navigate('/inspections')}>📜 რეესტრი</Button>
                         <Button variant="primary" size="sm" onClick={() => navigate('/add-inspection')}>+ ახალი საქმე</Button>
                     </div>
                 </div>
 
-                {/* 2. KPI Cards (Compact Row) */}
+                {/* 2. KPI Cards */}
                 <Row className="g-3 mb-4">
                     <Col md={3}>
-                        <Card className="border-0" style={{...smallCardStyle, borderLeftColor: COLORS.primary}}>
-                            <Card.Body className="p-3 d-flex justify-content-between align-items-center" style={{cursor:'pointer'}} onClick={() => navigate('/inspections')}>
-                                <div><div className="text-muted small fw-bold">სულ საქმეები</div><h3 className="m-0 fw-bold">{stats?.counts?.total}</h3></div>
-                                <div className="fs-1 text-muted opacity-25">📁</div>
-                            </Card.Body>
-                        </Card>
+                        <div className="stat-card" style={{ borderLeftColor: 'var(--primary)', cursor: 'pointer' }} onClick={() => navigate('/inspections')}>
+                            <div className="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <div className="stat-label">სულ საქმეები</div>
+                                    <div className="stat-value" style={{ color: 'var(--primary)' }}>{stats?.counts?.total}</div>
+                                </div>
+                                <div className="fs-1 opacity-15">📁</div>
+                            </div>
+                        </div>
                     </Col>
                     <Col md={3}>
-                        <Card className="border-0" style={{...smallCardStyle, borderLeftColor: COLORS.warning}}>
-                            <Card.Body className="p-3 d-flex justify-content-between align-items-center" style={{cursor:'pointer'}} onClick={() => navigate('/inspections')}>
-                                <div><div className="text-muted small fw-bold">მიმდინარე</div><h3 className="m-0 fw-bold text-warning">{stats?.counts?.active}</h3></div>
-                                <div className="fs-1 text-warning opacity-25">⚡</div>
-                            </Card.Body>
-                        </Card>
+                        <div className="stat-card" style={{ borderLeftColor: 'var(--warning)', cursor: 'pointer' }} onClick={() => navigate('/inspections')}>
+                            <div className="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <div className="stat-label">მიმდინარე</div>
+                                    <div className="stat-value" style={{ color: 'var(--warning)' }}>{stats?.counts?.active}</div>
+                                </div>
+                                <div className="fs-1 opacity-15">⚡</div>
+                            </div>
+                        </div>
                     </Col>
                     <Col md={3}>
-                        <Card className="border-0" style={{...smallCardStyle, borderLeftColor: COLORS.success}}>
-                            <Card.Body className="p-3 d-flex justify-content-between align-items-center" style={{cursor:'pointer'}} onClick={() => navigate('/inspections')}>
-                                <div><div className="text-muted small fw-bold">დასრულებული</div><h3 className="m-0 fw-bold text-success">{stats?.counts?.completed}</h3></div>
-                                <div className="fs-1 text-success opacity-25">✅</div>
-                            </Card.Body>
-                        </Card>
+                        <div className="stat-card" style={{ borderLeftColor: 'var(--success)', cursor: 'pointer' }} onClick={() => navigate('/inspections')}>
+                            <div className="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <div className="stat-label">დასრულებული</div>
+                                    <div className="stat-value" style={{ color: 'var(--success)' }}>{stats?.counts?.completed}</div>
+                                </div>
+                                <div className="fs-1 opacity-15">✅</div>
+                            </div>
+                        </div>
                     </Col>
                     <Col md={3}>
-                        <Card className="border-0" style={{...smallCardStyle, borderLeftColor: COLORS.info}}>
-                            <Card.Body className="p-3 d-flex justify-content-between align-items-center" style={{cursor:'pointer'}} onClick={() => navigate('/admin')}>
-                                <div><div className="text-muted small fw-bold">პერსონალი</div><h3 className="m-0 fw-bold text-info">{stats?.counts?.staffCount}</h3></div>
-                                <div className="fs-1 text-info opacity-25">👥</div>
-                            </Card.Body>
-                        </Card>
+                        <div className="stat-card" style={{ borderLeftColor: 'var(--info)', cursor: 'pointer' }} onClick={() => navigate('/admin')}>
+                            <div className="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <div className="stat-label">პერსონალი</div>
+                                    <div className="stat-value" style={{ color: 'var(--info)' }}>{stats?.counts?.staffCount}</div>
+                                </div>
+                                <div className="fs-1 opacity-15">👥</div>
+                            </div>
+                        </div>
                     </Col>
                 </Row>
 
@@ -126,7 +138,7 @@ const Dashboard = ({ role }) => {
                     {/* COL 1: Deadlines & Recent Activity */}
                     <Col lg={5}>
                         {/* ვადების ცხრილი */}
-                        <Card className="shadow-sm border-0 mb-3 h-100">
+                        <Card className="mb-3 h-100">
                             <Card.Header style={cardHeaderStyle}>⚠️ კრიტიკული ვადები (5 დღე)</Card.Header>
                             <Table hover responsive size="sm" className="mb-0 text-nowrap align-middle">
                                 <thead className="bg-light">
@@ -149,8 +161,8 @@ const Dashboard = ({ role }) => {
                     {/* COL 2: Equipment & Staff Alerts (Middle Column) */}
                     <Col lg={3}>
                         {/* აპარატურა (Compact List) */}
-                        <Card className="shadow-sm border-0 mb-3">
-                            <Card.Header style={{...cardHeaderStyle, backgroundColor: '#34495e'}}>🛠️ აპარატურა</Card.Header>
+                        <Card className="mb-3">
+                            <Card.Header style={cardHeaderStyle}>🛠️ აპარატურა</Card.Header>
                             <ListGroup variant="flush">
                                 <ListGroup.Item className="d-flex justify-content-between align-items-center">
                                     <span className="small text-danger fw-bold">● ვადაგასული</span>
@@ -171,8 +183,8 @@ const Dashboard = ({ role }) => {
                         </Card>
 
                         {/* პერსონალის მონიტორინგი (ახალი) */}
-                        <Card className="shadow-sm border-0 mb-3">
-                            <Card.Header style={{...cardHeaderStyle, backgroundColor: '#d35400'}}>🆔 პერსონალის ავტორიზაცია</Card.Header>
+                        <Card className="mb-3">
+                            <Card.Header style={cardHeaderStyle}>🆔 პერსონალის ავტორიზაცია</Card.Header>
                             <Card.Body className="p-0">
                                 {expiringStaff.length > 0 ? (
                                     <ListGroup variant="flush">
@@ -193,8 +205,8 @@ const Dashboard = ({ role }) => {
 
                         {/* ISO შესაბამისობის მაჩვენებლები */}
                         {(ins.expired.length > 0 || ins.expiringSoon.length > 0 || alerts.openComplaints > 0 || alerts.overdueActions > 0) && (
-                            <Card className="shadow-sm border-0">
-                                <Card.Header style={{...cardHeaderStyle, backgroundColor: '#8e44ad'}}>⚠️ ISO გაფრთხილებები</Card.Header>
+                            <Card className="">
+                                <Card.Header style={cardHeaderStyle}>⚠️ ISO გაფრთხილებები</Card.Header>
                                 <ListGroup variant="flush">
                                     {ins.expired.length > 0 && (
                                         <ListGroup.Item className="d-flex justify-content-between align-items-center">
@@ -227,8 +239,8 @@ const Dashboard = ({ role }) => {
 
                     {/* COL 3: Analytics & Activity */}
                     <Col lg={4}>
-                        <Card className="shadow-sm border-0 h-100">
-                            <Card.Header style={{...cardHeaderStyle, backgroundColor: 'white', color: 'black', borderBottom: '1px solid #eee'}}>📊 დატვირთვის სტატისტიკა</Card.Header>
+                        <Card className="h-100">
+                            <Card.Header style={cardHeaderStyle}>📊 დატვირთვის სტატისტიკა</Card.Header>
                             <Card.Body>
                                 <div style={{ width: '100%', height: 200 }}>
                                     <ResponsiveContainer width="100%" height={200}>
@@ -257,8 +269,8 @@ const Dashboard = ({ role }) => {
                 {/* Recent / Urgent Inspections */}
                 <Row className="mt-3">
                     <Col>
-                        <Card className="shadow-sm border-0">
-                            <Card.Header style={{...cardHeaderStyle, backgroundColor: '#2980b9'}}>📋 გადაუდებელი ვადების მქონე საქმეები</Card.Header>
+                        <Card className="">
+                            <Card.Header style={cardHeaderStyle}>📋 გადაუდებელი ვადების მქონე საქმეები</Card.Header>
                             <Table hover size="sm" responsive className="mb-0 align-middle">
                                 <thead className="bg-light">
                                     <tr style={{fontSize: '0.85rem'}}>
@@ -289,5 +301,6 @@ const Dashboard = ({ role }) => {
         </div>
     );
 };
+
 
 export default Dashboard;

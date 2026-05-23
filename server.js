@@ -88,6 +88,14 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+// Security headers
+app.use((req, res, next) => {
+    res.setHeader('X-Content-Type-Options', 'nosniff');
+    res.setHeader('X-Frame-Options', 'DENY');
+    res.setHeader('X-XSS-Protection', '1; mode=block');
+    next();
+});
+
 mongoose.connect(process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/buildexDB')
     .then(() => console.log('✅ ბაზა და რეგლამენტი ჩაიტვირთა!'))
     .catch(err => console.error('❌ ბაზის შეცდომა:', err));
@@ -843,6 +851,38 @@ const ProcedureDoc = mongoose.model('ProcedureDoc', new mongoose.Schema({
     fileSize:      { type: Number, default: 0 },     // bytes
 }, { timestamps: true }));
 
+// AUDIT LOG MODEL
+const AuditLog = mongoose.model('AuditLog', new mongoose.Schema({
+    action:       { type: String, required: true },   // შექმნა / განახლება / წაშლა / ატვირთვა
+    resource:     { type: String, required: true },   // inspection / user / procedure / equipment / complaint / corrective_action / internal_audit
+    resourceId:   { type: String, default: '' },
+    resourceName: { type: String, default: '' },
+    userId:       { type: String, default: '' },
+    username:     { type: String, default: '' },
+    role:         { type: String, default: '' },
+    details:      { type: String, default: '' },
+    ip:           { type: String, default: '' },
+    timestamp:    { type: Date, default: Date.now },
+}));
+
+async function logAudit(req, action, resource, resourceId, resourceName, details = '') {
+    try {
+        await AuditLog.create({
+            action, resource,
+            resourceId:   String(resourceId || ''),
+            resourceName: String(resourceName || ''),
+            userId:       String(req.user?.id || ''),
+            username:     req.user?.username || '',
+            role:         req.user?.role || '',
+            details:      String(details || ''),
+            ip:           req.ip || req.headers['x-forwarded-for'] || '',
+            timestamp:    new Date(),
+        });
+    } catch (e) {
+        console.error('AuditLog error:', e.message);
+    }
+}
+
 // CHECKLIST SESSION MODEL
 const ChecklistSession = mongoose.model('ChecklistSession', new mongoose.Schema({
     sessionNumber: { type: String },
@@ -1011,6 +1051,7 @@ api.post('/inspections', async (req, res) => {
             content: req.body.applicationContent,
             signatory: req.body.clientName
         });
+        await logAudit(req, 'შექმნა', 'inspection', newInsp._id, newInsp.inspectionNumber || req.body.objectName);
         res.status(201).json(newInsp);
     } catch (err) { res.status(400).json({ error: err.message }); }
 });
@@ -1045,6 +1086,7 @@ api.delete('/inspections/:id', async (req, res) => {
 api.put('/inspections/:id', async (req, res) => {
     try {
         const updated = await Inspection.findByIdAndUpdate(req.params.id, req.body, { new: true });
+        if (updated) await logAudit(req, 'განახლება', 'inspection', updated._id, updated.inspectionNumber || updated.objectName, `სტატუსი: ${updated.status}`);
         res.json(updated);
     } catch (err) { res.status(500).json({ error: err.message }); }
 });
@@ -1068,6 +1110,7 @@ api.post('/users/register', async (req, res) => {
     try {
         // photo comes as base64 data URL (stored directly in MongoDB — no filesystem needed)
         const user = await new User(req.body).save();
+        await logAudit(req, 'შექმნა', 'user', user._id, `${user.firstName} ${user.lastName}`, `პოზიცია: ${user.position || ''}`);
         res.json({ msg: 'OK', user });
     } catch (err) { res.status(400).json({ error: err.message }); }
 });
@@ -1090,6 +1133,7 @@ api.put('/users/:id', async (req, res) => {
     try {
         const updated = await User.findByIdAndUpdate(req.params.id, req.body, { new: true });
         if (!updated) return res.status(404).json({ error: 'ვერ მოიძებნა' });
+        await logAudit(req, 'განახლება', 'user', updated._id, `${updated.firstName} ${updated.lastName}`, `სტატუსი: ${updated.status}`);
         res.json(updated);
     } catch (err) { res.status(500).json({ error: err.message }); }
 });
@@ -1131,6 +1175,7 @@ api.post('/equipment', async (req, res) => {
         const nextCal       = new Date(calDate);
         nextCal.setMonth(nextCal.getMonth() + intervalMonths);
         const item = await Equipment.create({ name, serialNumber, manufacturer, calibrationDate: calDate, calibrationInterval: intervalMonths, nextCalibration: nextCal });
+        await logAudit(req, 'შექმნა', 'equipment', item._id, `${name} (${serialNumber})`);
         res.status(201).json(item);
     } catch (err) {
         if (err.code === 11000) return res.status(400).json({ error: 'ამ სერიული ნომრით ხელსაწყო უკვე არსებობს' });
@@ -1141,7 +1186,8 @@ api.post('/equipment', async (req, res) => {
 api.delete('/equipment/:id', async (req, res) => {
     if (req.user.role !== 'admin') return res.status(403).json({ error: 'წაშლის უფლება არ გაქვთ' });
     try {
-        await Equipment.findByIdAndDelete(req.params.id);
+        const item = await Equipment.findByIdAndDelete(req.params.id);
+        if (item) await logAudit(req, 'წაშლა', 'equipment', item._id, `${item.name} (${item.serialNumber})`);
         res.json({ msg: 'წაიშალა' });
     } catch (err) { res.status(500).json({ error: err.message }); }
 });
@@ -1222,6 +1268,7 @@ api.post('/complaints', async (req, res) => {
     try {
         const num = await generateDocumentNumber('COMP');
         const item = await Complaint.create({ ...req.body, complaintNumber: num });
+        await logAudit(req, 'შექმნა', 'complaint', item._id, `${num} — ${req.body.complainant || ''}`, `კატეგორია: ${req.body.category || 'საჩივარი'}`);
         res.status(201).json(item);
     } catch (err) { res.status(400).json({ error: err.message }); }
 });
@@ -1252,6 +1299,7 @@ api.post('/internal-audits', async (req, res) => {
     try {
         const num = await generateDocumentNumber('AUD');
         const item = await InternalAudit.create({ ...req.body, auditNumber: num });
+        await logAudit(req, 'შექმნა', 'internal_audit', item._id, num, `აუდიტორი: ${req.body.auditor || ''}`);
         res.status(201).json(item);
     } catch (err) { res.status(400).json({ error: err.message }); }
 });
@@ -1282,6 +1330,7 @@ api.post('/corrective-actions', async (req, res) => {
     try {
         const num = await generateDocumentNumber('CAR');
         const item = await CorrectiveAction.create({ ...req.body, carNumber: num });
+        await logAudit(req, 'შექმნა', 'corrective_action', item._id, num, `წყარო: ${req.body.sourceType || ''}`);
         res.status(201).json(item);
     } catch (err) { res.status(400).json({ error: err.message }); }
 });
@@ -1290,6 +1339,7 @@ api.put('/corrective-actions/:id', async (req, res) => {
     try {
         const updated = await CorrectiveAction.findByIdAndUpdate(req.params.id, req.body, { new: true });
         if (!updated) return res.status(404).json({ error: 'ვერ მოიძებნა' });
+        await logAudit(req, 'განახლება', 'corrective_action', updated._id, updated.carNumber, `სტატუსი: ${updated.status}`);
         res.json(updated);
     } catch (err) { res.status(400).json({ error: err.message }); }
 });
@@ -1760,6 +1810,19 @@ api.delete('/price-adequacy/:id', async (req, res) => {
     catch (err) { res.status(500).json({ error: err.message }); }
 });
 
+// --- AUDIT LOGS ---
+api.get('/audit-logs', async (req, res) => {
+    if (!['admin', 'quality_manager'].includes(req.user.role))
+        return res.status(403).json({ error: 'წვდომა მხოლოდ ადმინს და ხარ.მენეჯერს' });
+    try {
+        const filter = {};
+        if (req.query.resource) filter.resource = req.query.resource;
+        if (req.query.user) filter.username = { $regex: req.query.user, $options: 'i' };
+        const logs = await AuditLog.find(filter).sort({ timestamp: -1 }).limit(500);
+        res.json(logs);
+    } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
 // --- AUTH ROUTES (public — no JWT required) ---
 const authRouter = express.Router();
 
@@ -1904,6 +1967,7 @@ api.post('/procedures', procUpload.single('file'), async (req, res) => {
             uploadedBy:   req.user.username,
             notes:        notes || '',
         });
+        await logAudit(req, 'ატვირთვა', 'procedure', doc._id, `${doc.code} — ${doc.title}`, `ვერსია: ${doc.version}`);
         res.json(doc);
     } catch (e) { res.status(500).json({ error: e.message }); }
 });
@@ -1950,6 +2014,7 @@ api.put('/procedures/:id', procUpload.single('file'), async (req, res) => {
             doc.uploadedBy   = req.user.username;
         }
         await doc.save();
+        await logAudit(req, 'განახლება', 'procedure', doc._id, `${doc.code} — ${doc.title}`, `ვერსია: ${doc.version}`);
         res.json(doc);
     } catch (e) { res.status(500).json({ error: e.message }); }
 });
@@ -1962,6 +2027,7 @@ api.delete('/procedures/:id', async (req, res) => {
         const doc = await ProcedureDoc.findByIdAndDelete(req.params.id);
         if (!doc) return res.status(404).json({ error: 'ვერ მოიძებნა' });
 
+        await logAudit(req, 'წაშლა', 'procedure', doc._id, `${doc.code} — ${doc.title}`);
         // Remove from Cloudinary
         if (doc.cloudinaryId) await deleteFromCloudinary(doc.cloudinaryId);
         // Remove local fallback file

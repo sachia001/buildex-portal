@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Link, useLocation } from 'react-router-dom';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import axios from 'axios';
 
@@ -25,6 +25,7 @@ import PriceAdequacyPage from './pages/PriceAdequacyPage';
 import NormsAdminPage from './pages/NormsAdminPage';
 import ChecklistPage from './pages/ChecklistPage';
 import ProceduresPage from './pages/ProceduresPage';
+import AuditLogPage from './pages/AuditLogPage';
 
 // Attach token to every axios request
 axios.interceptors.request.use(config => {
@@ -35,19 +36,29 @@ axios.interceptors.request.use(config => {
 
 // Role labels in Georgian
 const ROLE_LABELS = {
-    admin: '👑 ადმინი',
-    chancellor: '🗂️ კანცელარია',
-    tech_manager: '🔧 ტექ. მენეჯერი',
+    admin:           '👑 ადმინი',
+    chancellor:      '🗂️ კანცელარია',
+    tech_manager:    '🔧 ტექ. მენეჯერი',
     quality_manager: '✅ ხარ. მენეჯერი',
-    hr: '👥 HR',
-    inspector: '🔍 ინსპექტორი',
+    hr:              '👥 HR',
+    inspector:       '🔍 ინსპექტორი',
+};
+
+/* ── Nav link that highlights when active ─────────────────────── */
+const NavLink = ({ to, children }) => {
+    const location = useLocation();
+    const isActive = location.pathname === to || (to !== '/' && location.pathname.startsWith(to));
+    return (
+        <Link className={`nav-link-item${isActive ? ' active' : ''}`} to={to}>
+            {children}
+        </Link>
+    );
 };
 
 const Navbar = ({ username, role, onLogout }) => {
     const [dropOpen, setDropOpen] = useState(false);
     const dropRef = useRef(null);
 
-    // Close dropdown when clicking outside
     useEffect(() => {
         const handler = (e) => {
             if (dropRef.current && !dropRef.current.contains(e.target)) setDropOpen(false);
@@ -56,102 +67,86 @@ const Navbar = ({ username, role, onLogout }) => {
         return () => document.removeEventListener('mousedown', handler);
     }, []);
 
-    // Navigation visibility per role
     const show = {
-        inspections: ['admin', 'chancellor', 'tech_manager', 'inspector', 'quality_manager'].includes(role),
-        documents:   ['admin', 'quality_manager'].includes(role),
-        equipment:   ['admin', 'quality_manager'].includes(role),
-        management:  ['admin', 'quality_manager'].includes(role),
-        staff:       ['admin', 'hr'].includes(role),
-        insurance:   ['admin', 'quality_manager'].includes(role),
-        complaints:  ['admin', 'quality_manager'].includes(role),
-        audits:      ['admin', 'quality_manager'].includes(role),
-        corrections: ['admin', 'quality_manager'].includes(role),
+        inspections:   ['admin', 'chancellor', 'tech_manager', 'inspector', 'quality_manager'].includes(role),
+        documents:     ['admin', 'quality_manager'].includes(role),
+        equipment:     ['admin', 'quality_manager'].includes(role),
+        management:    ['admin', 'quality_manager'].includes(role),
+        staff:         ['admin', 'hr'].includes(role),
+        insurance:     ['admin', 'quality_manager'].includes(role),
+        complaints:    ['admin', 'quality_manager'].includes(role),
+        audits:        ['admin', 'quality_manager'].includes(role),
+        corrections:   ['admin', 'quality_manager'].includes(role),
         companyDocs:   ['admin'].includes(role),
         priceAdequacy: ['admin', 'quality_manager', 'tech_manager'].includes(role),
         normsAdmin:    ['admin', 'quality_manager'].includes(role),
         checklist:     ['admin', 'quality_manager'].includes(role),
         procedures:    ['admin', 'quality_manager', 'tech_manager', 'inspector'].includes(role),
+        auditLog:      ['admin', 'quality_manager'].includes(role),
     };
 
     return (
-        <nav className="navbar navbar-expand-lg navbar-light bg-white shadow-sm mb-4 py-3 sticky-top">
-            <div className="container-fluid px-4">
-                <Link className="navbar-brand d-flex align-items-center" to="/">
-                    <img src="/logo.png" alt="Logo" style={{ height: '50px', marginRight: '15px' }} />
-                    <div style={{ lineHeight: '1.2' }}>
-                        <div className="fw-bold text-dark" style={{ fontSize: '1.25rem' }}>ბილდექს ექსპერტიზა</div>
-                        <div className="text-muted" style={{ fontSize: '0.75rem', fontWeight: '500' }}>ISO/IEC 17020:2012</div>
+        <nav className="app-navbar">
+            <div className="app-navbar navbar-inner">
+                {/* Brand */}
+                <Link className="brand-logo" to="/">
+                    <img src="/logo.png" alt="Logo" style={{ height: '44px', flexShrink: 0 }} />
+                    <div>
+                        <div className="brand-name">ბილდექს ექსპერტიზა</div>
+                        <div className="brand-sub">ISO/IEC 17020:2012</div>
                     </div>
                 </Link>
-                <div className="d-flex gap-2 flex-wrap align-items-center">
-                    <Link className="btn btn-light fw-bold text-secondary border-0" to="/">📊 მთავარი</Link>
-                    {show.inspections && (
-                        <Link className="btn btn-light fw-bold text-secondary border-0" to="/inspections">📂 რეესტრი</Link>
+
+                {/* Nav links */}
+                <NavLink to="/">📊 მთავარი</NavLink>
+
+                {show.inspections && <NavLink to="/inspections">📂 რეესტრი</NavLink>}
+                {show.procedures  && <NavLink to="/procedures">📂 პროცედ.</NavLink>}
+                {show.documents   && <NavLink to="/documents">📄 დოკ-ები</NavLink>}
+                {show.equipment   && <NavLink to="/equipment">🛠️ ხელსაწ.</NavLink>}
+                {show.management  && <NavLink to="/management-review">📋 გადახედვა</NavLink>}
+                {show.insurance   && <NavLink to="/insurance">🛡️ დაზღვ.</NavLink>}
+                {show.complaints  && <NavLink to="/complaints">📨 საჩივ.</NavLink>}
+                {show.audits      && <NavLink to="/internal-audits">🔍 შიდა აუდ.</NavLink>}
+                {show.corrections && <NavLink to="/corrective-actions">⚙️ CAR</NavLink>}
+                {show.companyDocs && <NavLink to="/company-docs">🏢 კომპ.</NavLink>}
+                {show.priceAdequacy && <NavLink to="/price-adequacy">💰 ფასად.</NavLink>}
+                {show.normsAdmin  && <NavLink to="/norms-admin">📊 ნორმ-ბ.</NavLink>}
+                {show.checklist   && <NavLink to="/checklist">✅ ჩეკლ.</NavLink>}
+                {show.auditLog    && <NavLink to="/audit-log">📋 აუდიტი</NavLink>}
+
+                {show.staff && (
+                    <Link className="nav-link-staff" to="/admin">👥 პერსონალი</Link>
+                )}
+
+                {/* User dropdown */}
+                <div className="position-relative ms-auto flex-shrink-0" ref={dropRef}>
+                    <button className="user-pill" onClick={() => setDropOpen(o => !o)}>
+                        👤 <span style={{ fontWeight: 600 }}>{username}</span>
+                        <span style={{ color: 'var(--text-muted)', fontSize: '0.75rem' }}>{ROLE_LABELS[role] || role}</span>
+                        <span style={{ color: 'var(--text-muted)' }}>▾</span>
+                    </button>
+
+                    {dropOpen && (
+                        <div className="user-dropdown">
+                            <div className="role-label">{ROLE_LABELS[role] || role}</div>
+                            <div className="drop-divider" />
+                            <Link
+                                className="drop-item"
+                                to="/change-password"
+                                onClick={() => setDropOpen(false)}
+                            >
+                                🔑 პაროლის შეცვლა
+                            </Link>
+                            <div className="drop-divider" />
+                            <button
+                                className="drop-item danger"
+                                onClick={() => { setDropOpen(false); onLogout(); }}
+                            >
+                                🚪 გასვლა
+                            </button>
+                        </div>
                     )}
-                    {show.documents && (
-                        <Link className="btn btn-light fw-bold text-secondary border-0" to="/documents">📄 დოკუმენტები</Link>
-                    )}
-                    {show.equipment && (
-                        <Link className="btn btn-light fw-bold text-secondary border-0" to="/equipment">🛠️ აპარატურა</Link>
-                    )}
-                    {show.management && (
-                        <Link className="btn btn-light fw-bold text-secondary border-0" to="/management-review">📋 გადახედვა</Link>
-                    )}
-                    {show.insurance && (
-                        <Link className="btn btn-light fw-bold text-secondary border-0" to="/insurance">🛡️ დაზღვევა</Link>
-                    )}
-                    {show.complaints && (
-                        <Link className="btn btn-light fw-bold text-secondary border-0" to="/complaints">📨 საჩივრები</Link>
-                    )}
-                    {show.audits && (
-                        <Link className="btn btn-light fw-bold text-secondary border-0" to="/internal-audits">🔍 აუდიტი</Link>
-                    )}
-                    {show.corrections && (
-                        <Link className="btn btn-light fw-bold text-secondary border-0" to="/corrective-actions">⚙️ CAR</Link>
-                    )}
-                    {show.companyDocs && (
-                        <Link className="btn btn-light fw-bold text-secondary border-0" to="/company-docs">🏢 კომპანია</Link>
-                    )}
-                    {show.priceAdequacy && (
-                        <Link className="btn btn-light fw-bold text-secondary border-0" to="/price-adequacy">💰 ფასადეკ.</Link>
-                    )}
-                    {show.normsAdmin && (
-                        <Link className="btn btn-light fw-bold text-secondary border-0" to="/norms-admin">📊 ნორმ-ბაზა</Link>
-                    )}
-                    {show.checklist && (
-                        <Link className="btn btn-light fw-bold text-secondary border-0" to="/checklist">📋 ჩეკლისტი</Link>
-                    )}
-                    {show.procedures && (
-                        <Link className="btn btn-light fw-bold text-secondary border-0" to="/procedures">📂 პროცედ.</Link>
-                    )}
-                    {show.staff && (
-                        <Link className="btn btn-primary fw-bold px-4 shadow-sm rounded-pill" to="/admin">👥 პერსონალი</Link>
-                    )}
-                    {/* User dropdown — pure React state, no Bootstrap JS needed */}
-                    <div className="position-relative ms-2" ref={dropRef}>
-                        <button
-                            className="btn btn-outline-secondary btn-sm"
-                            onClick={() => setDropOpen(o => !o)}
-                        >
-                            👤 {username} <small className="ms-1 text-muted">{ROLE_LABELS[role] || role}</small> ▾
-                        </button>
-                        {dropOpen && (
-                            <ul className="dropdown-menu dropdown-menu-end show position-absolute" style={{ right: 0, top: '110%', minWidth: '200px', zIndex: 9999 }}>
-                                <li>
-                                    <Link className="dropdown-item" to="/change-password" onClick={() => setDropOpen(false)}>
-                                        🔑 პაროლის შეცვლა
-                                    </Link>
-                                </li>
-                                <li><hr className="dropdown-divider" /></li>
-                                <li>
-                                    <button className="dropdown-item text-danger" onClick={() => { setDropOpen(false); onLogout(); }}>
-                                        🚪 გასვლა
-                                    </button>
-                                </li>
-                            </ul>
-                        )}
-                    </div>
                 </div>
             </div>
         </nav>
@@ -200,14 +195,14 @@ function AppContent() {
 
     return (
         <>
-            <div style={{
-                position: 'fixed', top: 0, left: 0, width: '100%', height: '100%',
-                backgroundImage: 'url("/logo.png")', backgroundRepeat: 'no-repeat',
-                backgroundPosition: 'center', backgroundSize: '40%',
-                opacity: 0.05, zIndex: -1, pointerEvents: 'none'
+            <div className="page-watermark" style={{
+                backgroundImage: 'url("/logo.png")',
+                backgroundRepeat: 'no-repeat',
+                backgroundPosition: 'center',
+                backgroundSize: '40%',
             }} />
             <Navbar username={username} role={role} onLogout={handleLogout} />
-            <div className="container-fluid px-4 pb-5">
+            <div className="container-fluid px-4 pb-5 pt-3">
                 <Routes>
                     <Route path="/" element={<Dashboard role={role} />} />
                     <Route path="/inspections" element={<InspectionList role={role} />} />
@@ -234,6 +229,7 @@ function AppContent() {
                     <Route path="/norms-admin" element={<NormsAdminPage role={role} />} />
                     <Route path="/checklist" element={<ChecklistPage role={role} />} />
                     <Route path="/procedures" element={<ProceduresPage role={role} />} />
+                    <Route path="/audit-log" element={<AuditLogPage role={role} />} />
                     <Route path="*" element={
                         <div className="text-center mt-5">
                             <h1 className="display-1 fw-bold text-muted">404</h1>
