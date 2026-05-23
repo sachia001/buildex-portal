@@ -1217,44 +1217,87 @@ api.delete('/management-reviews/:id', async (req, res) => {
 // --- DASHBOARD STATS ---
 api.get('/dashboard/stats', async (req, res) => {
     try {
-        const today   = new Date();
-        const in5Days = new Date();
-        in5Days.setDate(today.getDate() + 5);
+        const today    = new Date();
+        const in5Days  = new Date(); in5Days.setDate(today.getDate() + 5);
+        const in30Days = new Date(); in30Days.setDate(today.getDate() + 30);
+        const ago30    = new Date(); ago30.setDate(today.getDate() - 30);
 
-        const [total, active, completed, registered, staffCount, equipmentList, urgentList, insuranceList, openComplaints, overdueActions] = await Promise.all([
+        const [
+            total, active, completed, registered, staffCount,
+            equipmentList, urgentList, insuranceList,
+            openComplaints, inProgressComplaints, closedComplaints,
+            openCARs, overdueCARs, closedCARs,
+            plannedAudits, completedAudits,
+            totalProcs, uploadedProcs,
+            recentLogs,
+            monthlyInspections,
+            staffList,
+        ] = await Promise.all([
             Inspection.countDocuments(),
             Inspection.countDocuments({ status: 'მიმდინარე' }),
             Inspection.countDocuments({ status: 'დასრულებული' }),
             Inspection.countDocuments({ status: 'რეგისტრირებული' }),
             User.countDocuments(),
-            Equipment.find(),
+            Equipment.find().select('name nextCalibration status'),
             Inspection.find({
-                deadline: { $gte: today, $lte: in5Days },
+                deadline: { $gte: today, $lte: in30Days },
                 status:   { $ne: 'დასრულებული' }
-            }).populate('expert', 'firstName lastName').sort({ deadline: 1 }).limit(10),
+            }).populate('expert', 'firstName lastName').sort({ deadline: 1 }).limit(15),
             Insurance.find({ status: 'active' }).sort({ endDate: 1 }),
             Complaint.countDocuments({ status: 'განხილვაში' }),
-            CorrectiveAction.countDocuments({ status: { $ne: 'დახურული' }, deadline: { $lt: today } })
+            Complaint.countDocuments({ status: 'პასუხი გაეცა' }),
+            Complaint.countDocuments({ status: 'დახურულია' }),
+            CorrectiveAction.countDocuments({ status: { $ne: 'დახურული' } }),
+            CorrectiveAction.countDocuments({ status: { $ne: 'დახურული' }, deadline: { $lt: today } }),
+            CorrectiveAction.countDocuments({ status: 'დახურული' }),
+            InternalAudit.countDocuments({ status: { $ne: 'დასრულებული' } }),
+            InternalAudit.countDocuments({ status: 'დასრულებული' }),
+            ProcedureDoc.countDocuments(),
+            ProcedureDoc.countDocuments({ $or: [{ filePath: { $ne: '' } }, { cloudinaryId: { $ne: '' } }] }),
+            AuditLog.find().sort({ timestamp: -1 }).limit(8).select('action resource resourceName username role timestamp'),
+            Inspection.countDocuments({ createdAt: { $gte: ago30 } }),
+            User.find().select('firstName lastName authExpiry status'),
         ]);
 
-        const eqStats = { expired: 0, warning: 0, valid: 0 };
+        // Equipment stats
+        const eqStats = { expired: 0, warning: 0, valid: 0, list: [] };
         equipmentList.forEach(eq => {
-            if (!eq.nextCalibration) return;
-            const diffDays = Math.ceil((new Date(eq.nextCalibration) - today) / (1000 * 60 * 60 * 24));
-            if (diffDays < 0)       eqStats.expired++;
-            else if (diffDays <= 30) eqStats.warning++;
-            else                     eqStats.valid++;
+            if (!eq.nextCalibration) { eqStats.valid++; return; }
+            const d = Math.ceil((new Date(eq.nextCalibration) - today) / 86400000);
+            if (d < 0)       { eqStats.expired++; eqStats.list.push({ name: eq.name, days: d, status: 'expired' }); }
+            else if (d <= 30){ eqStats.warning++; eqStats.list.push({ name: eq.name, days: d, status: 'warning' }); }
+            else               eqStats.valid++;
         });
 
+        // Insurance stats
         const insStats = { expiringSoon: [], expired: [] };
         insuranceList.forEach(ins => {
             if (!ins.endDate) return;
-            const diffDays = Math.ceil((new Date(ins.endDate) - today) / (1000 * 60 * 60 * 24));
-            if (diffDays < 0) insStats.expired.push({ id: ins._id, insurerName: ins.insurerName, policyNumber: ins.policyNumber, endDate: ins.endDate });
-            else if (diffDays <= 30) insStats.expiringSoon.push({ id: ins._id, insurerName: ins.insurerName, policyNumber: ins.policyNumber, endDate: ins.endDate, daysLeft: diffDays });
+            const d = Math.ceil((new Date(ins.endDate) - today) / 86400000);
+            if (d < 0) insStats.expired.push({ id: ins._id, insurerName: ins.insurerName, endDate: ins.endDate, days: d });
+            else if (d <= 30) insStats.expiringSoon.push({ id: ins._id, insurerName: ins.insurerName, endDate: ins.endDate, daysLeft: d });
         });
 
-        res.json({ counts: { total, active, completed, registered, staffCount }, equipment: eqStats, urgentList, insurance: insStats, alerts: { openComplaints, overdueActions } });
+        // Staff expiry
+        const expiringStaff = staffList
+            .filter(s => s.authExpiry)
+            .map(s => ({ ...s.toObject(), daysLeft: Math.ceil((new Date(s.authExpiry) - today) / 86400000) }))
+            .filter(s => s.daysLeft <= 60)
+            .sort((a, b) => a.daysLeft - b.daysLeft);
+
+        res.json({
+            counts: { total, active, completed, registered, staffCount, monthlyInspections },
+            equipment: eqStats,
+            urgentList,
+            insurance: insStats,
+            alerts: { openComplaints, overdueActions: overdueCARs },
+            complaints: { open: openComplaints, inProgress: inProgressComplaints, closed: closedComplaints },
+            correctiveActions: { open: openCARs, overdue: overdueCARs, closed: closedCARs },
+            audits: { planned: plannedAudits, completed: completedAudits },
+            procedures: { total: totalProcs, uploaded: uploadedProcs },
+            recentLogs,
+            expiringStaff,
+        });
     } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
