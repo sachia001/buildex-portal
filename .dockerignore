@@ -1,7 +1,36 @@
+# ─── Dependencies & build artifacts (reinstalled/rebuilt in the image) ───
 node_modules
 client/node_modules
+client/build
+
+# ─── VCS & CI ───
+.git
+.github
+.gitignore
+
+# ─── Secrets & local env ───
 .env
 .env.local
-uploads
+.env.production
 .claude
+
+# ─── Logs & OS cruft ───
 *.log
+.DS_Store
+Thumbs.db
+
+# ─── User uploads (ephemeral; not part of the image) ───
+uploads
+
+# ─── Audit, docs & diagrams (not needed at runtime) ───
+audit
+diagrams
+docs
+*.md
+
+# ─── Dev/throwaway artifacts ───
+tmp_*
+*.py
+scripts/*.png
+BUILDEXEXPERTISE.html
+BUILDEXEXPERTISE_files/

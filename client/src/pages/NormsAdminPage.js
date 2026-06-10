@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { confirmDialog } from '../components/Feedback';
 
 const NORM_TYPES = ['NER', 'მშენ. კავშირი', 'SNIP', 'SNiP', 'SHNEB', 'სხვა'];
 
@@ -29,7 +30,7 @@ export default function NormsAdminPage({ role }) {
     };
 
     const handleSeedDemo = async () => {
-        if (!window.confirm(`ჩაიტვირთოს საცდელი NER ბაზა ${form.year} კვ.${form.quarter}?`)) return;
+        if (!(await confirmDialog(`ჩაიტვირთოს საცდელი NER ბაზა ${form.year} კვ.${form.quarter}?`))) return;
         setSeeding(true); setMsg(null);
         try {
             const r = await axios.post('/api/norms/seed-demo', { year: form.year, quarter: form.quarter, normType: form.normType });
@@ -61,7 +62,7 @@ export default function NormsAdminPage({ role }) {
     };
 
     const handleDelete = async (id) => {
-        if (!window.confirm('ნამდვილად წაშლით ნორმ-ფაილს და მის ყველა ჩანაწერს?')) return;
+        if (!(await confirmDialog('ნამდვილად წაშლით ნორმ-ფაილს და მის ყველა ჩანაწერს?'))) return;
         try {
             await axios.delete(`/api/norms/files/${id}`);
             setFiles(f => f.filter(x => x._id !== id));

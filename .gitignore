@@ -2,6 +2,12 @@
 node_modules/
 client/node_modules/
 
+# Built client bundle (OPS-004 — built in Docker/CI, must not be committed)
+client/build/
+
+# Throwaway extraction/scan artifacts (OPS-004)
+tmp_*
+
 # Environment variables
 .env
 .env.local

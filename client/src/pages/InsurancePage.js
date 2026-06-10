@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Container, Card, Table, Button, Modal, Form, Badge, Row, Col, Alert } from 'react-bootstrap';
 import axios from 'axios';
+import { toast, confirmDialog } from '../components/Feedback';
 
 const InsurancePage = ({ role }) => {
     const [policies, setPolicies] = useState([]);
@@ -71,7 +72,7 @@ const InsurancePage = ({ role }) => {
 
     const handleSave = async () => {
         if (!form.insurerName || !form.policyNumber || !form.startDate || !form.endDate) {
-            return alert('შეავსეთ სავალდებულო ველები');
+            return toast('შეავსეთ სავალდებულო ველები', 'warning');
         }
         setSaving(true);
         try {
@@ -91,16 +92,16 @@ const InsurancePage = ({ role }) => {
             }
             setShowModal(false);
             fetchPolicies();
-        } catch (err) { alert('შეცდომა: ' + (err.response?.data?.error || err.message)); }
+        } catch (err) { toast('შეცდომა: ' + (err.response?.data?.error || err.message), 'danger'); }
         finally { setSaving(false); }
     };
 
     const handleDelete = async (id) => {
-        if (!window.confirm('წავშალოთ პოლისი?')) return;
+        if (!(await confirmDialog('წავშალოთ პოლისი?'))) return;
         try {
             await axios.delete(`/api/insurance/${id}`);
             fetchPolicies();
-        } catch (err) { alert('ვერ წაიშალა'); }
+        } catch (err) { toast('ვერ წაიშალა', 'danger'); }
     };
 
     const expiredCount = policies.filter(p => getDaysLeft(p.endDate) < 0).length;
@@ -158,7 +159,7 @@ const InsurancePage = ({ role }) => {
                                 <td>{getStatusBadge(p.endDate)}</td>
                                 <td>
                                     {p.fileUrl
-                                        ? <a href={`/${p.fileUrl}`} target="_blank" rel="noreferrer" className="btn btn-sm btn-link p-0">📄 ნახვა</a>
+                                        ? <a href={`/${p.fileUrl}?token=${localStorage.getItem('token')}`} target="_blank" rel="noreferrer" className="btn btn-sm btn-link p-0">📄 ნახვა</a>
                                         : <span className="text-muted small">—</span>}
                                 </td>
                                 <td>
@@ -182,38 +183,38 @@ const InsurancePage = ({ role }) => {
                 <Modal.Body>
                     <Row className="g-3">
                         <Col md={6}>
-                            <Form.Label className="fw-bold small">სადაზღვევო კომპანია *</Form.Label>
-                            <Form.Control value={form.insurerName} onChange={e => setForm(p => ({...p, insurerName: e.target.value}))} placeholder="კომპანიის დასახელება" />
+                            <Form.Label htmlFor="fld-insurerName" className="fw-bold small">სადაზღვევო კომპანია *</Form.Label>
+                            <Form.Control id="fld-insurerName" value={form.insurerName} onChange={e => setForm(p => ({...p, insurerName: e.target.value}))} placeholder="კომპანიის დასახელება" />
                         </Col>
                         <Col md={6}>
-                            <Form.Label className="fw-bold small">პოლისის ნომერი *</Form.Label>
-                            <Form.Control value={form.policyNumber} onChange={e => setForm(p => ({...p, policyNumber: e.target.value}))} placeholder="პოლისის №" />
+                            <Form.Label htmlFor="fld-policyNumber" className="fw-bold small">პოლისის ნომერი *</Form.Label>
+                            <Form.Control id="fld-policyNumber" value={form.policyNumber} onChange={e => setForm(p => ({...p, policyNumber: e.target.value}))} placeholder="პოლისის №" />
                         </Col>
                         <Col md={12}>
-                            <Form.Label className="fw-bold small">დაზღვევის სახეობა</Form.Label>
-                            <Form.Select value={form.insuranceType} onChange={e => setForm(p => ({...p, insuranceType: e.target.value}))}>
+                            <Form.Label htmlFor="fld-insuranceType" className="fw-bold small">დაზღვევის სახეობა</Form.Label>
+                            <Form.Select id="fld-insuranceType" value={form.insuranceType} onChange={e => setForm(p => ({...p, insuranceType: e.target.value}))}>
                                 {insuranceTypes.map(t => <option key={t} value={t}>{t}</option>)}
                             </Form.Select>
                         </Col>
                         <Col md={6}>
-                            <Form.Label className="fw-bold small">დაწყების თარიღი *</Form.Label>
-                            <Form.Control type="date" value={form.startDate} onChange={e => setForm(p => ({...p, startDate: e.target.value}))} />
+                            <Form.Label htmlFor="fld-startDate" className="fw-bold small">დაწყების თარიღი *</Form.Label>
+                            <Form.Control id="fld-startDate" type="date" value={form.startDate} onChange={e => setForm(p => ({...p, startDate: e.target.value}))} />
                         </Col>
                         <Col md={6}>
-                            <Form.Label className="fw-bold small">დამთავრების თარიღი *</Form.Label>
-                            <Form.Control type="date" value={form.endDate} onChange={e => setForm(p => ({...p, endDate: e.target.value}))} />
+                            <Form.Label htmlFor="fld-endDate" className="fw-bold small">დამთავრების თარიღი *</Form.Label>
+                            <Form.Control id="fld-endDate" type="date" value={form.endDate} onChange={e => setForm(p => ({...p, endDate: e.target.value}))} />
                         </Col>
                         <Col md={6}>
-                            <Form.Label className="fw-bold small">დაზღვეული თანხა</Form.Label>
-                            <Form.Control value={form.insuredAmount} onChange={e => setForm(p => ({...p, insuredAmount: e.target.value}))} placeholder="მაგ: 50,000 ₾" />
+                            <Form.Label htmlFor="fld-insuredAmount" className="fw-bold small">დაზღვეული თანხა</Form.Label>
+                            <Form.Control id="fld-insuredAmount" value={form.insuredAmount} onChange={e => setForm(p => ({...p, insuredAmount: e.target.value}))} placeholder="მაგ: 50,000 ₾" />
                         </Col>
                         <Col md={6}>
                             <Form.Label className="fw-bold small">პოლისის ფაილი (PDF)</Form.Label>
                             <Form.Control type="file" accept=".pdf,.jpg,.png" onChange={e => setFile(e.target.files[0])} />
                         </Col>
                         <Col md={12}>
-                            <Form.Label className="fw-bold small">შენიშვნა</Form.Label>
-                            <Form.Control as="textarea" rows={2} value={form.notes} onChange={e => setForm(p => ({...p, notes: e.target.value}))} placeholder="დამატებითი ინფორმაცია..." />
+                            <Form.Label htmlFor="fld-notes" className="fw-bold small">შენიშვნა</Form.Label>
+                            <Form.Control id="fld-notes" as="textarea" rows={2} value={form.notes} onChange={e => setForm(p => ({...p, notes: e.target.value}))} placeholder="დამატებითი ინფორმაცია..." />
                         </Col>
                     </Row>
                 </Modal.Body>

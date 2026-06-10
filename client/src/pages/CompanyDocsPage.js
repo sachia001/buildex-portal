@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Container, Card, Row, Col, Button, Form, Table, Badge, Modal, Accordion, Alert } from 'react-bootstrap';
 import { PDFDownloadLink } from '@react-pdf/renderer';
 import axios from 'axios';
+import { toast, confirmDialog } from '../components/Feedback';
 import { Link } from 'react-router-dom';
 import ShareTransferPdf from '../pdf-components/ShareTransferPdf';
 import CharterPdf from '../pdf-components/CharterPdf';
@@ -175,13 +176,13 @@ const CompanyDocsPage = ({ role }) => {
       setShowUpload(false);
       setUploadForm({ title: '', category: 'სხვა', description: '', docDate: new Date().toISOString().split('T')[0] });
       setUploadFile(null); fetchDocs();
-    } catch (err) { alert('შეცდომა: ' + (err.response?.data?.error || err.message)); }
+    } catch (err) { toast('შეცდომა: ' + (err.response?.data?.error || err.message), 'danger'); }
     finally { setUploading(false); }
   };
   const handleDelete = async (id) => {
-    if (!window.confirm('ნამდვილად გსურთ წაშლა?')) return;
+    if (!(await confirmDialog('ნამდვილად გსურთ წაშლა?'))) return;
     try { await axios.delete(`/api/company-docs/${id}`); fetchDocs(); }
-    catch { alert('წაშლა ვერ მოხერხდა'); }
+    catch { toast('წაშლა ვერ მოხერხდა', 'danger'); }
   };
   const catVariant = cat => ({ 'წესდება': 'primary', 'PO გადაწყვეტილება': 'success', 'სადამფ. შეთანხმება': 'info', 'სხვა': 'secondary' }[cat] || 'secondary');
 
@@ -357,7 +358,7 @@ const CompanyDocsPage = ({ role }) => {
                 <td className="small text-muted">{doc.description || '-'}</td>
                 <td className="text-center">
                   <div className="d-flex gap-1 justify-content-center">
-                    {doc.fileUrl && <a href={`/${doc.fileUrl}`} target="_blank" rel="noreferrer" className="btn btn-sm btn-outline-primary">👁 ნახვა</a>}
+                    {doc.fileUrl && <a href={`/${doc.fileUrl}?token=${localStorage.getItem('token')}`} target="_blank" rel="noreferrer" className="btn btn-sm btn-outline-primary">👁 ნახვა</a>}
                     {role === 'admin' && <Button size="sm" variant="outline-danger" onClick={() => handleDelete(doc._id)}>🗑️</Button>}
                   </div>
                 </td>
@@ -777,12 +778,12 @@ const CompanyDocsPage = ({ role }) => {
         <Modal.Body>
           <Form onSubmit={handleUpload}>
             <Form.Group className="mb-3">
-              <Form.Label className="fw-bold small">სათაური *</Form.Label>
-              <Form.Control required value={uploadForm.title} onChange={e => setUploadForm({ ...uploadForm, title: e.target.value })} placeholder="მაგ: წესდება v.1" />
+              <Form.Label htmlFor="fld-title" className="fw-bold small">სათაური *</Form.Label>
+              <Form.Control id="fld-title" required value={uploadForm.title} onChange={e => setUploadForm({ ...uploadForm, title: e.target.value })} placeholder="მაგ: წესდება v.1" />
             </Form.Group>
             <Form.Group className="mb-3">
-              <Form.Label className="fw-bold small">კატეგორია</Form.Label>
-              <Form.Select value={uploadForm.category} onChange={e => setUploadForm({ ...uploadForm, category: e.target.value })}>
+              <Form.Label htmlFor="fld-category" className="fw-bold small">კატეგორია</Form.Label>
+              <Form.Select id="fld-category" value={uploadForm.category} onChange={e => setUploadForm({ ...uploadForm, category: e.target.value })}>
                 <option>წესდება</option>
                 <option>PO გადაწყვეტილება</option>
                 <option>სადამფ. შეთანხმება</option>
@@ -791,12 +792,12 @@ const CompanyDocsPage = ({ role }) => {
               </Form.Select>
             </Form.Group>
             <Form.Group className="mb-3">
-              <Form.Label className="fw-bold small">თარიღი</Form.Label>
-              <Form.Control type="date" value={uploadForm.docDate} onChange={e => setUploadForm({ ...uploadForm, docDate: e.target.value })} />
+              <Form.Label htmlFor="fld-docDate" className="fw-bold small">თარიღი</Form.Label>
+              <Form.Control id="fld-docDate" type="date" value={uploadForm.docDate} onChange={e => setUploadForm({ ...uploadForm, docDate: e.target.value })} />
             </Form.Group>
             <Form.Group className="mb-3">
-              <Form.Label className="fw-bold small">აღწერა</Form.Label>
-              <Form.Control as="textarea" rows={2} value={uploadForm.description} onChange={e => setUploadForm({ ...uploadForm, description: e.target.value })} />
+              <Form.Label htmlFor="fld-description" className="fw-bold small">აღწერა</Form.Label>
+              <Form.Control id="fld-description" as="textarea" rows={2} value={uploadForm.description} onChange={e => setUploadForm({ ...uploadForm, description: e.target.value })} />
             </Form.Group>
             <Form.Group className="mb-3">
               <Form.Label className="fw-bold small">ფაილი</Form.Label>

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Container, Table, Button, Form, Card, Row, Col, Badge, Spinner, Modal } from 'react-bootstrap';
 import axios from 'axios';
+import { toast, confirmDialog } from '../components/Feedback';
 
 const EquipmentManager = () => {
     const [equipment, setEquipment] = useState([]);
@@ -38,21 +39,21 @@ const EquipmentManager = () => {
         e.preventDefault();
         try {
             await axios.post('/api/equipment', formData);
-            alert("✅ ხელსაწყო დაემატა!");
+            toast("✅ ხელსაწყო დაემატა!", 'success');
             fetchEquipment(); // სიის განახლება
             setFormData({ name: '', serialNumber: '', manufacturer: '', calibrationDate: '', calibrationInterval: 12 });
-        } catch (err) { 
+        } catch (err) {
             const errorMsg = err.response?.data?.error || "შეცდომა დამატებისას!";
-            alert("❌ " + errorMsg); 
+            toast("❌ " + errorMsg, 'danger');
         }
     };
 
     const handleDelete = async (id) => {
-        if(window.confirm("ნამდვილად გსურთ ხელსაწყოს წაშლა?")) {
+        if (await confirmDialog("ნამდვილად გსურთ ხელსაწყოს წაშლა?")) {
             try {
                 await axios.delete(`/api/equipment/${id}`);
                 fetchEquipment();
-            } catch (err) { alert("წაშლა ვერ მოხერხდა"); }
+            } catch (err) { toast("წაშლა ვერ მოხერხდა", 'danger'); }
         }
     };
 
@@ -74,7 +75,7 @@ const EquipmentManager = () => {
             setShowEdit(false);
             fetchEquipment();
         } catch (err) {
-            alert('შეცდომა: ' + (err.response?.data?.error || err.message));
+            toast('შეცდომა: ' + (err.response?.data?.error || err.message), 'danger');
         } finally { setEditUploading(false); }
     };
 
@@ -103,24 +104,24 @@ const EquipmentManager = () => {
                         <h5 className="text-primary fw-bold mb-4">ახალი ხელსაწყო</h5>
                         <Form onSubmit={handleSubmit}>
                             <Form.Group className="mb-3">
-                                <Form.Label className="small fw-bold">დასახელება</Form.Label>
-                                <Form.Control required name="name" value={formData.name} onChange={handleChange} placeholder="მაგ: ლაზერული მანძილმზომი" />
+                                <Form.Label htmlFor="fld-name" className="small fw-bold">დასახელება</Form.Label>
+                                <Form.Control id="fld-name" required name="name" value={formData.name} onChange={handleChange} placeholder="მაგ: ლაზერული მანძილმზომი" />
                             </Form.Group>
                             <Form.Group className="mb-3">
-                                <Form.Label className="small fw-bold">სერიული ნომერი</Form.Label>
-                                <Form.Control required name="serialNumber" value={formData.serialNumber} onChange={handleChange} />
+                                <Form.Label htmlFor="fld-serialNumber" className="small fw-bold">სერიული ნომერი</Form.Label>
+                                <Form.Control id="fld-serialNumber" required name="serialNumber" value={formData.serialNumber} onChange={handleChange} />
                             </Form.Group>
                             <Form.Group className="mb-3">
-                                <Form.Label className="small fw-bold">მწარმოებელი</Form.Label>
-                                <Form.Control name="manufacturer" value={formData.manufacturer} onChange={handleChange} />
+                                <Form.Label htmlFor="fld-manufacturer" className="small fw-bold">მწარმოებელი</Form.Label>
+                                <Form.Control id="fld-manufacturer" name="manufacturer" value={formData.manufacturer} onChange={handleChange} />
                             </Form.Group>
                             <Form.Group className="mb-3">
-                                <Form.Label className="small fw-bold">ბოლო კალიბრაცია</Form.Label>
-                                <Form.Control required type="date" name="calibrationDate" value={formData.calibrationDate} onChange={handleChange} />
+                                <Form.Label htmlFor="fld-calibrationDate" className="small fw-bold">ბოლო კალიბრაცია</Form.Label>
+                                <Form.Control id="fld-calibrationDate" required type="date" name="calibrationDate" value={formData.calibrationDate} onChange={handleChange} />
                             </Form.Group>
                             <Form.Group className="mb-4">
-                                <Form.Label className="small fw-bold">ინტერვალი (თვე)</Form.Label>
-                                <Form.Control type="number" name="calibrationInterval" value={formData.calibrationInterval} onChange={handleChange} />
+                                <Form.Label htmlFor="fld-calibrationInterval" className="small fw-bold">ინტერვალი (თვე)</Form.Label>
+                                <Form.Control id="fld-calibrationInterval" type="number" name="calibrationInterval" value={formData.calibrationInterval} onChange={handleChange} />
                             </Form.Group>
                             <Button variant="primary" type="submit" className="w-100 fw-bold py-2">
                                 + ბაზაში დამატება

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Container, Card, Form, Button, Row, Col, Spinner } from 'react-bootstrap';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import { toast } from '../components/Feedback';
 
 const AddInspection = () => {
     const navigate = useNavigate();
@@ -61,13 +62,13 @@ const AddInspection = () => {
         e.preventDefault();
         setLoading(true);
         if(!formData.objectName || !formData.clientName) {
-            alert("შეავსეთ ობიექტი და დამკვეთი!"); setLoading(false); return;
+            toast("შეავსეთ ობიექტი და დამკვეთი!", 'warning'); setLoading(false); return;
         }
         try {
             await axios.post('/api/inspections', formData);
-            alert("✅ საქმე და განცხადება დარეგისტრირდა!");
+            toast("✅ საქმე და განცხადება დარეგისტრირდა!", 'success');
             navigate('/inspections');
-        } catch (err) { alert("შეცდომა: " + err.message); } 
+        } catch (err) { toast("შეცდომა: " + err.message, 'danger'); }
         finally { setLoading(false); }
     };
 
@@ -85,17 +86,17 @@ const AddInspection = () => {
                         <Card.Header className="bg-white py-3 border-bottom"><h6 className="m-0 fw-bold text-primary">1. ობიექტის და დამკვეთის ინფორმაცია</h6></Card.Header>
                         <Card.Body>
                             <Row className="g-3">
-                                <Col md={6}><Form.Label className="small fw-bold">ობიექტი *</Form.Label><Form.Control name="objectName" required onChange={handleChange} /></Col>
-                                <Col md={6}><Form.Label className="small fw-bold">მისამართი</Form.Label><Form.Control name="objectAddress" onChange={handleChange} /></Col>
+                                <Col md={6}><Form.Label htmlFor="fld-objectName" className="small fw-bold">ობიექტი *</Form.Label><Form.Control id="fld-objectName" name="objectName" required onChange={handleChange} /></Col>
+                                <Col md={6}><Form.Label htmlFor="fld-objectAddress" className="small fw-bold">მისამართი</Form.Label><Form.Control id="fld-objectAddress" name="objectAddress" onChange={handleChange} /></Col>
                                 
                                 {/* 👇 ტენდერის ველები (არასავალდებულო) */}
-                                <Col md={4}><Form.Label className="small fw-bold text-muted">ტენდერის ნომერი (SPA...)</Form.Label><Form.Control name="tenderNumber" onChange={handleChange} /></Col>
-                                <Col md={8}><Form.Label className="small fw-bold text-muted">ტენდერის ბმული</Form.Label><Form.Control name="tenderLink" onChange={handleChange} placeholder="https://..." /></Col>
+                                <Col md={4}><Form.Label htmlFor="fld-tenderNumber" className="small fw-bold text-muted">ტენდერის ნომერი (SPA...)</Form.Label><Form.Control id="fld-tenderNumber" name="tenderNumber" onChange={handleChange} /></Col>
+                                <Col md={8}><Form.Label htmlFor="fld-tenderLink" className="small fw-bold text-muted">ტენდერის ბმული</Form.Label><Form.Control id="fld-tenderLink" name="tenderLink" onChange={handleChange} placeholder="https://..." /></Col>
 
                                 <Col md={12}><hr/></Col>
-                                <Col md={4}><Form.Label className="small fw-bold">დამკვეთი *</Form.Label><Form.Control name="clientName" required onChange={handleChange} /></Col>
-                                <Col md={4}><Form.Label className="small fw-bold">ს/კ</Form.Label><Form.Control name="clientID" onChange={handleChange} /></Col>
-                                <Col md={4}><Form.Label className="small fw-bold">ტელეფონი</Form.Label><Form.Control name="clientPhone" onChange={handleChange} /></Col>
+                                <Col md={4}><Form.Label htmlFor="fld-clientName" className="small fw-bold">დამკვეთი *</Form.Label><Form.Control id="fld-clientName" name="clientName" required onChange={handleChange} /></Col>
+                                <Col md={4}><Form.Label htmlFor="fld-clientID" className="small fw-bold">ს/კ</Form.Label><Form.Control id="fld-clientID" name="clientID" onChange={handleChange} /></Col>
+                                <Col md={4}><Form.Label htmlFor="fld-clientPhone" className="small fw-bold">ტელეფონი</Form.Label><Form.Control id="fld-clientPhone" name="clientPhone" onChange={handleChange} /></Col>
                             </Row>
                         </Card.Body>
                     </Card>
@@ -106,17 +107,17 @@ const AddInspection = () => {
                         <Card.Body>
                             <Row className="g-3">
                                 <Col md={12}>
-                                    <Form.Label className="small fw-bold">ინსპექტირების სფერო</Form.Label>
-                                    <Form.Select name="inspectionScope" value={formData.inspectionScope} onChange={handleChange}>
+                                    <Form.Label htmlFor="fld-inspectionScope" className="small fw-bold">ინსპექტირების სფერო</Form.Label>
+                                    <Form.Select id="fld-inspectionScope" name="inspectionScope" value={formData.inspectionScope} onChange={handleChange}>
                                         {scopes.map(s => <option key={s} value={s}>{s}</option>)}
                                     </Form.Select>
                                 </Col>
                                 <Col md={12}>
-                                    <Form.Label className="small fw-bold">განცხადების შინაარსი</Form.Label>
-                                    <Form.Control as="textarea" rows={3} name="applicationContent" value={formData.applicationContent} onChange={handleChange} />
+                                    <Form.Label htmlFor="fld-applicationContent" className="small fw-bold">განცხადების შინაარსი</Form.Label>
+                                    <Form.Control id="fld-applicationContent" as="textarea" rows={3} name="applicationContent" value={formData.applicationContent} onChange={handleChange} />
                                 </Col>
-                                <Col md={6}><Form.Label className="small fw-bold">დაწყება</Form.Label><Form.Control type="date" name="startDate" value={formData.startDate} onChange={handleChange} /></Col>
-                                <Col md={6}><Form.Label className="small fw-bold">დასრულების ვადა</Form.Label><Form.Control type="date" name="deadline" onChange={handleChange} /></Col>
+                                <Col md={6}><Form.Label htmlFor="fld-startDate" className="small fw-bold">დაწყება</Form.Label><Form.Control id="fld-startDate" type="date" name="startDate" value={formData.startDate} onChange={handleChange} /></Col>
+                                <Col md={6}><Form.Label htmlFor="fld-deadline" className="small fw-bold">დასრულების ვადა</Form.Label><Form.Control id="fld-deadline" type="date" name="deadline" onChange={handleChange} /></Col>
                             </Row>
                         </Card.Body>
                     </Card>
@@ -125,7 +126,7 @@ const AddInspection = () => {
                     <Card className="shadow-sm border-0 mb-4">
                         <Card.Header className="bg-white py-3 border-bottom"><h6 className="m-0 fw-bold text-primary">2ბ. წარმოდგენილი დოკუმენტები</h6></Card.Header>
                         <Card.Body>
-                            <Form.Label className="small fw-bold d-block mb-2">მონიშნეთ განაცხადთან ერთად წარმოდგენილი დოკუმენტები:</Form.Label>
+                            <Form.Label htmlFor="fld-qualityManager" className="small fw-bold d-block mb-2">მონიშნეთ განაცხადთან ერთად წარმოდგენილი დოკუმენტები:</Form.Label>
                             <div className="d-flex flex-wrap gap-3">
                                 {submittedDocOptions.map(doc => (
                                     <Form.Check
@@ -178,7 +179,7 @@ const AddInspection = () => {
                                 </Col>
                                 <Col md={4}>
                                     <Form.Label className="small fw-bold">ხარისხის მენეჯერი</Form.Label>
-                                    <Form.Select name="qualityManager" onChange={handleChange}>
+                                    <Form.Select id="fld-qualityManager" name="qualityManager" onChange={handleChange}>
                                         <option value="">-- აირჩიეთ --</option>
                                         {staff.filter(s => s.position === 'ხარ. მენეჯერი').map(s => (
                                             <option key={s._id} value={s._id}>{s.firstName} {s.lastName}</option>

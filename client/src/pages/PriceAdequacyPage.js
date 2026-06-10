@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import * as XLSX from 'xlsx';
+import { toast, confirmDialog } from '../components/Feedback';
 import { pdf } from '@react-pdf/renderer';
 import PriceAdequacyReportPdf from '../pdf-components/PriceAdequacyReportPdf';
 
@@ -92,7 +93,7 @@ export default function PriceAdequacyPage({ role }) {
     };
 
     const deleteCheck = async (id) => {
-        if (!window.confirm('წაშლით შემოწმებას?')) return;
+        if (!(await confirmDialog('წაშლით შემოწმებას?'))) return;
         try {
             await axios.delete(`/api/price-adequacy/${id}`);
             setChecks(c => c.filter(x => x._id !== id));
@@ -128,7 +129,7 @@ export default function PriceAdequacyPage({ role }) {
             a.click();
             URL.revokeObjectURL(url);
         } catch (err) {
-            alert('Word გენერაცია ვერ მოხდა: ' + (err.response?.status === 401 ? 'ავტორიზაცია საჭიროა' : err.message));
+            toast('Word გენერაცია ვერ მოხდა: ' + (err.response?.status === 401 ? 'ავტორიზაცია საჭიროა' : err.message), 'danger');
         }
     };
 

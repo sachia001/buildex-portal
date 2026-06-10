@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Container, Table, Button, Form, Card, Modal, Row, Col, Badge } from 'react-bootstrap';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
+import { toast, confirmDialog } from '../components/Feedback';
 
 const statusVariant = s => ({ 'ღია': 'danger', 'მიმდინარე': 'warning', 'დახურული': 'success' }[s] || 'secondary');
 const statusText = s => ({ 'ღია': undefined, 'მიმდინარე': 'dark', 'დახურული': undefined }[s]);
@@ -56,13 +57,13 @@ const CorrectiveActionsPage = ({ role }) => {
             }
             setShow(false);
             fetch();
-        } catch (err) { alert('შეცდომა: ' + (err.response?.data?.error || err.message)); }
+        } catch (err) { toast('შეცდომა: ' + (err.response?.data?.error || err.message), 'danger'); }
     };
 
     const handleDelete = async id => {
-        if (!window.confirm('ნამდვილად გსურთ ჩანაწერის წაშლა?')) return;
+        if (!(await confirmDialog('ნამდვილად გსურთ ჩანაწერის წაშლა?'))) return;
         try { await axios.delete(`/api/corrective-actions/${id}`); fetch(); }
-        catch { alert('წაშლა ვერ მოხერხდა'); }
+        catch { toast('წაშლა ვერ მოხერხდა', 'danger'); }
     };
 
     const isOverdue = item => item.status !== 'დახურული' && item.deadline && new Date(item.deadline) < new Date();
@@ -136,8 +137,8 @@ const CorrectiveActionsPage = ({ role }) => {
                     <Form onSubmit={handleSubmit}>
                         <Row className="g-3">
                             <Col md={4}>
-                                <Form.Label className="fw-bold small">წყარო</Form.Label>
-                                <Form.Select name="sourceType" value={formData.sourceType} onChange={handleChange}>
+                                <Form.Label htmlFor="fld-sourceType" className="fw-bold small">წყარო</Form.Label>
+                                <Form.Select id="fld-sourceType" name="sourceType" value={formData.sourceType} onChange={handleChange}>
                                     <option>შიდა აუდიტი</option>
                                     <option>საჩივარი</option>
                                     <option>გარე აუდიტი</option>
@@ -146,44 +147,44 @@ const CorrectiveActionsPage = ({ role }) => {
                                 </Form.Select>
                             </Col>
                             <Col md={4}>
-                                <Form.Label className="fw-bold small">წყაროს რეფ. ნომერი</Form.Label>
-                                <Form.Control name="sourceRef" value={formData.sourceRef} onChange={handleChange} placeholder="AUD-1/26 ან COMP-1/26" />
+                                <Form.Label htmlFor="fld-sourceRef" className="fw-bold small">წყაროს რეფ. ნომერი</Form.Label>
+                                <Form.Control id="fld-sourceRef" name="sourceRef" value={formData.sourceRef} onChange={handleChange} placeholder="AUD-1/26 ან COMP-1/26" />
                             </Col>
                             <Col md={4}>
-                                <Form.Label className="fw-bold small">სტატუსი</Form.Label>
-                                <Form.Select name="status" value={formData.status} onChange={handleChange}>
+                                <Form.Label htmlFor="fld-status" className="fw-bold small">სტატუსი</Form.Label>
+                                <Form.Select id="fld-status" name="status" value={formData.status} onChange={handleChange}>
                                     <option>ღია</option>
                                     <option>მიმდინარე</option>
                                     <option>დახურული</option>
                                 </Form.Select>
                             </Col>
                             <Col md={12}>
-                                <Form.Label className="fw-bold small">შეუსაბამობის აღწერა *</Form.Label>
-                                <Form.Control as="textarea" rows={2} name="description" required value={formData.description} onChange={handleChange} />
+                                <Form.Label htmlFor="fld-description" className="fw-bold small">შეუსაბამობის აღწერა *</Form.Label>
+                                <Form.Control id="fld-description" as="textarea" rows={2} name="description" required value={formData.description} onChange={handleChange} />
                             </Col>
                             <Col md={12}>
-                                <Form.Label className="fw-bold small">ძირეული მიზეზი</Form.Label>
-                                <Form.Control as="textarea" rows={2} name="rootCause" value={formData.rootCause} onChange={handleChange} />
+                                <Form.Label htmlFor="fld-rootCause" className="fw-bold small">ძირეული მიზეზი</Form.Label>
+                                <Form.Control id="fld-rootCause" as="textarea" rows={2} name="rootCause" value={formData.rootCause} onChange={handleChange} />
                             </Col>
                             <Col md={12}>
-                                <Form.Label className="fw-bold small">ქმედებათა გეგმა</Form.Label>
-                                <Form.Control as="textarea" rows={2} name="actionPlan" value={formData.actionPlan} onChange={handleChange} />
+                                <Form.Label htmlFor="fld-actionPlan" className="fw-bold small">ქმედებათა გეგმა</Form.Label>
+                                <Form.Control id="fld-actionPlan" as="textarea" rows={2} name="actionPlan" value={formData.actionPlan} onChange={handleChange} />
                             </Col>
                             <Col md={4}>
-                                <Form.Label className="fw-bold small">პასუხისმგებელი პირი</Form.Label>
-                                <Form.Control name="responsiblePerson" value={formData.responsiblePerson} onChange={handleChange} />
+                                <Form.Label htmlFor="fld-responsiblePerson" className="fw-bold small">პასუხისმგებელი პირი</Form.Label>
+                                <Form.Control id="fld-responsiblePerson" name="responsiblePerson" value={formData.responsiblePerson} onChange={handleChange} />
                             </Col>
                             <Col md={4}>
-                                <Form.Label className="fw-bold small">შესრულების ვადა</Form.Label>
-                                <Form.Control type="date" name="deadline" value={formData.deadline} onChange={handleChange} />
+                                <Form.Label htmlFor="fld-deadline" className="fw-bold small">შესრულების ვადა</Form.Label>
+                                <Form.Control id="fld-deadline" type="date" name="deadline" value={formData.deadline} onChange={handleChange} />
                             </Col>
                             <Col md={4}>
-                                <Form.Label className="fw-bold small">შესრულების თარიღი</Form.Label>
-                                <Form.Control type="date" name="completedDate" value={formData.completedDate} onChange={handleChange} />
+                                <Form.Label htmlFor="fld-completedDate" className="fw-bold small">შესრულების თარიღი</Form.Label>
+                                <Form.Control id="fld-completedDate" type="date" name="completedDate" value={formData.completedDate} onChange={handleChange} />
                             </Col>
                             <Col md={12}>
-                                <Form.Label className="fw-bold small">ეფექტიანობის შეფასება</Form.Label>
-                                <Form.Control as="textarea" rows={2} name="effectiveness" value={formData.effectiveness} onChange={handleChange} />
+                                <Form.Label htmlFor="fld-effectiveness" className="fw-bold small">ეფექტიანობის შეფასება</Form.Label>
+                                <Form.Control id="fld-effectiveness" as="textarea" rows={2} name="effectiveness" value={formData.effectiveness} onChange={handleChange} />
                             </Col>
                         </Row>
                         <div className="d-flex justify-content-end mt-4 gap-2">

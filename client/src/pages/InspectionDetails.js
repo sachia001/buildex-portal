@@ -3,6 +3,7 @@ import { Container, Card, Row, Col, Button, Form, Badge, Spinner, Table, Modal }
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { PDFDownloadLink } from '@react-pdf/renderer';
+import { toast, confirmDialog } from '../components/Feedback';
 
 // PDF კომპონენტები
 import PdfDocument from '../pdf-components/PdfDocument';
@@ -162,17 +163,17 @@ const InspectionDetails = ({ role }) => {
     const handleSave = async () => {
         try {
             await axios.put(`/api/inspections/${id}`, formData);
-            alert("✅ მონაცემები განახლდა!");
+            toast("✅ მონაცემები განახლდა!", 'success');
             setEditMode(false);
             fetchData();
         } catch (err) {
-            alert("შეცდომა შენახვისას: " + err.message);
+            toast("შეცდომა შენახვისას: " + err.message, 'danger');
         }
     };
 
     // ატვირთვა
     const handleUpload = async () => {
-        if (!file) return alert("აირჩიეთ ფაილი");
+        if (!file) return toast("აირჩიეთ ფაილი", 'warning');
         setUploading(true);
 
         const uploadData = new FormData();
@@ -183,11 +184,11 @@ const InspectionDetails = ({ role }) => {
             await axios.post(`/api/inspections/${id}/upload`, uploadData, {
                 headers: { 'Content-Type': 'multipart/form-data' }
             });
-            alert("✅ დოკუმენტი აიტვირთა");
+            toast("✅ დოკუმენტი აიტვირთა", 'success');
             setFile(null);
             fetchData();
         } catch (err) {
-            alert("შეცდომა ატვირთვისას");
+            toast("შეცდომა ატვირთვისას", 'danger');
         } finally { setUploading(false); }
     };
 
@@ -346,16 +347,16 @@ const InspectionDetails = ({ role }) => {
                                             <td><Badge bg="secondary" className="me-2">{key}</Badge></td>
                                             <td>
                                                 <div className="d-flex gap-2 align-items-center">
-                                                    <a href={`/${path}`} target="_blank" rel="noreferrer" className="btn btn-sm btn-outline-primary">👁 ნახვა</a>
+                                                    <a href={`/${path}?token=${localStorage.getItem('token')}`} target="_blank" rel="noreferrer" className="btn btn-sm btn-outline-primary">👁 ნახვა</a>
                                                     {!isReadOnly && (
                                                         <Button size="sm" variant="outline-danger" onClick={async () => {
-                                                            if (!window.confirm(`წაიშალოს "${key}"?`)) return;
+                                                            if (!(await confirmDialog(`წაიშალოს "${key}"?`))) return;
                                                             const newDocs = { ...data.documents };
                                                             delete newDocs[key];
                                                             try {
                                                                 await axios.put(`/api/inspections/${id}`, { documents: newDocs });
                                                                 fetchData();
-                                                            } catch { alert('შეცდომა'); }
+                                                            } catch { toast('შეცდომა', 'danger'); }
                                                         }}>🗑️</Button>
                                                     )}
                                                 </div>

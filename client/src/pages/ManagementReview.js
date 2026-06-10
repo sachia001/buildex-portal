@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Container, Table, Button, Form, Card, Modal, Row, Col } from 'react-bootstrap';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
+import { toast, confirmDialog } from '../components/Feedback';
 
 const ManagementReview = () => {
     const [reviews, setReviews] = useState([]);
@@ -45,23 +46,23 @@ const ManagementReview = () => {
             await axios.post('/api/management-reviews', formData);
             setShow(false);
             fetchReviews();
-            alert("✅ ოქმი წარმატებით შეინახა!");
+            toast("✅ ოქმი წარმატებით შეინახა!", 'success');
             // ფორმის გასუფთავება
             setFormData({
                 reviewDate: '', participants: '',
                 inputs: { prevActions: '', internalAudits: '', complaints: '', resources: '' },
                 outputs: { improvements: '', trainingNeeds: '', decisions: '' }
             });
-        } catch (err) { alert("შეცდომა შენახვისას: " + err.message); }
+        } catch (err) { toast("შეცდომა შენახვისას: " + err.message, 'danger'); }
     };
 
     // წაშლა
     const handleDelete = async (id) => {
-        if(!window.confirm("ნამდვილად გსურთ ოქმის წაშლა?")) return;
+        if (!(await confirmDialog("ნამდვილად გსურთ ოქმის წაშლა?"))) return;
         try {
             await axios.delete(`/api/management-reviews/${id}`);
             fetchReviews();
-        } catch (err) { alert("ვერ წაიშალა"); }
+        } catch (err) { toast("ვერ წაიშალა", 'danger'); }
     };
 
     return (
@@ -125,12 +126,12 @@ const ManagementReview = () => {
                         <div className="bg-light p-3 rounded mb-3">
                             <Row>
                                 <Col md={4}>
-                                    <Form.Label className="fw-bold">ჩატარების თარიღი</Form.Label>
-                                    <Form.Control type="date" required value={formData.reviewDate} onChange={e => handleChange(null, 'reviewDate', e.target.value)} />
+                                    <Form.Label htmlFor="fld-reviewDate" className="fw-bold">ჩატარების თარიღი</Form.Label>
+                                    <Form.Control id="fld-reviewDate" type="date" required value={formData.reviewDate} onChange={e => handleChange(null, 'reviewDate', e.target.value)} />
                                 </Col>
                                 <Col md={8}>
-                                    <Form.Label className="fw-bold">მონაწილეები (სახელი, გვარი, პოზიცია)</Form.Label>
-                                    <Form.Control required placeholder="მაგ: გ.გიორგაძე (დირექტორი), ნ.ნინიძე (ხარისხის მენეჯერი)..." value={formData.participants} onChange={e => handleChange(null, 'participants', e.target.value)} />
+                                    <Form.Label htmlFor="fld-participants" className="fw-bold">მონაწილეები (სახელი, გვარი, პოზიცია)</Form.Label>
+                                    <Form.Control id="fld-participants" required placeholder="მაგ: გ.გიორგაძე (დირექტორი), ნ.ნინიძე (ხარისხის მენეჯერი)..." value={formData.participants} onChange={e => handleChange(null, 'participants', e.target.value)} />
                                 </Col>
                             </Row>
                         </div>

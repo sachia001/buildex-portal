@@ -7,9 +7,47 @@ const fs = require('fs');
 const multer = require('multer');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const helmet = require('helmet');
+const compression = require('compression');
+const morgan = require('morgan');
+const rateLimit = require('express-rate-limit');
 const XLSX_LIB = require('xlsx');
 
-const JWT_SECRET = process.env.JWT_SECRET || 'buildex-secret-2026';
+// ─── FAIL-FAST ENV GUARD (CR-1 / SEC-001 / API-019 / OPS-009) ─────────────────
+// სავალდებულო env ცვლადები — მათ გარეშე აპლიკაცია არ უნდა ჩაირთოს.
+// აღარ არსებობს hardcoded JWT_SECRET fallback და default admin creds.
+function requireEnv() {
+    const errors = [];
+    const { JWT_SECRET, MONGODB_URI } = process.env;
+
+    if (!JWT_SECRET || JWT_SECRET.length < 32) {
+        errors.push('JWT_SECRET არ არის დაყენებული ან 32 სიმბოლოზე მოკლეა (კრიპტოგრაფიულად ძლიერი მნიშვნელობა საჭიროა).');
+    }
+    if (!MONGODB_URI) {
+        errors.push('MONGODB_URI არ არის დაყენებული.');
+    }
+    // Cloudinary — სავალდებულო production-ში (ფაილების მუდმივი შენახვისთვის).
+    const cloudinaryOk = !!(
+        process.env.CLOUDINARY_URL ||
+        (process.env.CLOUDINARY_CLOUD_NAME &&
+         process.env.CLOUDINARY_API_KEY &&
+         process.env.CLOUDINARY_API_SECRET)
+    );
+    if (process.env.NODE_ENV === 'production' && !cloudinaryOk) {
+        errors.push('CLOUDINARY_URL ან CLOUDINARY_CLOUD_NAME/API_KEY/API_SECRET არ არის დაყენებული (production-ში სავალდებულოა).');
+    }
+
+    if (errors.length) {
+        console.error('❌ კონფიგურაციის ფატალური შეცდომა — აპლიკაცია ვერ ჩაირთვება:');
+        for (const e of errors) console.error('   • ' + e);
+        console.error('   დააყენეთ ეს env ცვლადები (Railway dashboard / .env) და გადატვირთეთ.');
+        process.exit(1);
+    }
+}
+requireEnv();
+
+const JWT_SECRET = process.env.JWT_SECRET;
+const JWT_TTL = process.env.JWT_TTL || '2h'; // SEC-011: 8სთ→მცირე TTL
 
 // ─── Cloudinary (secure document storage) ────────────────────────────────────
 const cloudinary = require('cloudinary').v2;
@@ -85,27 +123,80 @@ async function proxyCloudinaryDownload(secureUrl, res, filename) {
 // ─────────────────────────────────────────────────────────────────────────────
 
 const app = express();
-app.use(cors());
-app.use(express.json());
+// Behind Railway's reverse proxy — needed for correct client IP in rate-limit & logs (SEC-013)
+app.set('trust proxy', 1);
 
-// Security headers
-app.use((req, res, next) => {
-    res.setHeader('X-Content-Type-Options', 'nosniff');
-    res.setHeader('X-Frame-Options', 'DENY');
-    res.setHeader('X-XSS-Protection', '1; mode=block');
-    next();
+// ─── Security headers (SEC-007) — helmet replaces the manual header block ─────
+app.use(helmet({
+    contentSecurityPolicy: {
+        directives: {
+            defaultSrc:    ["'self'"],
+            // 'wasm-unsafe-eval' — @react-pdf/renderer/fontkit იყენებს WebAssembly-ს (PDF გენერაცია)
+            scriptSrc:     ["'self'", "'wasm-unsafe-eval'"],
+            styleSrc:      ["'self'", "'unsafe-inline'"],
+            imgSrc:        ["'self'", 'data:', 'blob:', 'https:'],
+            // data:/blob: — react-pdf-ის WASM data-URI-დან იტვირთება; blob: — PDF preview
+            connectSrc:    ["'self'", 'data:', 'blob:'],
+            fontSrc:       ["'self'", 'data:'],
+            // frameSrc — შესყიდვების სამთავრობო პორტალის iframe (ProcurementPricePage)
+            frameSrc:      ["'self'", 'https://cpp.procurement.gov.ge', 'https://*.procurement.gov.ge'],
+            workerSrc:     ["'self'", 'blob:'],
+            objectSrc:     ["'none'"],
+            frameAncestors: ["'none'"],
+        },
+    },
+    // React build inlines no cross-origin embeds; relax COEP so data: images load.
+    crossOriginEmbedderPolicy: false,
+}));
+
+// ─── CORS (SEC-007) — restrict to whitelisted origins when CORS_ORIGINS is set ─
+const allowedOrigins = (process.env.CORS_ORIGINS || '')
+    .split(',').map(s => s.trim()).filter(Boolean);
+app.use(cors({
+    origin(origin, cb) {
+        // No Origin header (same-origin, curl, server-to-server) is always allowed.
+        if (!origin) return cb(null, true);
+        // Empty whitelist = permissive (dev); otherwise must be listed.
+        if (allowedOrigins.length === 0 || allowedOrigins.includes(origin)) return cb(null, true);
+        return cb(new Error('CORS: origin not allowed'));
+    },
+    credentials: true,
+}));
+
+// ─── Response compression (PERF-004) ─────────────────────────────────────────
+app.use(compression());
+
+// ─── Request logging (C9 / PERF-009 / OPS-007) ───────────────────────────────
+app.use(morgan(process.env.NODE_ENV === 'production' ? 'combined' : 'dev'));
+
+// ─── Body parsing with size limit (API-003) — base64 photos need headroom ─────
+app.use(express.json({ limit: process.env.JSON_BODY_LIMIT || '12mb' }));
+app.use(express.urlencoded({ extended: true, limit: '12mb' }));
+
+// ─── Rate limiting (SEC-003) ──────────────────────────────────────────────────
+const loginLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, max: 10,
+    standardHeaders: true, legacyHeaders: false,
+    message: { message: 'ძალიან ბევრი მცდელობა — სცადეთ 15 წუთში.' },
 });
+const aiLimiter = rateLimit({
+    windowMs: 60 * 1000, max: 15,
+    standardHeaders: true, legacyHeaders: false,
+    message: { error: 'AI მოთხოვნების ლიმიტი ამოიწურა — სცადეთ მოგვიანებით.' },
+});
+const apiLimiter = rateLimit({
+    windowMs: 60 * 1000, max: 600,
+    standardHeaders: true, legacyHeaders: false,
+});
+app.use('/api', apiLimiter);
 
 mongoose.connect(process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/buildexDB')
     .then(() => console.log('✅ ბაზა და რეგლამენტი ჩაიტვირთა!'))
     .catch(err => console.error('❌ ბაზის შეცდომა:', err));
 
-// Public static (non-procedure files — norms, estimates, doc uploads)
-app.use('/uploads/norms',     express.static(path.join(__dirname, 'uploads/norms')));
-app.use('/uploads/estimates', express.static(path.join(__dirname, 'uploads/estimates')));
-app.use('/uploads/docs',      express.static(path.join(__dirname, 'uploads/docs')));
-// NOTE: /uploads/procedures is intentionally NOT served as static —
-//       all procedure downloads go through the authenticated API endpoint.
+// Static uploads (C3 / SEC-004 / ISO-004): იხ. requireAuth-ის შემდეგ მონტაჟი ქვემოთ.
+// norms — public (სამშენებლო რეგლამენტები); docs/estimates — auth-დაცული (კონფიდენციალური).
+// /uploads/procedures არასდროს იდება static-ად — მხოლოდ authenticated API proxy-ით.
 
 // --- UPLOAD CONFIG ---
 const uploadDir = './uploads/docs/';
@@ -118,7 +209,19 @@ const storage = multer.diskStorage({
         cb(null, Date.now() + '-' + safeName);
     }
 });
-const upload = multer({ storage });
+
+// SEC-010: dokument-ტიპების whitelist + ზომის ლიმიტი (arbitrary upload / stored XSS-ის წინააღმდეგ)
+const ALLOWED_DOC_EXT = ['.pdf', '.doc', '.docx', '.xls', '.xlsx', '.png', '.jpg', '.jpeg'];
+const docFileFilter = (req, file, cb) => {
+    const ext = path.extname(file.originalname).toLowerCase();
+    if (ALLOWED_DOC_EXT.includes(ext)) return cb(null, true);
+    cb(new Error('დაუშვებელი ფაილის ტიპი: ' + ext));
+};
+const upload = multer({
+    storage,
+    fileFilter: docFileFilter,
+    limits: { fileSize: 15 * 1024 * 1024 }, // 15 MB
+});
 
 // --- MODELS ---
 
@@ -129,19 +232,10 @@ const AuthUser = mongoose.model('AuthUser', new mongoose.Schema({
     staffId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null }
 }, { timestamps: true }));
 
-// Seed default admin on startup
-mongoose.connection.once('open', async () => {
-    try {
-        const exists = await AuthUser.findOne({ username: 'admin' });
-        if (!exists) {
-            const hash = await bcrypt.hash('Buildex@2026', 10);
-            await AuthUser.create({ username: 'admin', passwordHash: hash, role: 'admin' });
-            console.log('✅ ადმინი შეიქმნა: admin / Buildex@2026');
-        }
-    } catch (err) {
-        console.error('Admin seed error:', err.message);
-    }
-});
+// CR-1 / OPS-009: hardcoded default admin (admin / Buildex@2026) წაიშალა.
+// ადმინ-მომხმარებელი იქმნება მხოლოდ ცალკე seed-სკრიპტით env-პაროლით:
+//   ADMIN_USERNAME=... ADMIN_PASSWORD=... node scripts/seed-admin.js
+// ეს თავიდან აიცილებს ცნობილი default პაროლის გაჟონვას production-ში.
 
 // JWT middleware
 const requireAuth = (req, res, next) => {
@@ -155,6 +249,28 @@ const requireAuth = (req, res, next) => {
         return res.status(401).json({ message: 'ტოკენი არასწორია ან ვადაგასულია' });
     }
 };
+
+// ─── Role-based access control (C2 / SEC-006 / API-001 / API-005 / ISO-003) ───
+// ცენტრალიზებული role-guard. გამოყენება: api.post('/x', requireRole('admin','hr'), handler)
+const requireRole = (...roles) => (req, res, next) => {
+    if (!req.user) return res.status(401).json({ error: 'ავტორიზაცია საჭიროა' });
+    if (!roles.includes(req.user.role))
+        return res.status(403).json({ error: 'ამ მოქმედების უფლება არ გაქვთ' });
+    next();
+};
+
+// ─── Static uploads mount (C3 / SEC-004 / ISO-004 — §4.2 კონფიდენციალურობა) ────
+// norms — public; docs/estimates — მხოლოდ ავტორიზებულ მომხმარებელს (token query ან header).
+// ბრაუზერის პირდაპირი ლინკი token-ს header-ით ვერ აგზავნის, ამიტომ ?token=... query-საც ვუშვებთ.
+const requireAuthStatic = (req, res, next) => {
+    const token = (req.headers.authorization || '').split(' ')[1] || req.query.token;
+    if (!token) return res.status(401).json({ message: 'ავტორიზაცია საჭიროა' });
+    try { req.user = jwt.verify(token, JWT_SECRET); next(); }
+    catch { return res.status(401).json({ message: 'ტოკენი არასწორია ან ვადაგასულია' }); }
+};
+app.use('/uploads/norms',     express.static(path.join(__dirname, 'uploads/norms')));
+app.use('/uploads/estimates', requireAuthStatic, express.static(path.join(__dirname, 'uploads/estimates')));
+app.use('/uploads/docs',      requireAuthStatic, express.static(path.join(__dirname, 'uploads/docs')));
 
 const Counter = mongoose.model('Counter', new mongoose.Schema({
     _id: { type: String, required: true },
@@ -241,7 +357,7 @@ const Complaint = mongoose.model('Complaint', new mongoose.Schema({
     inspectionRef: String,
     description: { type: String, required: true },
     category: { type: String, default: 'საჩივარი' }, // საჩივარი / აპელაცია
-    status: { type: String, default: 'განხილვაში' }, // განხილვაში / დასრულებული / უარყოფილი
+    status: { type: String, enum: ['განხილვაში', 'დასრულებული', 'უარყოფილი'], default: 'განხილვაში' }, // DAT-006: enum drift-პრევენცია
     reviewedBy: String,
     resolution: String,
     closedDate: Date,
@@ -272,7 +388,7 @@ const CorrectiveAction = mongoose.model('CorrectiveAction', new mongoose.Schema(
     deadline: Date,
     completedDate: Date,
     effectiveness: String,
-    status: { type: String, default: 'ღია' } // ღია / მიმდინარე / დახურული
+    status: { type: String, enum: ['ღია', 'მიმდინარე', 'დახურული'], default: 'ღია' } // DAT-006: enum drift-პრევენცია
 }, { timestamps: true }));
 
 const Insurance = mongoose.model('Insurance', new mongoose.Schema({
@@ -418,6 +534,7 @@ async function generateDocumentNumber(type, date = new Date()) {
         case 'AUD':  return `AUD-${seq}/${yearShort}`;
         case 'CAR':  return `CAR-${seq}/${yearShort}`;
         case 'PA':   return `PA-${seq4}/${yearShort}`;
+        case 'MON':  return `MON-${seq}/${yearShort}`; // API-004: management review — case აკლდა
         default: throw new Error("უცნობი კატეგორია");
     }
 }
@@ -896,6 +1013,26 @@ const ChecklistSession = mongoose.model('ChecklistSession', new mongoose.Schema(
     qmSig:         { type: String, default: '' },
 }, { timestamps: true }));
 
+// ─── DB indexes (C7 / PERF-006 / DAT-018 / DAT-003) ───────────────────────────
+// query/sort/ფილტრ-ველებზე ინდექსები — list-ები და dashboard-აგრეგაცია სწრაფდება.
+// (additive; mongoose ფონურად ქმნის. sparse-unique personalId — null-ებს უშვებს.)
+User.schema.index({ lastName: 1 });
+User.schema.index({ personalId: 1 }, { unique: true, sparse: true }); // DAT-003
+Inspection.schema.index({ status: 1, createdAt: -1 });
+Inspection.schema.index({ expert: 1 });
+Inspection.schema.index({ technicalManager: 1 });
+OfficeDocument.schema.index({ category: 1, date: -1 });
+Equipment.schema.index({ status: 1, nextCalibration: 1 });
+Complaint.schema.index({ status: 1, createdAt: -1 });
+InternalAudit.schema.index({ status: 1, createdAt: -1 });
+CorrectiveAction.schema.index({ status: 1, deadline: 1 });
+Insurance.schema.index({ status: 1, endDate: 1 });
+AuditLog.schema.index({ timestamp: -1 });
+AuditLog.schema.index({ resource: 1, timestamp: -1 });
+NormEntry.schema.index({ normType: 1, year: 1, quarter: 1 });
+NormEntry.schema.index({ code: 1 });
+NormEntry.schema.index({ description: 'text', keywords: 'text' }); // DAT-018: $regex→text search
+
 // Multer for procedure uploads — memory storage (buffer sent to Cloudinary)
 // Fallback: if Cloudinary not configured, save to local disk
 const procUploadDir = './uploads/procedures/';
@@ -931,66 +1068,70 @@ const PROC_FOLDER_MAP = {
     'G_რისკების_მართვა':         'risk',
     'H_ბრძანებები':              'order',
 };
+// ─── CR-2 / C11 — პროცედურა/ფორმის ნუმერაცია: ერთიანი SOURCE OF TRUTH ──────────
+// სათაურები ემთხვევა client/src/pages/ProceduresPage.js → ALL_DOCS_META-ს
+// (რომელიც, თავის მხრივ, რეალურ B/E-ფოლდერის DOCX-ფაილებს ასახავს).
+// ⚠️ ცვლილებისას ორივე ფაილი ერთად უნდა განახლდეს, რომ ტრასირებადობა არ დაირღვეს.
 const PROC_TITLE_MAP = {
     'QM-01':'ხარისხის სახელმძღვანელო',
-    'BE-PR-01':'განაცხადების მიღება და კლიენტებთან ხელშეკრულება',
-    'BE-PR-02':'სახელშეკრულებო მოთხოვნათა შეთანხმება',
-    'BE-PR-03':'ინსპექტირების დაგეგმვა',
-    'BE-PR-04':'ინსპექტირების ჩატარება',
-    'BE-PR-05':'შედეგების გაფორმება',
-    'BE-PR-06':'ინსპექციის ანგარიშის გაცემა',
-    'BE-PR-07':'საჩივრებისა და აპელაციების განხილვა',
-    'BE-PR-08':'შეუსაბამო სამუშაოს მართვა',
-    'BE-PR-09':'კორექტირებითი ქმედებები (CAPA)',
-    'BE-PR-10':'შიდა აუდიტი',
-    'BE-PR-11':'მენეჯმენტის მიმოხილვა',
-    'BE-PR-12':'დოკუმენტების მართვა',
-    'BE-PR-13':'ჩანაწერების მართვა',
-    'BE-PR-14':'პერსონალის კვალიფიკაცია და ტრენინგი',
-    'BE-PR-15':'მოწყობილობის მართვა და კალიბრაცია',
-    'BE-PR-MAIN':'ინსპექტირების სრული პროცესი',
     'BE-PR-SET':'პროცედურების სარჩევი (ინდექსი)',
+    'BE-PR-MAIN':'ინსპექტირების სრული პროცესი',
+    'BE-PR-01':'ხარჯთაღრიცხვის პროექტთან შესაბამისობის ინსპექტირების სამუშაო პროცედურა',
+    'BE-PR-02':'შესრულებული სამუშაოებისა და ფორმა №2-ის ინსპექტირების სამუშაო პროცედურა',
+    'BE-PR-03':'ხარჯთაღრიცხვის ფასწარმოქმნის ადეკვატურობის ინსპექტირების სამუშაო პროცედურა',
+    'BE-PR-04':'ტექნიკური ზედამხედველობა–ინსპექტირების სამუშაო პროცედურა',
+    'BE-PR-05':'დოკუმენტებისა და გარე ნორმატიული დოკუმენტების მართვის პროცედურა',
+    'BE-PR-06':'ჩანაწერების, არქივისა და მონაცემთა დაცვის მართვის პროცედურა',
+    'BE-PR-07':'მიუკერძოებლობისა და კონფიდენციალურობის უზრუნველყოფის პროცედურა',
+    'BE-PR-08':'პერსონალის კომპეტენციის, უფლებამოსილების და მონიტორინგის პროცედურა',
+    'BE-PR-09':'განაცხადის, ხელშეკრულების და სამუშაოს მიღების განხილვის პროცედურა',
+    'BE-PR-10':'საჩივრებისა და აპელაციების მართვის პროცედურა',
+    'BE-PR-11':'შიდა აუდიტის პროცედურა',
+    'BE-PR-12':'მენეჯმენტის ანალიზის პროცედურა',
+    'BE-PR-13':'შეუსაბამობების, კორექციისა და მაკორექტირებელი მოქმედებების (CAPA) პროცედურა',
+    'BE-PR-14':'აღჭურვილობის, გაზომვის საშუალებებისა და ქვეკონტრაქტირების მართვის პროცედურა',
+    'BE-PR-15':'ინსპექტირების ანგარიშების, დასკვნებისა და სერტიფიკატების გაცემის პროცედურა',
     'BE-WI-01':'ხარჯთაღრიცხვის შესაბამისობის შემოწმება',
-    'BE-WI-02':'შესრულებული სამუშაოს ფორმა 2',
+    'BE-WI-02':'შესრულებული სამუშაოს ფორმა',
     'BE-WI-03':'ფასწარმოქმნის ადეკვატურობის შემოწმება',
     'BE-WI-04':'ტექნიკური ზედამხედველობა',
-    'HR-JD-001':'აღმასრულებელი დირექტორის სამუშაო აღწერილობა',
-    'HR-JD-002':'ხარისხის მენეჯერის სამუშაო აღწერილობა',
-    'HR-JD-003':'ტექნიკური მენეჯერის სამუშაო აღწერილობა',
-    'HR-JD-004':'ინსპექტორის სამუშაო აღწერილობა',
-    'HR-JD-005':'ადმინისტრატორის სამუშაო აღწერილობა',
+    'HR-JD-001':'სამუშაო აღწერილობა — დირექტორი',
+    'HR-JD-002':'სამუშაო აღწერილობა — ხარისხის მენეჯერი',
+    'HR-JD-003':'სამუშაო აღწერილობა — ტექნიკური მენეჯერი',
+    'HR-JD-004':'სამუშაო აღწერილობა — ინსპექტორი',
+    'HR-JD-005':'სამუშაო აღწერილობა — ადმინისტრაციული მხარდაჭერა',
     'FM-01':'ინსპექტირების ანგარიში',
     'FM-02':'მიუკერძოებლობის დეკლარაცია',
     'FM-03':'კონფიდენციალობის შეთანხმება',
     'FM-04':'შიდა აუდიტის გეგმა და ანგარიში',
     'FM-05':'მომსახურების ხელშეკრულება',
-    'FM-06':'საჩივრის / აპელაციის ფორმა',
+    'FM-06':'საჩივრის და აპელაციის ფორმა',
     'FM-07':'მოწყობილობის ვერიფიკაცია',
     'FM-08':'კომპეტენციის შეფასება',
     'FM-09':'ხელშეკრულების განხილვა',
-    'FM-10':'CAPA ფორმა',
+    'FM-10':'კორექტირებული ქმედების ჩანაწერი (CAPA)',
     'FM-11':'ინსპექტირების გეგმა',
     'FM-12':'ქვეკონტრაქტორის შეფასება',
     'FM-13':'ტრენინგის ჩანაწერი',
     'FM-14':'შეუსაბამო სამუშაო',
-    'FM-15':'მენეჯმენტის ანალიზი',
+    'FM-15':'მენეჯმენტის ანალიზის ოქმი',
     'FM-16':'ვიზიტის ჩანაწერი',
-    'FM-18':'განაცხადის ფორმა',
+    'FM-18':'GAC-ის განაცხადის ფორმა',
     'FM-21':'ინსპექტირების რეგისტრი',
     'FM-22':'გაცნობის ფურცელი',
     'FM-23':'დოკუმენტში ცვლილების წინადადება',
-    'FM-24':'ცვლილებების რეგისტრაცია',
+    'FM-24':'ცვლილების რეგისტრაცია',
     'FM-25':'ლიკვიდაციის აქტი',
     'POL-01':'მიუკერძოებლობის პოლიტიკა',
     'POL-02':'კონფიდენციალობის პოლიტიკა',
     'POL-03':'ხარისხის პოლიტიკა',
     'POL-04':'IT და მონაცემთა უსაფრთხოების პოლიტიკა',
     'RM-01':'რისკების რეესტრი',
-    'ORD-01':'ბრძანება №01',
-    'ORD-02':'ბრძანება №02',
-    'ORD-03':'ბრძანება №03',
-    'ORD-04':'ბრძანება №04',
-    'ORD-05':'ბრძანება №05',
+    'ORD-01':'ბრძანება — ხარისხის მენეჯერის დანიშვნა',
+    'ORD-02':'ბრძანება — ტექნიკური მენეჯერის დანიშვნა',
+    'ORD-03':'ბრძანება — ინსპექტორების დანიშვნა',
+    'ORD-04':'ბრძანება — დოკუმენტების მართვის სისტემის დამტკიცება',
+    'ORD-05':'ბრძანება — მიუკერძოებლობის კომიტეტის შექმნა',
 };
 
 async function seedProcedures() {
@@ -1013,12 +1154,19 @@ async function seedProcedures() {
                 filesToProcess = [{ fname: entry.name, fullPath: path.join(procDir, entry.name), category: 'procedure', relPath: `/uploads/procedures/${entry.name}` }];
             }
             for (const { fname, relPath, category } of filesToProcess) {
-                const existing = await ProcedureDoc.findOne({ filePath: relPath });
-                if (existing) continue;
                 // Extract code: match BE-PR-XX, BE-WI-XX, HR-JD-XXX, FM-XX, POL-XX, RM-XX, ORD-XX, QM-XX
                 const codeMatch = fname.match(/(?:BE-PR-(?:MAIN|SET|\d+)|BE-WI-\d+|HR-JD-\d+|FM-\d+|POL-\d+|RM-\d+|ORD-\d+|QM-\d+)/i);
                 const code = codeMatch ? codeMatch[0].toUpperCase() : fname.replace(/[_v\d.]+$/,'').replace(/_/g,'-');
                 const title = PROC_TITLE_MAP[code] || fname.replace(/_v2_2026\.\w+$/,'').replace(/_/g,' ');
+                const existing = await ProcedureDoc.findOne({ filePath: relPath });
+                if (existing) {
+                    // CR-2: არსებული ჩანაწერების title/code სინქრო canonical map-თან (stale title-ების გასწორება)
+                    if (existing.title !== title || existing.code !== code) {
+                        existing.title = title; existing.code = code; existing.category = category;
+                        await existing.save();
+                    }
+                    continue;
+                }
                 const verMatch = fname.match(/v(\d+)/i);
                 await ProcedureDoc.create({ code, title, category, version: verMatch ? verMatch[1]+'.0' : '2.0', filePath: relPath, originalName: fname, uploadedBy: 'system' });
                 seeded++;
@@ -1106,7 +1254,7 @@ api.post('/inspections/:id/upload', upload.single('file'), async (req, res) => {
 });
 
 // --- USERS ---
-api.post('/users/register', async (req, res) => {
+api.post('/users/register', requireRole('admin', 'hr'), async (req, res) => {
     try {
         // photo comes as base64 data URL (stored directly in MongoDB — no filesystem needed)
         const user = await new User(req.body).save();
@@ -1129,7 +1277,7 @@ api.get('/users/:id', async (req, res) => {
     } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-api.put('/users/:id', async (req, res) => {
+api.put('/users/:id', requireRole('admin', 'hr'), async (req, res) => {
     try {
         const updated = await User.findByIdAndUpdate(req.params.id, req.body, { new: true });
         if (!updated) return res.status(404).json({ error: 'ვერ მოიძებნა' });
@@ -1146,7 +1294,7 @@ api.delete('/users/:id', async (req, res) => {
     } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-api.post('/users/:id/upload', upload.single('file'), async (req, res) => {
+api.post('/users/:id/upload', requireRole('admin', 'hr'), upload.single('file'), async (req, res) => {
     try {
         if (!req.file) return res.status(400).json({ error: 'ფაილი არ არის' });
         const webPath = `uploads/docs/${req.file.filename}`;
@@ -1167,7 +1315,7 @@ api.get('/equipment', async (req, res) => {
     } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-api.post('/equipment', async (req, res) => {
+api.post('/equipment', requireRole('admin', 'tech_manager'), async (req, res) => {
     try {
         const { name, serialNumber, manufacturer, calibrationDate, calibrationInterval } = req.body;
         const calDate       = new Date(calibrationDate);
@@ -1199,7 +1347,7 @@ api.get('/management-reviews', async (req, res) => {
     } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-api.post('/management-reviews', async (req, res) => {
+api.post('/management-reviews', requireRole('admin', 'quality_manager'), async (req, res) => {
     try {
         const review = await ManagementReview.create(req.body);
         res.status(201).json(review);
@@ -1244,9 +1392,9 @@ api.get('/dashboard/stats', async (req, res) => {
                 status:   { $ne: 'დასრულებული' }
             }).populate('expert', 'firstName lastName').sort({ deadline: 1 }).limit(15),
             Insurance.find({ status: 'active' }).sort({ endDate: 1 }),
-            Complaint.countDocuments({ status: 'განხილვაში' }),
-            Complaint.countDocuments({ status: 'პასუხი გაეცა' }),
-            Complaint.countDocuments({ status: 'დახურულია' }),
+            Complaint.countDocuments({ status: 'განხილვაში' }),                    // open
+            Complaint.countDocuments({ status: 'უარყოფილი' }),                     // C8: იყო 'პასუხი გაეცა' (არ არსებობს)
+            Complaint.countDocuments({ status: 'დასრულებული' }),                   // C8/DAT-006: closed — იყო 'დახურულია' (→ ყოველთვის 0)
             CorrectiveAction.countDocuments({ status: { $ne: 'დახურული' } }),
             CorrectiveAction.countDocuments({ status: { $ne: 'დახურული' }, deadline: { $lt: today } }),
             CorrectiveAction.countDocuments({ status: 'დახურული' }),
@@ -1307,7 +1455,7 @@ api.get('/complaints', async (req, res) => {
     catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-api.post('/complaints', async (req, res) => {
+api.post('/complaints', requireRole('admin', 'quality_manager', 'chancellor'), async (req, res) => {
     try {
         const num = await generateDocumentNumber('COMP');
         const item = await Complaint.create({ ...req.body, complaintNumber: num });
@@ -1316,7 +1464,7 @@ api.post('/complaints', async (req, res) => {
     } catch (err) { res.status(400).json({ error: err.message }); }
 });
 
-api.put('/complaints/:id', async (req, res) => {
+api.put('/complaints/:id', requireRole('admin', 'quality_manager', 'chancellor'), async (req, res) => {
     try {
         const updated = await Complaint.findByIdAndUpdate(req.params.id, req.body, { new: true });
         if (!updated) return res.status(404).json({ error: 'ვერ მოიძებნა' });
@@ -1338,7 +1486,7 @@ api.get('/internal-audits', async (req, res) => {
     catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-api.post('/internal-audits', async (req, res) => {
+api.post('/internal-audits', requireRole('admin', 'quality_manager'), async (req, res) => {
     try {
         const num = await generateDocumentNumber('AUD');
         const item = await InternalAudit.create({ ...req.body, auditNumber: num });
@@ -1347,7 +1495,7 @@ api.post('/internal-audits', async (req, res) => {
     } catch (err) { res.status(400).json({ error: err.message }); }
 });
 
-api.put('/internal-audits/:id', async (req, res) => {
+api.put('/internal-audits/:id', requireRole('admin', 'quality_manager'), async (req, res) => {
     try {
         const updated = await InternalAudit.findByIdAndUpdate(req.params.id, req.body, { new: true });
         if (!updated) return res.status(404).json({ error: 'ვერ მოიძებნა' });
@@ -1369,7 +1517,7 @@ api.get('/corrective-actions', async (req, res) => {
     catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-api.post('/corrective-actions', async (req, res) => {
+api.post('/corrective-actions', requireRole('admin', 'quality_manager'), async (req, res) => {
     try {
         const num = await generateDocumentNumber('CAR');
         const item = await CorrectiveAction.create({ ...req.body, carNumber: num });
@@ -1378,7 +1526,7 @@ api.post('/corrective-actions', async (req, res) => {
     } catch (err) { res.status(400).json({ error: err.message }); }
 });
 
-api.put('/corrective-actions/:id', async (req, res) => {
+api.put('/corrective-actions/:id', requireRole('admin', 'quality_manager'), async (req, res) => {
     try {
         const updated = await CorrectiveAction.findByIdAndUpdate(req.params.id, req.body, { new: true });
         if (!updated) return res.status(404).json({ error: 'ვერ მოიძებნა' });
@@ -1401,7 +1549,7 @@ api.get('/insurance', async (req, res) => {
     catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-api.post('/insurance', upload.single('file'), async (req, res) => {
+api.post('/insurance', requireRole('admin', 'chancellor'), upload.single('file'), async (req, res) => {
     try {
         const data = JSON.parse(req.body.data || '{}');
         if (req.file) data.fileUrl = `uploads/docs/${req.file.filename}`;
@@ -1410,7 +1558,7 @@ api.post('/insurance', upload.single('file'), async (req, res) => {
     } catch (err) { res.status(400).json({ error: err.message }); }
 });
 
-api.put('/insurance/:id', async (req, res) => {
+api.put('/insurance/:id', requireRole('admin', 'chancellor'), async (req, res) => {
     try {
         const updated = await Insurance.findByIdAndUpdate(req.params.id, req.body, { new: true });
         if (!updated) return res.status(404).json({ error: 'ვერ მოიძებნა' });
@@ -1432,7 +1580,7 @@ api.get('/company-docs', async (req, res) => {
     catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-api.post('/company-docs', upload.single('file'), async (req, res) => {
+api.post('/company-docs', requireRole('admin', 'chancellor'), upload.single('file'), async (req, res) => {
     try {
         const data = JSON.parse(req.body.data || '{}');
         if (req.file) data.fileUrl = `uploads/docs/${req.file.filename}`;
@@ -1468,7 +1616,7 @@ api.get('/company-settings', async (req, res) => {
     } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-api.put('/company-settings', async (req, res) => {
+api.put('/company-settings', requireRole('admin'), async (req, res) => {
     try {
         const { partners, config } = req.body;
         const settings = await CompanySettings.findOneAndUpdate(
@@ -1501,7 +1649,7 @@ const estimateUpload = multer({ storage: multer.diskStorage({
     }
 }) });
 
-api.post('/norms/upload', normUpload.single('file'), async (req, res) => {
+api.post('/norms/upload', requireRole('admin', 'tech_manager'), normUpload.single('file'), async (req, res) => {
     if (!['admin', 'quality_manager'].includes(req.user.role))
         return res.status(403).json({ error: 'ნების ჩატვირთვის უფლება მხოლოდ ადმინს და ხარ.მენეჯერს აქვს' });
     try {
@@ -1611,7 +1759,7 @@ api.get('/price-adequacy/:id/word', async (req, res) => {
 });
 
 // Seed demo NER norm data (approximate 2025 Georgian market prices)
-api.post('/norms/seed-demo', async (req, res) => {
+api.post('/norms/seed-demo', requireRole('admin'), async (req, res) => {
     if (!['admin', 'quality_manager'].includes(req.user.role))
         return res.status(403).json({ error: 'უფლება არ გაქვთ' });
     try {
@@ -1869,14 +2017,27 @@ api.get('/audit-logs', async (req, res) => {
 // --- AUTH ROUTES (public — no JWT required) ---
 const authRouter = express.Router();
 
-authRouter.post('/login', async (req, res) => {
+authRouter.post('/login', loginLimiter, async (req, res) => {
     try {
         const { username, password } = req.body;
+        // SEC-009: typed guard — reject non-string credentials (NoSQL-injection surface)
+        if (typeof username !== 'string' || typeof password !== 'string')
+            return res.status(400).json({ message: 'არასწორი მონაცემები' });
         const user = await AuthUser.findOne({ username });
-        if (!user) return res.status(401).json({ message: 'მომხმარებელი ვერ მოიძებნა' });
+        if (!user) {
+            console.warn(`[AUTH] წარუმატებელი login: უცნობი username="${username}" ip=${req.ip}`); // SEC-013
+            return res.status(401).json({ message: 'მომხმარებელი ან პაროლი არასწორია' });
+        }
         const ok = await bcrypt.compare(password, user.passwordHash);
-        if (!ok) return res.status(401).json({ message: 'პაროლი არასწორია' });
-        const token = jwt.sign({ id: user._id, username: user.username, role: user.role, staffId: user.staffId || null }, JWT_SECRET, { expiresIn: '8h' });
+        if (!ok) {
+            console.warn(`[AUTH] წარუმატებელი login: username="${username}" ip=${req.ip}`); // SEC-013
+            return res.status(401).json({ message: 'მომხმარებელი ან პაროლი არასწორია' });
+        }
+        const token = jwt.sign(
+            { id: user._id, username: user.username, role: user.role, staffId: user.staffId || null },
+            JWT_SECRET, { expiresIn: JWT_TTL } // SEC-011: env-კონფიგ. TTL (default 2სთ)
+        );
+        console.log(`[AUTH] წარმატებული login: username="${user.username}" role=${user.role} ip=${req.ip}`); // SEC-013
         res.json({ token, username: user.username, role: user.role });
     } catch (err) { res.status(500).json({ message: err.message }); }
 });
@@ -2131,17 +2292,17 @@ api.delete('/checklists/:id', async (req, res) => {
 // ─────────────────────────────────────────────
 // AI ANALYSIS PROXY (Anthropic)
 // ─────────────────────────────────────────────
-api.post('/checklist-analyze', async (req, res) => {
+api.post('/checklist-analyze', aiLimiter, async (req, res) => {
     try {
         const { prompt } = req.body;
-        if (!prompt) return res.status(400).json({ error: 'prompt საჭიროა' });
+        if (typeof prompt !== 'string' || !prompt.trim()) return res.status(400).json({ error: 'prompt საჭიროა' });
         const apiKey = process.env.ANTHROPIC_API_KEY;
         if (!apiKey) return res.status(503).json({ error: 'ANTHROPIC_API_KEY არ არის კონფიგურირებული. Railway-ზე დაამატეთ env variable.' });
 
         const Anthropic = require('@anthropic-ai/sdk');
         const client = new Anthropic({ apiKey });
         const message = await client.messages.create({
-            model: 'claude-sonnet-4-5',
+            model: process.env.ANTHROPIC_MODEL || 'claude-sonnet-4-6',
             max_tokens: 1024,
             messages: [{ role: 'user', content: prompt }],
         });
@@ -2153,13 +2314,29 @@ api.post('/checklist-analyze', async (req, res) => {
 // Mount the API router — BEFORE static file serving
 app.use('/api', api);
 
-// Health check for Railway deployment
-app.get('/health', (req, res) => res.json({ ok: true }));
+// API 404 — უცნობი /api/* მისამართი JSON-ად (არა SPA index.html) (API-002)
+app.use('/api', (req, res) => res.status(404).json({ error: 'API endpoint ვერ მოიძებნა' }));
+
+// Health check (C6 / API-012 / OPS-005 / PERF-010) — DB-კავშირსაც ამოწმებს
+app.get('/health', (req, res) => {
+    const dbState = mongoose.connection.readyState; // 1 = connected
+    if (dbState === 1) return res.json({ ok: true, db: 'connected' });
+    res.status(503).json({ ok: false, db: 'disconnected' });
+});
 
 // --- FRONTEND (React Build) ---
 const buildPath = path.join(__dirname, 'client', 'build');
-// Static assets (JS/CSS) have content hashes — cache them long-term
-app.use(express.static(buildPath, { index: false }));
+// Static assets (JS/CSS) have content hashes — cache them long-term (PERF-003)
+app.use(express.static(buildPath, {
+    index: false,
+    maxAge: '1y',
+    setHeaders(res, filePath) {
+        // hashed assets → immutable; everything else → no aggressive cache
+        if (/\.[0-9a-f]{8,}\.(js|css|woff2?|png|jpg|svg)$/i.test(filePath)) {
+            res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+        }
+    },
+}));
 // index.html must never be cached so browser always gets the latest bundle reference
 app.use((req, res) => {
     const indexPath = path.join(buildPath, 'index.html');
@@ -2169,6 +2346,20 @@ app.use((req, res) => {
     } else {
         res.status(200).json({ status: 'API running', buildMissing: true });
     }
+});
+
+// ─── Global error handler (API-002 / SEC-012) — stack არასდროს მიდის client-ს ──
+// eslint-disable-next-line no-unused-vars
+app.use((err, req, res, next) => {
+    if (res.headersSent) return next(err);
+    console.error('[ERROR]', req.method, req.originalUrl, '—', err.message);
+    const isCors = err.message && err.message.startsWith('CORS');
+    const status = err.status || (isCors ? 403 : 500);
+    res.status(status).json({
+        error: process.env.NODE_ENV === 'production'
+            ? 'სერვერის შიდა შეცდომა'   // production: მხოლოდ ზოგადი შეტყობინება
+            : err.message,
+    });
 });
 
 const PORT = process.env.PORT || 5001;

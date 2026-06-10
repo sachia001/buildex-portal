@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import axios from 'axios';
 import * as XLSX from 'xlsx';
+import { toast, confirmDialog } from '../components/Feedback';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // CHECKLIST DATA — ISO/IEC 17020:2012 — სრული ტექსტი
@@ -526,8 +527,8 @@ export default function ChecklistPage({ role }) {
   const [sessionNum, setSessionNum] = useState('');
   const [conclusion, setConclusion] = useState('');
   const [nextDate, setNextDate]     = useState('');
-  const [dirSig, setDirSig]         = useState('Levan Sachiashvili');
-  const [qmSig, setQmSig]           = useState('Alexandre Sumbadze');
+  const [dirSig, setDirSig]         = useState(''); // UX-009: ხელმომწერი ივსება, არა hardcoded
+  const [qmSig, setQmSig]           = useState('');
 
   const [aiLoading, setAiLoading]   = useState(false);
   const [aiResult, setAiResult]     = useState('');
@@ -580,7 +581,7 @@ export default function ChecklistPage({ role }) {
   const handlePdfPrint = () => {
     const html = buildPrintHtml({ chkState, chkDate, sessionNum, period, conclusion, dirSig, qmSig, summary });
     const win = window.open('', '_blank', 'width=960,height=750');
-    if (!win) { alert('ბრაუზერი ბლოკავს pop-up-ს. გთხოვთ, დაუშვათ.'); return; }
+    if (!win) { toast('ბრაუზერი ბლოკავს pop-up-ს. გთხოვთ, დაუშვათ.', 'warning'); return; }
     win.document.write(html);
     win.document.close();
     win.onload = () => { win.focus(); win.print(); };
@@ -629,7 +630,7 @@ export default function ChecklistPage({ role }) {
   };
 
   const deleteSession = async (id) => {
-    if (!window.confirm('გსურთ წაშლა?')) return;
+    if (!(await confirmDialog('გსურთ წაშლა?'))) return;
     try { await axios.delete(`/api/checklists/${id}`, { headers }); fetchSessions(); }
     catch (e) { setMsg({ type: 'danger', text: e.message }); }
   };

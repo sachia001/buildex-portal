@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import axios from 'axios';
 import { Row, Col, Button, Modal, Form, Badge } from 'react-bootstrap';
+import { toast, confirmDialog } from '../components/Feedback';
 import { PDFDownloadLink } from '@react-pdf/renderer';
 import { Link } from 'react-router-dom';
 
@@ -437,7 +438,7 @@ export default function ProceduresPage({ role }) {
   useEffect(() => { fetchDocs(); }, [fetchDocs]);
 
   const handleDelete = async (doc) => {
-    if (!window.confirm(`წაიშალოს "${doc.title}"?`)) return;
+    if (!(await confirmDialog(`წაიშალოს "${doc.title}"?`))) return;
     try {
       await axios.delete(`/api/procedures/${doc._id}`, { headers });
       setMsg({ type: 'success', text: '✅ დოკუმენტი წაიშალა' });
@@ -468,7 +469,7 @@ export default function ProceduresPage({ role }) {
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
     } catch (e) {
-      alert('ჩამოტვირთვა ვერ მოხდა: ' + (e.response?.status === 401 ? 'ავტორიზაცია საჭიროა' : e.message));
+      toast('ჩამოტვირთვა ვერ მოხდა: ' + (e.response?.status === 401 ? 'ავტორიზაცია საჭიროა' : e.message), 'danger');
     }
   };
 

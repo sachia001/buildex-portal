@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Container, Card, Form, Button, Row, Col, Alert, Spinner, Modal, Table, Badge, Nav, Tab } from 'react-bootstrap';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import { toast, confirmDialog } from '../components/Feedback';
 
 const ROLE_OPTIONS = [
     { value: 'admin',           label: '👑 ადმინი (დონე 1)' },
@@ -80,10 +81,10 @@ const AdminRegister = ({ role }) => {
 
     // ── Staff handlers ─────────────────────────────────────────
     const handleDelete = async (id, name) => {
-        if (!isAdmin) return alert('წაშლის უფლება არ გაქვთ');
-        if (!window.confirm(`წაიშალოს ${name}? ეს ქმედება შეუქცევადია.`)) return;
+        if (!isAdmin) return toast('წაშლის უფლება არ გაქვთ', 'danger');
+        if (!(await confirmDialog(`წაიშალოს ${name}? ეს ქმედება შეუქცევადია.`))) return;
         try { await axios.delete(`/api/users/${id}`); fetchStaff(); }
-        catch { alert("წაშლა ვერ მოხერხდა"); }
+        catch { toast("წაშლა ვერ მოხერხდა", 'danger'); }
     };
 
     const handleChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -148,7 +149,7 @@ const AdminRegister = ({ role }) => {
             await axios.put(`/api/users/${editStaff._id}`, payload);
             setShowEditModal(false);
             fetchStaff();
-        } catch (err) { alert('შეცდომა: ' + (err.response?.data?.error || err.message)); }
+        } catch (err) { toast('შეცდომა: ' + (err.response?.data?.error || err.message), 'danger'); }
         finally { setEditSaving(false); }
     };
 
@@ -168,7 +169,7 @@ const AdminRegister = ({ role }) => {
             if (photoFile) photo = await toBase64(photoFile);
             await axios.post('/api/users/register', { ...formData, competencies, photo });
             setShowStaffModal(false); resetStaffForm(); fetchStaff();
-            alert("✅ თანამშრომელი დარეგისტრირდა!");
+            toast("✅ თანამშრომელი დარეგისტრირდა!", 'success');
         } catch (err) { setStaffError(err.response?.data?.error || "შეცდომა რეგისტრაციისას"); }
         finally { setStaffLoading(false); }
     };
@@ -184,10 +185,10 @@ const AdminRegister = ({ role }) => {
 
     // ── Auth user handlers ─────────────────────────────────────
     const handleAuthDelete = async (id, uname) => {
-        if (!isAdmin) return alert('მხოლოდ ადმინს შეუძლია წაშლა');
-        if (!window.confirm(`წაიშალოს ${uname}?`)) return;
+        if (!isAdmin) return toast('მხოლოდ ადმინს შეუძლია წაშლა', 'danger');
+        if (!(await confirmDialog(`წაიშალოს ${uname}?`))) return;
         try { await axios.delete(`/api/auth/users/${id}`); fetchAuthUsers(); }
-        catch (err) { alert(err.response?.data?.message || "წაშლა ვერ მოხერხდა"); }
+        catch (err) { toast(err.response?.data?.message || "წაშლა ვერ მოხერხდა", 'danger'); }
     };
 
     const handleAuthSubmit = async (e) => {
@@ -199,7 +200,7 @@ const AdminRegister = ({ role }) => {
             setShowAuthModal(false);
             setAuthForm({ username: '', password: '', role: 'inspector', staffId: '' });
             fetchAuthUsers();
-            alert("✅ მომხმარებელი შეიქმნა!");
+            toast("✅ მომხმარებელი შეიქმნა!", 'success');
         } catch (err) { setAuthError(err.response?.data?.message || "შეცდომა"); }
         finally { setAuthLoading(false); }
     };
@@ -468,8 +469,8 @@ const AdminRegister = ({ role }) => {
                         <h6 className="text-muted border-bottom pb-2 mb-3">კომპეტენციები და ავტორიზაცია</h6>
                         <Row className="g-3 mb-4">
                             <Col md={6}>
-                                <Form.Label className="small fw-bold">ავტორიზაციის ვადა</Form.Label>
-                                <Form.Control type="date" name="authExpiry" value={formData.authExpiry} onChange={handleChange} />
+                                <Form.Label htmlFor="fld-authExpiry" className="small fw-bold">ავტორიზაციის ვადა</Form.Label>
+                                <Form.Control id="fld-authExpiry" type="date" name="authExpiry" value={formData.authExpiry} onChange={handleChange} />
                             </Col>
                             <Col md={6}>
                                 <Form.Label className="small fw-bold">ფოტოსურათი</Form.Label>
@@ -505,8 +506,8 @@ const AdminRegister = ({ role }) => {
                     <Form onSubmit={handleAuthSubmit}>
                         <Row className="g-3">
                             <Col md={12}>
-                                <Form.Label className="fw-bold small">მომხმარებლის სახელი *</Form.Label>
-                                <Form.Control
+                                <Form.Label htmlFor="fld-username" className="fw-bold small">მომხმარებლის სახელი *</Form.Label>
+                                <Form.Control id="fld-username"
                                     value={authForm.username}
                                     onChange={e => setAuthForm({ ...authForm, username: e.target.value })}
                                     placeholder="username"
@@ -514,8 +515,8 @@ const AdminRegister = ({ role }) => {
                                 />
                             </Col>
                             <Col md={12}>
-                                <Form.Label className="fw-bold small">პაროლი *</Form.Label>
-                                <Form.Control
+                                <Form.Label htmlFor="fld-password" className="fw-bold small">პაროლი *</Form.Label>
+                                <Form.Control id="fld-password"
                                     type="password"
                                     value={authForm.password}
                                     onChange={e => setAuthForm({ ...authForm, password: e.target.value })}
@@ -524,8 +525,8 @@ const AdminRegister = ({ role }) => {
                                 />
                             </Col>
                             <Col md={12}>
-                                <Form.Label className="fw-bold small">როლი / დონე *</Form.Label>
-                                <Form.Select
+                                <Form.Label htmlFor="fld-role" className="fw-bold small">როლი / დონე *</Form.Label>
+                                <Form.Select id="fld-role"
                                     value={authForm.role}
                                     onChange={e => setAuthForm({ ...authForm, role: e.target.value })}
                                 >
@@ -536,8 +537,8 @@ const AdminRegister = ({ role }) => {
                             </Col>
                             {authForm.role === 'inspector' && (
                                 <Col md={12}>
-                                    <Form.Label className="fw-bold small">დაუკავშირე პერსონალს (ინსპექტორი)</Form.Label>
-                                    <Form.Select
+                                    <Form.Label htmlFor="fld-staffId" className="fw-bold small">დაუკავშირე პერსონალს (ინსპექტორი)</Form.Label>
+                                    <Form.Select id="fld-staffId"
                                         value={authForm.staffId}
                                         onChange={e => setAuthForm({ ...authForm, staffId: e.target.value })}
                                     >

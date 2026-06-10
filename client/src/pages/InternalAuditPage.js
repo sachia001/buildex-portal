@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Container, Table, Button, Form, Card, Modal, Row, Col, Badge } from 'react-bootstrap';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
+import { toast, confirmDialog } from '../components/Feedback';
 
 const InternalAuditPage = ({ role }) => {
     const [items, setItems] = useState([]);
@@ -49,13 +50,13 @@ const InternalAuditPage = ({ role }) => {
             }
             setShow(false);
             fetch();
-        } catch (err) { alert('შეცდომა: ' + (err.response?.data?.error || err.message)); }
+        } catch (err) { toast('შეცდომა: ' + (err.response?.data?.error || err.message), 'danger'); }
     };
 
     const handleDelete = async id => {
-        if (!window.confirm('ნამდვილად გსურთ ჩანაწერის წაშლა?')) return;
+        if (!(await confirmDialog('ნამდვილად გსურთ ჩანაწერის წაშლა?'))) return;
         try { await axios.delete(`/api/internal-audits/${id}`); fetch(); }
-        catch { alert('წაშლა ვერ მოხერხდა'); }
+        catch { toast('წაშლა ვერ მოხერხდა', 'danger'); }
     };
 
     return (
@@ -117,35 +118,35 @@ const InternalAuditPage = ({ role }) => {
                     <Form onSubmit={handleSubmit}>
                         <Row className="g-3">
                             <Col md={4}>
-                                <Form.Label className="fw-bold small">აუდიტის თარიღი *</Form.Label>
-                                <Form.Control type="date" name="auditDate" required value={formData.auditDate} onChange={handleChange} />
+                                <Form.Label htmlFor="fld-auditDate" className="fw-bold small">აუდიტის თარიღი *</Form.Label>
+                                <Form.Control id="fld-auditDate" type="date" name="auditDate" required value={formData.auditDate} onChange={handleChange} />
                             </Col>
                             <Col md={4}>
-                                <Form.Label className="fw-bold small">აუდიტორი *</Form.Label>
-                                <Form.Control name="auditor" required value={formData.auditor} onChange={handleChange} />
+                                <Form.Label htmlFor="fld-auditor" className="fw-bold small">აუდიტორი *</Form.Label>
+                                <Form.Control id="fld-auditor" name="auditor" required value={formData.auditor} onChange={handleChange} />
                             </Col>
                             <Col md={4}>
-                                <Form.Label className="fw-bold small">სტატუსი</Form.Label>
-                                <Form.Select name="status" value={formData.status} onChange={handleChange}>
+                                <Form.Label htmlFor="fld-status" className="fw-bold small">სტატუსი</Form.Label>
+                                <Form.Select id="fld-status" name="status" value={formData.status} onChange={handleChange}>
                                     <option>მიმდინარე</option>
                                     <option>დასრულებული</option>
                                 </Form.Select>
                             </Col>
                             <Col md={12}>
-                                <Form.Label className="fw-bold small">სფერო / სამიზნე პროცესი</Form.Label>
-                                <Form.Control name="scope" value={formData.scope} onChange={handleChange} placeholder="მაგ: ინსპექტირების პროცედურა, BE-PR-01" />
+                                <Form.Label htmlFor="fld-scope" className="fw-bold small">სფერო / სამიზნე პროცესი</Form.Label>
+                                <Form.Control id="fld-scope" name="scope" value={formData.scope} onChange={handleChange} placeholder="მაგ: ინსპექტირების პროცედურა, BE-PR-01" />
                             </Col>
                             <Col md={6}>
-                                <Form.Label className="fw-bold small">შეუსაბამობები</Form.Label>
-                                <Form.Control as="textarea" rows={3} name="nonConformities" value={formData.nonConformities} onChange={handleChange} />
+                                <Form.Label htmlFor="fld-nonConformities" className="fw-bold small">შეუსაბამობები</Form.Label>
+                                <Form.Control id="fld-nonConformities" as="textarea" rows={3} name="nonConformities" value={formData.nonConformities} onChange={handleChange} />
                             </Col>
                             <Col md={6}>
-                                <Form.Label className="fw-bold small">პოზიტიური მიგნებები</Form.Label>
-                                <Form.Control as="textarea" rows={3} name="positiveFindings" value={formData.positiveFindings} onChange={handleChange} />
+                                <Form.Label htmlFor="fld-positiveFindings" className="fw-bold small">პოზიტიური მიგნებები</Form.Label>
+                                <Form.Control id="fld-positiveFindings" as="textarea" rows={3} name="positiveFindings" value={formData.positiveFindings} onChange={handleChange} />
                             </Col>
                             <Col md={12}>
-                                <Form.Label className="fw-bold small">დასკვნა</Form.Label>
-                                <Form.Control as="textarea" rows={2} name="conclusion" value={formData.conclusion} onChange={handleChange} />
+                                <Form.Label htmlFor="fld-conclusion" className="fw-bold small">დასკვნა</Form.Label>
+                                <Form.Control id="fld-conclusion" as="textarea" rows={2} name="conclusion" value={formData.conclusion} onChange={handleChange} />
                             </Col>
                             <Col md={12}>
                                 <Form.Check type="checkbox" name="correctiveActionRequired" label="კორექტირებადი ქმედება საჭიროა (CAR)" checked={formData.correctiveActionRequired} onChange={handleChange} />

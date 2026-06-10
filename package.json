@@ -1,16 +1,22 @@
 {
-  "name": "advocateportal",
+  "name": "buildex-portal",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "ბილდექს ექსპერტიზა — ISO/IEC 17020 ინსპექტირების მართვის სისტემა",
+  "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "build": "echo 'pre-built client committed to git'",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "echo 'client იგება Dockerfile-ში (client/ npm run build)'",
+    "seed-admin": "node scripts/seed-admin.js",
+    "test": "echo \"(backend tests ჯერ არ არის)\""
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "keywords": [
+    "iso17020",
+    "inspection",
+    "buildex"
+  ],
+  "author": "Buildex Expertiza",
+  "license": "UNLICENSED",
+  "private": true,
   "type": "commonjs",
   "engines": {
     "node": ">=20"
@@ -19,13 +25,17 @@
     "@anthropic-ai/sdk": "^0.98.0",
     "bcryptjs": "^3.0.3",
     "cloudinary": "^2.10.0",
+    "compression": "^1.8.1",
     "cors": "^2.8.6",
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
+    "express-rate-limit": "^7.5.1",
+    "helmet": "^8.2.0",
     "jsonwebtoken": "^9.0.3",
     "mongoose": "^9.1.5",
+    "morgan": "^1.11.0",
     "multer": "^2.0.2",
     "react-signature-canvas": "^1.1.0-alpha.2",
-    "xlsx": "^0.18.5"
+    "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz"
   }
 }

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Container, Table, Button, Form, Card, Modal, Row, Col, Badge } from 'react-bootstrap';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
+import { toast, confirmDialog } from '../components/Feedback';
 
 const statusVariant = s => ({ 'განხილვაში': 'warning', 'დასრულებული': 'success', 'უარყოფილი': 'secondary' }[s] || 'secondary');
 
@@ -49,13 +50,13 @@ const ComplaintsPage = ({ role }) => {
             }
             setShow(false);
             fetch();
-        } catch (err) { alert('შეცდომა: ' + (err.response?.data?.error || err.message)); }
+        } catch (err) { toast('შეცდომა: ' + (err.response?.data?.error || err.message), 'danger'); }
     };
 
     const handleDelete = async id => {
-        if (!window.confirm('ნამდვილად გსურთ ჩანაწერის წაშლა?')) return;
+        if (!(await confirmDialog('ნამდვილად გსურთ ჩანაწერის წაშლა?'))) return;
         try { await axios.delete(`/api/complaints/${id}`); fetch(); }
-        catch { alert('წაშლა ვერ მოხერხდა'); }
+        catch { toast('წაშლა ვერ მოხერხდა', 'danger'); }
     };
 
     const canEdit = ['admin', 'quality_manager'].includes(role);
@@ -120,51 +121,51 @@ const ComplaintsPage = ({ role }) => {
                     <Form onSubmit={handleSubmit}>
                         <Row className="g-3">
                             <Col md={4}>
-                                <Form.Label className="fw-bold small">შეტანის თარიღი</Form.Label>
-                                <Form.Control type="date" name="dateReceived" required value={formData.dateReceived} onChange={handleChange} />
+                                <Form.Label htmlFor="cmp-dateReceived" className="fw-bold small">შეტანის თარიღი <span aria-hidden="true">*</span></Form.Label>
+                                <Form.Control id="cmp-dateReceived" type="date" name="dateReceived" required aria-required="true" value={formData.dateReceived} onChange={handleChange} />
                             </Col>
                             <Col md={4}>
-                                <Form.Label className="fw-bold small">კატეგორია</Form.Label>
-                                <Form.Select name="category" value={formData.category} onChange={handleChange}>
+                                <Form.Label htmlFor="cmp-category" className="fw-bold small">კატეგორია</Form.Label>
+                                <Form.Select id="cmp-category" name="category" value={formData.category} onChange={handleChange}>
                                     <option>საჩივარი</option>
                                     <option>აპელაცია</option>
                                 </Form.Select>
                             </Col>
                             <Col md={4}>
-                                <Form.Label className="fw-bold small">სტატუსი</Form.Label>
-                                <Form.Select name="status" value={formData.status} onChange={handleChange}>
+                                <Form.Label htmlFor="cmp-status" className="fw-bold small">სტატუსი</Form.Label>
+                                <Form.Select id="cmp-status" name="status" value={formData.status} onChange={handleChange}>
                                     <option>განხილვაში</option>
                                     <option>დასრულებული</option>
                                     <option>უარყოფილი</option>
                                 </Form.Select>
                             </Col>
                             <Col md={6}>
-                                <Form.Label className="fw-bold small">განმცხადებელი *</Form.Label>
-                                <Form.Control name="complainant" required value={formData.complainant} onChange={handleChange} />
+                                <Form.Label htmlFor="cmp-complainant" className="fw-bold small">განმცხადებელი <span aria-hidden="true">*</span></Form.Label>
+                                <Form.Control id="cmp-complainant" name="complainant" required aria-required="true" value={formData.complainant} onChange={handleChange} />
                             </Col>
                             <Col md={6}>
-                                <Form.Label className="fw-bold small">საკონტაქტო</Form.Label>
-                                <Form.Control name="complainantContact" value={formData.complainantContact} onChange={handleChange} />
+                                <Form.Label htmlFor="cmp-complainantContact" className="fw-bold small">საკონტაქტო</Form.Label>
+                                <Form.Control id="cmp-complainantContact" name="complainantContact" value={formData.complainantContact} onChange={handleChange} />
                             </Col>
                             <Col md={6}>
-                                <Form.Label className="fw-bold small">დაკავშირებული საქმის ნომერი</Form.Label>
-                                <Form.Control name="inspectionRef" value={formData.inspectionRef} onChange={handleChange} placeholder="BX-INS-..." />
+                                <Form.Label htmlFor="cmp-inspectionRef" className="fw-bold small">დაკავშირებული საქმის ნომერი</Form.Label>
+                                <Form.Control id="cmp-inspectionRef" name="inspectionRef" value={formData.inspectionRef} onChange={handleChange} placeholder="BX-INS-..." />
                             </Col>
                             <Col md={6}>
-                                <Form.Label className="fw-bold small">განმხილველი</Form.Label>
-                                <Form.Control name="reviewedBy" value={formData.reviewedBy} onChange={handleChange} />
+                                <Form.Label htmlFor="cmp-reviewedBy" className="fw-bold small">განმხილველი</Form.Label>
+                                <Form.Control id="cmp-reviewedBy" name="reviewedBy" value={formData.reviewedBy} onChange={handleChange} />
                             </Col>
                             <Col md={12}>
-                                <Form.Label className="fw-bold small">აღწერა / შინაარსი *</Form.Label>
-                                <Form.Control as="textarea" rows={3} name="description" required value={formData.description} onChange={handleChange} />
+                                <Form.Label htmlFor="cmp-description" className="fw-bold small">აღწერა / შინაარსი <span aria-hidden="true">*</span></Form.Label>
+                                <Form.Control id="cmp-description" as="textarea" rows={3} name="description" required aria-required="true" value={formData.description} onChange={handleChange} />
                             </Col>
                             <Col md={12}>
-                                <Form.Label className="fw-bold small">გადაწყვეტა / პასუხი</Form.Label>
-                                <Form.Control as="textarea" rows={2} name="resolution" value={formData.resolution} onChange={handleChange} />
+                                <Form.Label htmlFor="cmp-resolution" className="fw-bold small">გადაწყვეტა / პასუხი</Form.Label>
+                                <Form.Control id="cmp-resolution" as="textarea" rows={2} name="resolution" value={formData.resolution} onChange={handleChange} />
                             </Col>
                             <Col md={12}>
-                                <Form.Label className="fw-bold small">პრევენციული ღონისძიება</Form.Label>
-                                <Form.Control as="textarea" rows={2} name="preventiveAction" value={formData.preventiveAction} onChange={handleChange} />
+                                <Form.Label htmlFor="cmp-preventiveAction" className="fw-bold small">პრევენციული ღონისძიება</Form.Label>
+                                <Form.Control id="cmp-preventiveAction" as="textarea" rows={2} name="preventiveAction" value={formData.preventiveAction} onChange={handleChange} />
                             </Col>
                         </Row>
                         <div className="d-flex justify-content-end mt-4 gap-2">

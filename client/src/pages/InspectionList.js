@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Container, Card, Table, Button, Form, Row, Col, Badge, Spinner } from 'react-bootstrap';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import { toast, confirmDialog } from '../components/Feedback';
 
 const InspectionList = ({ role }) => {
     const navigate = useNavigate();
@@ -92,12 +93,12 @@ const InspectionList = ({ role }) => {
     };
 
     const handleDelete = async (id, name) => {
-        if (!window.confirm(`წაიშალოს "${name}"? ეს ქმედება შეუქცევადია.`)) return;
+        if (!(await confirmDialog(`წაიშალოს "${name}"? ეს ქმედება შეუქცევადია.`))) return;
         try {
             await axios.delete(`/api/inspections/${id}`);
             fetchInspections();
         } catch (err) {
-            alert(err.response?.data?.error || 'წაშლა ვერ მოხერხდა');
+            toast(err.response?.data?.error || 'წაშლა ვერ მოხერხდა', 'danger');
         }
     };
 
@@ -144,8 +145,8 @@ const InspectionList = ({ role }) => {
                     <Card.Body className="p-3 bg-light">
                         <Row className="g-3 align-items-end">
                             <Col md={3}>
-                                <Form.Label className="small fw-bold text-muted">ძებნა (ნომერი / ობიექტი)</Form.Label>
-                                <Form.Control 
+                                <Form.Label htmlFor="fld-search" className="small fw-bold text-muted">ძებნა (ნომერი / ობიექტი)</Form.Label>
+                                <Form.Control id="fld-search" 
                                     size="sm"
                                     type="text" 
                                     placeholder="🔍 ჩაწერეთ..." 
@@ -156,8 +157,8 @@ const InspectionList = ({ role }) => {
                                 />
                             </Col>
                             <Col md={2}>
-                                <Form.Label className="small fw-bold text-muted">ექსპერტი</Form.Label>
-                                <Form.Select size="sm" name="expert" value={filter.expert} onChange={handleFilterChange} style={{borderColor: THEME.border}}>
+                                <Form.Label htmlFor="fld-expert" className="small fw-bold text-muted">ექსპერტი</Form.Label>
+                                <Form.Select id="fld-expert" size="sm" name="expert" value={filter.expert} onChange={handleFilterChange} style={{borderColor: THEME.border}}>
                                     <option value="">ყველა</option>
                                     {expertsList.map(ex => (
                                         <option key={ex.id} value={ex.id}>{ex.name}</option>
@@ -165,8 +166,8 @@ const InspectionList = ({ role }) => {
                                 </Form.Select>
                             </Col>
                             <Col md={2}>
-                                <Form.Label className="small fw-bold text-muted">სტატუსი</Form.Label>
-                                <Form.Select size="sm" name="status" value={filter.status} onChange={handleFilterChange} style={{borderColor: THEME.border}}>
+                                <Form.Label htmlFor="fld-status" className="small fw-bold text-muted">სტატუსი</Form.Label>
+                                <Form.Select id="fld-status" size="sm" name="status" value={filter.status} onChange={handleFilterChange} style={{borderColor: THEME.border}}>
                                     <option value="">ყველა</option>
                                     <option value="რეგისტრირებული">რეგისტრირებული</option>
                                     <option value="მიმდინარე">მიმდინარე</option>
@@ -174,12 +175,12 @@ const InspectionList = ({ role }) => {
                                 </Form.Select>
                             </Col>
                             <Col md={2}>
-                                <Form.Label className="small fw-bold text-muted">თარიღი (-დან)</Form.Label>
-                                <Form.Control size="sm" type="date" name="dateFrom" value={filter.dateFrom} onChange={handleFilterChange} style={{borderColor: THEME.border}} />
+                                <Form.Label htmlFor="fld-dateFrom" className="small fw-bold text-muted">თარიღი (-დან)</Form.Label>
+                                <Form.Control id="fld-dateFrom" size="sm" type="date" name="dateFrom" value={filter.dateFrom} onChange={handleFilterChange} style={{borderColor: THEME.border}} />
                             </Col>
                             <Col md={2}>
-                                <Form.Label className="small fw-bold text-muted">თარიღი (-მდე)</Form.Label>
-                                <Form.Control size="sm" type="date" name="dateTo" value={filter.dateTo} onChange={handleFilterChange} style={{borderColor: THEME.border}} />
+                                <Form.Label htmlFor="fld-dateTo" className="small fw-bold text-muted">თარიღი (-მდე)</Form.Label>
+                                <Form.Control id="fld-dateTo" size="sm" type="date" name="dateTo" value={filter.dateTo} onChange={handleFilterChange} style={{borderColor: THEME.border}} />
                             </Col>
                             <Col md={1}>
                                 <Button variant="outline-secondary" size="sm" className="w-100" onClick={clearFilters} title="ფილტრის გასუფთავება">

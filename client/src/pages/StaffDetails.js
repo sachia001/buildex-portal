@@ -3,6 +3,7 @@ import { Container, Card, Row, Col, Form, Button, Table, Badge, Spinner, Modal, 
 import { useParams, useNavigate } from 'react-router-dom';
 import { PDFDownloadLink } from '@react-pdf/renderer';
 import axios from 'axios';
+import { toast, confirmDialog } from '../components/Feedback';
 import DirectorsOrderPdf from '../pdf-components/DirectorsOrderPdf';
 import LaborContractPdf from '../pdf-components/LaborContractPdf';
 import ImpartialityDeclarationPdf from '../pdf-components/ImpartialityDeclarationPdf';
@@ -77,28 +78,28 @@ const StaffDetails = () => {
     useEffect(() => { fetchUser(); }, [id]);
 
     const handleUpload = async () => {
-        if (!file) return alert('აირჩიეთ ფაილი!');
+        if (!file) return toast('აირჩიეთ ფაილი!', 'warning');
         const formData = new FormData();
         formData.append('file', file);
         formData.append('docType', docType);
         setUploading(true);
         try {
             await axios.post(`/api/users/${id}/upload`, formData, { headers: { 'Content-Type': 'multipart/form-data' } });
-            alert('✅ ფაილი აიტვირთა!');
+            toast('✅ ფაილი აიტვირთა!', 'success');
             setFile(null);
             fetchUser();
-        } catch { alert('ატვირთვა ვერ მოხერხდა!'); }
+        } catch { toast('ატვირთვა ვერ მოხერხდა!', 'danger'); }
         finally { setUploading(false); }
     };
 
     const deleteDoc = async (key) => {
-        if (!window.confirm('წავშალოთ დოკუმენტი?')) return;
+        if (!(await confirmDialog('წავშალოთ დოკუმენტი?'))) return;
         const newDocs = { ...user.documents };
         delete newDocs[key];
         try {
             await axios.put(`/api/users/${id}`, { documents: newDocs });
             fetchUser();
-        } catch { alert('ვერ წაიშალა'); }
+        } catch { toast('ვერ წაიშალა', 'danger'); }
     };
 
     const handleStatusChange = async () => {
@@ -106,8 +107,8 @@ const StaffDetails = () => {
             await axios.put(`/api/users/${id}`, { status: newStatus });
             setShowStatusModal(false);
             fetchUser();
-            alert('✅ სტატუსი შეიცვალა');
-        } catch { alert('შეცდომა'); }
+            toast('✅ სტატუსი შეიცვალა', 'success');
+        } catch { toast('შეცდომა', 'danger'); }
     };
 
     const searchInspection = async () => {
@@ -302,7 +303,7 @@ const StaffDetails = () => {
                                                     <tr key={key}>
                                                         <td className="fw-bold text-dark">{key}</td>
                                                         <td>
-                                                            <a href={`/${path}`} target="_blank" rel="noreferrer" className="btn btn-sm btn-link text-decoration-none">👁️ ნახვა</a>
+                                                            <a href={`/${path}?token=${localStorage.getItem('token')}`} target="_blank" rel="noreferrer" className="btn btn-sm btn-link text-decoration-none">👁️ ნახვა</a>
                                                             <Button size="sm" variant="outline-danger" className="ms-2" onClick={() => deleteDoc(key)}>🗑️</Button>
                                                         </td>
                                                     </tr>

@@ -1,32 +1,37 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, Suspense, lazy } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link, useLocation } from 'react-router-dom';
+import { Spinner } from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import axios from 'axios';
 
-import Dashboard from './pages/Dashboard';
-import InspectionList from './pages/InspectionList';
-import AddInspection from './pages/AddInspection';
-import InspectionDetails from './pages/InspectionDetails';
-import AdminRegister from './pages/AdminRegister';
-import StaffDetails from './pages/StaffDetails';
-import DocumentsPage from './pages/DocumentsPage';
-import OrderGenerator from './pages/OrderGenerator';
-import ContractGenerator from './pages/ContractGenerator';
-import EquipmentManager from './pages/EquipmentManager';
-import ManagementReview from './pages/ManagementReview';
-import InsurancePage from './pages/InsurancePage';
-import CompanyDocsPage from './pages/CompanyDocsPage';
-import ComplaintsPage from './pages/ComplaintsPage';
-import InternalAuditPage from './pages/InternalAuditPage';
-import CorrectiveActionsPage from './pages/CorrectiveActionsPage';
 import Login from './components/Login';
-import ChangePassword from './components/ChangePassword';
-import PriceAdequacyPage from './pages/PriceAdequacyPage';
-import NormsAdminPage from './pages/NormsAdminPage';
-import ChecklistPage from './pages/ChecklistPage';
-import ProceduresPage from './pages/ProceduresPage';
-import AuditLogPage from './pages/AuditLogPage';
-import ProcurementPricePage from './pages/ProcurementPricePage';
+import ErrorBoundary from './components/ErrorBoundary';
+import { FeedbackProvider } from './components/Feedback';
+
+/* ── Lazy-loaded routes (PERF-001 / PERF-002 code splitting) ───────────── */
+const Dashboard            = lazy(() => import('./pages/Dashboard'));
+const InspectionList       = lazy(() => import('./pages/InspectionList'));
+const AddInspection        = lazy(() => import('./pages/AddInspection'));
+const InspectionDetails    = lazy(() => import('./pages/InspectionDetails'));
+const AdminRegister        = lazy(() => import('./pages/AdminRegister'));
+const StaffDetails         = lazy(() => import('./pages/StaffDetails'));
+const DocumentsPage        = lazy(() => import('./pages/DocumentsPage'));
+const OrderGenerator       = lazy(() => import('./pages/OrderGenerator'));
+const ContractGenerator    = lazy(() => import('./pages/ContractGenerator'));
+const EquipmentManager     = lazy(() => import('./pages/EquipmentManager'));
+const ManagementReview     = lazy(() => import('./pages/ManagementReview'));
+const InsurancePage        = lazy(() => import('./pages/InsurancePage'));
+const CompanyDocsPage      = lazy(() => import('./pages/CompanyDocsPage'));
+const ComplaintsPage       = lazy(() => import('./pages/ComplaintsPage'));
+const InternalAuditPage    = lazy(() => import('./pages/InternalAuditPage'));
+const CorrectiveActionsPage = lazy(() => import('./pages/CorrectiveActionsPage'));
+const ChangePassword       = lazy(() => import('./components/ChangePassword'));
+const PriceAdequacyPage    = lazy(() => import('./pages/PriceAdequacyPage'));
+const NormsAdminPage       = lazy(() => import('./pages/NormsAdminPage'));
+const ChecklistPage        = lazy(() => import('./pages/ChecklistPage'));
+const ProceduresPage       = lazy(() => import('./pages/ProceduresPage'));
+const AuditLogPage         = lazy(() => import('./pages/AuditLogPage'));
+const ProcurementPricePage = lazy(() => import('./pages/ProcurementPricePage'));
 
 // Attach token to every axios request
 axios.interceptors.request.use(config => {
@@ -45,12 +50,25 @@ const ROLE_LABELS = {
     inspector:       '🔍 ინსპექტორი',
 };
 
+/* ── Route-level loading fallback (Suspense) ───────────────────────────── */
+const RouteFallback = () => (
+    <div className="loading-state" role="status" aria-live="polite">
+        <Spinner animation="border" variant="primary" />
+        <span>იტვირთება…</span>
+    </div>
+);
+
 /* ── Nav link that highlights when active ─────────────────────── */
 const NavLink = ({ to, children, onClick }) => {
     const location = useLocation();
     const isActive = location.pathname === to || (to !== '/' && location.pathname.startsWith(to));
     return (
-        <Link className={`nav-link-item${isActive ? ' active' : ''}`} to={to} onClick={onClick}>
+        <Link
+            className={`nav-link-item${isActive ? ' active' : ''}`}
+            to={to}
+            onClick={onClick}
+            aria-current={isActive ? 'page' : undefined}
+        >
             {children}
         </Link>
     );
@@ -60,27 +78,54 @@ const NavLink = ({ to, children, onClick }) => {
 const NavDropdown = ({ label, icon, items, openKey, currentOpen, onToggle, onAnyClick }) => {
     const location = useLocation();
     const isOpen = currentOpen === openKey;
+    const menuRef = useRef(null);
+    const toggleRef = useRef(null);
     const visibleItems = items.filter(i => i.show !== false);
+
+    // Focus first item when opening via keyboard
+    useEffect(() => {
+        if (isOpen && menuRef.current) {
+            const first = menuRef.current.querySelector('a, button');
+            if (first) first.focus();
+        }
+    }, [isOpen]);
+
     if (visibleItems.length === 0) return null;
     const anyActive = visibleItems.some(i => location.pathname === i.to || (i.to !== '/' && location.pathname.startsWith(i.to)));
 
+    const handleKeyDown = (e) => {
+        if (e.key === 'Escape') {
+            onToggle(null);
+            if (toggleRef.current) toggleRef.current.focus();
+        }
+    };
+
+    const menuId = `nav-menu-${openKey}`;
+
     return (
-        <div className="nav-dropdown">
+        <div className="nav-dropdown" onKeyDown={handleKeyDown}>
             <button
+                ref={toggleRef}
+                type="button"
                 className={`nav-dropdown-toggle${isOpen || anyActive ? ' active' : ''}`}
                 onClick={(e) => { e.stopPropagation(); onToggle(isOpen ? null : openKey); }}
+                aria-haspopup="true"
+                aria-expanded={isOpen}
+                aria-controls={menuId}
             >
-                {icon} {label} <span className="caret">▾</span>
+                {icon} {label} <span className="caret" aria-hidden="true">▾</span>
             </button>
             {isOpen && (
-                <div className="nav-dropdown-menu">
+                <div className="nav-dropdown-menu" id={menuId} role="menu" ref={menuRef}>
                     {visibleItems.map(item => {
                         const itemActive = location.pathname === item.to || (item.to !== '/' && location.pathname.startsWith(item.to));
                         return (
                             <Link
                                 key={item.to}
                                 to={item.to}
+                                role="menuitem"
                                 className={itemActive ? 'active' : ''}
+                                aria-current={itemActive ? 'page' : undefined}
                                 onClick={onAnyClick}
                             >
                                 {item.label}
@@ -95,17 +140,28 @@ const NavDropdown = ({ label, icon, items, openKey, currentOpen, onToggle, onAny
 
 const Navbar = ({ username, role, onLogout }) => {
     const [openDropdown, setOpenDropdown] = useState(null); // 'user' | 'ops' | 'docs' | ...
+    const [mobileOpen, setMobileOpen] = useState(false);
     const navRef = useRef(null);
 
     useEffect(() => {
         const handler = (e) => {
-            if (navRef.current && !navRef.current.contains(e.target)) setOpenDropdown(null);
+            if (navRef.current && !navRef.current.contains(e.target)) {
+                setOpenDropdown(null);
+                setMobileOpen(false);
+            }
+        };
+        const escHandler = (e) => {
+            if (e.key === 'Escape') { setOpenDropdown(null); setMobileOpen(false); }
         };
         document.addEventListener('mousedown', handler);
-        return () => document.removeEventListener('mousedown', handler);
+        document.addEventListener('keydown', escHandler);
+        return () => {
+            document.removeEventListener('mousedown', handler);
+            document.removeEventListener('keydown', escHandler);
+        };
     }, []);
 
-    const closeAll = () => setOpenDropdown(null);
+    const closeAll = () => { setOpenDropdown(null); setMobileOpen(false); };
 
     const show = {
         inspections:   ['admin', 'chancellor', 'tech_manager', 'inspector', 'quality_manager'].includes(role),
@@ -154,73 +210,95 @@ const Navbar = ({ username, role, onLogout }) => {
     ];
 
     return (
-        <nav className="app-navbar" ref={navRef}>
+        <nav className="app-navbar" ref={navRef} aria-label="მთავარი ნავიგაცია">
             <div className="app-navbar navbar-inner">
                 {/* Brand */}
                 <Link className="brand-logo" to="/" onClick={closeAll}>
-                    <img src="/logo.png" alt="Logo" style={{ height: '44px', flexShrink: 0 }} />
+                    <img src="/logo.png" alt="ბილდექს ექსპერტიზა — ლოგო" style={{ height: '44px', flexShrink: 0 }} />
                     <div>
                         <div className="brand-name">ბილდექს ექსპერტიზა</div>
                         <div className="brand-sub">ISO/IEC 17020:2012</div>
                     </div>
                 </Link>
 
-                {/* Home link */}
-                <NavLink to="/" onClick={closeAll}>📊 მთავარი</NavLink>
+                {/* Mobile hamburger toggle (UX-005) */}
+                <button
+                    type="button"
+                    className="navbar-burger d-lg-none ms-auto"
+                    onClick={() => { setMobileOpen(o => !o); setOpenDropdown(null); }}
+                    aria-expanded={mobileOpen}
+                    aria-controls="primary-nav"
+                    aria-label="ნავიგაციის მენიუ"
+                >
+                    <span aria-hidden="true">{mobileOpen ? '✕' : '☰'}</span>
+                </button>
 
-                {/* Grouped dropdowns */}
-                <NavDropdown
-                    label="ოპერაციები" icon="📂" openKey="ops"
-                    items={operationsItems}
-                    currentOpen={openDropdown} onToggle={setOpenDropdown} onAnyClick={closeAll}
-                />
-                <NavDropdown
-                    label="დოკუმენტაცია" icon="📄" openKey="docs"
-                    items={docsItems}
-                    currentOpen={openDropdown} onToggle={setOpenDropdown} onAnyClick={closeAll}
-                />
-                <NavDropdown
-                    label="ხარისხი" icon="⚙️" openKey="quality"
-                    items={qualityItems}
-                    currentOpen={openDropdown} onToggle={setOpenDropdown} onAnyClick={closeAll}
-                />
-                <NavDropdown
-                    label="რესურსები" icon="🏗️" openKey="resources"
-                    items={resourcesItems}
-                    currentOpen={openDropdown} onToggle={setOpenDropdown} onAnyClick={closeAll}
-                />
+                {/* Collapsible nav region */}
+                <div id="primary-nav" className={`nav-collapse${mobileOpen ? ' open' : ''}`}>
+                    {/* Home link */}
+                    <NavLink to="/" onClick={closeAll}>📊 მთავარი</NavLink>
 
-                {/* User dropdown */}
-                <div className="nav-dropdown ms-auto flex-shrink-0">
-                    <button
-                        className="user-pill"
-                        onClick={(e) => { e.stopPropagation(); setOpenDropdown(openDropdown === 'user' ? null : 'user'); }}
-                    >
-                        👤 <span style={{ fontWeight: 600 }}>{username}</span>
-                        <span style={{ color: 'var(--text-muted)', fontSize: '0.75rem' }}>{ROLE_LABELS[role] || role}</span>
-                        <span style={{ color: 'var(--text-muted)' }}>▾</span>
-                    </button>
+                    {/* Grouped dropdowns */}
+                    <NavDropdown
+                        label="ოპერაციები" icon="📂" openKey="ops"
+                        items={operationsItems}
+                        currentOpen={openDropdown} onToggle={setOpenDropdown} onAnyClick={closeAll}
+                    />
+                    <NavDropdown
+                        label="დოკუმენტაცია" icon="📄" openKey="docs"
+                        items={docsItems}
+                        currentOpen={openDropdown} onToggle={setOpenDropdown} onAnyClick={closeAll}
+                    />
+                    <NavDropdown
+                        label="ხარისხი" icon="⚙️" openKey="quality"
+                        items={qualityItems}
+                        currentOpen={openDropdown} onToggle={setOpenDropdown} onAnyClick={closeAll}
+                    />
+                    <NavDropdown
+                        label="რესურსები" icon="🏗️" openKey="resources"
+                        items={resourcesItems}
+                        currentOpen={openDropdown} onToggle={setOpenDropdown} onAnyClick={closeAll}
+                    />
 
-                    {openDropdown === 'user' && (
-                        <div className="user-dropdown">
-                            <div className="role-label">{ROLE_LABELS[role] || role}</div>
-                            <div className="drop-divider" />
-                            <Link
-                                className="drop-item"
-                                to="/change-password"
-                                onClick={closeAll}
-                            >
-                                🔑 პაროლის შეცვლა
-                            </Link>
-                            <div className="drop-divider" />
-                            <button
-                                className="drop-item danger"
-                                onClick={() => { closeAll(); onLogout(); }}
-                            >
-                                🚪 გასვლა
-                            </button>
-                        </div>
-                    )}
+                    {/* User dropdown */}
+                    <div className="nav-dropdown ms-lg-auto flex-shrink-0">
+                        <button
+                            type="button"
+                            className="user-pill"
+                            onClick={(e) => { e.stopPropagation(); setOpenDropdown(openDropdown === 'user' ? null : 'user'); }}
+                            aria-haspopup="true"
+                            aria-expanded={openDropdown === 'user'}
+                            aria-controls="user-menu"
+                        >
+                            👤 <span style={{ fontWeight: 600 }}>{username}</span>
+                            <span style={{ color: 'var(--text-muted)', fontSize: '0.75rem' }}>{ROLE_LABELS[role] || role}</span>
+                            <span style={{ color: 'var(--text-muted)' }} aria-hidden="true">▾</span>
+                        </button>
+
+                        {openDropdown === 'user' && (
+                            <div className="user-dropdown" id="user-menu" role="menu">
+                                <div className="role-label">{ROLE_LABELS[role] || role}</div>
+                                <div className="drop-divider" />
+                                <Link
+                                    className="drop-item"
+                                    to="/change-password"
+                                    role="menuitem"
+                                    onClick={closeAll}
+                                >
+                                    🔑 პაროლის შეცვლა
+                                </Link>
+                                <div className="drop-divider" />
+                                <button
+                                    type="button"
+                                    className="drop-item danger"
+                                    role="menuitem"
+                                    onClick={() => { closeAll(); onLogout(); }}
+                                >
+                                    🚪 გასვლა
+                                </button>
+                            </div>
+                        )}
+                    </div>
                 </div>
             </div>
         </nav>
@@ -277,49 +355,59 @@ function AppContent() {
             }} />
             <Navbar username={username} role={role} onLogout={handleLogout} />
             <div className="container-fluid px-4 pb-5 pt-3">
-                <Routes>
-                    <Route path="/" element={<Dashboard role={role} />} />
-                    <Route path="/inspections" element={<InspectionList role={role} />} />
-                    <Route path="/add-inspection" element={
-                        ['admin', 'chancellor'].includes(role)
-                            ? <AddInspection />
-                            : <div className="text-center mt-5"><h4 className="text-danger">🚫 წვდომა აკრძალულია</h4><p className="text-muted">მხოლოდ ადმინი და კანცელარია ახდენენ საქმის რეგისტრაციას.</p><Link to="/inspections" className="btn btn-secondary mt-2">← უკან</Link></div>
-                    } />
-                    <Route path="/inspections/:id" element={<InspectionDetails role={role} />} />
-                    <Route path="/admin" element={<AdminRegister role={role} />} />
-                    <Route path="/staff/:id" element={<StaffDetails />} />
-                    <Route path="/management-review" element={<ManagementReview role={role} />} />
-                    <Route path="/documents" element={<DocumentsPage />} />
-                    <Route path="/equipment" element={<EquipmentManager role={role} />} />
-                    <Route path="/insurance" element={<InsurancePage role={role} />} />
-                    <Route path="/complaints" element={<ComplaintsPage role={role} />} />
-                    <Route path="/internal-audits" element={<InternalAuditPage role={role} />} />
-                    <Route path="/corrective-actions" element={<CorrectiveActionsPage role={role} />} />
-                    <Route path="/order-generator" element={<OrderGenerator />} />
-                    <Route path="/contract-generator" element={<ContractGenerator />} />
-                    <Route path="/company-docs" element={<CompanyDocsPage role={role} />} />
-                    <Route path="/change-password" element={<ChangePassword />} />
-                    <Route path="/price-adequacy" element={<PriceAdequacyPage role={role} />} />
-                    <Route path="/norms-admin" element={<NormsAdminPage role={role} />} />
-                    <Route path="/checklist" element={<ChecklistPage role={role} />} />
-                    <Route path="/procedures" element={<ProceduresPage role={role} />} />
-                    <Route path="/audit-log" element={<AuditLogPage role={role} />} />
-                    <Route path="/procurement" element={<ProcurementPricePage />} />
-                    <Route path="*" element={
-                        <div className="text-center mt-5">
-                            <h1 className="display-1 fw-bold text-muted">404</h1>
-                            <p className="lead">გვერდი არ მოიძებნა</p>
-                            <Link to="/" className="btn btn-primary">მთავარზე დაბრუნება</Link>
-                        </div>
-                    } />
-                </Routes>
+                <ErrorBoundary>
+                    <Suspense fallback={<RouteFallback />}>
+                        <Routes>
+                            <Route path="/" element={<Dashboard role={role} />} />
+                            <Route path="/inspections" element={<InspectionList role={role} />} />
+                            <Route path="/add-inspection" element={
+                                ['admin', 'chancellor'].includes(role)
+                                    ? <AddInspection />
+                                    : <div className="text-center mt-5"><h4 className="text-danger">🚫 წვდომა აკრძალულია</h4><p className="text-muted">მხოლოდ ადმინი და კანცელარია ახდენენ საქმის რეგისტრაციას.</p><Link to="/inspections" className="btn btn-secondary mt-2">← უკან</Link></div>
+                            } />
+                            <Route path="/inspections/:id" element={<InspectionDetails role={role} />} />
+                            <Route path="/admin" element={<AdminRegister role={role} />} />
+                            <Route path="/staff/:id" element={<StaffDetails />} />
+                            <Route path="/management-review" element={<ManagementReview role={role} />} />
+                            <Route path="/documents" element={<DocumentsPage />} />
+                            <Route path="/equipment" element={<EquipmentManager role={role} />} />
+                            <Route path="/insurance" element={<InsurancePage role={role} />} />
+                            <Route path="/complaints" element={<ComplaintsPage role={role} />} />
+                            <Route path="/internal-audits" element={<InternalAuditPage role={role} />} />
+                            <Route path="/corrective-actions" element={<CorrectiveActionsPage role={role} />} />
+                            <Route path="/order-generator" element={<OrderGenerator />} />
+                            <Route path="/contract-generator" element={<ContractGenerator />} />
+                            <Route path="/company-docs" element={<CompanyDocsPage role={role} />} />
+                            <Route path="/change-password" element={<ChangePassword />} />
+                            <Route path="/price-adequacy" element={<PriceAdequacyPage role={role} />} />
+                            <Route path="/norms-admin" element={<NormsAdminPage role={role} />} />
+                            <Route path="/checklist" element={<ChecklistPage role={role} />} />
+                            <Route path="/procedures" element={<ProceduresPage role={role} />} />
+                            <Route path="/audit-log" element={<AuditLogPage role={role} />} />
+                            <Route path="/procurement" element={<ProcurementPricePage />} />
+                            <Route path="*" element={
+                                <div className="text-center mt-5">
+                                    <h1 className="display-1 fw-bold text-muted">404</h1>
+                                    <p className="lead">გვერდი არ მოიძებნა</p>
+                                    <Link to="/" className="btn btn-primary">მთავარზე დაბრუნება</Link>
+                                </div>
+                            } />
+                        </Routes>
+                    </Suspense>
+                </ErrorBoundary>
             </div>
         </>
     );
 }
 
 function App() {
-    return <Router><AppContent /></Router>;
+    return (
+        <Router>
+            <FeedbackProvider>
+                <AppContent />
+            </FeedbackProvider>
+        </Router>
+    );
 }
 
 export default App;
