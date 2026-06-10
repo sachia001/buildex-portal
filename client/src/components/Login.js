@@ -48,7 +48,7 @@ const Login = ({ onLogin }) => {
                         {error && <Alert variant="danger" className="py-2">{error}</Alert>}
 
                         <Form onSubmit={handleSubmit}>
-                            <Form.Group className="mb-3">
+                            <Form.Group className="mb-3" controlId="login-username">
                                 <Form.Label className="small fw-bold">მომხმარებლის სახელი</Form.Label>
                                 <Form.Control
                                     type="text"
@@ -59,7 +59,7 @@ const Login = ({ onLogin }) => {
                                     autoFocus
                                 />
                             </Form.Group>
-                            <Form.Group className="mb-4">
+                            <Form.Group className="mb-4" controlId="login-password">
                                 <Form.Label className="small fw-bold">პაროლი</Form.Label>
                                 <Form.Control
                                     type="password"
