@@ -13,9 +13,9 @@ const FM15_MgmtReviewPdf = ({ data = {} }) => {
   ];
   return (
   <Document>
-    <Page size="A4" style={s.page}>
+    <Page size="A4" style={[s.page, { paddingTop: 10, paddingBottom: 16, paddingHorizontal: 28 }]}>
       <WM />
-      <FormHeader code="FM-15" isoRef="სსტ ISO/IEC 17020 §8.5" title="მართვის ანალიზი — სხდომის ოქმი" subtitle="Management Review Record" />
+      <FormHeader code="BE-FM-15" isoRef="სსტ ISO/IEC 17020 §8.5" title="მართვის ანალიზი — სხდომის ოქმი" subtitle="Management Review Record" />
 
       <Text style={s.secH}>1. სხდომის რეკვიზიტები</Text>
       <View style={[s.tBorder,{marginBottom:4}]}>
@@ -96,7 +96,7 @@ const FM15_MgmtReviewPdf = ({ data = {} }) => {
       </View>
 
       <SigBlock3 labels={['სხდომის თავმჯდომარე','ხარისხის მენეჯერი','დირექტორი']} sigs={sigs} />
-      <FormFooter code="FM-15 v2.0 | 28.04.2026 | შენახვა: 5 წელი" />
+      <FormFooter code="BE-FM-15 v2.0 | 28.04.2026 | შენახვა: 5 წელი" />
     </Page>
   </Document>
 );};

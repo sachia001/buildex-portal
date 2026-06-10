@@ -64,7 +64,7 @@ const ImpartialityPerCasePdf = ({ data }) => {
           <Image src="/logo.png" style={s.logo} />
           <Text style={s.companyName}>შპს „ბილდექს ექსპერტიზა"</Text>
           <Text style={s.companyInfo}>A ტიპის ინსპექტირების ორგანო | ს/კ 431188010</Text>
-          <Text style={s.companyInfo}>ქ. თელავი, ჭ. ამირეჯიბის ქ. №26 | buildexpertiza@gmail.com</Text>
+          <Text style={s.companyInfo}>ქ. თელავი, ჭ. ამირეჯიბის ქ. №26 | info@buildexexpertise.com</Text>
         </View>
         <View style={s.divider} />
 

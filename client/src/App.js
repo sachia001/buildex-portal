@@ -26,6 +26,7 @@ import NormsAdminPage from './pages/NormsAdminPage';
 import ChecklistPage from './pages/ChecklistPage';
 import ProceduresPage from './pages/ProceduresPage';
 import AuditLogPage from './pages/AuditLogPage';
+import ProcurementPricePage from './pages/ProcurementPricePage';
 
 // Attach token to every axios request
 axios.interceptors.request.use(config => {
@@ -119,6 +120,7 @@ const Navbar = ({ username, role, onLogout }) => {
         corrections:   ['admin', 'quality_manager'].includes(role),
         companyDocs:   ['admin'].includes(role),
         priceAdequacy: ['admin', 'quality_manager', 'tech_manager'].includes(role),
+        procurement:   ['admin', 'quality_manager', 'tech_manager', 'inspector'].includes(role),
         normsAdmin:    ['admin', 'quality_manager'].includes(role),
         checklist:     ['admin', 'quality_manager'].includes(role),
         procedures:    ['admin', 'quality_manager', 'tech_manager', 'inspector'].includes(role),
@@ -144,10 +146,11 @@ const Navbar = ({ username, role, onLogout }) => {
         { to: '/audit-log',           label: '📋 აუდიტის ჟურნალი',  show: show.auditLog },
     ];
     const resourcesItems = [
-        { to: '/admin',          label: '👥 პერსონალი',     show: show.staff },
-        { to: '/equipment',      label: '🛠️ აპარატურა',      show: show.equipment },
-        { to: '/insurance',      label: '🛡️ დაზღვევა',       show: show.insurance },
-        { to: '/price-adequacy', label: '💰 ფასადეკვატ.',    show: show.priceAdequacy },
+        { to: '/admin',          label: '👥 პერსონალი',      show: show.staff },
+        { to: '/equipment',      label: '🛠️ აპარატურა',       show: show.equipment },
+        { to: '/insurance',      label: '🛡️ დაზღვევა',        show: show.insurance },
+        { to: '/price-adequacy', label: '💰 ფასადეკვატ.',     show: show.priceAdequacy },
+        { to: '/procurement',    label: '🏗️ სამშ. ფასები',    show: show.procurement },
     ];
 
     return (
@@ -301,6 +304,7 @@ function AppContent() {
                     <Route path="/checklist" element={<ChecklistPage role={role} />} />
                     <Route path="/procedures" element={<ProceduresPage role={role} />} />
                     <Route path="/audit-log" element={<AuditLogPage role={role} />} />
+                    <Route path="/procurement" element={<ProcurementPricePage />} />
                     <Route path="*" element={
                         <div className="text-center mt-5">
                             <h1 className="display-1 fw-bold text-muted">404</h1>

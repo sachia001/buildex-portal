@@ -6,9 +6,9 @@ const FM23_DocChangePdf = ({ data = {} }) => {
   const sigs = data.sigs || [];
   return (
   <Document>
-    <Page size="A4" style={s.page}>
+    <Page size="A4" style={[s.page, { paddingTop: 10, paddingBottom: 16, paddingHorizontal: 28 }]}>
       <WM />
-      <FormHeader code="FM-23" isoRef="სსტ ISO/IEC 17020 §8.3 (PR-01)" title="დოკუმენტის ცვლილების წინადადება" subtitle="Document Change Proposal" />
+      <FormHeader code="BE-FM-23" isoRef="სსტ ISO/IEC 17020 §8.3 (PR-01)" title="დოკუმენტის ცვლილების წინადადება" subtitle="Document Change Proposal" />
 
       <Text style={s.secH}>A. ინიციატორი</Text>
       <FieldRow2 label1="სახელი / გვარი:"     value1={data.initiatorName} label2="თანამდებობა:"          value2={data.position} />
@@ -43,7 +43,7 @@ const FM23_DocChangePdf = ({ data = {} }) => {
       <FieldRow2 label1="ახალი ვერსიის №:"          value1={data.newVersion} label2="ძალაში შესვლის თარიღი:" value2={data.effectiveDate} />
 
       <SigBlock3 labels={['ინიციატორი','ხარისხის მენეჯერი','დამტკიცება / დირექტორი']} sigs={sigs} />
-      <FormFooter code="FM-23 v2.0 | 28.04.2026 | შენახვა: 5 წელი" />
+      <FormFooter code="BE-FM-23 v2.0 | 28.04.2026 | შენახვა: 5 წელი" />
     </Page>
   </Document>
 );};

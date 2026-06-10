@@ -14,7 +14,7 @@ const FM12_SubcontractorPdf = ({ data = {} }) => {
   <Document>
     <Page size="A4" style={s.page}>
       <WM />
-      <FormHeader code="FM-12" isoRef="სსტ ISO/IEC 17020 §6.6" title="ქვეკონტრაქტორის შეფასება" subtitle="Subcontractor Assessment" />
+      <FormHeader code="BE-FM-12" isoRef="სსტ ISO/IEC 17020 §6.6" title="ქვეკონტრაქტორის შეფასება" subtitle="Subcontractor Assessment" />
 
       <Text style={s.secH}>1. საიდენტიფიკაციო მონაცემები</Text>
       <View style={[s.tBorder,{marginBottom:4}]}>
@@ -91,7 +91,7 @@ const FM12_SubcontractorPdf = ({ data = {} }) => {
       <FieldRow label="ვალიდური ვადა:" value={data.validUntil} />
 
       <SigBlock2 left="ტექნიკური მენეჯერი" right="ხარისხის მენეჯერი" sigs={sigs} />
-      <FormFooter code="FM-12 v2.0 | 28.04.2026 | შენახვა: 5 წელი" />
+      <FormFooter code="BE-FM-12 v2.0 | 28.04.2026 | შენახვა: 5 წელი" />
     </Page>
   </Document>
 );};

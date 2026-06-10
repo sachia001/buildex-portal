@@ -9,7 +9,7 @@ const FM08_CompetencyAssessmentPdf = ({ data = {} }) => {
   <Document>
     <Page size="A4" style={s.page}>
       <WM />
-      <FormHeader code="FM-08" isoRef="სსტ ISO/IEC 17020 §6.1" title="კომპეტენციის შეფასება" subtitle="Competency Assessment Form" />
+      <FormHeader code="BE-FM-08" isoRef="სსტ ISO/IEC 17020 §6.1" title="კომპეტენციის შეფასება" subtitle="Competency Assessment Form" />
 
       <Text style={s.secH}>A. ინსპექტორის მონაცემები</Text>
       <FieldRow2 label1="სახელი / გვარი:"     value1={data.name}           label2="პირადი №:"           value2={data.personalId} />
@@ -49,7 +49,7 @@ const FM08_CompetencyAssessmentPdf = ({ data = {} }) => {
       <FieldRow  label="მომდევნო შეფასების თარიღი:" value={data.nextAssessment} />
 
       <SigBlock3 labels={['ინსპექტორი','ტექნიკური მენეჯერი','ხარისხის მენეჯერი']} sigs={sigs} />
-      <FormFooter code="FM-08 v2.0 | 28.04.2026 | შენახვა: 5 წელი" />
+      <FormFooter code="BE-FM-08 v2.0 | 28.04.2026 | შენახვა: 5 წელი" />
     </Page>
   </Document>
 );};

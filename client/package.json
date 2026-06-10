@@ -12,6 +12,7 @@
     "axios": "^1.13.3",
     "bcryptjs": "^3.0.3",
     "bootstrap": "^5.3.8",
+    "docx": "^7.8.2",
     "jsonwebtoken": "^9.0.3",
     "react": "^19.2.4",
     "react-bootstrap": "^2.10.10",

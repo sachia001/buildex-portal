@@ -127,13 +127,10 @@ const InstructionModal = ({ show, onHide, instrKey, color = 'primary' }) => {
         <PDFDownloadLink
           document={<InstructionsPdf instrData={instrData} code={instrKey} />}
           fileName={`ინსტრუქცია_${instrKey}.pdf`}
+          className={`btn btn-${color} btn-sm`}
           style={{ textDecoration: 'none' }}
         >
-          {({ loading }) => (
-            <Button variant={color} size="sm" disabled={loading}>
-              {loading ? '⏳ მომზ...' : '🖨️ ინსტრ. PDF ჩამოტვ.'}
-            </Button>
-          )}
+          {({ loading }) => loading ? '⏳ მომზ...' : '🖨️ ინსტრ. PDF ჩამოტვ.'}
         </PDFDownloadLink>
         <Button variant="outline-secondary" size="sm" onClick={onHide}>
           დახურვა

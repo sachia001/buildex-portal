@@ -8,7 +8,7 @@ const FM14_NonConformingPdf = ({ data = {} }) => {
   <Document>
     <Page size="A4" style={s.page}>
       <WM />
-      <FormHeader code="FM-14" isoRef="სსტ ISO/IEC 17020 §8.7" title="შეუსაბამო სამუშაოს მართვა" subtitle="Non-Conforming Work Control" />
+      <FormHeader code="BE-FM-14" isoRef="სსტ ISO/IEC 17020 §8.7" title="შეუსაბამო სამუშაოს მართვა" subtitle="Non-Conforming Work Control" />
 
       <Text style={s.secH}>1. იდენტიფიკაცია (§8.7.1)</Text>
       <FieldRow2 label1="NC № (BE-NC-YYYY-____):" value1={data.ncNumber} label2="გამოვლენის თარიღი:" value2={data.detectionDate} />
@@ -56,7 +56,7 @@ const FM14_NonConformingPdf = ({ data = {} }) => {
       <FieldRow2 label1="დახურვის თარიღი:" value1={data.closingDate} label2="ხარისხის მენეჯერის ვიზა:" value2={data.qualityMgrVerif} />
 
       <SigBlock3 labels={['ხარისხის მენეჯერი','ტექნიკური მენეჯერი','დირექტორი']} sigs={sigs} />
-      <FormFooter code="FM-14 v2.0 | 28.04.2026 | შენახვა: 5 წელი" />
+      <FormFooter code="BE-FM-14 v2.0 | 28.04.2026 | შენახვა: 5 წელი" />
     </Page>
   </Document>
 );};

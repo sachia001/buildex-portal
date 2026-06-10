@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="ka">
+<head>
+<meta charset="UTF-8">
+<title>დაკვეთის მიღების პროცესი</title>
+<style>
+* { box-sizing:border-box; margin:0; padding:0; }
+body {
+  background:#fff;
+  font-family:'Sylfaen','Arial Unicode MS',Arial,sans-serif;
+  padding:50px 48px;
+  color:#111;
+}
+.page { max-width:860px; margin:0 auto; }
+
+h1 {
+  text-align:center; font-size:17px; font-weight:bold;
+  color:#1a2e58; margin-bottom:6px;
+}
+.subtitle { text-align:center; font-size:11px; color:#777; margin-bottom:36px; }
+
+/* ─── Step ─── */
+.step {
+  border-radius:10px;
+  padding:17px 20px;
+  box-shadow:0 2px 10px rgba(0,0,0,.12);
+}
+.step-header {
+  display:flex;
+  align-items:center;
+  gap:12px;
+  margin-bottom:10px;
+}
+.step-badge {
+  width:34px; height:34px;
+  border-radius:50%;
+  background:rgba(255,255,255,.22);
+  display:flex; align-items:center; justify-content:center;
+  font-size:14px; font-weight:bold; color:#fff;
+  flex-shrink:0;
+}
+.step-title { font-size:13.5px; font-weight:bold; color:#fff; flex:1; }
+.step-resp  { font-size:10px; color:rgba(255,255,255,.78); white-space:nowrap; font-style:italic; }
+.step-body  { list-style:none; font-size:10.5px; line-height:1.85; color:rgba(255,255,255,.93); }
+.step-body li { padding-left:14px; position:relative; }
+.step-body li::before { content:"▸"; position:absolute; left:0; top:1px; font-size:9px; opacity:.7; }
+
+.s1 { background:#1a3060; }
+.s2 { background:#1d5aa0; }
+.s3 { background:#16697a; }
+.s4 { background:#1a5c34; }
+.s5 { background:#4a3888; }
+
+/* ─── Two-col row ─── */
+.row-2 { display:flex; gap:14px; }
+.row-2 .step { flex:1; }
+
+/* ─── Arrow ─── */
+.arrow {
+  text-align:center; font-size:24px;
+  color:#2c4c8c; padding:7px 0; line-height:1;
+}
+.arrow-label { font-size:11px; color:#888; }
+
+/* ─── Decision ─── */
+.decision { display:flex; gap:14px; }
+.dec {
+  flex:1; border-radius:9px;
+  padding:13px 16px; font-size:10.5px; line-height:1.75;
+}
+.dec-yes { border:2px solid #3da84a; background:#f0fff2; color:#1a3c20; }
+.dec-no  { border:2px solid #e03535; background:#fff0f0; color:#3c1a1a; }
+.dec-head { font-size:13.5px; font-weight:bold; margin-bottom:5px; }
+
+/* ─── End box ─── */
+.end-box {
+  border:2px solid #3da84a;
+  background:#f0fff2;
+  border-radius:10px;
+  padding:16px 22px;
+  text-align:center;
+}
+.end-title { font-size:14px; font-weight:bold; color:#1a5c34; margin-bottom:5px; }
+.end-sub   { font-size:10.5px; color:#2a6030; line-height:1.7; }
+
+/* ─── Records ─── */
+.records {
+  margin-top:30px;
+  background:#f5f7fc;
+  border:1.5px solid #c0cae8;
+  border-radius:9px;
+  padding:14px 20px;
+}
+.records-title { font-size:11px; font-weight:bold; color:#1a2e58; margin-bottom:11px; }
+.records-grid  { display:flex; flex-wrap:wrap; gap:8px 20px; }
+.rec {
+  display:flex; align-items:center; gap:8px;
+  font-size:10.5px; color:#333;
+}
+.rec-num {
+  width:22px; height:22px; border-radius:50%;
+  background:#1a3060; color:#fff;
+  font-size:10.5px; font-weight:bold;
+  display:flex; align-items:center; justify-content:center;
+  flex-shrink:0;
+}
+</style>
+</head>
+<body>
+<div class="page">
+
+  <h1>დაკვეთის მიღების სრული პროცესი &nbsp;|&nbsp; ნაბიჯ-ნაბიჯ სქემა</h1>
+  <p class="subtitle">შპს „ბილდექს ექსპერტიზა" &nbsp;·&nbsp; ISO/IEC 17020:2012 &nbsp;·&nbsp; BT-PR-01</p>
+
+  <!-- ─── STEP 1 ─── -->
+  <div class="step s1">
+    <div class="step-header">
+      <div class="step-badge">1</div>
+      <div class="step-title">მოთხოვნის მიღება და პირველადი რეგისტრაცია</div>
+      <div class="step-resp">პასუხ.: ადმინ. პერსონალი</div>
+    </div>
+    <ul class="step-body">
+      <li>დამკვეთის კონტაქტი და ობიექტის ადგილმდებარეობა</li>
+      <li>ინსპექტირების სახეობა (ხარჯთაღრიცხვა / შესრულებული სამუშაო / ფასი / ზედამხედველობა)</li>
+      <li>განაცხადის ჟურნალში რეგისტრაცია (თარიღი + უნიკალური ნომერი)</li>
+    </ul>
+  </div>
+
+  <div class="arrow">▼</div>
+
+  <!-- ─── STEP 2A + 2B ─── -->
+  <div class="row-2">
+
+    <div class="step s2">
+      <div class="step-header">
+        <div class="step-badge">2A</div>
+        <div class="step-title">კომპეტენციის შემოწმება</div>
+        <div class="step-resp">ტექ. მენეჯერი</div>
+      </div>
+      <ul class="step-body">
+        <li>სამუშაო ჩვენს სფეროშია?</li>
+        <li>გვაქვს შესაბამისი სპეციალისტი?</li>
+        <li>საკმარისი დრო და რესურსი?</li>
+      </ul>
+    </div>
+
+    <div class="step s2">
+      <div class="step-header">
+        <div class="step-badge">2B</div>
+        <div class="step-title">მიუკერძოებლობის შემოწმება</div>
+        <div class="step-resp">დირ. / ხარ. მენ.</div>
+      </div>
+      <ul class="step-body">
+        <li>ინტერესთა კონფლიქტი ხომ არ არის?</li>
+        <li>წინა კავშირი ობიექტთან?</li>
+        <li>ხომ არ ვიყავით კონსულტანტი?</li>
+      </ul>
+    </div>
+
+  </div>
+
+  <div class="arrow">▼ <span class="arrow-label">გადაწყვეტილება</span></div>
+
+  <!-- ─── DECISION ─── -->
+  <div class="decision">
+
+    <div class="dec dec-yes">
+      <div class="dec-head">✅ &nbsp;კი — გავაგრძელოთ</div>
+      დოკუმენტების მოთხოვნის ეტაპზე გადასვლა<br>
+      ინსპექტორი ასრულებს მიუკ. დეკლარაციას
+    </div>
+
+    <div class="dec dec-no">
+      <div class="dec-head">❌ &nbsp;არა — უარი</div>
+      მიზეზის ახსნა დამკვეთისთვის<br>
+      წერილობითი ინფორმირება, ჩანაწერი ჟურნალში
+    </div>
+
+  </div>
+
+  <div class="arrow">▼</div>
+
+  <!-- ─── STEP 3 ─── -->
+  <div class="step s3">
+    <div class="step-header">
+      <div class="step-badge">3</div>
+      <div class="step-title">დოკუმენტაციის მოთხოვნა და სისრულის შეფასება</div>
+      <div class="step-resp">პასუხ.: ტექ. მენეჯერი</div>
+    </div>
+    <ul class="step-body">
+      <li>პროექტი / ხარჯთაღრიცხვა / ხელშეკრულება — ყველა საჭირო დოკუმენტის სია</li>
+      <li>მიღებული დოკუმენტების ვერსიების გადამოწმება (ბოლო მოქმედი ვერსიები)</li>
+      <li>არასრული დოკუმენტაციის შემთხვევაში — სიის გაგზავნა დამკვეთზე</li>
+    </ul>
+  </div>
+
+  <div class="arrow">▼</div>
+
+  <!-- ─── STEP 4 ─── -->
+  <div class="step s4">
+    <div class="step-header">
+      <div class="step-badge">4</div>
+      <div class="step-title">კომერციული შეთავაზება და ხელშეკრულების გაფორმება</div>
+      <div class="step-resp">პასუხ.: დირექტორი / ადმინ.</div>
+    </div>
+    <ul class="step-body">
+      <li>სამუშაოს ჩამონათვალი, ვადა და ანაზღაურება</li>
+      <li>ინსპექტირების ანგარიშის ფორმა და გადაცემის წესი</li>
+      <li>კონფიდენციალობის პირობები</li>
+      <li>ხელშეკრულებაზე ხელმოწერა (ან დამკვეთის წერილობითი დადასტურება)</li>
+    </ul>
+  </div>
+
+  <div class="arrow">▼</div>
+
+  <!-- ─── STEP 5 ─── -->
+  <div class="step s5">
+    <div class="step-header">
+      <div class="step-badge">5</div>
+      <div class="step-title">საქმის გახსნა, კოდირება და ინსპექტორის დანიშვნა</div>
+      <div class="step-resp">პასუხ.: ტექ. მენეჯერი</div>
+    </div>
+    <ul class="step-body">
+      <li>საქმეს ენიჭება უნიკალური კოდი (წელი-ნომერი)</li>
+      <li>ინიშნება ავტორიზებული ინსპექტორი კონკრეტულ სფეროზე</li>
+      <li>ინსპექტორი ადასტურებს მიუკერძოებლობას და ხელმისაწვდომობას</li>
+      <li>ინსპექტორს გადაეცემა: მიზანი, ობიექტი, კრიტერიუმები, ვადები</li>
+    </ul>
+  </div>
+
+  <div class="arrow">▼</div>
+
+  <!-- ─── END ─── -->
+  <div class="end-box">
+    <div class="end-title">✅ &nbsp;საქმე გახსნილია — ინსპექტირება იწყება</div>
+    <div class="end-sub">
+      შემდგომი ნაბიჯები: &nbsp;ინსპექტირების ჩატარება &nbsp;→&nbsp;
+      ტექნიკური გადახედვა &nbsp;→&nbsp; ანგარიშის გაცემა &nbsp;→&nbsp; არქივი
+    </div>
+  </div>
+
+  <!-- ─── MANDATORY RECORDS ─── -->
+  <div class="records">
+    <div class="records-title">სავალდებულო ჩანაწერები თითოეულ ნაბიჯზე</div>
+    <div class="records-grid">
+      <div class="rec"><div class="rec-num">1</div> მოთხოვნის სარეგისტრაციო ჩანაწერი</div>
+      <div class="rec"><div class="rec-num">2</div> მიუკერძოებლობის შემოწმების ჩანაწერი</div>
+      <div class="rec"><div class="rec-num">3</div> კონტრაქტის გადახედვის ფორმა</div>
+      <div class="rec"><div class="rec-num">4</div> ხელშეკრულება</div>
+      <div class="rec"><div class="rec-num">5</div> ინსპექტორის დანიშვნის ჩანაწერი</div>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

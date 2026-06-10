@@ -61,12 +61,8 @@ const buildFoundationDecisions = (partners, config) => {
 
 // ── Download button helper ────────────────────────────────────────────────────
 const PdfBtn = ({ document: doc, fileName, label, variant = 'primary' }) => (
-  <PDFDownloadLink document={doc} fileName={fileName}>
-    {({ loading }) => (
-      <Button variant={variant} disabled={loading} className="d-flex align-items-center gap-1">
-        {loading ? '⏳ მზადდება...' : `📄 ${label}`}
-      </Button>
-    )}
+  <PDFDownloadLink document={doc} fileName={fileName} className={`btn btn-${variant} d-flex align-items-center gap-1`} style={{ textDecoration: 'none' }}>
+    {({ loading }) => loading ? '⏳ მზადდება...' : `📄 ${label}`}
   </PDFDownloadLink>
 );
 

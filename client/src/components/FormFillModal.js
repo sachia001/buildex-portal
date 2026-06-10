@@ -446,21 +446,21 @@ const FormFillModal = ({ show, onHide, config, pdfComponent, pdfFileName, formCo
 
       <Modal.Footer className="border-0 pt-0 gap-2">
         <Button variant="secondary" size="sm" onClick={onHide}>დახურვა</Button>
-        <PDFDownloadLink document={BlankPDF} fileName={`${pdfFileName}_ცარიელი.pdf`}
-          style={{ textDecoration: 'none' }}>
-          {({ loading }) => (
-            <Button variant="outline-primary" size="sm" disabled={loading}>
-              {loading ? '⏳' : '📄 ცარიელი ჩამოტვირთვა'}
-            </Button>
-          )}
+        <PDFDownloadLink
+          document={BlankPDF}
+          fileName={`${pdfFileName}_ცარიელი.pdf`}
+          className="btn btn-outline-primary btn-sm"
+          style={{ textDecoration: 'none' }}
+        >
+          {({ loading }) => loading ? '⏳' : '📄 ცარიელი ჩამოტვირთვა'}
         </PDFDownloadLink>
-        <PDFDownloadLink document={FilledPDF} fileName={`${pdfFileName}_შევსებული.pdf`}
-          style={{ textDecoration: 'none' }}>
-          {({ loading }) => (
-            <Button variant="success" size="sm" disabled={loading}>
-              {loading ? '⏳' : `📥 შევსებული ჩამოტვირთვა${sigCount > 0 ? ` (${sigCount} ✍️)` : ''}`}
-            </Button>
-          )}
+        <PDFDownloadLink
+          document={FilledPDF}
+          fileName={`${pdfFileName}_შევსებული.pdf`}
+          className="btn btn-success btn-sm"
+          style={{ textDecoration: 'none' }}
+        >
+          {({ loading }) => loading ? '⏳' : `📥 შევსებული ჩამოტვირთვა${sigCount > 0 ? ` (${sigCount} ✍️)` : ''}`}
         </PDFDownloadLink>
       </Modal.Footer>
     </Modal>

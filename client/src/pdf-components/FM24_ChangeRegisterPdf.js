@@ -10,7 +10,7 @@ const FM24_ChangeRegisterPdf = ({ data = {} }) => {
   <Document>
     <Page size="A4" orientation="landscape" style={[s.page,{paddingHorizontal:28}]}>
       <WM />
-      <FormHeader code="FM-24" isoRef="სსტ ISO/IEC 17020 §8.3 (PR-01)" title="ცვლილებების რეგისტრი" subtitle="Document Change Register" />
+      <FormHeader code="BE-FM-24" isoRef="სსტ ISO/IEC 17020 §8.3 (PR-01)" title="ცვლილებების რეგისტრი" subtitle="Document Change Register" />
 
       <FieldRow2 label1="პასუხისმგებელი (ხარისხის მენეჯერი):" value1={data.qualityManager} label2="პერიოდი (წელი):" value2={data.period} />
 
@@ -18,10 +18,10 @@ const FM24_ChangeRegisterPdf = ({ data = {} }) => {
       <View style={s.tBorder}>
         <View style={s.tHeader}>
           <View style={[s.tHead,{width:'4%',...cc}]}><Text>#</Text></View>
-          <View style={[s.tHead,{width:'14%',...cc}]}><Text>FM-23 №</Text></View>
+          <View style={[s.tHead,{width:'12%',...cc}]}><Text>FM-23 №</Text></View>
           <View style={[s.tHead,{flex:1,...cc}]}><Text>დოკუმენტის სახელი</Text></View>
-          <View style={[s.tHead,{width:'8%',...cc}]}><Text>ძველი ვ.</Text></View>
-          <View style={[s.tHead,{width:'8%',...cc}]}><Text>ახალი ვ.</Text></View>
+          <View style={[s.tHead,{width:'9%',...cc}]}><Text>ძველი ვერსია</Text></View>
+          <View style={[s.tHead,{width:'9%',...cc}]}><Text>ახალი ვერსია</Text></View>
           <View style={[s.tHead,{width:'11%',...cc}]}><Text>ძალაში შესვლის თარიღი</Text></View>
           <View style={[s.tHead,{width:'18%',...cc}]}><Text>ცვლილების ხასიათი</Text></View>
           <View style={[s.tHead,{width:'10%',...cc}]}><Text>FM-22</Text></View>
@@ -29,7 +29,7 @@ const FM24_ChangeRegisterPdf = ({ data = {} }) => {
         {[...Array(22)].map((_,i) => (
           <View key={i} style={i%2===0?s.tRow:s.tRowAlt}>
             <View style={[s.tCell,{width:'4%',...cc}]}><Text style={{fontSize:7}}>{i+1}</Text></View>
-            <View style={[s.tCell,{width:'14%',...cc}]}/><View style={[s.tCell,{flex:1,...cc}]}/><View style={[s.tCell,{width:'8%',...cc}]}/><View style={[s.tCell,{width:'8%',...cc}]}/><View style={[s.tCell,{width:'11%',...cc}]}/><View style={[s.tCell,{width:'18%',...cc}]}/><View style={[s.tCell,{width:'10%',...cc}]}/>
+            <View style={[s.tCell,{width:'12%',...cc}]}/><View style={[s.tCell,{flex:1,...cc}]}/><View style={[s.tCell,{width:'9%',...cc}]}/><View style={[s.tCell,{width:'9%',...cc}]}/><View style={[s.tCell,{width:'11%',...cc}]}/><View style={[s.tCell,{width:'18%',...cc}]}/><View style={[s.tCell,{width:'10%',...cc}]}/>
           </View>
         ))}
       </View>
@@ -46,7 +46,7 @@ const FM24_ChangeRegisterPdf = ({ data = {} }) => {
         </View>
       </View>
 
-      <FormFooter code="FM-24 v2.0 | 28.04.2026 | შენახვა: 5 წელი" />
+      <FormFooter code="BE-FM-24 v2.0 | 28.04.2026 | შენახვა: 5 წელი" />
     </Page>
   </Document>
 );};

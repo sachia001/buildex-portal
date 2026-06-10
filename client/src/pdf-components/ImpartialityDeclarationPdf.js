@@ -69,12 +69,12 @@ const ImpartialityDeclarationPdf = ({ data = {} }) => {
           <Image src="/logo.png" style={s.logo} />
           <Text style={s.companyName}>შპს „ბილდექს ექსპერტიზა"</Text>
           <Text style={s.companyInfo}>A ტიპის ინსპექტირების ორგანო | ს/კ 431188010</Text>
-          <Text style={s.companyInfo}>ქ. თელავი, ჭ. ამირეჯიბის ქ. №26 | buildexpertiza@gmail.com</Text>
+          <Text style={s.companyInfo}>ქ. თელავი, ჭ. ამირეჯიბის ქ. №26 | info@buildexexpertise.com</Text>
         </View>
         <View style={s.divider} />
 
         <Text style={s.docTitle}>მიუკერძოებლობის დეკლარაცია</Text>
-        <Text style={s.docCode}>FM-02 | ვ.2 | 2026 | ISO/IEC 17020:2012/2013 §4</Text>
+        <Text style={s.docCode}>BE-FM-02 | ვ.2 | 2026 | ISO/IEC 17020:2012/2013 §4</Text>
 
         <View style={s.fieldRow}>
           <Text style={s.fieldLabel}>მე, ქვემოხსენებული:</Text>
@@ -154,7 +154,7 @@ const ImpartialityDeclarationPdf = ({ data = {} }) => {
 
         <View style={[s.divider, { marginTop: 18 }]} />
         <Text style={{ fontSize: 7, color: '#aaa', textAlign: 'center' }}>
-          კონფიდენციალური — მხოლოდ შიდა გამოყენებისთვის | FM-02 v.2 | შპს „ბილდექს ექსპერტიზა"
+          კონფიდენციალური — მხოლოდ შიდა გამოყენებისთვის | BE-FM-02 v.2 | შპს „ბილდექს ექსპერტიზა"
         </Text>
       </Page>
     </Document>

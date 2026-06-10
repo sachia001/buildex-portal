@@ -8,9 +8,9 @@ const FM22_FamiliarizationPdf = ({ data = {} }) => {
   const sigs = data.sigs || [];
   return (
   <Document>
-    <Page size="A4" style={s.page}>
+    <Page size="A4" style={[s.page, { paddingTop: 10, paddingBottom: 16, paddingHorizontal: 28 }]}>
       <WM />
-      <FormHeader code="FM-22" isoRef="სსტ ISO/IEC 17020 §6.1" title="გაცნობის ფურცელი" subtitle="Document Familiarization Sheet" />
+      <FormHeader code="BE-FM-22" isoRef="სსტ ISO/IEC 17020 §6.1" title="გაცნობის ფურცელი" subtitle="Document Familiarization Sheet" />
 
       <Text style={s.secH}>A. დოკუმენტის მონაცემები</Text>
       <FieldRow  label="დოკუმენტის სახელი:"              value={data.documentName} />
@@ -42,7 +42,7 @@ const FM22_FamiliarizationPdf = ({ data = {} }) => {
       </View>
 
       <SigBlock3 labels={['შემდგენი','შემმოწმებელი (ხარისხის მენეჯერი)','დამტკიცება (დირექტორი)']} sigs={sigs} />
-      <FormFooter code="FM-22 v2.0 | 28.04.2026 | შენახვა: 5 წელი" />
+      <FormFooter code="BE-FM-22 v2.0 | 28.04.2026 | შენახვა: 5 წელი" />
     </Page>
   </Document>
 );};

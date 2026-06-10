@@ -6,9 +6,9 @@ const FM07_EquipmentVerificationPdf = ({ data = {} }) => {
   const sigs = data.sigs || [];
   return (
   <Document>
-    <Page size="A4" style={s.page}>
+    <Page size="A4" style={[s.page, { paddingTop: 10, paddingBottom: 16, paddingHorizontal: 28 }]}>
       <WM />
-      <FormHeader code="FM-07" isoRef="სსტ ISO/IEC 17020 §6.2" title="მოწყობილობის ვერიფიკაცია" subtitle="Equipment Verification Record" />
+      <FormHeader code="BE-FM-07" isoRef="სსტ ISO/IEC 17020 §6.2" title="მოწყობილობის ვერიფიკაცია" subtitle="Equipment Verification Record" />
 
       <Text style={s.secH}>A. მოწყობილობის იდენტიფიკაცია</Text>
       <FieldRow2 label1="დასახელება:"        value1={data.equipmentName}  label2="საინვენტარო №:"               value2={data.inventoryNumber} />
@@ -70,7 +70,7 @@ const FM07_EquipmentVerificationPdf = ({ data = {} }) => {
       <FieldRow2 label1="FM-14 №:" value1={data.fm14Number} label2="ვერიფიკატორის სახელი:" value2={data.verifierName} />
 
       <SigBlock3 labels={['ვერიფიკატორი','შემდგენი','დირექტორი']} sigs={sigs} />
-      <FormFooter code="FM-07 v2.0 | 28.04.2026 | შენახვა: 5 წელი" />
+      <FormFooter code="BE-FM-07 v2.0 | 28.04.2026 | შენახვა: 5 წელი" />
     </Page>
   </Document>
 );};

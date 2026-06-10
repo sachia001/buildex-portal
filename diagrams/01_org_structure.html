@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="ka">
+<head>
+<meta charset="UTF-8">
+<title>სტრუქტურული ორგანოგრამა</title>
+<style>
+* { box-sizing:border-box; margin:0; padding:0; }
+body {
+  background:#fff;
+  font-family:'Sylfaen','Arial Unicode MS',Arial,sans-serif;
+  padding:52px 48px;
+  color:#111;
+}
+.page { max-width:960px; margin:0 auto; }
+
+h1 {
+  text-align:center; font-size:17px; font-weight:bold;
+  color:#1a2e58; margin-bottom:6px; letter-spacing:.2px;
+}
+.subtitle {
+  text-align:center; font-size:11px; color:#777; margin-bottom:42px;
+}
+
+/* ── connectors ── */
+.vc { width:2px; background:#2c4a8c; margin:0 auto; }
+.hc { height:2px; background:#2c4a8c; }
+.dot { width:9px; height:9px; border-radius:50%; background:#2c4a8c; margin:0 auto; }
+
+/* ── Director ── */
+.dir-wrap { text-align:center; }
+.dir {
+  display:inline-block;
+  background:#1a3060;
+  color:#fff;
+  border-radius:12px;
+  padding:18px 32px;
+  min-width:300px;
+  text-align:center;
+  box-shadow:0 4px 18px rgba(26,48,96,.28);
+}
+.dir-title { font-size:18px; font-weight:bold; letter-spacing:.3px; margin-bottom:6px; }
+.dir-line { width:40px; height:1px; background:rgba(255,255,255,.3); margin:6px auto; }
+.dir-role { font-size:11px; opacity:.88; line-height:1.6; }
+
+/* ── Dept boxes ── */
+.dept {
+  border-radius:9px;
+  padding:16px 17px;
+  box-shadow:0 2px 10px rgba(0,0,0,.14);
+  height:100%;
+}
+.dept-quality   { background:#1a3060; color:#fff; }
+.dept-technical { background:#1d5aa0; color:#fff; }
+.dept-admin     { background:#485060; color:#fff; }
+
+.dept-title {
+  font-size:13.5px; font-weight:bold; text-align:center;
+  margin-bottom:10px; padding-bottom:9px;
+  border-bottom:1px solid rgba(255,255,255,.22);
+}
+.dept-list { list-style:none; font-size:10.5px; line-height:1.82; }
+.dept-list li { padding-left:12px; position:relative; }
+.dept-list li::before { content:"▸"; position:absolute; left:0; font-size:9px; opacity:.75; top:1px; }
+
+/* ── Inspector boxes ── */
+.insp-row { display:flex; gap:6px; }
+.insp {
+  flex:1;
+  background:#2472c4;
+  color:#fff;
+  border-radius:8px;
+  padding:12px 6px;
+  text-align:center;
+  box-shadow:0 2px 8px rgba(36,114,196,.3);
+}
+.insp-num   { font-size:12.5px; font-weight:bold; margin-bottom:3px; }
+.insp-area  { font-size:9px; line-height:1.4; opacity:.9; }
+.insp-code  { font-size:8px; margin-top:6px; padding-top:5px; border-top:1px solid rgba(255,255,255,.28); opacity:.72; }
+
+/* ── coord arrow ── */
+.coord { text-align:center; color:#8aaecc; }
+
+/* ── Legend ── */
+.legend { display:flex; gap:20px; flex-wrap:wrap; margin-top:24px; }
+.legend-item { display:flex; align-items:center; gap:7px; font-size:10px; color:#444; }
+.legend-sq { width:13px; height:13px; border-radius:3px; }
+
+/* ── Notes ── */
+.notes { display:flex; gap:14px; margin-top:14px; }
+.note { flex:1; border-radius:8px; padding:12px 15px; font-size:10px; line-height:1.72; }
+.note strong { display:block; font-size:10.5px; margin-bottom:5px; }
+.note-yellow { border:1.5px solid #c8a000; background:#fffde6; color:#3a2c00; }
+.note-green  { border:1.5px solid #3da84a; background:#f0fff1; color:#1a3c20; }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <h1>ინსპექტირების ორგანოს სტრუქტურული ორგანოგრამა</h1>
+  <p class="subtitle">შპს „ბილდექს ექსპერტიზა" &nbsp;·&nbsp; A ტიპის ინსპექტირების ორგანო &nbsp;·&nbsp; ISO/IEC 17020:2012/2013</p>
+
+  <!-- ─── DIRECTOR ─── -->
+  <div class="dir-wrap">
+    <div class="dir">
+      <div class="dir-title">დირექტორი</div>
+      <div class="dir-line"></div>
+      <div class="dir-role">
+        სრული ხელმძღვანელობა &nbsp;|&nbsp; ხარისხის სისტემის პასუხისმგებელი<br>
+        მიუკერძოებლობის უზრუნველყოფა და გადაწყვეტილებების მიღება
+      </div>
+    </div>
+  </div>
+
+  <!-- vline -->
+  <div class="vc" style="height:26px;"></div>
+
+  <!-- H-fork -->
+  <table style="width:100%;border-collapse:collapse;"><tr>
+    <td style="width:46%;"><div class="hc"></div></td>
+    <td style="width:8%;text-align:center;"><div class="dot" style="margin-top:-4px;"></div></td>
+    <td style="width:46%;"><div class="hc"></div></td>
+  </tr></table>
+
+  <!-- ─── QUALITY + TECHNICAL ─── -->
+  <table style="width:100%;border-collapse:collapse;">
+  <tr valign="top">
+
+    <!-- QUALITY -->
+    <td style="width:46%;padding-right:12px;">
+      <div class="vc" style="height:20px;"></div>
+      <div class="dept dept-quality">
+        <div class="dept-title">ხარისხის მენეჯერი</div>
+        <ul class="dept-list">
+          <li>დოკუმენტაციის მართვა და კონტროლი</li>
+          <li>შიდა აუდიტების კოორდინაცია</li>
+          <li>CAPA მენეჯმენტი და მონიტორინგი</li>
+          <li>ხარისხის სისტემის შენარჩუნება და განახლება</li>
+          <li>GAC / ENAK-ის საექსპერტო კომუნიკაცია</li>
+        </ul>
+      </div>
+    </td>
+
+    <!-- COORD ARROW -->
+    <td style="width:8%;text-align:center;vertical-align:middle;">
+      <div class="coord" style="font-size:20px;">⟷</div>
+      <div style="font-size:8.5px;color:#aaa;text-align:center;margin-top:2px;">კოორდინაცია</div>
+    </td>
+
+    <!-- TECHNICAL -->
+    <td style="width:46%;padding-left:12px;">
+      <div class="vc" style="height:20px;"></div>
+      <div class="dept dept-technical">
+        <div class="dept-title">ტექნიკური მენეჯერი</div>
+        <ul class="dept-list">
+          <li>ინსპექტირების ტექნ. ხელმძღვ. და ზედამხედვ.</li>
+          <li>კომპეტენციის შეფასება და მართვა</li>
+          <li>ექსპერტთა ავტ. მინიჭება და ბაზის მართვა</li>
+          <li>Witness ინსპექტირების კოორდინაცია</li>
+          <li>ტექნიკური გადახედვა / ანგარიშის გაცემა</li>
+        </ul>
+      </div>
+    </td>
+
+  </tr>
+  </table>
+
+  <!-- ─── ADMIN + INSPECTORS ─── -->
+  <table style="width:100%;border-collapse:collapse;margin-top:12px;">
+  <tr valign="top">
+
+    <!-- ADMIN -->
+    <td style="width:46%;padding-right:12px;">
+      <div class="vc" style="height:20px;"></div>
+      <div class="dept dept-admin">
+        <div class="dept-title" style="font-size:12.5px;">ადმინისტრაციული მსახ.</div>
+        <ul class="dept-list">
+          <li>მოთხოვნების მიღება, რეგისტრაცია და კოორდ.</li>
+          <li>დოკუმენტების გაცემა, არქივი და მართვა</li>
+          <li>კლიენტებთან ელ. კომუნიკაცია</li>
+        </ul>
+      </div>
+    </td>
+
+    <td style="width:8%;"></td>
+
+    <!-- INSPECTORS -->
+    <td style="width:46%;padding-left:12px;">
+      <div class="vc" style="height:20px;"></div>
+      <div class="hc" style="margin:0 10%;"></div>
+      <table style="width:100%;border-collapse:collapse;margin-top:0;">
+        <tr>
+          <td style="width:25%;padding:0 3px;">
+            <div class="vc" style="height:10px;"></div>
+            <div class="insp">
+              <div class="insp-num">ინსპ. N1</div>
+              <div class="insp-area">სამოქ.<br>სიება</div>
+              <div class="insp-code">BT-PR-02/02</div>
+            </div>
+          </td>
+          <td style="width:25%;padding:0 3px;">
+            <div class="vc" style="height:10px;"></div>
+            <div class="insp">
+              <div class="insp-num">ინსპ. N2</div>
+              <div class="insp-area">შენობ.<br>სამოთხე</div>
+              <div class="insp-code">BT-PR-03/04</div>
+            </div>
+          </td>
+          <td style="width:25%;padding:0 3px;">
+            <div class="vc" style="height:10px;"></div>
+            <div class="insp">
+              <div class="insp-num">ინსპ. N3</div>
+              <div class="insp-area">ყანახი<br>ამო.</div>
+              <div class="insp-code">BT-PR-05/06</div>
+            </div>
+          </td>
+          <td style="width:25%;padding:0 3px;">
+            <div class="vc" style="height:10px;"></div>
+            <div class="insp">
+              <div class="insp-num">ინსპ. N4</div>
+              <div class="insp-area">ელ.<br>ობ.</div>
+              <div class="insp-code">BT-PR-07/08</div>
+            </div>
+          </td>
+        </tr>
+      </table>
+    </td>
+
+  </tr>
+  </table>
+
+  <!-- ─── LEGEND ─── -->
+  <div class="legend">
+    <div class="legend-item"><div class="legend-sq" style="background:#1a3060;"></div>დირ. / ხარ. მენ.</div>
+    <div class="legend-item"><div class="legend-sq" style="background:#1d5aa0;"></div>ტექ. მენ.</div>
+    <div class="legend-item"><div class="legend-sq" style="background:#2472c4;"></div>ავტ. ინსპექტორი</div>
+    <div class="legend-item"><div class="legend-sq" style="background:#485060;"></div>ადმ. მსახ.</div>
+  </div>
+
+  <!-- ─── NOTES ─── -->
+  <div class="notes">
+    <div class="note note-yellow">
+      <strong>A ტიპის გამოყოფის მოთხოვნა (ISO/IEC 17020 §4.1)</strong>
+      ყოველი ინსპექტორი, მენეჯერი და ექსპერტი ვალდებულია გამოაცხადოს ყველა
+      ფინანსური ზეგავლენა ან ინტერესთა კონფლიქტი. ორგანოს სტრუქტურა
+      სრულ ფუნქციურ დამოუკიდებლობას უზრუნველყოფს — ისე, რომ ვერც ერთი
+      გარე მხარე ვერ ახდენს ზეგავლენას ინსპექტირების შედეგებზე.
+    </div>
+    <div class="note note-green">
+      <strong>ავტ. მინიჭების წესი (ISO/IEC 17020 §6.2.6)</strong>
+      ასრულებული ჩანაწერი → ვერიფიკაცია (ინტ. ვ-ია) | ინ. გადახედვა →
+      ვარგისიანობის სია. ტექნიკური გადახედვა — კომ-ების გათვალისწინებით,
+      გამ-ება ბრძ-ით.
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

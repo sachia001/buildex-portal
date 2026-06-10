@@ -590,6 +590,81 @@ export const FORM_CONFIGS = {
   },
 
   // ══════════════════════════════════════════════════════════
+  'FM-17': {
+    title: 'ინსპექტირების ანგარიში',
+    signers: ['ინსპექტორი', 'ტექნიკური მენეჯერი', 'ხარისხის მენეჯერი'],
+    caseAutoFill: (insp) => {
+      const expertName = insp.expert?.[0]
+        ? `${insp.expert[0].firstName} ${insp.expert[0].lastName}` : '';
+      const tmName = insp.technicalManager?.[0]
+        ? `${insp.technicalManager[0].firstName} ${insp.technicalManager[0].lastName}` : '';
+      return {
+        objectAddress: insp.objectAddress || '',
+        client:        insp.clientName   || '',
+        inspector:     expertName,
+        techManager:   tmName,
+        inspScope:     insp.inspectionScope || '',
+      };
+    },
+    sections: [
+      { label: 'საიდენტიფიკაციო მონაცემები', fields: [
+        { id: 'caseNumber',    label: 'BE-CASE №',                    type: 'case' },
+        { id: 'reportNumber',  label: 'ანგარიშის №',                  type: 'text' },
+        { id: 'reportDate',    label: 'ანგარიშის თარიღი',             type: 'date' },
+        { id: 'contractNumber',label: 'ხელშეკრულების №',              type: 'text' },
+        { id: 'objectAddress', label: 'ობიექტის მისამართი',           type: 'text' },
+        { id: 'client',        label: 'დამკვეთი / ორგანიზაცია',      type: 'text' },
+        { id: 'inspector',     label: 'ინსპექტორი',                   type: 'staff' },
+        { id: 'techManager',   label: 'ტექნიკური მენეჯერი',           type: 'staff' },
+        { id: 'inspScope',     label: 'ინსპექციის სფერო',             type: 'select', options: ['BE-PR-01','BE-PR-02','BE-PR-03','BE-PR-04','სხვა'] },
+        { id: 'executedStandards', label: 'გამოყენებული სტანდარტები', type: 'textarea' },
+      ]},
+      { label: 'C. შემოწმებული ელემენტები (6 ჩანაწერი)', fields: [
+        { id: 'r1_element',  label: '1. ელემენტი',   type: 'text' },
+        { id: 'r1_standard', label: '1. სტანდარტი',  type: 'text' },
+        { id: 'r1_result',   label: '1. შეფასება',   type: 'select', options: ['შეესაბამება','არ შეესაბამება','ნაწილობრივ','N/A'] },
+        { id: 'r1_note',     label: '1. შენიშვნა',   type: 'text' },
+        { id: 'r2_element',  label: '2. ელემენტი',   type: 'text' },
+        { id: 'r2_standard', label: '2. სტანდარტი',  type: 'text' },
+        { id: 'r2_result',   label: '2. შეფასება',   type: 'select', options: ['შეესაბამება','არ შეესაბამება','ნაწილობრივ','N/A'] },
+        { id: 'r2_note',     label: '2. შენიშვნა',   type: 'text' },
+        { id: 'r3_element',  label: '3. ელემენტი',   type: 'text' },
+        { id: 'r3_standard', label: '3. სტანდარტი',  type: 'text' },
+        { id: 'r3_result',   label: '3. შეფასება',   type: 'select', options: ['შეესაბამება','არ შეესაბამება','ნაწილობრივ','N/A'] },
+        { id: 'r3_note',     label: '3. შენიშვნა',   type: 'text' },
+        { id: 'r4_element',  label: '4. ელემენტი',   type: 'text' },
+        { id: 'r4_standard', label: '4. სტანდარტი',  type: 'text' },
+        { id: 'r4_result',   label: '4. შეფასება',   type: 'select', options: ['შეესაბამება','არ შეესაბამება','ნაწილობრივ','N/A'] },
+        { id: 'r4_note',     label: '4. შენიშვნა',   type: 'text' },
+        { id: 'r5_element',  label: '5. ელემენტი',   type: 'text' },
+        { id: 'r5_standard', label: '5. სტანდარტი',  type: 'text' },
+        { id: 'r5_result',   label: '5. შეფასება',   type: 'select', options: ['შეესაბამება','არ შეესაბამება','ნაწილობრივ','N/A'] },
+        { id: 'r5_note',     label: '5. შენიშვნა',   type: 'text' },
+        { id: 'r6_element',  label: '6. ელემენტი',   type: 'text' },
+        { id: 'r6_standard', label: '6. სტანდარტი',  type: 'text' },
+        { id: 'r6_result',   label: '6. შეფასება',   type: 'select', options: ['შეესაბამება','არ შეესაბამება','ნაწილობრივ','N/A'] },
+        { id: 'r6_note',     label: '6. შენიშვნა',   type: 'text' },
+      ]},
+      { label: 'D. ფოტო-დოკუმენტაცია (3 ჩანაწერი)', fields: [
+        { id: 'p1_num',  label: 'ფ1. ნომერი',      type: 'text' },
+        { id: 'p1_desc', label: 'ფ1. აღწერა',      type: 'text' },
+        { id: 'p1_gps',  label: 'ფ1. GPS',          type: 'text' },
+        { id: 'p2_num',  label: 'ფ2. ნომერი',      type: 'text' },
+        { id: 'p2_desc', label: 'ფ2. აღწერა',      type: 'text' },
+        { id: 'p2_gps',  label: 'ფ2. GPS',          type: 'text' },
+        { id: 'p3_num',  label: 'ფ3. ნომერი',      type: 'text' },
+        { id: 'p3_desc', label: 'ფ3. აღწერა',      type: 'text' },
+        { id: 'p3_gps',  label: 'ფ3. GPS',          type: 'text' },
+      ]},
+      { label: 'E–F. მიგნებები და დასკვნა', fields: [
+        { id: 'findings',       label: 'ძირითადი მიგნებები',     type: 'textarea' },
+        { id: 'conclusion',     label: 'დასკვნა', type: 'select', options: ['შეესაბამება მოთხოვნებს','პირობით შეესაბამება','არ შეესაბამება მოთხოვნებს'] },
+        { id: 'conclusionText', label: 'დასკვნის განმარტება',    type: 'textarea' },
+      ]},
+    ],
+  },
+
+  // ══════════════════════════════════════════════════════════
   'FM-21': {
     title: 'ინსპექციების რეგისტრი (ჟურნალი)',
     signers: ['ხარისხის მენეჯერი'],
@@ -719,6 +794,99 @@ export const FORM_CONFIGS = {
   },
 
   // ══════════════════════════════════════════════════════════
+  'FM-19': {
+    title: 'მომხმარებლის კმაყოფილების კვლევა',
+    signers: ['კლიენტის წარმომადგენელი', 'ხარისხის მენეჯერი'],
+    caseAutoFill: (insp) => ({
+      caseNumber: insp.inspectionNumber || '',
+      clientName: insp.clientName || '',
+      inspScope:  insp.inspectionScope || '',
+    }),
+    sections: [
+      { label: 'საიდენტიფიკაციო მონაცემები', fields: [
+        { id: 'caseNumber',  label: 'BE-CASE №',                  type: 'case' },
+        { id: 'surveyDate',  label: 'კვლევის თარიღი',             type: 'date' },
+        { id: 'clientName',  label: 'კლიენტი / ორგანიზაცია',     type: 'text' },
+        { id: 'clientRep',   label: 'წარმომადგენელი',             type: 'text' },
+        { id: 'email',       label: 'ელ.ფოსტა',                   type: 'text' },
+        { id: 'inspScope',   label: 'ინსპექტირების სფერო',        type: 'select', options: ['BE-PR-01','BE-PR-02','BE-PR-03','BE-PR-04','სხვა'] },
+      ]},
+      { label: 'B. კმაყოფილების შეფასება (1–5)', fields: [
+        { id: 'q1', label: '1. მომსახურების ზოგადი ხარისხი',               type: 'select', options: ['1','2','3','4','5'] },
+        { id: 'q2', label: '2. ინსპექტირების პროფესიონალიზმი',             type: 'select', options: ['1','2','3','4','5'] },
+        { id: 'q3', label: '3. ანგარიშის სიზუსტე და სრულყოფილება',        type: 'select', options: ['1','2','3','4','5'] },
+        { id: 'q4', label: '4. მომსახურების ვადების დაცვა',                type: 'select', options: ['1','2','3','4','5'] },
+        { id: 'q5', label: '5. კომუნიკაცია და ინფორმირებულობა',            type: 'select', options: ['1','2','3','4','5'] },
+        { id: 'q6', label: '6. პერსონალის კომპეტენტურობა',                 type: 'select', options: ['1','2','3','4','5'] },
+        { id: 'q7', label: '7. ფასი / მომსახურების თანაფარდობა',           type: 'select', options: ['1','2','3','4','5'] },
+        { id: 'q8', label: '8. ზოგადი კმაყოფილება',                        type: 'select', options: ['1','2','3','4','5'] },
+      ]},
+      { label: 'C. დამატებითი კითხვები', fields: [
+        { id: 'wouldReturn',      label: 'კვლავ ისარგებლებდით ჩვენი მომსახურებით?', type: 'yesno' },
+        { id: 'wouldRecommend',   label: 'გვირჩევდით სხვა კლიენტებს?',              type: 'yesno' },
+        { id: 'conflictFound',    label: 'გამოვლინდა კონფლიქტი ინტერესებთან?',      type: 'yesno' },
+        { id: 'avgScore',         label: 'საშუალო ქულა (გამოთვლა)',                  type: 'text', placeholder: 'მაგ: 4.5' },
+        { id: 'comments',         label: 'შენიშვნები და წინადადებები',               type: 'textarea' },
+      ]},
+    ],
+  },
+
+  // ══════════════════════════════════════════════════════════
+  'FM-20': {
+    title: 'ანგარიშის ტექნიკური გადამოწმება',
+    signers: ['ვერიფიკატორი (ტექ. მენეჯერი)', 'ხარისხის მენეჯერი'],
+    caseAutoFill: (insp) => {
+      const tmName = insp.technicalManager?.[0]
+        ? `${insp.technicalManager[0].firstName} ${insp.technicalManager[0].lastName}` : '';
+      const expertName = insp.expert?.[0]
+        ? `${insp.expert[0].firstName} ${insp.expert[0].lastName}` : '';
+      return {
+        caseNumber: insp.inspectionNumber || '',
+        inspector:  expertName,
+        verifier:   tmName,
+        inspScope:  insp.inspectionScope || '',
+      };
+    },
+    sections: [
+      { label: 'საიდენტიფიკაციო მონაცემები', fields: [
+        { id: 'caseNumber',        label: 'BE-CASE №',                          type: 'case' },
+        { id: 'reportNumber',      label: 'BE-FM-17 ანგარიშის №',               type: 'text' },
+        { id: 'verificationDate',  label: 'გადამოწმების თარიღი',                type: 'date' },
+        { id: 'verifier',          label: 'ვერიფიკატორი (ტექ. მენეჯერი)',       type: 'staff' },
+        { id: 'inspector',         label: 'ინსპექტორი',                         type: 'staff' },
+        { id: 'inspScope',         label: 'ინსპექციის სფერო',                   type: 'select', options: ['BE-PR-01','BE-PR-02','BE-PR-03','BE-PR-04','სხვა'] },
+      ]},
+      { label: 'B. ტექნიკური შემოწმების ჩამონათვალი (კი / არა / N/A)', fields: [
+        { id: 'ck1',  label: '1. ანგარიში შეიცავს BE-CASE და მისამართს',                   type: 'yesno' },
+        { id: 'ck1_note', label: '1. კომენტარი',                                            type: 'text' },
+        { id: 'ck2',  label: '2. ინსპექტირების სფერო განსაზღვრულია',                       type: 'yesno' },
+        { id: 'ck2_note', label: '2. კომენტარი',                                            type: 'text' },
+        { id: 'ck3',  label: '3. სტანდარტები და კრიტერიუმები მითითებულია',                 type: 'yesno' },
+        { id: 'ck3_note', label: '3. კომენტარი',                                            type: 'text' },
+        { id: 'ck4',  label: '4. მეთოდები და მოწყობილობა ჩამოთვლილია',                    type: 'yesno' },
+        { id: 'ck4_note', label: '4. კომენტარი',                                            type: 'text' },
+        { id: 'ck5',  label: '5. ყველა შედეგი ნათლად ჩამოყალიბებულია',                    type: 'yesno' },
+        { id: 'ck5_note', label: '5. კომენტარი',                                            type: 'text' },
+        { id: 'ck6',  label: '6. შეუსაბამობები კატეგორიზებულია',                           type: 'yesno' },
+        { id: 'ck6_note', label: '6. კომენტარი',                                            type: 'text' },
+        { id: 'ck7',  label: '7. ფოტო-დოკუმენტაცია მითითებულია (ასეთის არსებობისას)',     type: 'yesno' },
+        { id: 'ck7_note', label: '7. კომენტარი',                                            type: 'text' },
+        { id: 'ck8',  label: '8. დასკვნა ასახავს მთელი ინსპექტირების შედეგს',             type: 'yesno' },
+        { id: 'ck8_note', label: '8. კომენტარი',                                            type: 'text' },
+        { id: 'ck9',  label: '9. ანგარიში ხელმოწერილია ინსპექტორის მიერ',                 type: 'yesno' },
+        { id: 'ck9_note', label: '9. კომენტარი',                                            type: 'text' },
+        { id: 'ck10', label: '10. ანგარიში შეესაბამება ISO/IEC 17020 §7.4 მოთხოვნებს',    type: 'yesno' },
+        { id: 'ck10_note', label: '10. კომენტარი',                                          type: 'text' },
+      ]},
+      { label: 'C–D. შედეგი და შენიშვნები', fields: [
+        { id: 'verificationResult', label: 'გადამოწმების შედეგი', type: 'select',
+          options: ['ანგარიში დამტკიცებულია','ანგარიში საჭიროებს გადასწორებას','ანგარიში ხელახლა გადამოწმებას საჭიროებს'] },
+        { id: 'remarks', label: 'შენიშვნები / გადასასწორებელი საკითხები', type: 'textarea' },
+      ]},
+    ],
+  },
+
+  // ══════════════════════════════════════════════════════════
   'FM-25': {
     title: 'ლიკვიდაციის (განადგურების) აქტი',
     signers: ['შემდგენი / პასუხისმგებელი', 'მოწმე', 'ხარისხის მენეჯერი'],
@@ -748,4 +916,275 @@ export const FORM_CONFIGS = {
       ]},
     ],
   },
+
+  // ══════════════════════════════════════════════════════════
+  'FM-26': {
+    title: 'შიდა აუდიტის გეგმა',
+    signers: ['შემდგენი (აუდიტორი)', 'შემმოწმებელი (ხარისხის მენეჯერი)', 'დამტკიცება (დირექტორი)'],
+    sections: [
+      { label: 'აუდიტის მონაცემები', fields: [
+        { id: 'auditNumber',  label: 'აუდიტის №',                          type: 'text', placeholder: 'AUD-2026-01' },
+        { id: 'period',       label: 'პერიოდი',                             type: 'text', placeholder: '2026-01 – 2026-12' },
+        { id: 'auditor',      label: 'აუდიტორი',                           type: 'staff' },
+        { id: 'auditDate',    label: 'გეგმური თარიღი',                     type: 'date' },
+        { id: 'auditedStaff', label: 'აუდიტირებული პირი',                  type: 'staff' },
+        { id: 'approvalDate', label: 'გეგმის დამტკიცების თარიღი',          type: 'date' },
+      ]},
+      { label: 'შედეგი', fields: [
+        { id: 'allRequirementsMet', label: 'ყველა მოთხოვნა შესრულებულია (კი/არა)', type: 'yesno' },
+        { id: 'reauditNeeded',      label: 'ხელმეორე აუდიტი საჭიროა (კი/არა)',     type: 'yesno' },
+        { id: 'notes',              label: 'შენიშვნა / NC-ები',                      type: 'textarea' },
+      ]},
+    ],
+  },
+
+  // ══════════════════════════════════════════════════════════
+  'FM-27': {
+    title: 'შიდა აუდიტის ჩეკლისტი',
+    signers: ['აუდიტორი', 'შემმოწმებელი (ხარისხის მენეჯერი)', 'დამტკიცება (დირექტორი)'],
+    sections: [
+      { label: 'აუდიტის მონაცემები', fields: [
+        { id: 'auditNumber',   label: 'FM-26 აუდიტის №',                type: 'text' },
+        { id: 'auditDate',     label: 'აუდიტის თარიღი',                 type: 'date' },
+        { id: 'conforming',    label: 'ISO მოთხოვნები შესრულებულია (კი/არა)', type: 'yesno' },
+        { id: 'overallResult', label: 'საერთო შეფასება', type: 'select',
+          options: ['მოთხოვნები შეყვანილია','არსებითი NC-ები','მცირე NC-ები'] },
+      ]},
+    ],
+  },
+
+  // ══════════════════════════════════════════════════════════
+  'FM-28': {
+    title: 'შიდა აუდიტის ანგარიში',
+    signers: ['აუდიტორი', 'შემმოწმებელი (ხარისხის მენეჯერი)', 'დამტკიცება (დირექტორი)'],
+    sections: [
+      { label: 'ანგარიშის მონაცემები', fields: [
+        { id: 'auditNumber',      label: 'FM-26 აუდიტის №',              type: 'text' },
+        { id: 'auditDate',        label: 'აუდიტის თარიღი',               type: 'date' },
+        { id: 'auditedSections',  label: 'აუდიტირებული ISO §§',          type: 'text' },
+        { id: 'keyFindings',      label: 'ძირითადი მიგნებები',           type: 'textarea' },
+        { id: 'auditConclusion',  label: 'აუდიტის შეფასება', type: 'select',
+          options: ['მოთხოვნები შეყვანილია','არსებითი NC-ები','მცირე NC-ები'] },
+      ]},
+    ],
+  },
+
+  // ══════════════════════════════════════════════════════════
+  'FM-29': {
+    title: 'აუდიტის შეუსაბამობის ფორმა',
+    signers: ['აუდიტორი', 'შემმოწმებელი (ხარისხის მენეჯერი)', 'დამტკიცება (დირექტორი)'],
+    sections: [
+      { label: 'შეუსაბამობის საიდენტიფიკაციო მონაცემები', fields: [
+        { id: 'auditNumber',  label: 'FM-26 აუდიტის №',      type: 'text' },
+        { id: 'ncNumber',     label: 'NC №',                   type: 'text', placeholder: 'ANC-2026-01' },
+        { id: 'isoClause',    label: 'ISO §',                   type: 'text' },
+        { id: 'severity',     label: 'კატეგორია', type: 'select', options: ['მცირე (Minor)','არსებითი (Major)','კრიტიკული (Critical)'] },
+        { id: 'description',  label: 'შეუსაბამობის აღწერა',   type: 'textarea' },
+      ]},
+      { label: 'CAPA', fields: [
+        { id: 'rootCause',         label: 'ფესვური მიზეზი (5-Why)', type: 'textarea' },
+        { id: 'correctiveAction',  label: 'მაკორექტირებელი ქმედება', type: 'textarea' },
+        { id: 'capaNumber',        label: 'FM-10 CAPA №',             type: 'text' },
+        { id: 'deadline',          label: 'ვადა',                     type: 'date' },
+        { id: 'checkDate',         label: 'შემოწმების თარიღი',        type: 'date' },
+        { id: 'effective',         label: 'ეფექტურია (კი/არა)',        type: 'yesno' },
+      ]},
+    ],
+  },
+
+  // ══════════════════════════════════════════════════════════
+  'FM-30': {
+    title: 'აუდიტის შეხვედრის ოქმი',
+    signers: ['აუდიტორი', 'აუდიტირებული', 'ხარისხის მენეჯერი'],
+    sections: [
+      { label: 'შეხვედრის მონაცემები', fields: [
+        { id: 'auditNumber',  label: 'FM-26 აუდიტის №',                     type: 'text' },
+        { id: 'meetingType',  label: 'შეხვედრის ტიპი', type: 'select', options: ['გახსნის შეხვედრა (kick-off)','დახურვის შეხვედრა (closing)'] },
+        { id: 'meetingDate',  label: 'შეხვედრის თარიღი',                    type: 'date' },
+        { id: 'auditor',      label: 'აუდიტორი',                            type: 'staff' },
+        { id: 'auditees',     label: 'აუდიტირებული პირ(ებ)ი',               type: 'text' },
+        { id: 'participants', label: 'სხვა მონაწილეები',                    type: 'textarea' },
+        { id: 'auditedScope', label: 'ინსპექტირებული სფერო / განყოფილება',  type: 'text' },
+      ]},
+    ],
+  },
+
+  // ══════════════════════════════════════════════════════════
+  'FM-31': {
+    title: 'შიდა აუდიტის პროგრამა (წლიური გეგმა)',
+    signers: ['შემდგენი (ხარისხის მენეჯერი)', 'შემმოწმებელი (აუდიტორი)', 'დამტკიცება (დირექტორი)'],
+    sections: [
+      { label: 'პროგრამის მონაცემები', fields: [
+        { id: 'programNumber',       label: 'პროგრამის №',                     type: 'text', placeholder: 'PROG-2026' },
+        { id: 'year',                label: 'წელი',                             type: 'text', placeholder: '2026' },
+        { id: 'qualityManager',      label: 'ხარისხის მენეჯერი',               type: 'staff' },
+        { id: 'approvalDate',        label: 'დამტკიცების კალენდ. თარიღი',      type: 'date' },
+        { id: 'completedVsPlanned',  label: 'შესრულებული / გეგმური (რ-ბა)',    type: 'text' },
+        { id: 'isoConforming',       label: 'ISO §8.6 კონფორმულია (კი/არა)',    type: 'yesno' },
+        { id: 'remarks',             label: 'შეჯამება / შენიშვნები',            type: 'textarea' },
+      ]},
+    ],
+  },
+
+  // ══════════════════════════════════════════════════════════
+  'FM-01': {
+    title: 'მოთხოვნის სარეგისტრაციო ფორმა',
+    signers: ['ადმინისტრატორი', 'ტექნიკური მენეჯერი', 'ხარისხის მენეჯერი'],
+    sections: [
+      { label: 'A. საქმის საიდ. მ-ბი', fields: [
+        { id: 'caseId',        label: 'BE-CASE №',           type: 'text' },
+        { id: 'regDate',       label: 'რეგისტრ. თარიღი',     type: 'date' },
+        { id: 'receiptMethod', label: 'მიღ. ფ.',             type: 'select', options: ['ელ.ფოსტა', 'ფოსტა', 'პირადად', 'ტელ.'] },
+        { id: 'caseType',      label: 'სამ. სახე',           type: 'select', options: ['BE-PR-01', 'BE-PR-02', 'BE-PR-03', 'სხვა'] },
+      ]},
+      { label: 'B. დამკვ. მ-ბი', fields: [
+        { id: 'clientName',     label: 'ო-ბ. / სახ., გვ.',   type: 'text' },
+        { id: 'clientId',       label: 'საიდ. კ. / პ.ნ.',    type: 'text' },
+        { id: 'clientPhone',    label: 'ტელ.',               type: 'text' },
+        { id: 'clientEmail',    label: 'ელ-ფ.',              type: 'text' },
+        { id: 'clientAddress',  label: 'მ-ბი',               type: 'text' },
+        { id: 'representative', label: 'წარმ.',              type: 'text' },
+      ]},
+      { label: 'C. ობ.', fields: [
+        { id: 'objectName',    label: 'ობ. დ.',              type: 'text' },
+        { id: 'objectAddress', label: 'ობ. მ-ბი',            type: 'text' },
+        { id: 'objectCategory',label: 'ობ. კატ.',            type: 'text' },
+        { id: 'contractNum',   label: 'ხელშ. №',             type: 'text' },
+        { id: 'description',   label: 'ა-ა',                type: 'textarea' },
+      ]},
+      { label: 'D. წ-ლი დ-ა', fields: [
+        { id: 'docsProject',  label: 'საპ. დ.',              type: 'yesno' },
+        { id: 'docsBudget',   label: 'ხ-ა',                 type: 'yesno' },
+        { id: 'docsTD',       label: 'ტ. დ-ბა',             type: 'yesno' },
+        { id: 'docsContract', label: 'ს-ო. დ.',             type: 'yesno' },
+        { id: 'docsDrawings', label: 'ნ-ბი / ს-ა',          type: 'yesno' },
+        { id: 'otherDocs',    label: 'სხვა',                type: 'textarea' },
+      ]},
+      { label: 'E. წ-ი შ. (ტ. მ.)', fields: [
+        { id: 'completenessCheck',  label: 'დ-ა ს-ე დ.',    type: 'yesno' },
+        { id: 'scopeCheck',         label: 'ი-ბ. სფ. გ.',   type: 'yesno' },
+        { id: 'impartialityCheck',  label: 'FM-02 ი-ბ.',    type: 'yesno' },
+        { id: 'tmNote',             label: 'შ-ა / მ-ბი',    type: 'textarea' },
+      ]},
+    ],
+  },
+
+  // ══════════════════════════════════════════════════════════
+  'FM-05': {
+    title: 'ხელშეკრულების განხილვა და სამუშაოს მიღება',
+    signers: ['ტექნიკური მენეჯერი', 'ხარისხის მენეჯერი', 'დირექტორი'],
+    sections: [
+      { label: 'A. საიდ. მ-ბი', fields: [
+        { id: 'caseId',      label: 'BE-CASE №',           type: 'text' },
+        { id: 'reviewDate',  label: 'განხ. თარიღი',         type: 'date' },
+        { id: 'clientName',  label: 'დამკვეთი',             type: 'text' },
+        { id: 'inspScope',   label: 'ინსპ. სფ. (BE-PR)',    type: 'select', options: ['BE-PR-01', 'BE-PR-02', 'BE-PR-03', 'სხვა'] },
+        { id: 'contractNum', label: 'ხელშ. №',              type: 'text' },
+        { id: 'deadline',    label: 'ვადა',                 type: 'date' },
+        { id: 'fee',         label: 'გასამრ. (₾)',          type: 'text' },
+        { id: 'fm01Num',     label: 'FM-01 №',              type: 'text' },
+      ]},
+      { label: 'B. ტექ. გადახ. კრიტ. (ISO §7.1.1)', fields: [
+        { id: 'r_scope',      label: '§7.1.1a — ობ. იდენტ.',   type: 'yesno' },
+        { id: 'r_capability', label: '§7.1.1b — შ-ძ. დ.',       type: 'yesno' },
+        { id: 'r_content',    label: '§7.1.1c — მომს. შ.',       type: 'yesno' },
+        { id: 'r_clientReqs', label: '§7.1.1d — კლ. მ.',         type: 'yesno' },
+        { id: 'r_deadline',   label: '§7.1 — ვადა / გასამ.',     type: 'yesno' },
+        { id: 'r_fm02',       label: 'FM-02 — მიუკ.',             type: 'yesno' },
+        { id: 'r_conflict',   label: 'ინტ. კონფ.',                type: 'yesno' },
+      ]},
+      { label: 'C. შ-ძ. დადასტ.', fields: [
+        { id: 'staffAvailable', label: 'პ-ლი ხ-ა',   type: 'yesno' },
+        { id: 'equipAvailable', label: 'აღჭ. ხ-ა',   type: 'yesno' },
+        { id: 'timeAvailable',  label: 'ვ-ა რ-ლი',   type: 'yesno' },
+      ]},
+      { label: 'D–E. შ-ბები / გ-ა', fields: [
+        { id: 'scopeLimitations', label: 'შ-ბები / შ-ა',          type: 'textarea' },
+        { id: 'decision',         label: 'გ-ა', type: 'select', options: ['accept', 'reject', 'defer'] },
+        { id: 'decisionDate',     label: 'გ-ის თ-ღი',              type: 'date' },
+        { id: 'decisionNote',     label: 'გ-ის დასაბ.',            type: 'textarea' },
+      ]},
+    ],
+  },
+
+  // ══════════════════════════════════════════════════════════
+  'FM-33': {
+    title: 'მიუკერძოებლობის რისკების შეფასება',
+    signers: ['ინსპექტორი', 'ხარისხის მენეჯერი', 'დირექტორი'],
+    sections: [
+      { label: 'A. ზ-ადი ი-ა', fields: [
+        { id: 'assessmentId',   label: 'შეფ. №',       type: 'text' },
+        { id: 'assessmentDate', label: 'თ-ღი',         type: 'date' },
+        { id: 'caseId',         label: 'BE-CASE №',    type: 'text' },
+        { id: 'inspector',      label: 'ინსპ.',         type: 'staff' },
+        { id: 'clientName',     label: 'დამკ.',         type: 'text' },
+        { id: 'objectName',     label: 'ობ.',           type: 'text' },
+      ]},
+      { label: 'C. გ-ა', fields: [
+        { id: 'overallRiskLevel', label: 'საერ. რ-ის დ.', type: 'select', options: ['acceptable', 'review', 'mitigate'] },
+        { id: 'controlMeasures', label: 'კ-ბი / შ-ები',  type: 'textarea' },
+        { id: 'decision',        label: 'გ-ა',            type: 'select', options: ['accept', 'restricted', 'rejected'] },
+      ]},
+    ],
+  },
+
+  // ══════════════════════════════════════════════════════════
+  'FM-34': {
+    title: 'აღჭურვილობის სარეგისტრაციო ბარათი',
+    signers: ['ტექნიკური მენეჯერი', 'ხარისხის მენეჯერი', 'დირექტორი'],
+    sections: [
+      { label: 'A. ა-ბ. საიდ.', fields: [
+        { id: 'equipId',      label: 'ს/კ. №',          type: 'text' },
+        { id: 'status',       label: 'სტ.',              type: 'select', options: ['Active', 'Calibrating', 'Suspended', 'Decommissioned'] },
+        { id: 'name',         label: 'დასახ.',           type: 'text' },
+        { id: 'model',        label: 'მოდ.',             type: 'text' },
+        { id: 'serialNum',    label: 'სერ. №',           type: 'text' },
+        { id: 'manufacturer', label: 'მწარ.',            type: 'text' },
+        { id: 'country',      label: 'ქ.',               type: 'text' },
+        { id: 'purchaseDate', label: 'შ-ძ. თ-ღი',       type: 'date' },
+        { id: 'location',     label: 'მდ-ბ.',            type: 'text' },
+        { id: 'measRange',    label: 'გ-ვ. დ-ი',        type: 'text' },
+        { id: 'accuracy',     label: 'ს-ე',              type: 'text' },
+      ]},
+      { label: 'B. კ-ბ. ი-ა', fields: [
+        { id: 'calibCenter',    label: 'კ-ბ. ლ-ა / ო-ბ.',  type: 'text' },
+        { id: 'lastCalibDate',  label: 'ბ-ლი კ-ბ.',         type: 'date' },
+        { id: 'nextCalibDate',  label: 'შ-მდ. კ-ბ.',        type: 'date' },
+        { id: 'calibInterval',  label: 'ინ-ი (თვე)',         type: 'number' },
+        { id: 'certNum',        label: 'ს-ტ. №',             type: 'text' },
+        { id: 'traceability',   label: 'ე-ბ.',               type: 'text' },
+        { id: 'calibResult',    label: 'კ-ბ. სა-ე (ვ-ა)',   type: 'yesno' },
+      ]},
+    ],
+  },
+
+  // ══════════════════════════════════════════════════════════
+  'FM-35': {
+    title: 'ქვეკონტრაქტორის შეფასება და მონიტ. ჩ.',
+    signers: ['ტექნიკური მენეჯერი', 'ხარისხის მენეჯერი', 'დირექტორი'],
+    sections: [
+      { label: 'A. ქ-კ. საიდ.', fields: [
+        { id: 'companyName',   label: 'ო-ბ. სახ.',      type: 'text' },
+        { id: 'legalForm',     label: 'ი-ბ. ფ.',         type: 'text' },
+        { id: 'taxId',         label: 'ს/კ',             type: 'text' },
+        { id: 'contact',       label: 'კ-ტ. პ.',         type: 'text' },
+        { id: 'phone',         label: 'ტ-ნი',            type: 'text' },
+        { id: 'email',         label: 'ელ-ფ.',           type: 'text' },
+        { id: 'address',       label: 'მ-ბი',            type: 'text' },
+        { id: 'services',      label: 'გ-ბ. მომს. სახ.', type: 'textarea' },
+        { id: 'accreditation', label: 'ა-ბ. / ლ-ა №',   type: 'text' },
+      ]},
+      { label: 'B. კ-ა შ-ა ც-ლი (6 კრ.)', fields: [
+        { id: 'q1',         label: 'იურ. სტ. დ. (§6.3.1)',  type: 'yesno' },
+        { id: 'q2',         label: 'ი-ო. და კ-ბ. (§6.3.2)', type: 'yesno' },
+        { id: 'q3',         label: 'პ-ლ. კომპ. (§6.3.3)',   type: 'yesno' },
+        { id: 'q4',         label: 'ა-ბ./ი-ბ. ო-ბ. (§6.3.4)', type: 'yesno' },
+        { id: 'q5',         label: 'CAPA ს-ა დ. (§8.7)',    type: 'yesno' },
+        { id: 'q6',         label: 'კ-ბ. დ-ბ./მ-ბ. (§6.2)', type: 'yesno' },
+        { id: 'totalScore', label: 'ჯ-ი ქ-ა (0–6)',          type: 'text' },
+        { id: 'decision',   label: 'გ-ა', type: 'select', options: ['approved', 'conditional', 'rejected'] },
+      ]},
+    ],
+  },
+
 };

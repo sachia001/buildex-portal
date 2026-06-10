@@ -8,9 +8,9 @@ const FM25_LiquidationActPdf = ({ data = {} }) => {
   const sigs = data.sigs || [];
   return (
   <Document>
-    <Page size="A4" style={s.page}>
+    <Page size="A4" style={[s.page, { paddingTop: 10, paddingBottom: 16, paddingHorizontal: 28 }]}>
       <WM />
-      <FormHeader code="FM-25" isoRef="PR-02 §6" title="ლიკვიდაციის (განადგურების) აქტი" subtitle="Document Liquidation / Destruction Act" />
+      <FormHeader code="BE-FM-25" isoRef="PR-02 §6" title="ლიკვიდაციის (განადგურების) აქტი" subtitle="Document Liquidation / Destruction Act" />
 
       <Text style={s.secH}>A. საიდენტიფიკაციო მონაცემები</Text>
       <FieldRow2 label1="A № (BE-DEST-YYYY-____):" value1={data.actNumber} label2="შედგენის თარიღი:" value2={data.date} />
@@ -63,7 +63,7 @@ const FM25_LiquidationActPdf = ({ data = {} }) => {
       </View>
 
       <SigBlock3 labels={['შემდგენი / პასუხისმგებელი','მოწმე','ხარისხის მენეჯერი']} sigs={sigs} />
-      <FormFooter code="FM-25 v2.0 | 28.04.2026 | შენახვა: 5 წელი" />
+      <FormFooter code="BE-FM-25 v2.0 | 28.04.2026 | შენახვა: 5 წელი" />
     </Page>
   </Document>
 );};

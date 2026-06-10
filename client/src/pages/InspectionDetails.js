@@ -206,8 +206,8 @@ const InspectionDetails = ({ role }) => {
                 </div>
                 <div className="d-flex gap-2">
                      {/* PDF ღილაკები - მონაცემებს ვაწვდით data prop-ით */}
-                    <PDFDownloadLink document={<PdfDocument data={data} />} fileName={`Application-${data.inspectionNumber}.pdf`}>
-                        {({ loading }) => <Button variant="outline-danger" size="sm" disabled={loading}>📄 განცხადება</Button>}
+                    <PDFDownloadLink document={<PdfDocument data={data} />} fileName={`Application-${data.inspectionNumber}.pdf`} className="btn btn-outline-danger btn-sm" style={{ textDecoration: 'none' }}>
+                        {({ loading }) => loading ? '⏳' : '📄 განცხადება'}
                     </PDFDownloadLink>
 
                     <Button variant="outline-success" size="sm" onClick={openReportModal}>📗 ინსპ. ანგარიში</Button>
@@ -477,12 +477,10 @@ const InspectionDetails = ({ role }) => {
                 <PDFDownloadLink
                     document={<ServiceContractPdf data={svcForm} />}
                     fileName={`service-contract-${svcForm.contractNumber || data.inspectionNumber}.pdf`}
+                    className="btn btn-warning"
+                    style={{ textDecoration: 'none' }}
                 >
-                    {({ loading }) => (
-                        <Button variant="warning" disabled={loading}>
-                            {loading ? '⏳ მზადდება...' : '📄 ხელშეკრულების გადმოწერა'}
-                        </Button>
-                    )}
+                    {({ loading }) => loading ? '⏳ მზადდება...' : '📄 ხელშეკრულების გადმოწერა'}
                 </PDFDownloadLink>
             </Modal.Footer>
         </Modal>
@@ -581,12 +579,10 @@ const InspectionDetails = ({ role }) => {
                 <PDFDownloadLink
                     document={<ReportCoverPdf data={reportForm} />}
                     fileName={`inspection-report-${reportForm.inspectionNumber || 'draft'}.pdf`}
+                    className="btn btn-success"
+                    style={{ textDecoration: 'none' }}
                 >
-                    {({ loading }) => (
-                        <Button variant="success" disabled={loading}>
-                            {loading ? '⏳ მზადდება...' : '📗 ანგარიშის გადმოწერა'}
-                        </Button>
-                    )}
+                    {({ loading }) => loading ? '⏳ მზადდება...' : '📗 ანგარიშის გადმოწერა'}
                 </PDFDownloadLink>
             </Modal.Footer>
         </Modal>

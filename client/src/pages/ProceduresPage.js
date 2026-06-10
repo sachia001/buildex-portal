@@ -248,12 +248,8 @@ function FormCard({ icon, code, title, desc, pdf, fileName, linkTo, color, fill 
                 {fill && FORM_CONFIGS[fill] && (
                   <Button variant={color} size="sm" className="w-100 fw-bold" style={{ fontSize: '0.68rem' }} onClick={() => setShowFill(true)}>📝 შევსება</Button>
                 )}
-                <PDFDownloadLink document={pdf} fileName={`${fileName}_ცარიელი.pdf`} style={{ textDecoration: 'none' }}>
-                  {({ loading }) => (
-                    <Button variant={`outline-${color}`} size="sm" className="w-100 fw-bold" style={{ fontSize: '0.68rem' }}>
-                      {loading ? '⏳' : '📄 ჩამოტვირთვა'}
-                    </Button>
-                  )}
+                <PDFDownloadLink document={pdf} fileName={`${fileName}_ცარიელი.pdf`} className={`btn btn-outline-${color} btn-sm w-100 fw-bold`} style={{ textDecoration: 'none', fontSize: '0.68rem' }}>
+                  {({ loading }) => loading ? '⏳' : '📄 ჩამოტვირთვა'}
                 </PDFDownloadLink>
               </div>
             )}

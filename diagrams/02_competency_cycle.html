@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="ka">
+<head>
+<meta charset="UTF-8">
+<title>კომპეტენციის მართვის ციკლი</title>
+<style>
+* { box-sizing:border-box; margin:0; padding:0; }
+body {
+  background:#fff;
+  font-family:'Sylfaen','Arial Unicode MS',Arial,sans-serif;
+  padding:50px 44px;
+}
+.page { max-width:860px; margin:0 auto; }
+
+h1 {
+  text-align:center; font-size:17px; font-weight:bold;
+  color:#1a2e58; margin-bottom:6px;
+}
+.subtitle { text-align:center; font-size:11px; color:#777; margin-bottom:48px; }
+
+/* ─── Circular layout wrapper ─── */
+.cycle-outer {
+  position:relative;
+  width:760px;
+  height:630px;
+  margin:0 auto;
+}
+
+/* ─── Circle nodes ─── */
+.node {
+  position:absolute;
+  width:148px;
+  height:148px;
+  border-radius:50%;
+  color:#fff;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  padding:12px 10px;
+  box-shadow:0 5px 20px rgba(0,0,0,.22);
+  z-index:3;
+}
+.node-num {
+  font-size:26px;
+  font-weight:bold;
+  line-height:1;
+  margin-bottom:5px;
+  opacity:.95;
+}
+.node-title {
+  font-size:11.5px;
+  font-weight:bold;
+  line-height:1.35;
+}
+.node-sub {
+  font-size:9px;
+  margin-top:5px;
+  opacity:.82;
+  line-height:1.4;
+}
+
+/* Positions — center of cycle: (380, 315), radius 205px */
+/* angle 0 = top, clockwise */
+/* N1 top:        (380-74, 110-74) = (306, 36)   */
+/* N2 top-right:  (380+178-74, 315-103-74) = (484, 138)  */
+/* N3 bot-right:  (484, 315+103-74) = (484, 344)          */
+/* N4 bottom:     (306, 315+205-74) = (306, 446)           */
+/* N5 bot-left:   (380-178-74, 344) = (128, 344)            */
+/* N6 top-left:   (128, 138)                                  */
+
+/* Recalculate carefully:
+   center=(380,315), r=205, node-radius=74 (half of 148)
+   N1 (top, 270°):     cx=380,       cy=315-205=110   → left=380-74=306,  top=110-74=36
+   N2 (top-right,330°):cx=380+205*cos(330°)=380+205*0.866=380+178=558, cy=315+205*sin(330°)=315-205*0.5=315-102=213  → left=558-74=484, top=213-74=139
+   N3 (bot-right, 30°):cx=558,       cy=315+102=417    → left=484,  top=417-74=343
+   N4 (bottom, 90°):   cx=380,       cy=315+205=520    → left=306,  top=520-74=446
+   N5 (bot-left,150°): cx=380-178=202, cy=417          → left=202-74=128, top=343
+   N6 (top-left,210°): cx=202,       cy=213            → left=128,  top=139
+*/
+.n1 { left:306px; top:36px;  background:#1a3060; }
+.n2 { left:484px; top:139px; background:#1d5aa0; }
+.n3 { left:484px; top:343px; background:#1a7a6a; }
+.n4 { left:306px; top:446px; background:#1e7a38; }
+.n5 { left:128px; top:343px; background:#c06818; }
+.n6 { left:128px; top:139px; background:#602a8a; }
+
+/* ─── Center box ─── */
+.center-box {
+  position:absolute;
+  left:50%;
+  top:50%;
+  transform:translate(-50%,-50%);
+  width:178px;
+  border:2.5px solid #2c4c8c;
+  border-radius:14px;
+  padding:18px 16px;
+  text-align:center;
+  background:#fff;
+  box-shadow:0 2px 12px rgba(44,76,140,.12);
+  z-index:3;
+}
+.center-title { font-size:14.5px; font-weight:bold; color:#1a3060; line-height:1.35; margin-bottom:8px; }
+.center-div   { width:36px; height:1.5px; background:#2c4c8c; margin:0 auto 8px; opacity:.3; }
+.center-sub   { font-size:9.5px; color:#555; line-height:1.6; }
+
+/* ─── SVG arrows ─── */
+.cycle-svg {
+  position:absolute;
+  top:0; left:0;
+  width:100%; height:100%;
+  z-index:1;
+  pointer-events:none;
+}
+
+/* ─── Bottom note ─── */
+.bottom-note {
+  border:1.5px solid #d06060;
+  background:#fff5f5;
+  border-radius:8px;
+  padding:12px 18px;
+  font-size:10.5px;
+  line-height:1.72;
+  margin-top:28px;
+  max-width:760px;
+  margin-left:auto;
+  margin-right:auto;
+  color:#4a1a1a;
+}
+.bottom-note strong { font-size:11px; display:block; margin-bottom:4px; color:#b83030; }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <h1>კომპეტენციის მართვის ციკლი</h1>
+  <p class="subtitle">შპს „ბილდექს ექსპერტიზა" &nbsp;·&nbsp; ISO/IEC 17020:2012 §6.1 &nbsp;·&nbsp; GAC SAK 1.1:2020</p>
+
+  <div class="cycle-outer">
+
+    <!-- SVG curved arrows (clockwise) -->
+    <svg class="cycle-svg" viewBox="0 0 760 630">
+      <defs>
+        <marker id="ah" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto">
+          <path d="M0,0 L0,6 L9,3 z" fill="#9abcd0"/>
+        </marker>
+      </defs>
+
+      <!-- guide circle (dashed) -->
+      <circle cx="380" cy="315" r="205" fill="none" stroke="#dce6f0" stroke-width="2" stroke-dasharray="7 5"/>
+
+      <!-- N1 → N2  (top → top-right) curve outward -->
+      <path d="M 399,39  Q 530,50 550,170" fill="none" stroke="#9abcd0" stroke-width="2.5" marker-end="url(#ah)"/>
+      <!-- N2 → N3  (top-right → bot-right) -->
+      <path d="M 626,250  Q 648,315 626,380" fill="none" stroke="#9abcd0" stroke-width="2.5" marker-end="url(#ah)"/>
+      <!-- N3 → N4  (bot-right → bottom) -->
+      <path d="M 550,460  Q 530,580 399,591" fill="none" stroke="#9abcd0" stroke-width="2.5" marker-end="url(#ah)"/>
+      <!-- N4 → N5  (bottom → bot-left) -->
+      <path d="M 361,591  Q 230,580 210,460" fill="none" stroke="#9abcd0" stroke-width="2.5" marker-end="url(#ah)"/>
+      <!-- N5 → N6  (bot-left → top-left) -->
+      <path d="M 134,380  Q 112,315 134,250" fill="none" stroke="#9abcd0" stroke-width="2.5" marker-end="url(#ah)"/>
+      <!-- N6 → N1  (top-left → top) -->
+      <path d="M 210,170  Q 230,50 361,39" fill="none" stroke="#9abcd0" stroke-width="2.5" marker-end="url(#ah)"/>
+    </svg>
+
+    <!-- ─── 6 nodes ─── -->
+
+    <div class="node n1">
+      <div class="node-num">1</div>
+      <div class="node-title">შეფასება და<br>დაგეგმვა</div>
+      <div class="node-sub">კომპეტ. ხარვეზები<br>და საჭიროებები</div>
+    </div>
+
+    <div class="node n2">
+      <div class="node-num">2</div>
+      <div class="node-title">ინდივიდუალური<br>ტრენინგი</div>
+      <div class="node-sub">სწავლება, სემინარი,<br>გარე კურსები</div>
+    </div>
+
+    <div class="node n3">
+      <div class="node-num">3</div>
+      <div class="node-title">კვალიფიკაცია<br>Witness-test</div>
+      <div class="node-sub">პრაქტ. შეფასება,<br>ვიდეო, ინ. დაკვ.</div>
+    </div>
+
+    <div class="node n4">
+      <div class="node-num">4</div>
+      <div class="node-title">ავტ. მინიჭება<br>სერტ. ი.ს.</div>
+      <div class="node-sub">ბრძანება, სია,<br>ი.ს. ჩანაწერი</div>
+    </div>
+
+    <div class="node n5">
+      <div class="node-num">5</div>
+      <div class="node-title">შედეგის<br>შეფასება</div>
+      <div class="node-sub">KPI, Witness<br>ანგარიში, ხ-ება</div>
+    </div>
+
+    <div class="node n6">
+      <div class="node-num">6</div>
+      <div class="node-title">განახლება /<br>სულდგმ. მეთ.</div>
+      <div class="node-sub">ახალი სტანდარტები,<br>ციკლის გამეორება</div>
+    </div>
+
+    <!-- ─── Center box ─── -->
+    <div class="center-box">
+      <div class="center-title">კომპეტენციის<br>მართვა</div>
+      <div class="center-div"></div>
+      <div class="center-sub">
+        ინსპ. | ტექ. მენ. | ხარ. მენ.<br>
+        ავტ. სფეროები და<br>
+        კვალიფ. კრიტერიუმები
+      </div>
+    </div>
+
+  </div><!-- /.cycle-outer -->
+
+  <!-- ─── Bottom note ─── -->
+  <div class="bottom-note">
+    <strong>[!] ავტ. შეჩერება / შეზღუდვა</strong>
+    განმეორებითი შეუსაბამობა &nbsp;|&nbsp; Witness-ზე ჩავარდნა &nbsp;|&nbsp; ინციდენტი &nbsp;|&nbsp; CAPA<br>
+    → ეტაპ 1-ზე დაბრუნება და გასინჯვის ციკლის გამეორება
+  </div>
+
+</div>
+</body>
+</html>

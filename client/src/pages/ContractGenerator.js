@@ -59,19 +59,11 @@ const ContractGenerator = () => {
 
                         {isFormValid ? (
                             <div className="d-flex gap-2 flex-wrap justify-content-center">
-                                <PDFDownloadLink document={<LaborContractPdf data={makePdfData(false)} />} fileName={`ხელშეკრულება_${employeeName}.pdf`} style={{ textDecoration: 'none' }}>
-                                    {({ loading }) => (
-                                        <Button variant="success" size="lg" className="fw-bold px-4 shadow">
-                                            {loading ? '...' : '📥 სრული პაკეტის ჩამოტვირთვა'}
-                                        </Button>
-                                    )}
+                                <PDFDownloadLink document={<LaborContractPdf data={makePdfData(false)} />} fileName={`ხელშეკრულება_${employeeName}.pdf`} className="btn btn-success btn-lg fw-bold px-4 shadow" style={{ textDecoration: 'none' }}>
+                                    {({ loading }) => loading ? '...' : '📥 სრული პაკეტის ჩამოტვირთვა'}
                                 </PDFDownloadLink>
-                                <PDFDownloadLink document={<LaborContractPdf data={makePdfData(true)} />} fileName={`signed-ხელშეკრულება_${employeeName}.pdf`} style={{ textDecoration: 'none' }}>
-                                    {({ loading }) => (
-                                        <Button variant="outline-secondary" size="lg" className="fw-bold px-4">
-                                            {loading ? '...' : '✍️ ხელმოწერით'}
-                                        </Button>
-                                    )}
+                                <PDFDownloadLink document={<LaborContractPdf data={makePdfData(true)} />} fileName={`signed-ხელშეკრულება_${employeeName}.pdf`} className="btn btn-outline-secondary btn-lg fw-bold px-4" style={{ textDecoration: 'none' }}>
+                                    {({ loading }) => loading ? '...' : '✍️ ხელმოწერით'}
                                 </PDFDownloadLink>
                             </div>
                         ) : (

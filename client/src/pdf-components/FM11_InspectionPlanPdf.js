@@ -16,7 +16,7 @@ const FM11_InspectionPlanPdf = ({ data = {} }) => {
   <Document>
     <Page size="A4" style={s.page}>
       <WM />
-      <FormHeader code="FM-11" isoRef="სსტ ISO/IEC 17020 §7.1" title="ინსპექციის გეგმა" subtitle="Inspection Plan" />
+      <FormHeader code="BE-FM-11" isoRef="სსტ ISO/IEC 17020 §7.1" title="ინსპექციის გეგმა" subtitle="Inspection Plan" />
 
       <Text style={s.secH}>A. საიდენტიფიკაციო მონაცემები</Text>
       <View style={[s.tBorder,{marginBottom:4}]}>
@@ -109,7 +109,7 @@ const FM11_InspectionPlanPdf = ({ data = {} }) => {
         </View>
       </View>
 
-      <FormFooter code="FM-11 v2.0 | 28.04.2026 | შენახვა: 10 წელი" />
+      <FormFooter code="BE-FM-11 v2.0 | 28.04.2026 | შენახვა: 10 წელი" />
     </Page>
   </Document>
 );};

@@ -366,12 +366,8 @@ const StaffDetails = () => {
                                                     ))}
 
                                                     <PDFDownloadLink document={<ImpartialityDeclarationPdf data={buildImpartialityDeclarationData()} />}
-                                                        fileName={`FM-02_მიუკ_დეკ_${fname}.pdf`} style={{ textDecoration: 'none' }}>
-                                                        {({ loading: l }) => (
-                                                            <Button variant="outline-primary" size="sm" disabled={l} className="mt-2">
-                                                                {l ? '...' : '📥 FM-02 — მიუკ. დეკლარაცია'}
-                                                            </Button>
-                                                        )}
+                                                        fileName={`FM-02_მიუკ_დეკ_${fname}.pdf`} className="btn btn-outline-primary btn-sm mt-2" style={{ textDecoration: 'none' }}>
+                                                        {({ loading: l }) => l ? '...' : '📥 FM-02 — მიუკ. დეკლარაცია'}
                                                     </PDFDownloadLink>
                                                 </div>
 
@@ -384,12 +380,8 @@ const StaffDetails = () => {
                                                     </p>
 
                                                     <PDFDownloadLink document={<ImpartialityGeneralPdf data={buildImpartialityGeneralData()} />}
-                                                        fileName={`FM-02a_ზოგ_მიუკ_${fname}.pdf`} style={{ textDecoration: 'none' }}>
-                                                        {({ loading: l }) => (
-                                                            <Button variant="outline-primary" size="sm" disabled={l} className="mt-2">
-                                                                {l ? '...' : '📥 FM-02a — ზოგადი მიუკერძოებლობის დეკლარაცია'}
-                                                            </Button>
-                                                        )}
+                                                        fileName={`FM-02a_ზოგ_მიუკ_${fname}.pdf`} className="btn btn-outline-primary btn-sm mt-2" style={{ textDecoration: 'none' }}>
+                                                        {({ loading: l }) => l ? '...' : '📥 FM-02a — ზოგადი მიუკერძოებლობის დეკლარაცია'}
                                                     </PDFDownloadLink>
                                                 </div>
 
@@ -447,14 +439,14 @@ const StaffDetails = () => {
                                                             checked={caseConclusion === 'conflict'} onChange={() => setCaseConclusion('conflict')} />
                                                     </div>
 
-                                                    <PDFDownloadLink document={<ImpartialityPerCasePdf data={buildImpartialityPerCaseData()} />}
-                                                        fileName={`FM-02b_${foundCase?.inspectionNumber || 'საქმე'}_${fname}.pdf`} style={{ textDecoration: 'none' }}>
-                                                        {({ loading: l }) => (
-                                                            <Button variant="outline-danger" size="sm" disabled={l || !foundCase}>
-                                                                {!foundCase ? '🔍 ჯერ მიუთითეთ საქმის ნომერი' : l ? '...' : '📥 FM-02b — საქმის მიუკერძოებლობის შეფასება'}
-                                                            </Button>
-                                                        )}
-                                                    </PDFDownloadLink>
+                                                    {!foundCase ? (
+                                                        <Button variant="outline-danger" size="sm" disabled>🔍 ჯერ მიუთითეთ საქმის ნომერი</Button>
+                                                    ) : (
+                                                        <PDFDownloadLink document={<ImpartialityPerCasePdf data={buildImpartialityPerCaseData()} />}
+                                                            fileName={`FM-02b_${foundCase.inspectionNumber}_${fname}.pdf`} className="btn btn-outline-danger btn-sm" style={{ textDecoration: 'none' }}>
+                                                            {({ loading: l }) => l ? '...' : '📥 FM-02b — საქმის მიუკერძოებლობის შეფასება'}
+                                                        </PDFDownloadLink>
+                                                    )}
                                                 </div>
 
                                                 {/* FM-03 */}
@@ -464,13 +456,10 @@ const StaffDetails = () => {
                                                     <PDFDownloadLink
                                                         document={<ConfidentialityAgreementPdf data={buildConfidentialityData()} />}
                                                         fileName={`FM-03_კონფ_შეთ_${fname}.pdf`}
+                                                        className="btn btn-outline-primary btn-sm"
                                                         style={{ textDecoration: 'none' }}
                                                     >
-                                                        {({ loading: l }) => (
-                                                            <Button variant="outline-primary" size="sm" disabled={l}>
-                                                                {l ? '...' : '📥 FM-03 — კონფიდენციალურობის შეთანხმება'}
-                                                            </Button>
-                                                        )}
+                                                        {({ loading: l }) => l ? '...' : '📥 FM-03 — კონფიდენციალურობის შეთანხმება'}
                                                     </PDFDownloadLink>
                                                 </div>
                                             </Accordion.Body>
@@ -501,21 +490,21 @@ const StaffDetails = () => {
                                                 <div className="d-flex flex-wrap gap-3">
                                                     {startDate && (
                                                         <div className="d-flex gap-2 flex-wrap">
-                                                            <PDFDownloadLink document={<DirectorsOrderPdf data={{ ...buildOrderData(), withSignature: false }} />} fileName={`დანიშვნ_ბრძ_${fname}.pdf`} style={{ textDecoration: 'none' }}>
-                                                                {({ loading: l }) => <Button variant="outline-success" size="sm" disabled={l}>{l ? '...' : '📥 დანიშვნის ბრძანება'}</Button>}
+                                                            <PDFDownloadLink document={<DirectorsOrderPdf data={{ ...buildOrderData(), withSignature: false }} />} fileName={`დანიშვნ_ბრძ_${fname}.pdf`} className="btn btn-outline-success btn-sm" style={{ textDecoration: 'none' }}>
+                                                                {({ loading: l }) => l ? '...' : '📥 დანიშვნის ბრძანება'}
                                                             </PDFDownloadLink>
-                                                            <PDFDownloadLink document={<DirectorsOrderPdf data={{ ...buildOrderData(), withSignature: true }} />} fileName={`signed-დანიშვნ_ბრძ_${fname}.pdf`} style={{ textDecoration: 'none' }}>
-                                                                {({ loading: l }) => <Button variant="outline-secondary" size="sm" disabled={l}>{l ? '...' : '✍️ ხელმოწ.'}</Button>}
+                                                            <PDFDownloadLink document={<DirectorsOrderPdf data={{ ...buildOrderData(), withSignature: true }} />} fileName={`signed-დანიშვნ_ბრძ_${fname}.pdf`} className="btn btn-outline-secondary btn-sm" style={{ textDecoration: 'none' }}>
+                                                                {({ loading: l }) => l ? '...' : '✍️ ხელმოწ.'}
                                                             </PDFDownloadLink>
                                                         </div>
                                                     )}
                                                     {startDate && contractNumber && (
                                                         <div className="d-flex gap-2 flex-wrap">
-                                                            <PDFDownloadLink document={<LaborContractPdf data={{ ...buildContractData(), withSignature: false }} />} fileName={`ხელშეკრ_${fname}.pdf`} style={{ textDecoration: 'none' }}>
-                                                                {({ loading: l }) => <Button variant="outline-primary" size="sm" disabled={l}>{l ? '...' : '📥 შრომითი ხელშეკრულება'}</Button>}
+                                                            <PDFDownloadLink document={<LaborContractPdf data={{ ...buildContractData(), withSignature: false }} />} fileName={`ხელშეკრ_${fname}.pdf`} className="btn btn-outline-primary btn-sm" style={{ textDecoration: 'none' }}>
+                                                                {({ loading: l }) => l ? '...' : '📥 შრომითი ხელშეკრულება'}
                                                             </PDFDownloadLink>
-                                                            <PDFDownloadLink document={<LaborContractPdf data={{ ...buildContractData(), withSignature: true }} />} fileName={`signed-ხელშეკრ_${fname}.pdf`} style={{ textDecoration: 'none' }}>
-                                                                {({ loading: l }) => <Button variant="outline-secondary" size="sm" disabled={l}>{l ? '...' : '✍️ ხელმოწ.'}</Button>}
+                                                            <PDFDownloadLink document={<LaborContractPdf data={{ ...buildContractData(), withSignature: true }} />} fileName={`signed-ხელშეკრ_${fname}.pdf`} className="btn btn-outline-secondary btn-sm" style={{ textDecoration: 'none' }}>
+                                                                {({ loading: l }) => l ? '...' : '✍️ ხელმოწ.'}
                                                             </PDFDownloadLink>
                                                         </div>
                                                     )}
@@ -596,13 +585,10 @@ const StaffDetails = () => {
                                                 <PDFDownloadLink
                                                     document={<TrainingRecordPdf data={buildTrainingData()} />}
                                                     fileName={`FM-13_ტრენ_ჩანაწ_${fname}.pdf`}
+                                                    className="btn btn-outline-success btn-sm"
                                                     style={{ textDecoration: 'none' }}
                                                 >
-                                                    {({ loading: l }) => (
-                                                        <Button variant="outline-success" size="sm" disabled={l}>
-                                                            {l ? '...' : '📥 FM-13 — ტრენინგის ჩანაწერი'}
-                                                        </Button>
-                                                    )}
+                                                    {({ loading: l }) => l ? '...' : '📥 FM-13 — ტრენინგის ჩანაწერი'}
                                                 </PDFDownloadLink>
                                             </Accordion.Body>
                                         </Accordion.Item>

@@ -191,19 +191,11 @@ const OrderGenerator = () => {
 
                         {isReady ? (
                             <div className="d-flex gap-2 flex-wrap justify-content-center">
-                                <PDFDownloadLink document={<DirectorsOrderPdf data={generateOrderData(false)} />} fileName={`ბრძანება_${pdfData.number}.pdf`} style={{ textDecoration: 'none' }}>
-                                    {({ loading }) => (
-                                        <Button variant="success" size="lg" className="fw-bold px-4 shadow">
-                                            {loading ? 'მუშავდება...' : '📥 ბრძანების ჩამოტვირთვა'}
-                                        </Button>
-                                    )}
+                                <PDFDownloadLink document={<DirectorsOrderPdf data={generateOrderData(false)} />} fileName={`ბრძანება_${pdfData.number}.pdf`} className="btn btn-success btn-lg fw-bold px-4 shadow" style={{ textDecoration: 'none' }}>
+                                    {({ loading }) => loading ? 'მუშავდება...' : '📥 ბრძანების ჩამოტვირთვა'}
                                 </PDFDownloadLink>
-                                <PDFDownloadLink document={<DirectorsOrderPdf data={generateOrderData(true)} />} fileName={`signed-ბრძანება_${pdfData.number}.pdf`} style={{ textDecoration: 'none' }}>
-                                    {({ loading }) => (
-                                        <Button variant="outline-secondary" size="lg" className="fw-bold px-4">
-                                            {loading ? 'მუშავდება...' : '✍️ ხელმოწერით'}
-                                        </Button>
-                                    )}
+                                <PDFDownloadLink document={<DirectorsOrderPdf data={generateOrderData(true)} />} fileName={`signed-ბრძანება_${pdfData.number}.pdf`} className="btn btn-outline-secondary btn-lg fw-bold px-4" style={{ textDecoration: 'none' }}>
+                                    {({ loading }) => loading ? 'მუშავდება...' : '✍️ ხელმოწერით'}
                                 </PDFDownloadLink>
                             </div>
                         ) : (

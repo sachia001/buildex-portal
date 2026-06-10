@@ -161,7 +161,7 @@ const ReportCoverPdf = ({ data = {} }) => {
         
         <View style={styles.coverFooter}>
             <Text style={{fontSize: 9, color: '#003366'}}>თელავი, ჭ. ამირეჯიბის ქ. №26; ტელ: +995 511 74 74 00</Text>
-            <Text style={{fontSize: 9, color: '#003366'}}>buildexpertiza@gmail.com</Text>
+            <Text style={{fontSize: 9, color: '#003366'}}>info@buildexexpertise.com</Text>
         </View>
 
         <Text break />

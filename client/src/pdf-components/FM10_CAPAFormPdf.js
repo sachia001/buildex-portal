@@ -8,7 +8,7 @@ const FM10_CAPAFormPdf = ({ data = {} }) => {
   <Document>
     <Page size="A4" style={s.page}>
       <WM />
-      <FormHeader code="FM-10" isoRef="სსტ ISO/IEC 17020 §8.5" title="CAPA" subtitle="Corrective & Preventive Action Form" />
+      <FormHeader code="BE-FM-10" isoRef="სსტ ISO/IEC 17020 §8.5" title="CAPA" subtitle="Corrective & Preventive Action Form" />
 
       <Text style={s.secH}>A. რეგისტრაცია</Text>
       <FieldRow2 label1="CAPA №:" value1={data.capaNumber} label2="ინიცირების თარიღი:" value2={data.initDate} />
@@ -52,7 +52,7 @@ const FM10_CAPAFormPdf = ({ data = {} }) => {
       <FieldRow2 label1="დახურვის თარიღი:" value1={data.closingDate} label2="ხარისხის მენეჯერის ვიზა:" value2={data.qualityMgrVerif} />
 
       <SigBlock3 labels={['შემდგენი','ხარისხის მენეჯერი','დირექტორი']} sigs={sigs} />
-      <FormFooter code="FM-10 v2.0 | 28.04.2026 | შენახვა: 5 წელი" />
+      <FormFooter code="BE-FM-10 v2.0 | 28.04.2026 | შენახვა: 5 წელი" />
     </Page>
   </Document>
 );};

@@ -67,7 +67,7 @@ export const FormHeader = ({ code, isoRef, title, subtitle }) => (
     <View style={s.header}>
       <Image src="/logo.png" style={s.logo} />
       <Text style={s.co}>შპს „ბილდექს ექსპერტიზა"</Text>
-      <Text style={s.coSub}>ს/კ 431188010  |  ქ. თელავი, ლიონიძის ქ. 22  |  buildexpertiza@gmail.com</Text>
+      <Text style={s.coSub}>ს/კ 431188010  |  ქ. თელავი, ლიონიძის ქ. 22  |  info@buildexexpertise.com</Text>
     </View>
     <View style={s.metaBar}>
       <Text style={s.metaTxt}>{code}  |  ვ. 2.0  |  28.04.2026  |  მოქმედი</Text>
@@ -176,7 +176,7 @@ export const TextArea = ({ value, placeholder, minHeight = 24 }) => (
     {value
       ? <Text style={{ fontSize: 8.5, lineHeight: 1.4 }}>{value}</Text>
       : placeholder
-        ? <Text style={{ fontSize: 8, color: '#bbb', fontStyle: 'italic' }}>{placeholder}</Text>
+        ? <Text style={{ fontSize: 8, color: '#bbb' }}>{placeholder}</Text>
         : null
     }
   </View>

@@ -8,7 +8,7 @@ const FM09_ContractReviewPdf = ({ data = {} }) => {
   <Document>
     <Page size="A4" style={s.page}>
       <WM />
-      <FormHeader code="FM-09" isoRef="სსტ ISO/IEC 17020 §7.1" title="ხელშეკრულების განხილვა" subtitle="Contract / Tender Review" />
+      <FormHeader code="BE-FM-09" isoRef="სსტ ISO/IEC 17020 §7.1" title="ხელშეკრულების განხილვა" subtitle="Contract / Tender Review" />
 
       <Text style={s.secH}>A. საიდენტიფიკაციო მონაცემები</Text>
       <FieldRow2 label1="BE-CASE №:" value1={data.caseNumber}    label2="თარიღი:"    value2={data.reviewDate} />
@@ -55,7 +55,7 @@ const FM09_ContractReviewPdf = ({ data = {} }) => {
       <YesNoRow label="დამტკიცებულია:" yesNo={data.approved} />
 
       <SigBlock3 labels={['შემდგენი','ტექნიკური მენეჯერი','დირექტორი']} sigs={sigs} />
-      <FormFooter code="FM-09 v2.0 | 28.04.2026 | შენახვა: 10 წელი" />
+      <FormFooter code="BE-FM-09 v2.0 | 28.04.2026 | შენახვა: 10 წელი" />
     </Page>
   </Document>
 );};
