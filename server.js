@@ -223,6 +223,54 @@ const upload = multer({
     limits: { fileSize: 15 * 1024 * 1024 }, // 15 MB
 });
 
+// ─── Soft-delete + retention (DAT-008 / C5 / DAT-007 / ISO-006 — §8.4 ჩანაწერების მართვა) ──
+// ISO/IEC 17020 §8.4 მოითხოვს ჩანაწერების შენახვას შესაბამისი ვადით. hard-delete (findByIdAndDelete)
+// ანადგურებს ისტორიას და ანგრევს ტრასირებადობას. ამიტომ ყველა მოდელი იძენს isDeleted/deletedAt/deletedBy
+// ველებს; "წაშლა" → მონიშვნა. წაშლილი ჩანაწერი default query-დან იფარება, მაგრამ ბაზაში რჩება
+// retention-ვადის ამოწურვამდე (იხ. RETENTION_YEARS + /api/admin/purge-expired).
+// override: query.setOptions({ withDeleted: true }) — ნუმერაცია/აღდგენა/არქივი.
+function softDeletePlugin(schema) {
+    schema.add({
+        isDeleted: { type: Boolean, default: false, index: true },
+        deletedAt: { type: Date, default: null },
+        deletedBy: { type: String, default: '' },
+    });
+    const hideDeleted = function () {
+        if (this.getOptions && this.getOptions().withDeleted) return;     // ცხადი override
+        const q = this.getQuery();
+        if (q.isDeleted === undefined) this.where({ isDeleted: { $ne: true } });
+    };
+    ['find', 'findOne', 'findOneAndUpdate', 'countDocuments'].forEach(op => schema.pre(op, hideDeleted));
+}
+mongoose.plugin(softDeletePlugin);
+
+// soft-delete helper — წაშლის ნაცვლად მონიშნავს. აბრუნებს დოკუმენტს ან null-ს (თუ უკვე წაშლილია).
+async function softDeleteById(Model, id, req) {
+    return Model.findByIdAndUpdate(
+        id,
+        { isDeleted: true, deletedAt: new Date(), deletedBy: req.user?.username || '' },
+        { new: true }
+    );
+}
+
+// retention-ვადები წლებში resource-ის ტიპის მიხედვით (BE-PR-05 / ISO §8.4).
+// ამ ვადის ამოწურვამდე წაშლილი ჩანაწერი ფიზიკურად არ იშლება (admin purge-ითაც კი).
+const RETENTION_YEARS = {
+    inspection:        10,   // ინსპექტირების ჩანაწერები — ხანგრძლივი შენახვა
+    complaint:         6,
+    corrective_action: 6,
+    internal_audit:    6,
+    management_review: 6,
+    procedure:         10,   // მართვის სისტემის დოკუმენტები
+    user:              6,
+    equipment:         6,
+    insurance:         6,
+    company_doc:       6,
+    checklist:         6,
+    price_adequacy:    6,
+    default:           6,
+};
+
 // --- MODELS ---
 
 const AuthUser = mongoose.model('AuthUser', new mongoose.Schema({
@@ -494,7 +542,8 @@ async function generateDocumentNumber(type, date = new Date()) {
     // BX-INS and IN: derive sequence from actual existing records, not a stored counter
     // This ensures numbering is correct after deletions
     if (type === 'BX-INS') {
-        const last = await Inspection.findOne({}, 'inspectionNumber').sort({ createdAt: -1 });
+        // withDeleted: ნუმერაცია ითვალისწინებს soft-deleted ჩანაწერებსაც — unique-collision-ის თავიდან ასაცილებლად
+        const last = await Inspection.findOne({}, 'inspectionNumber').sort({ createdAt: -1 }).setOptions({ withDeleted: true });
         let nextSeq = 1;
         if (last && last.inspectionNumber) {
             const parts = last.inspectionNumber.split('-');
@@ -505,7 +554,7 @@ async function generateDocumentNumber(type, date = new Date()) {
     }
 
     if (type === 'IN') {
-        const last = await Inspection.findOne({}, 'applicationNumber').sort({ createdAt: -1 });
+        const last = await Inspection.findOne({}, 'applicationNumber').sort({ createdAt: -1 }).setOptions({ withDeleted: true });
         let nextSeq = 1;
         if (last && last.applicationNumber) {
             const m = last.applicationNumber.match(/^IN-(\d+)\//);
@@ -516,7 +565,7 @@ async function generateDocumentNumber(type, date = new Date()) {
 
     const counterKey = `${type}-${yearFull}`;
     const counter = await Counter.findByIdAndUpdate(
-        { _id: counterKey }, { $inc: { seq: 1 } }, { new: true, upsert: true }
+        { _id: counterKey }, { $inc: { seq: 1 } }, { new: true, upsert: true, withDeleted: true }
     );
     const seq = counter.seq;
     const seq2 = seq.toString().padStart(2, '0');
@@ -978,11 +1027,12 @@ const AuditLog = mongoose.model('AuditLog', new mongoose.Schema({
     username:     { type: String, default: '' },
     role:         { type: String, default: '' },
     details:      { type: String, default: '' },
+    changes:      { type: String, default: '' },     // DAT-016: before→after diff
     ip:           { type: String, default: '' },
     timestamp:    { type: Date, default: Date.now },
 }));
 
-async function logAudit(req, action, resource, resourceId, resourceName, details = '') {
+async function logAudit(req, action, resource, resourceId, resourceName, details = '', changes = '') {
     try {
         await AuditLog.create({
             action, resource,
@@ -992,12 +1042,25 @@ async function logAudit(req, action, resource, resourceId, resourceName, details
             username:     req.user?.username || '',
             role:         req.user?.role || '',
             details:      String(details || ''),
+            changes:      String(changes || ''),
             ip:           req.ip || req.headers['x-forwarded-for'] || '',
             timestamp:    new Date(),
         });
     } catch (e) {
         console.error('AuditLog error:', e.message);
     }
+}
+
+// before/after diff (DAT-016) — tracked ველებზე ცვლილებების მოკლე ტექსტი audit-ისთვის
+function diffDoc(before, after, fields) {
+    if (!before || !after) return '';
+    const parts = [];
+    for (const f of fields) {
+        const sa = before[f] === undefined || before[f] === null ? '' : String(before[f]);
+        const sb = after[f]  === undefined || after[f]  === null ? '' : String(after[f]);
+        if (sa !== sb) parts.push(`${f}: "${sa}" → "${sb}"`);
+    }
+    return parts.join('; ');
 }
 
 // CHECKLIST SESSION MODEL
@@ -1184,8 +1247,56 @@ const api = express.Router();
 api.use((req, res, next) => { console.log('[API ROUTER]', req.method, req.path); next(); });
 api.use(requireAuth);
 
+// ─── Input validation + mass-assignment დაცვა (API-006 / SEC-009 / DAT-002) ────
+// dependency-free ვალიდატორი (express-validator/zod-ის ნაცვლად — lockfile/CI-ს არ ვტეხავთ).
+// PROTECTED_FIELDS — ვერცერთი მომხმარებლის body ვერ გადააწერს server-მართულ ველებს
+// (განსაკ. isDeleted/deletedAt — soft-delete plugin-ის შემოტანილი mass-assignment ხვრელი).
+const PROTECTED_FIELDS = ['isDeleted', 'deletedAt', 'deletedBy', '__v'];
+function stripProtected(obj) {
+    if (obj && typeof obj === 'object') for (const f of PROTECTED_FIELDS) delete obj[f];
+    return obj;
+}
+api.use((req, res, next) => { stripProtected(req.body); next(); });
+
+// required/ტიპი/enum/მაქს.სიგრძე — აბრუნებს შეცდომების მასივს (ცარიელი = ვალიდურია).
+function validateBody(body, rules) {
+    const errors = [];
+    for (const [field, rule] of Object.entries(rules)) {
+        const v = body ? body[field] : undefined;
+        const empty = v === undefined || v === null || v === '';
+        if (rule.required && empty) { errors.push(`${rule.label || field}: სავალდებულოა`); continue; }
+        if (empty) continue;
+        if (rule.type === 'string' && typeof v !== 'string') errors.push(`${rule.label || field}: ტექსტი უნდა იყოს`);
+        if (rule.type === 'number' && isNaN(Number(v))) errors.push(`${rule.label || field}: რიცხვი უნდა იყოს`);
+        if (rule.type === 'email' && !(typeof v === 'string' && /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v))) errors.push(`${rule.label || field}: ელ.ფოსტა არასწორია`);
+        if (rule.maxLength && typeof v === 'string' && v.length > rule.maxLength) errors.push(`${rule.label || field}: მაქს. ${rule.maxLength} სიმბოლო`);
+        if (rule.enum && !rule.enum.includes(v)) errors.push(`${rule.label || field}: დაუშვებელი მნიშვნელობა`);
+    }
+    return errors;
+}
+// მცირე middleware-ფაბრიკა route-ებზე გამოსაყენებლად: validate({ field: {required,type,...} })
+const validate = (rules) => (req, res, next) => {
+    const errors = validateBody(req.body, rules);
+    if (errors.length) return res.status(400).json({ error: errors.join('; '), errors });
+    next();
+};
+
+// ─── Pagination (C7 / API-007 / PERF-005) ─────────────────────────────────────
+// ?page & ?limit; backward-compatible — პასუხი ისევ მასივია. ნაგულისხმევი cap ზღუდავს
+// unbounded payload-ს (DAT-014 base64 ფაილების ჭარბ ჩატვირთვას). ინდექსები იხ. ქვემოთ.
+function paging(req, defLimit = 1000, maxLimit = 2000) {
+    let limit = parseInt(req.query.limit, 10);
+    if (isNaN(limit) || limit <= 0) limit = defLimit;
+    limit = Math.min(limit, maxLimit);
+    let page = parseInt(req.query.page, 10);
+    if (isNaN(page) || page < 1) page = 1;
+    return { skip: (page - 1) * limit, limit };
+}
+
 // --- INSPECTIONS ---
-api.post('/inspections', async (req, res) => {
+api.post('/inspections', validate({
+    objectName: { required: true, type: 'string', maxLength: 300, label: 'ობიექტის დასახელება' },
+}), async (req, res) => {
     if (!['admin', 'chancellor'].includes(req.user.role))
         return res.status(403).json({ error: 'საქმის რეგისტრაციის უფლება არ გაქვთ' });
     try {
@@ -1210,7 +1321,8 @@ api.get('/inspections', async (req, res) => {
         if (req.user.role === 'inspector' && req.user.staffId) {
             query = { $or: [{ expert: req.user.staffId }, { technicalManager: req.user.staffId }] };
         }
-        const list = await Inspection.find(query).populate('expert', 'firstName lastName').populate('technicalManager', 'firstName lastName').sort({ createdAt: -1 });
+        const p = paging(req);
+        const list = await Inspection.find(query).populate('expert', 'firstName lastName').populate('technicalManager', 'firstName lastName').sort({ createdAt: -1 }).skip(p.skip).limit(p.limit);
         res.json(list);
     } catch (err) { res.status(500).json({ error: err.message }); }
 });
@@ -1226,15 +1338,20 @@ api.get('/inspections/:id', async (req, res) => {
 api.delete('/inspections/:id', async (req, res) => {
     if (req.user.role !== 'admin') return res.status(403).json({ error: 'წაშლის უფლება არ გაქვთ' });
     try {
-        await Inspection.findByIdAndDelete(req.params.id);
+        const del = await softDeleteById(Inspection, req.params.id, req);
+        if (del) await logAudit(req, 'წაშლა', 'inspection', del._id, del.inspectionNumber || del.objectName);
         res.json({ msg: 'საქმე წაიშალა' });
     } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
 api.put('/inspections/:id', async (req, res) => {
     try {
+        const before = await Inspection.findById(req.params.id).lean();
         const updated = await Inspection.findByIdAndUpdate(req.params.id, req.body, { new: true });
-        if (updated) await logAudit(req, 'განახლება', 'inspection', updated._id, updated.inspectionNumber || updated.objectName, `სტატუსი: ${updated.status}`);
+        if (updated) {
+            const changes = diffDoc(before, updated, ['status', 'objectName', 'objectAddress', 'inspectionScope', 'clientName', 'deadline']);
+            await logAudit(req, 'განახლება', 'inspection', updated._id, updated.inspectionNumber || updated.objectName, `სტატუსი: ${updated.status}`, changes);
+        }
         res.json(updated);
     } catch (err) { res.status(500).json({ error: err.message }); }
 });
@@ -1254,7 +1371,12 @@ api.post('/inspections/:id/upload', upload.single('file'), async (req, res) => {
 });
 
 // --- USERS ---
-api.post('/users/register', requireRole('admin', 'hr'), async (req, res) => {
+api.post('/users/register', requireRole('admin', 'hr'), validate({
+    firstName:  { required: true, type: 'string', maxLength: 100, label: 'სახელი' },
+    lastName:   { required: true, type: 'string', maxLength: 100, label: 'გვარი' },
+    email:      { type: 'email', label: 'ელ.ფოსტა' },
+    personalId: { type: 'string', maxLength: 20, label: 'პირადი ნომერი' },
+}), async (req, res) => {
     try {
         // photo comes as base64 data URL (stored directly in MongoDB — no filesystem needed)
         const user = await new User(req.body).save();
@@ -1265,7 +1387,8 @@ api.post('/users/register', requireRole('admin', 'hr'), async (req, res) => {
 
 api.get('/users/staff', async (req, res) => {
     try {
-        res.json(await User.find().sort({ lastName: 1 }));
+        const p = paging(req);
+        res.json(await User.find().sort({ lastName: 1 }).skip(p.skip).limit(p.limit));
     } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
@@ -1279,9 +1402,11 @@ api.get('/users/:id', async (req, res) => {
 
 api.put('/users/:id', requireRole('admin', 'hr'), async (req, res) => {
     try {
+        const before = await User.findById(req.params.id).lean();
         const updated = await User.findByIdAndUpdate(req.params.id, req.body, { new: true });
         if (!updated) return res.status(404).json({ error: 'ვერ მოიძებნა' });
-        await logAudit(req, 'განახლება', 'user', updated._id, `${updated.firstName} ${updated.lastName}`, `სტატუსი: ${updated.status}`);
+        const changes = diffDoc(before, updated, ['firstName', 'lastName', 'position', 'status', 'email', 'phone', 'authExpiry']);
+        await logAudit(req, 'განახლება', 'user', updated._id, `${updated.firstName} ${updated.lastName}`, `სტატუსი: ${updated.status}`, changes);
         res.json(updated);
     } catch (err) { res.status(500).json({ error: err.message }); }
 });
@@ -1289,7 +1414,8 @@ api.put('/users/:id', requireRole('admin', 'hr'), async (req, res) => {
 api.delete('/users/:id', async (req, res) => {
     if (req.user.role !== 'admin') return res.status(403).json({ error: 'წაშლის უფლება არ გაქვთ' });
     try {
-        await User.findByIdAndDelete(req.params.id);
+        const del = await softDeleteById(User, req.params.id, req);
+        if (del) await logAudit(req, 'წაშლა', 'user', del._id, `${del.firstName} ${del.lastName}`);
         res.json({ msg: 'თანამშრომელი წაიშალა' });
     } catch (err) { res.status(500).json({ error: err.message }); }
 });
@@ -1311,11 +1437,16 @@ api.post('/users/:id/upload', requireRole('admin', 'hr'), upload.single('file'),
 // --- EQUIPMENT ---
 api.get('/equipment', async (req, res) => {
     try {
-        res.json(await Equipment.find().sort({ createdAt: -1 }));
+        const p = paging(req);
+        res.json(await Equipment.find().sort({ createdAt: -1 }).skip(p.skip).limit(p.limit));
     } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-api.post('/equipment', requireRole('admin', 'tech_manager'), async (req, res) => {
+api.post('/equipment', requireRole('admin', 'tech_manager'), validate({
+    name:            { required: true, type: 'string', maxLength: 200, label: 'დასახელება' },
+    serialNumber:    { required: true, type: 'string', maxLength: 100, label: 'სერიული ნომერი' },
+    calibrationDate: { required: true, label: 'დაკალიბრების თარიღი' },
+}), async (req, res) => {
     try {
         const { name, serialNumber, manufacturer, calibrationDate, calibrationInterval } = req.body;
         const calDate       = new Date(calibrationDate);
@@ -1334,7 +1465,7 @@ api.post('/equipment', requireRole('admin', 'tech_manager'), async (req, res) =>
 api.delete('/equipment/:id', async (req, res) => {
     if (req.user.role !== 'admin') return res.status(403).json({ error: 'წაშლის უფლება არ გაქვთ' });
     try {
-        const item = await Equipment.findByIdAndDelete(req.params.id);
+        const item = await softDeleteById(Equipment, req.params.id, req);
         if (item) await logAudit(req, 'წაშლა', 'equipment', item._id, `${item.name} (${item.serialNumber})`);
         res.json({ msg: 'წაიშალა' });
     } catch (err) { res.status(500).json({ error: err.message }); }
@@ -1343,7 +1474,8 @@ api.delete('/equipment/:id', async (req, res) => {
 // --- MANAGEMENT REVIEWS ---
 api.get('/management-reviews', async (req, res) => {
     try {
-        res.json(await ManagementReview.find().sort({ reviewDate: -1 }));
+        const p = paging(req);
+        res.json(await ManagementReview.find().sort({ reviewDate: -1 }).skip(p.skip).limit(p.limit));
     } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
@@ -1357,7 +1489,8 @@ api.post('/management-reviews', requireRole('admin', 'quality_manager'), async (
 api.delete('/management-reviews/:id', async (req, res) => {
     if (req.user.role !== 'admin') return res.status(403).json({ error: 'წაშლის უფლება არ გაქვთ' });
     try {
-        await ManagementReview.findByIdAndDelete(req.params.id);
+        const del = await softDeleteById(ManagementReview, req.params.id, req);
+        if (del) await logAudit(req, 'წაშლა', 'management_review', del._id, del.reviewNumber || String(del.reviewDate || ''));
         res.json({ msg: 'წაიშალა' });
     } catch (err) { res.status(500).json({ error: err.message }); }
 });
@@ -1451,7 +1584,7 @@ api.get('/dashboard/stats', async (req, res) => {
 
 // --- COMPLAINTS ---
 api.get('/complaints', async (req, res) => {
-    try { res.json(await Complaint.find().sort({ createdAt: -1 })); }
+    try { const p = paging(req); res.json(await Complaint.find().sort({ createdAt: -1 }).skip(p.skip).limit(p.limit)); }
     catch (err) { res.status(500).json({ error: err.message }); }
 });
 
@@ -1466,8 +1599,11 @@ api.post('/complaints', requireRole('admin', 'quality_manager', 'chancellor'), a
 
 api.put('/complaints/:id', requireRole('admin', 'quality_manager', 'chancellor'), async (req, res) => {
     try {
+        const before = await Complaint.findById(req.params.id).lean();
         const updated = await Complaint.findByIdAndUpdate(req.params.id, req.body, { new: true });
         if (!updated) return res.status(404).json({ error: 'ვერ მოიძებნა' });
+        const changes = diffDoc(before, updated, ['status', 'category', 'resolution', 'complainant']);
+        await logAudit(req, 'განახლება', 'complaint', updated._id, updated.complaintNumber || updated.complainant || '', `სტატუსი: ${updated.status}`, changes);
         res.json(updated);
     } catch (err) { res.status(400).json({ error: err.message }); }
 });
@@ -1475,14 +1611,15 @@ api.put('/complaints/:id', requireRole('admin', 'quality_manager', 'chancellor')
 api.delete('/complaints/:id', async (req, res) => {
     if (!['admin', 'quality_manager'].includes(req.user.role)) return res.status(403).json({ error: 'უფლება არ გაქვთ' });
     try {
-        await Complaint.findByIdAndDelete(req.params.id);
+        const del = await softDeleteById(Complaint, req.params.id, req);
+        if (del) await logAudit(req, 'წაშლა', 'complaint', del._id, del.complaintNumber || del.complainant || '');
         res.json({ msg: 'წაიშალა' });
     } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
 // --- INTERNAL AUDITS ---
 api.get('/internal-audits', async (req, res) => {
-    try { res.json(await InternalAudit.find().sort({ auditDate: -1 })); }
+    try { const p = paging(req); res.json(await InternalAudit.find().sort({ auditDate: -1 }).skip(p.skip).limit(p.limit)); }
     catch (err) { res.status(500).json({ error: err.message }); }
 });
 
@@ -1497,8 +1634,11 @@ api.post('/internal-audits', requireRole('admin', 'quality_manager'), async (req
 
 api.put('/internal-audits/:id', requireRole('admin', 'quality_manager'), async (req, res) => {
     try {
+        const before = await InternalAudit.findById(req.params.id).lean();
         const updated = await InternalAudit.findByIdAndUpdate(req.params.id, req.body, { new: true });
         if (!updated) return res.status(404).json({ error: 'ვერ მოიძებნა' });
+        const changes = diffDoc(before, updated, ['status', 'auditor', 'auditDate', 'findings']);
+        await logAudit(req, 'განახლება', 'internal_audit', updated._id, updated.auditNumber || '', `სტატუსი: ${updated.status}`, changes);
         res.json(updated);
     } catch (err) { res.status(400).json({ error: err.message }); }
 });
@@ -1506,14 +1646,15 @@ api.put('/internal-audits/:id', requireRole('admin', 'quality_manager'), async (
 api.delete('/internal-audits/:id', async (req, res) => {
     if (req.user.role !== 'admin') return res.status(403).json({ error: 'წაშლის უფლება არ გაქვთ' });
     try {
-        await InternalAudit.findByIdAndDelete(req.params.id);
+        const del = await softDeleteById(InternalAudit, req.params.id, req);
+        if (del) await logAudit(req, 'წაშლა', 'internal_audit', del._id, del.auditNumber || '');
         res.json({ msg: 'წაიშალა' });
     } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
 // --- CORRECTIVE ACTIONS ---
 api.get('/corrective-actions', async (req, res) => {
-    try { res.json(await CorrectiveAction.find().sort({ createdAt: -1 })); }
+    try { const p = paging(req); res.json(await CorrectiveAction.find().sort({ createdAt: -1 }).skip(p.skip).limit(p.limit)); }
     catch (err) { res.status(500).json({ error: err.message }); }
 });
 
@@ -1528,9 +1669,11 @@ api.post('/corrective-actions', requireRole('admin', 'quality_manager'), async (
 
 api.put('/corrective-actions/:id', requireRole('admin', 'quality_manager'), async (req, res) => {
     try {
+        const before = await CorrectiveAction.findById(req.params.id).lean();
         const updated = await CorrectiveAction.findByIdAndUpdate(req.params.id, req.body, { new: true });
         if (!updated) return res.status(404).json({ error: 'ვერ მოიძებნა' });
-        await logAudit(req, 'განახლება', 'corrective_action', updated._id, updated.carNumber, `სტატუსი: ${updated.status}`);
+        const changes = diffDoc(before, updated, ['status', 'deadline', 'sourceType', 'rootCause', 'action']);
+        await logAudit(req, 'განახლება', 'corrective_action', updated._id, updated.carNumber, `სტატუსი: ${updated.status}`, changes);
         res.json(updated);
     } catch (err) { res.status(400).json({ error: err.message }); }
 });
@@ -1538,20 +1681,21 @@ api.put('/corrective-actions/:id', requireRole('admin', 'quality_manager'), asyn
 api.delete('/corrective-actions/:id', async (req, res) => {
     if (!['admin', 'quality_manager'].includes(req.user.role)) return res.status(403).json({ error: 'უფლება არ გაქვთ' });
     try {
-        await CorrectiveAction.findByIdAndDelete(req.params.id);
+        const del = await softDeleteById(CorrectiveAction, req.params.id, req);
+        if (del) await logAudit(req, 'წაშლა', 'corrective_action', del._id, del.carNumber || '');
         res.json({ msg: 'წაიშალა' });
     } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
 // --- INSURANCE ---
 api.get('/insurance', async (req, res) => {
-    try { res.json(await Insurance.find().sort({ endDate: 1 })); }
+    try { const p = paging(req); res.json(await Insurance.find().sort({ endDate: 1 }).skip(p.skip).limit(p.limit)); }
     catch (err) { res.status(500).json({ error: err.message }); }
 });
 
 api.post('/insurance', requireRole('admin', 'chancellor'), upload.single('file'), async (req, res) => {
     try {
-        const data = JSON.parse(req.body.data || '{}');
+        const data = stripProtected(JSON.parse(req.body.data || '{}'));
         if (req.file) data.fileUrl = `uploads/docs/${req.file.filename}`;
         const item = await Insurance.create(data);
         res.status(201).json(item);
@@ -1569,20 +1713,21 @@ api.put('/insurance/:id', requireRole('admin', 'chancellor'), async (req, res) =
 api.delete('/insurance/:id', async (req, res) => {
     if (req.user.role !== 'admin') return res.status(403).json({ error: 'წაშლის უფლება არ გაქვთ' });
     try {
-        await Insurance.findByIdAndDelete(req.params.id);
+        const del = await softDeleteById(Insurance, req.params.id, req);
+        if (del) await logAudit(req, 'წაშლა', 'insurance', del._id, del.insurerName || '');
         res.json({ msg: 'წაიშალა' });
     } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
 // --- COMPANY DOCS ---
 api.get('/company-docs', async (req, res) => {
-    try { res.json(await CompanyDoc.find().sort({ createdAt: -1 })); }
+    try { const p = paging(req); res.json(await CompanyDoc.find().sort({ createdAt: -1 }).skip(p.skip).limit(p.limit)); }
     catch (err) { res.status(500).json({ error: err.message }); }
 });
 
 api.post('/company-docs', requireRole('admin', 'chancellor'), upload.single('file'), async (req, res) => {
     try {
-        const data = JSON.parse(req.body.data || '{}');
+        const data = stripProtected(JSON.parse(req.body.data || '{}'));
         if (req.file) data.fileUrl = `uploads/docs/${req.file.filename}`;
         const item = await CompanyDoc.create(data);
         res.status(201).json(item);
@@ -1592,7 +1737,8 @@ api.post('/company-docs', requireRole('admin', 'chancellor'), upload.single('fil
 api.delete('/company-docs/:id', async (req, res) => {
     if (req.user.role !== 'admin') return res.status(403).json({ error: 'უფლება არ გაქვთ' });
     try {
-        await CompanyDoc.findByIdAndDelete(req.params.id);
+        const del = await softDeleteById(CompanyDoc, req.params.id, req);
+        if (del) await logAudit(req, 'წაშლა', 'company_doc', del._id, del.title || del.docType || '');
         res.json({ msg: 'წაიშალა' });
     } catch (err) { res.status(500).json({ error: err.message }); }
 });
@@ -1997,7 +2143,11 @@ api.post('/norms/seed-demo', requireRole('admin'), async (req, res) => {
 
 api.delete('/price-adequacy/:id', async (req, res) => {
     if (req.user.role !== 'admin') return res.status(403).json({ error: 'წაშლის უფლება არ გაქვთ' });
-    try { await PriceAdequacyCheck.findByIdAndDelete(req.params.id); res.json({ msg: 'წაიშალა' }); }
+    try {
+        const del = await softDeleteById(PriceAdequacyCheck, req.params.id, req);
+        if (del) await logAudit(req, 'წაშლა', 'price_adequacy', del._id, del.checkNumber || '');
+        res.json({ msg: 'წაიშალა' });
+    }
     catch (err) { res.status(500).json({ error: err.message }); }
 });
 
@@ -2011,6 +2161,74 @@ api.get('/audit-logs', async (req, res) => {
         if (req.query.user) filter.username = { $regex: req.query.user, $options: 'i' };
         const logs = await AuditLog.find(filter).sort({ timestamp: -1 }).limit(500);
         res.json(logs);
+    } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// ─── Soft-delete administration: არქივი / აღდგენა / retention-purge (DAT-008 / C5 / ISO §8.4) ──
+// resource → Model + retention-ვადის რეესტრი. ფიზიკური წაშლა მხოლოდ retention-ვადის ამოწურვის შემდეგ.
+const SOFT_DELETE_MODELS = {
+    inspection:        { model: Inspection,         retention: RETENTION_YEARS.inspection },
+    user:              { model: User,               retention: RETENTION_YEARS.user },
+    equipment:         { model: Equipment,          retention: RETENTION_YEARS.equipment },
+    management_review: { model: ManagementReview,   retention: RETENTION_YEARS.management_review },
+    complaint:         { model: Complaint,          retention: RETENTION_YEARS.complaint },
+    internal_audit:    { model: InternalAudit,      retention: RETENTION_YEARS.internal_audit },
+    corrective_action: { model: CorrectiveAction,   retention: RETENTION_YEARS.corrective_action },
+    insurance:         { model: Insurance,          retention: RETENTION_YEARS.insurance },
+    company_doc:       { model: CompanyDoc,         retention: RETENTION_YEARS.company_doc },
+    procedure:         { model: ProcedureDoc,       retention: RETENTION_YEARS.procedure },
+    checklist:         { model: ChecklistSession,   retention: RETENTION_YEARS.checklist },
+    price_adequacy:    { model: PriceAdequacyCheck, retention: RETENTION_YEARS.price_adequacy },
+    auth_user:         { model: AuthUser,           retention: RETENTION_YEARS.user },
+};
+
+// არქივი — წაშლილი (retained) ჩანაწერების ნახვა resource-ის მიხედვით
+api.get('/admin/trash', requireRole('admin'), async (req, res) => {
+    try {
+        const out = {};
+        for (const [key, { model }] of Object.entries(SOFT_DELETE_MODELS)) {
+            const docs = await model.find({ isDeleted: true })
+                .setOptions({ withDeleted: true }).sort({ deletedAt: -1 }).limit(200).lean();
+            if (docs.length) out[key] = docs.map(d => ({
+                _id: d._id, deletedAt: d.deletedAt, deletedBy: d.deletedBy,
+                name: d.inspectionNumber || d.complaintNumber || d.carNumber || d.auditNumber
+                    || d.checkNumber || d.code || d.title || d.username || d.insurerName || d.name
+                    || `${d.firstName || ''} ${d.lastName || ''}`.trim() || String(d._id),
+            }));
+        }
+        res.json(out);
+    } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// აღდგენა — წაშლილი ჩანაწერის დაბრუნება
+api.post('/admin/restore/:resource/:id', requireRole('admin'), async (req, res) => {
+    try {
+        const entry = SOFT_DELETE_MODELS[req.params.resource];
+        if (!entry) return res.status(400).json({ error: 'უცნობი რესურსი' });
+        const doc = await entry.model.findOneAndUpdate(
+            { _id: req.params.id },
+            { isDeleted: false, deletedAt: null, deletedBy: '' },
+            { new: true, withDeleted: true }
+        );
+        if (!doc) return res.status(404).json({ error: 'ვერ მოიძებნა' });
+        await logAudit(req, 'აღდგენა', req.params.resource, doc._id, '');
+        res.json({ ok: true });
+    } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// retention-purge — მხოლოდ ვადაგასული წაშლილი ჩანაწერების ფიზიკური წაშლა (BE-PR-05 / ISO §8.4)
+api.post('/admin/purge-expired', requireRole('admin'), async (req, res) => {
+    try {
+        const now = Date.now();
+        const report = {};
+        for (const [key, { model, retention }] of Object.entries(SOFT_DELETE_MODELS)) {
+            const cutoff = new Date(now - retention * 365 * 24 * 60 * 60 * 1000);
+            const r = await model.deleteMany({ isDeleted: true, deletedAt: { $ne: null, $lt: cutoff } });
+            if (r.deletedCount) report[key] = r.deletedCount;
+        }
+        const total = Object.values(report).reduce((a, b) => a + b, 0);
+        await logAudit(req, 'წაშლა', 'retention_purge', '', `ფიზიკურად წაიშალა ${total} ვადაგასული ჩანაწერი`, JSON.stringify(report));
+        res.json({ ok: true, purged: total, report });
     } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
@@ -2081,7 +2299,9 @@ authRouter.post('/users', requireAuth, async (req, res) => {
 
 authRouter.delete('/users/:id', requireAuth, async (req, res) => {
     if (req.user.role !== 'admin') return res.status(403).json({ message: 'მხოლოდ ადმინს შეუძლია წაშლა' });
-    await AuthUser.findByIdAndDelete(req.params.id);
+    if (String(req.params.id) === String(req.user.id)) return res.status(400).json({ message: 'საკუთარი ანგარიშის წაშლა შეუძლებელია' });
+    const del = await softDeleteById(AuthUser, req.params.id, req);
+    if (del) await logAudit(req, 'წაშლა', 'auth_user', del._id, del.username || '');
     res.json({ msg: 'წაიშალა' });
 });
 
@@ -2228,17 +2448,12 @@ api.delete('/procedures/:id', async (req, res) => {
     try {
         if (!['admin', 'quality_manager'].includes(req.user.role))
             return res.status(403).json({ error: 'უფლება არ გაქვთ' });
-        const doc = await ProcedureDoc.findByIdAndDelete(req.params.id);
+        const doc = await softDeleteById(ProcedureDoc, req.params.id, req);
         if (!doc) return res.status(404).json({ error: 'ვერ მოიძებნა' });
 
         await logAudit(req, 'წაშლა', 'procedure', doc._id, `${doc.code} — ${doc.title}`);
-        // Remove from Cloudinary
-        if (doc.cloudinaryId) await deleteFromCloudinary(doc.cloudinaryId);
-        // Remove local fallback file
-        if (doc.filePath) {
-            const abs = path.join(__dirname, doc.filePath.replace(/^\//, ''));
-            if (fs.existsSync(abs)) try { fs.unlinkSync(abs); } catch {}
-        }
+        // ISO §8.4 / retention: მართვის სისტემის დოკუმენტი soft-delete-ით ინიშნება, მაგრამ
+        // Cloudinary/ლოკალური ფაილი არ იშლება — ჩანაწერი retention-ვადამდე უნდა შენარჩუნდეს.
         res.json({ ok: true });
     } catch (e) { res.status(500).json({ error: e.message }); }
 });
@@ -2284,7 +2499,8 @@ api.put('/checklists/:id', async (req, res) => {
 api.delete('/checklists/:id', async (req, res) => {
     try {
         if (req.user.role !== 'admin') return res.status(403).json({ error: 'მხოლოდ ადმინი' });
-        await ChecklistSession.findByIdAndDelete(req.params.id);
+        const del = await softDeleteById(ChecklistSession, req.params.id, req);
+        if (del) await logAudit(req, 'წაშლა', 'checklist', del._id, del.sessionNumber || '');
         res.json({ ok: true });
     } catch (e) { res.status(500).json({ error: e.message }); }
 });
