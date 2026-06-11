@@ -1251,7 +1251,10 @@ api.use(requireAuth);
 // dependency-free ვალიდატორი (express-validator/zod-ის ნაცვლად — lockfile/CI-ს არ ვტეხავთ).
 // PROTECTED_FIELDS — ვერცერთი მომხმარებლის body ვერ გადააწერს server-მართულ ველებს
 // (განსაკ. isDeleted/deletedAt — soft-delete plugin-ის შემოტანილი mass-assignment ხვრელი).
-const PROTECTED_FIELDS = ['isDeleted', 'deletedAt', 'deletedBy', '__v'];
+// server-მართული ველები — body-დან ვერ გადაიწერება (mass-assignment). document-number-ები
+// ყოველთვის generateDocumentNumber-ით იქმნება, ამიტომ PUT-ით overwrite დაუშვებელია.
+const PROTECTED_FIELDS = ['isDeleted', 'deletedAt', 'deletedBy', '__v',
+    'inspectionNumber', 'applicationNumber', 'complaintNumber', 'auditNumber', 'carNumber'];
 function stripProtected(obj) {
     if (obj && typeof obj === 'object') for (const f of PROTECTED_FIELDS) delete obj[f];
     return obj;
@@ -1460,6 +1463,27 @@ api.post('/equipment', requireRole('admin', 'tech_manager'), validate({
         if (err.code === 11000) return res.status(400).json({ error: 'ამ სერიული ნომრით ხელსაწყო უკვე არსებობს' });
         res.status(400).json({ error: err.message });
     }
+});
+
+api.put('/equipment/:id', requireRole('admin', 'tech_manager'), validate({
+    name:            { required: true, type: 'string', maxLength: 200, label: 'დასახელება' },
+    calibrationDate: { required: true, label: 'დაკალიბრების თარიღი' },
+}), async (req, res) => {
+    try {
+        const { name, manufacturer, calibrationDate, calibrationInterval } = req.body;
+        const before = await Equipment.findById(req.params.id);
+        if (!before) return res.status(404).json({ error: 'ხელსაწყო ვერ მოიძებნა' });
+        const calDate = new Date(calibrationDate);
+        const intervalMonths = parseInt(calibrationInterval) || 12;
+        const nextCal = new Date(calDate);
+        nextCal.setMonth(nextCal.getMonth() + intervalMonths);
+        const item = await Equipment.findByIdAndUpdate(req.params.id,
+            { name, manufacturer, calibrationDate: calDate, calibrationInterval: intervalMonths, nextCalibration: nextCal },
+            { new: true });
+        await logAudit(req, 'განახლება', 'equipment', item._id, `${name} (${item.serialNumber})`,
+            '', diffDoc(before, item, ['name', 'manufacturer', 'calibrationDate', 'calibrationInterval', 'nextCalibration']));
+        res.json(item);
+    } catch (err) { res.status(400).json({ error: err.message }); }
 });
 
 api.delete('/equipment/:id', async (req, res) => {
@@ -1795,7 +1819,7 @@ const estimateUpload = multer({ storage: multer.diskStorage({
     }
 }) });
 
-api.post('/norms/upload', requireRole('admin', 'tech_manager'), normUpload.single('file'), async (req, res) => {
+api.post('/norms/upload', requireRole('admin', 'quality_manager'), normUpload.single('file'), async (req, res) => {
     if (!['admin', 'quality_manager'].includes(req.user.role))
         return res.status(403).json({ error: 'ნების ჩატვირთვის უფლება მხოლოდ ადმინს და ხარ.მენეჯერს აქვს' });
     try {
@@ -2263,6 +2287,8 @@ authRouter.post('/login', loginLimiter, async (req, res) => {
 authRouter.post('/change-password', requireAuth, async (req, res) => {
     try {
         const { oldPassword, newPassword } = req.body;
+        if (typeof newPassword !== 'string' || newPassword.length < 6)
+            return res.status(400).json({ message: 'ახალი პაროლი ძალიან მოკლეა (მინ. 6 სიმბოლო)' });
         const user = await AuthUser.findById(req.user.id);
         if (!user) return res.status(404).json({ message: 'მომხმარებელი ვერ მოიძებნა' });
         const ok = await bcrypt.compare(oldPassword, user.passwordHash);
@@ -2286,6 +2312,10 @@ authRouter.post('/users', requireAuth, async (req, res) => {
     if (!canManageUsers(req.user.role)) return res.status(403).json({ message: 'უფლება არ გაქვთ' });
     try {
         const { username, password, role, staffId } = req.body;
+        if (typeof username !== 'string' || username.trim().length < 3)
+            return res.status(400).json({ message: 'მომხმარებლის სახელი ძალიან მოკლეა (მინ. 3 სიმბოლო)' });
+        if (typeof password !== 'string' || password.length < 6)
+            return res.status(400).json({ message: 'პაროლი ძალიან მოკლეა (მინ. 6 სიმბოლო)' });
         // HR cannot create admin accounts
         if (req.user.role === 'hr' && role === 'admin') return res.status(403).json({ message: 'HR-ს არ შეუძლია ადმინის შექმნა' });
         const hash = await bcrypt.hash(password, 10);
@@ -2315,7 +2345,7 @@ app.use('/api/auth', authRouter);
 api.get('/procedures', async (req, res) => {
     try {
         const docs = await ProcedureDoc.find()
-            .select('-cloudinaryId -cloudinaryUrl')   // never expose Cloudinary URLs to client
+            .select('-cloudinaryId -cloudinaryUrl -isDeleted -deletedAt -deletedBy')   // არ გავამჟღავნოთ Cloudinary URL-ები და შიდა soft-delete ველები
             .sort({ code: 1 });
         res.json(docs);
     } catch (e) { res.status(500).json({ error: e.message }); }
@@ -2463,7 +2493,8 @@ api.delete('/procedures/:id', async (req, res) => {
 // ─────────────────────────────────────────────
 api.get('/checklists', async (req, res) => {
     try {
-        const list = await ChecklistSession.find().sort({ createdAt: -1 }).limit(50);
+        const p = paging(req);
+        const list = await ChecklistSession.find().sort({ createdAt: -1 }).skip(p.skip).limit(p.limit);
         res.json(list);
     } catch (e) { res.status(500).json({ error: e.message }); }
 });
@@ -2484,7 +2515,7 @@ api.post('/checklists', async (req, res) => {
             sessionNumber: req.body.sessionNumber || num,
             createdBy: req.user.username,
         });
-        res.json(s);
+        res.status(201).json(s);
     } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
@@ -2570,12 +2601,13 @@ app.use((err, req, res, next) => {
     if (res.headersSent) return next(err);
     console.error('[ERROR]', req.method, req.originalUrl, '—', err.message);
     const isCors = err.message && err.message.startsWith('CORS');
-    const status = err.status || (isCors ? 403 : 500);
-    res.status(status).json({
-        error: process.env.NODE_ENV === 'production'
-            ? 'სერვერის შიდა შეცდომა'   // production: მხოლოდ ზოგადი შეტყობინება
-            : err.message,
-    });
+    // multer / fileFilter შეცდომა (დაუშვებელი ტიპი, ზომის ლიმიტი) — კლიენტის შეცდომაა → 400
+    const isUpload = (err instanceof multer.MulterError) ||
+        (err.message && err.message.startsWith('დაუშვებელი ფაილის ტიპი'));
+    const status = err.status || (isCors ? 403 : isUpload ? 400 : 500);
+    // 5xx production-ში იმალება; კლიენტის შეცდომები (4xx: upload/cors) ინფორმაციულია — ჩანს.
+    const hide = process.env.NODE_ENV === 'production' && status >= 500;
+    res.status(status).json({ error: hide ? 'სერვერის შიდა შეცდომა' : err.message });
 });
 
 const PORT = process.env.PORT || 5001;
