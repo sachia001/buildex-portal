@@ -278,35 +278,35 @@ const DocumentsPage = () => (
     {/* ── 2. ინსპექტირების ფორმები ── */}
     <SectionTitle icon="🔍" title="ინსპექტირების ფორმები" color="#0d6efd" />
     <Row className="g-2">
-      <DocCard icon="📝" code="BE-FM-18" title="განცხადების ფორმა"
+      <DocCard icon="📝" code="BE-FM-APP" title="განცხადების ფორმა"
         desc="ISO §7.1 — კლიენტი ავსებს: ორგანიზაცია, წარმომადგენელი, ობიექტი, სფეროს შერჩევა (BE-PR-01..04), თანდართული დოკუმენტაცია"
         pdf={<BlankApplicationForm />} fileName="BE-FM-18_განცხადება" color="info"
         fillConfig={FORM_CONFIGS['FM-18']} instrKey="FM-18" />
-      <DocCard icon="📋" code="BE-FM-01" title="მოთხ. სარ. ფ."
+      <DocCard icon="📋" code="BE-FM-REG" title="მოთხ. სარ. ფ."
         desc="ISO §7.1 — BE-CASE №, თ-ღი, კლ. მ-ბი, ობ., წ-ლი დ-ა, ტ. მ-ის წ-ი შ.; ყ-ელ საქმის გახსნის ეტ."
         pdf={<FM01_ApplicationRegistrationPdf data={{}} />} fileName="BE-FM-01_მოთ_სარ" color="info"
         fillConfig={FORM_CONFIGS['FM-01']} instrKey="FM-01" />
-      <DocCard icon="✅" code="BE-FM-05" title="ხელშ. გ-ა და სამ. მ-ბა"
+      <DocCard icon="✅" code="BE-FM-SCREEN" title="ხელშ. გ-ა და სამ. მ-ბა"
         desc="ISO §7.1 — Decision Gate: ISO §7.1.1 კ-ბი, ი-ბ. შ., შ-ძ. კ., გ-ა (მიღ./უ-ბ./გ-ვ.); ყ-ელ საქმეზე"
         pdf={<FM05_ContractAcceptancePdf data={{}} />} fileName="BE-FM-05_ხელ_გად" color="info"
         fillConfig={FORM_CONFIGS['FM-05']} instrKey="FM-05" />
-      <DocCard icon="📋" code="BE-FM-09" title="ხელშეკრულების განხილვა"
+      <DocCard icon="📋" code="BE-FM-CONTRACT-REVIEW" title="ხელშეკრულების განხილვა"
         desc="ISO §7.1 — კლიენტის მოთხოვნები, ინსპექციის სფერო, ვადები, კონფლიქტის შემოწმება, ხარისხის მენეჯერის ვიზა"
         pdf={<FM09_ContractReviewPdf />} fileName="BE-FM-09_ხელშ_განხ" color="info"
         fillConfig={FORM_CONFIGS['FM-09']} instrKey="FM-09" />
-      <DocCard icon="🗺️" code="BE-FM-11" title="ინსპექციის გეგმა"
+      <DocCard icon="🗺️" code="BE-FM-PLAN" title="ინსპექციის გეგმა"
         desc="ISO §7.1 — ვიზიტის თარიღი, ინსპექტორი, ეტაპები, მოქმედი სტანდარტები, მოთხოვნილი საბუთები, ხელშეკრულების №"
         pdf={<FM11_InspectionPlanPdf />} fileName="BE-FM-11_ინსპ_გეგმა" color="info"
         fillConfig={FORM_CONFIGS['FM-11']} instrKey="FM-11" />
-      <DocCard icon="📍" code="BE-FM-16" title="ვიზიტის ჩანაწერი"
+      <DocCard icon="📍" code="BE-FM-VISIT" title="ვიზიტის ჩანაწერი"
         desc="ISO §7.3 — ვიზიტის ნომერი, ობიექტი, ინსპექტორი, 3 შემოწმება, 5 დეფექტი, ფოტო-დოკუმენტაცია, შეუსაბამობები"
         pdf={<FM16_VisitRecordPdf />} fileName="BE-FM-16_ვიზ_ჩანაწ" color="info"
         fillConfig={FORM_CONFIGS['FM-16']} instrKey="FM-16" />
-      <DocCard icon="📊" code="BE-FM-17" title="ინსპექტირების ანგარიში"
+      <DocCard icon="📊" code="BE-FM-IR" title="ინსპექტირების ანგარიში"
         desc="ISO §7.4 — BE-CASE, ობიექტი, გამოყენებული სტანდარტები, 6 შემოწმებული ელემენტი, მიგნებები, დასკვნა, ხელმოწერები"
         pdf={<FM17_InspectionReportPdf />} fileName="BE-FM-17_ინსპ_ანგ" color="info"
         fillConfig={FORM_CONFIGS['FM-17']} instrKey="FM-17" />
-      <DocCard icon="📒" code="BE-FM-21" title="ინსპექციების რეგისტრი"
+      <DocCard icon="📒" code="BE-FM-INSP-REG" title="ინსპექციების რეგისტრი"
         desc="ISO §7.3 ჟურნალი — ყველა საქმე ერთ ადგილას, პერიოდი, ხარისხის მენეჯერის ვიზა; ყოველწლიური გახსნა"
         pdf={<FM21_InspectionRegisterPdf />} fileName="BE-FM-21_ინსპ_რეგ" color="info"
         fillConfig={FORM_CONFIGS['FM-21']} instrKey="FM-21" />
@@ -315,31 +315,31 @@ const DocumentsPage = () => (
     {/* ── 3. პერსონალი და კომპეტენცია ── */}
     <SectionTitle icon="👥" title="პერსონალი და კომპეტენცია" color="#198754" />
     <Row className="g-2">
-      <DocCard icon="⚖️" code="BE-FM-02" title="მიუკერძოებლობის დეკლარაცია"
+      <DocCard icon="⚖️" code="BE-FM-IMP-DECL" title="მიუკერძოებლობის დეკლარაცია"
         desc="ISO §4 — პირადი მონაცემები, 4 ავტორიზებული სფერო (BE-PR-01..04), 5 კონფლიქტის კატეგორია კი/არა, ხელმოწერა"
         pdf={<ImpartialityDeclarationPdf data={{}} />} fileName="BE-FM-02_მიუკ_დეკლ" color="success"
         fillConfig={FORM_CONFIGS['FM-02']} instrKey="FM-02" />
-      <DocCard icon="📜" code="BE-FM-02a" title="ზოგადი მიუკ. დეკლარაცია"
+      <DocCard icon="📜" code="BE-FM-IMP-GEN" title="ზოგადი მიუკ. დეკლარაცია"
         desc="ISO §4.1 — ინსპექტორის ზოგადი ვალდებულება და ინტერესთა კონფლიქტის არარსებობის დადასტურება; წელიწადში ერთხელ"
         pdf={<ImpartialityGeneralPdf data={{}} />} fileName="BE-FM-02a_ზოგ_მიუკ" color="success"
         instrKey="FM-02" />
-      <DocCard icon="🔍" code="BE-FM-02b" title="საქმის მიუკ. შეფასება"
+      <DocCard icon="🔍" code="BE-FM-IMP-CHECK" title="საქმის მიუკ. შეფასება"
         desc="ISO §4.1.5 — კონკრეტული საქმისთვის: ინსპ. №, კლიენტი, 5 კონფლიქტის კრიტ. კი/არა, დასკვნა; ყოველ საქმეზე"
         pdf={<ImpartialityPerCasePdf data={{}} />} fileName="BE-FM-02b_საქ_მიუკ" color="success"
         instrKey="FM-02" />
-      <DocCard icon="🤐" code="BE-FM-03" title="კონფიდენციალობის შეთანხმება"
+      <DocCard icon="🤐" code="BE-FM-CONF" title="კონფიდენციალობის შეთანხმება"
         desc="ISO §5 — სახელი/გვარი, თანამდებობა, თარიღი; 5 წლიანი შენახვის ვადა; ორივე მხარის ხელმოწერა"
         pdf={<ConfidentialityAgreementPdf data={{}} />} fileName="BE-FM-03_კონფ_შეთ" color="success"
         fillConfig={FORM_CONFIGS['FM-03']} instrKey="FM-03" />
-      <DocCard icon="🎯" code="BE-FM-08" title="კომპეტენციის შეფასება"
+      <DocCard icon="🎯" code="BE-FM-COMP-CHECK" title="კომპეტენციის შეფასება"
         desc="ISO §6.1 — 6 შეფასების კრიტერიუმი (კი/არა), 4 ინსპ. სფერო × ქულა 1–5, სტატუსი და გადაწყვეტილება"
         pdf={<FM08_CompetencyAssessmentPdf />} fileName="BE-FM-08_კომპ_შეფ" color="success"
         fillConfig={FORM_CONFIGS['FM-08']} instrKey="FM-08" />
-      <DocCard icon="⚖️" code="BE-FM-33" title="მიუკ. რ-ბ. შეფასება"
+      <DocCard icon="⚖️" code="BE-FM-IMP-RISK" title="მიუკ. რ-ბ. შეფასება"
         desc="ISO §4.1 — Risk Matrix G×A, 5 რ-ის ჩ-ი, საერ. დ. (დ./საშ./მ-ლ.), კ-ბი; FM-02-ის გ-ბ. ინსტ."
         pdf={<FM33_ImpartialityRiskPdf data={{}} />} fileName="BE-FM-33_მიუკ_რ" color="success"
         fillConfig={FORM_CONFIGS['FM-33']} instrKey="FM-33" />
-      <DocCard icon="📚" code="BE-FM-13" title="ტრენინგის ჩანაწერი"
+      <DocCard icon="📚" code="BE-FM-TRAIN" title="ტრენინგის ჩანაწერი"
         desc="ISO §6.1 — სახელი, ტრენინგის სახეობა, ხანგრძლივობა, ორგანიზატორი, კომპეტენციის მეთოდი, სტატუსი, მომდევნო ვადა"
         pdf={<FM13_TrainingRecordNewPdf />} fileName="BE-FM-13_ტრენ_ჩანაწ" color="success"
         fillConfig={FORM_CONFIGS['FM-13']} instrKey="FM-13" />
@@ -354,31 +354,31 @@ const DocumentsPage = () => (
     {/* ── 4. ხარისხის მართვა ── */}
     <SectionTitle icon="🛡️" title="ხარისხის მართვა" color="#dc3545" />
     <Row className="g-2">
-      <DocCard icon="📣" code="BE-FM-06" title="საჩივარი / აპელაცია"
+      <DocCard icon="📣" code="BE-FM-COMPLAINT" title="საჩივარი / აპელაცია"
         desc="ISO §7.5/7.7 — შეტანის ინფორმაცია, ტიპი, ფ.მ.ა., CAPA ნომერი, 3 ეტაპი, საბოლოო გადაწყვეტილება"
         pdf={<FM06_ComplaintAppealPdf />} fileName="BE-FM-06_საჩ_აპ" color="danger"
         fillConfig={FORM_CONFIGS['FM-06']} instrKey="FM-06" />
-      <DocCard icon="⚠️" code="BE-FM-10" title="CAPA — მაკორექტირებელი ქმედება"
+      <DocCard icon="⚠️" code="BE-FM-CAPA" title="CAPA — მაკორექტირებელი ქმედება"
         desc="ISO §8.5 — NC/HA ნომერი, ტიპი, ფ.მ.ა., მაკ. ქმედება + ვადა, ეფექტურობის შემოწმება, ვიზა"
         pdf={<FM10_CAPAFormPdf />} fileName="BE-FM-10_CAPA" color="danger"
         fillConfig={FORM_CONFIGS['FM-10']} instrKey="FM-10" />
-      <DocCard icon="🚫" code="BE-FM-14" title="შეუსაბამო სამუშაოს მართვა"
+      <DocCard icon="🚫" code="BE-FM-NONCONF" title="შეუსაბამო სამუშაოს მართვა"
         desc="ISO §8.7 — NC ნომერი, გამოვლენის თარიღი, გადაუდებელი ქმედება, ფ.მ., CAPA ნომერი, დახურვის ვადა"
         pdf={<FM14_NonConformingPdf />} fileName="BE-FM-14_შეუსაბ" color="danger"
         fillConfig={FORM_CONFIGS['FM-14']} instrKey="FM-14" />
-      <DocCard icon="🔎" code="BE-FM-04" title="შიდა აუდიტი — გეგმა & ანგარიში"
+      <DocCard icon="🔎" code="BE-FM-AUDIT-PLAN" title="შიდა აუდიტი — გეგმა & ანგარიში"
         desc="ISO §8.6 — ნომერი, პერიოდი, ISO პარაგრაფები, შემოწმებული დოკ./საქმეები, NC-ები + CAPA, ეფექტურობის სტატუსი"
         pdf={<FM04_InternalAuditPdf />} fileName="BE-FM-04_შ_აუდ" color="danger"
         fillConfig={FORM_CONFIGS['FM-04']} instrKey="FM-04" />
-      <DocCard icon="📈" code="BE-FM-15" title="მართვის ანალიზი — სხდომის ოქმი"
+      <DocCard icon="📈" code="BE-FM-MGMT-REVIEW" title="მართვის ანალიზი — სხდომის ოქმი"
         desc="ISO §8.9 — სხდომის ნომერი, მონაწილეები, შეყვანის 7 პუნქტი, 4 გადაწყვეტილება + ვადა, ეფექტურობის შეფასება"
         pdf={<FM15_MgmtReviewPdf />} fileName="BE-FM-15_მენ_ანალ" color="danger"
         fillConfig={FORM_CONFIGS['FM-15']} instrKey="FM-15" />
-      <DocCard icon="😊" code="BE-FM-19" title="მომხმარებლის კმაყოფილება"
+      <DocCard icon="😊" code="BE-FM-SATISF" title="მომხმარებლის კმაყოფილება"
         desc="ISO §8.5 — 8 შეფასების კრიტერიუმი (1–5), 3 დამატებითი კითხვა, შენიშვნები; საშუალო ქულა ≥4.0 ნიშნავს კმაყოფილებას"
         pdf={<FM19_CustomerSatisfactionPdf />} fileName="BE-FM-19_კმაყ_კვლ" color="danger"
         fillConfig={FORM_CONFIGS['FM-19']} instrKey="FM-19" />
-      <DocCard icon="✅" code="BE-FM-20" title="ანგარიშის ტექ. გადამოწმება"
+      <DocCard icon="✅" code="BE-FM-TECH-REVIEW" title="ანგარიშის ტექ. გადამოწმება"
         desc="ISO §7.4 — 10 შემოწმების კრიტერიუმი (კი/არა/N/A), გადამოწმების შედეგი, შენიშვნები; ტექნიკური მენეჯერი ვიზირებს"
         pdf={<FM20_ReportVerificationPdf />} fileName="BE-FM-20_ანგ_გადამ" color="danger"
         fillConfig={FORM_CONFIGS['FM-20']} instrKey="FM-20" />
@@ -387,19 +387,19 @@ const DocumentsPage = () => (
     {/* ── 5. მოწყობილობა და ქვეკონტრაქტირება ── */}
     <SectionTitle icon="🔧" title="მოწყობილობა და ქვეკონტრაქტირება" color="#fd7e14" />
     <Row className="g-2">
-      <DocCard icon="🔩" code="BE-FM-07" title="მოწყობილობის ვერიფიკაცია"
+      <DocCard icon="🔩" code="BE-FM-EQ-CHECK" title="მოწყობილობის ვერიფიკაცია"
         desc="ISO §6.2 — დასახელება, სერიული ნომერი, კალიბრაციის ვადა, შემდეგი კალიბრაციის ვადა, ინტერვალი, კლასი, სტატუსი, ვიზა"
         pdf={<FM07_EquipmentVerificationPdf />} fileName="BE-FM-07_მოწყ_ვერ" color="warning"
         fillConfig={FORM_CONFIGS['FM-07']} instrKey="FM-07" />
-      <DocCard icon="🏗️" code="BE-FM-12" title="ქვეკონტრაქტორის შეფასება"
+      <DocCard icon="🏗️" code="BE-FM-SUB-MONITOR" title="ქვეკონტრაქტორის შეფასება"
         desc="ISO §6.6 — დასახელება, 6 შეფასების კრიტერიუმი (კი/არა), ჯამური ქულა (0–6), სტატუსი, ვიზა"
         pdf={<FM12_SubcontractorPdf />} fileName="BE-FM-12_ქვეკ_შეფ" color="warning"
         fillConfig={FORM_CONFIGS['FM-12']} instrKey="FM-12" />
-      <DocCard icon="🗂️" code="BE-FM-34" title="აღჭ. სარ. ბარათი"
+      <DocCard icon="🗂️" code="BE-FM-EQ-CARD" title="აღჭ. სარ. ბარათი"
         desc="ISO §6.2 — ს/კ №, სტ., მოდ., სერ. №, კ-ბ. ი-ა, ს-ტ. №, კ-ბ. ისტ. ცხ., გამ. ჩ.; მუდ. ბ-ი"
         pdf={<FM34_EquipmentCardPdf data={{}} />} fileName="BE-FM-34_აღჭ_ბ" color="warning"
         fillConfig={FORM_CONFIGS['FM-34']} instrKey="FM-34" />
-      <DocCard icon="🔗" code="BE-FM-35" title="ქვეკ. შ-ა და მ. ჩ."
+      <DocCard icon="🔗" code="BE-FM-SUB-MONITOR" title="ქვეკ. შ-ა და მ. ჩ."
         desc="ISO §6.3 — ო-ბ. საიდ., 6 კვ. კრ. (კი/არა), ჯ-ი ქ-ა (0–6), გ-ა (დ-ბ./პ-ბ./ა-ბ.), მ. ისტ."
         pdf={<FM35_SubcontractorMonitoringPdf data={{}} />} fileName="BE-FM-35_ქვეკ_მ" color="warning"
         fillConfig={FORM_CONFIGS['FM-35']} instrKey="FM-35" />
@@ -408,19 +408,19 @@ const DocumentsPage = () => (
     {/* ── 6. დოკუმენტაციის მართვა ── */}
     <SectionTitle icon="🗂️" title="დოკუმენტაციის მართვა" color="#6f42c1" />
     <Row className="g-2">
-      <DocCard icon="👁️" code="BE-FM-22" title="გაცნობის ფურცელი"
+      <DocCard icon="👁️" code="BE-FM-FAMIL" title="გაცნობის ფურცელი"
         desc="BE-PR-05 — დოკუმენტის სახელი, ძველი → ახალი ვერსია, ცვლილების აღწერა, 5 სამ. დღის ვადა, ყველა პერსონალის ხელმოწ."
         pdf={<FM22_FamiliarizationPdf />} fileName="BE-FM-22_გაცნ_ფ" color="secondary"
         fillConfig={FORM_CONFIGS['FM-22']} instrKey="FM-22" />
-      <DocCard icon="✍️" code="BE-FM-23" title="ცვლილების წინადადება"
+      <DocCard icon="✍️" code="BE-FM-CHANGE-INIT" title="ცვლილების წინადადება"
         desc="BE-PR-05 — ინიციატორი, DCR ნომერი, ძველი/ახალი ტექსტი, მიზეზი, მოწონება/უარყოფა გადაწყვეტილება, ძალაში შესვლის ვადა"
         pdf={<FM23_DocChangePdf />} fileName="BE-FM-23_ცვლ_წინ" color="secondary"
         fillConfig={FORM_CONFIGS['FM-23']} instrKey="FM-23" />
-      <DocCard icon="📒" code="BE-FM-24" title="ცვლილებების რეგისტრი"
+      <DocCard icon="📒" code="BE-FM-CHANGE-REG" title="ცვლილებების რეგისტრი"
         desc="BE-PR-05 ჟურნალი — ყველა ცვლილება ერთ ადგილას, პერიოდი, ხარისხის მენეჯერის ვიზა; ათწლიანი შენახვის ვადა"
         pdf={<FM24_ChangeRegisterPdf />} fileName="BE-FM-24_ცვლ_რეგ" color="secondary"
         fillConfig={FORM_CONFIGS['FM-24']} instrKey="FM-24" />
-      <DocCard icon="🗑️" code="BE-FM-25" title="ლიკვიდაციის (განადგ.) აქტი"
+      <DocCard icon="🗑️" code="BE-FM-DESTROY-ACT" title="ლიკვიდაციის (განადგ.) აქტი"
         desc="BE-PR-06 §6 — დოკუმენტების სია, განადგურების მეთოდი, ყველა ასლის განადგ. დადასტ., FM-24 განახლება, ვიზა"
         pdf={<FM25_LiquidationActPdf />} fileName="BE-FM-25_ლიკვ" color="secondary"
         fillConfig={FORM_CONFIGS['FM-25']} instrKey="FM-25" />
@@ -429,27 +429,27 @@ const DocumentsPage = () => (
     {/* ── 7. შიდა აუდიტი (FM-26 – FM-31) ── */}
     <SectionTitle icon="🔬" title="შიდა აუდიტი — ISO §8.6" color="#6610f2" />
     <Row className="g-2">
-      <DocCard icon="📅" code="BE-FM-26" title="შიდა აუდიტის გეგმა"
+      <DocCard icon="📅" code="BE-FM-AUDIT-PLAN" title="შიდა აუდიტის გეგმა"
         desc="ISO §8.6 — აუდიტის ნომერი, პერიოდი, აუდიტორი, აუდიტირებული პირი, ISO პარაგრაფები (×10), სტატუსი; ხელმოწ. სავალდებულო"
         pdf={<FM26_AuditPlanPdf />} fileName="BE-FM-26_შ_აუდ_გ" color="info"
         fillConfig={FORM_CONFIGS['FM-26']} instrKey="FM-26" />
-      <DocCard icon="☑️" code="BE-FM-27" title="შიდა აუდიტის ჩეკლისტი"
+      <DocCard icon="☑️" code="BE-FM-AUDIT-CHECK" title="შიდა აუდიტის ჩეკლისტი"
         desc="ISO §8.6 — §4 → §9 ყოველი პუნქტი შეყვანილია/არ შეყვანილია/NC; NC-ების სია; საერთო შეფასება"
         pdf={<FM27_AuditChecklistPdf />} fileName="BE-FM-27_შ_აუდ_ჩ" color="info"
         fillConfig={FORM_CONFIGS['FM-27']} instrKey="FM-27" />
-      <DocCard icon="📋" code="BE-FM-28" title="შიდა აუდიტის ანგარიში"
+      <DocCard icon="📋" code="BE-FM-AUDIT-REPORT" title="შიდა აუდიტის ანგარიში"
         desc="ISO §8.6 — ძირითადი მიგნებები, NC-ების სია + FM-10 ბმა, ISO §§, საბოლოო შეფასება; ატვირთვა 5 სამ. დღეში"
         pdf={<FM28_AuditReportPdf />} fileName="BE-FM-28_შ_აუდ_ა" color="info"
         fillConfig={FORM_CONFIGS['FM-28']} instrKey="FM-28" />
-      <DocCard icon="⛔" code="BE-FM-29" title="აუდიტის შეუსაბამობის ფორმა"
+      <DocCard icon="⛔" code="BE-FM-AUDIT-NC" title="აუდიტის შეუსაბამობის ფორმა"
         desc="ISO §8.6/8.7 — NC ნომერი, ISO პარაგრაფი, კატეგორია, აღწერა; 5-Why ანალიზი; CAPA FM-10; ეფექტურობის შემოწმება"
         pdf={<FM29_AuditNCFormPdf />} fileName="BE-FM-29_ა_შ_ო_ფ" color="danger"
         fillConfig={FORM_CONFIGS['FM-29']} instrKey="FM-29" />
-      <DocCard icon="🤝" code="BE-FM-30" title="აუდიტის შეხვედრის ოქმი"
+      <DocCard icon="🤝" code="BE-FM-AUDIT-MEETING" title="აუდიტის შეხვედრის ოქმი"
         desc="ISO §8.6 — გახსნის/დახურვის შეხვედრა, NC სტატუსი (closing), შეხვედრის მონაწილეები; შემმოწ. საბოლოო ვიზა"
         pdf={<FM30_AuditMeetingPdf />} fileName="BE-FM-30_ა_შ_ო" color="warning"
         fillConfig={FORM_CONFIGS['FM-30']} instrKey="FM-30" />
-      <DocCard icon="📆" code="BE-FM-31" title="შიდა აუდიტის პროგრამა (წლ.)"
+      <DocCard icon="📆" code="BE-FM-AUDIT-PROGRAM" title="შიდა აუდიტის პროგრამა (წლ.)"
         desc="ISO §8.6 — წლიური გეგმა, 10 აუდიტი × (ობიექტი + აუდიტირება + კვარტალი + სტატუსი); ISO §8.6 კონფორმულობა"
         pdf={<FM31_AuditProgramPdf />} fileName="BE-FM-31_ა_პ_წ_გ" color="warning"
         fillConfig={FORM_CONFIGS['FM-31']} instrKey="FM-31" />

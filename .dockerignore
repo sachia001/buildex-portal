@@ -20,7 +20,10 @@ client/build
 Thumbs.db
 
 # ─── User uploads (ephemeral; not part of the image) ───
-uploads
+# EXCEPT uploads/procedures — controlled accreditation documents bundled into the image.
+uploads/docs
+uploads/estimates
+uploads/norms
 
 # ─── Audit, docs & diagrams (not needed at runtime) ───
 audit

@@ -1139,21 +1139,21 @@ const PROC_TITLE_MAP = {
     'QM-01':'ხარისხის სახელმძღვანელო',
     'BE-PR-SET':'პროცედურების სარჩევი (ინდექსი)',
     'BE-PR-MAIN':'ინსპექტირების სრული პროცესი',
-    'BE-PR-01':'ხარჯთაღრიცხვის პროექტთან შესაბამისობის ინსპექტირების სამუშაო პროცედურა',
-    'BE-PR-02':'შესრულებული სამუშაოებისა და ფორმა №2-ის ინსპექტირების სამუშაო პროცედურა',
-    'BE-PR-03':'ხარჯთაღრიცხვის ფასწარმოქმნის ადეკვატურობის ინსპექტირების სამუშაო პროცედურა',
-    'BE-PR-04':'ტექნიკური ზედამხედველობა–ინსპექტირების სამუშაო პროცედურა',
-    'BE-PR-05':'დოკუმენტებისა და გარე ნორმატიული დოკუმენტების მართვის პროცედურა',
-    'BE-PR-06':'ჩანაწერების, არქივისა და მონაცემთა დაცვის მართვის პროცედურა',
-    'BE-PR-07':'მიუკერძოებლობისა და კონფიდენციალურობის უზრუნველყოფის პროცედურა',
-    'BE-PR-08':'პერსონალის კომპეტენციის, უფლებამოსილების და მონიტორინგის პროცედურა',
-    'BE-PR-09':'განაცხადის, ხელშეკრულების და სამუშაოს მიღების განხილვის პროცედურა',
-    'BE-PR-10':'საჩივრებისა და აპელაციების მართვის პროცედურა',
-    'BE-PR-11':'შიდა აუდიტის პროცედურა',
-    'BE-PR-12':'მენეჯმენტის ანალიზის პროცედურა',
-    'BE-PR-13':'შეუსაბამობების, კორექციისა და მაკორექტირებელი მოქმედებების (CAPA) პროცედურა',
-    'BE-PR-14':'აღჭურვილობის, გაზომვის საშუალებებისა და ქვეკონტრაქტირების მართვის პროცედურა',
-    'BE-PR-15':'ინსპექტირების ანგარიშების, დასკვნებისა და სერტიფიკატების გაცემის პროცედურა',
+    'BE-PR-01':'ობიექტის ხარჯთაღრიცხვის ინსპექტირება',
+    'BE-PR-02':'ობიექტზე შესრულებული სამუშაოების ინსპექტირება (მათ შორის ფორმა №2-ის მიხედვით)',
+    'BE-PR-03':'ობიექტის ხარჯთაღრიცხვის ფასწარმოქმნის ადეკვატურობის ინსპექტირება',
+    'BE-PR-04':'დოკუმენტების მართვის პროცედურა',
+    'BE-PR-05':'ჩანაწერების, არქივისა და მონაცემთა დაცვის მართვის პროცედურა',
+    'BE-PR-06':'მიუკერძოებლობისა და კონფიდენციალურობის უზრუნველყოფის პროცედურა',
+    'BE-PR-07':'პერსონალის კომპეტენციის მართვის, უფლებამოსილების და მონიტორინგის პროცედურა',
+    'BE-PR-08':'განაცხადის მიღების, ხელშეკრულების განხილვისა და ინსპექტირების სამუშაოს მიღების პროცედურა',
+    'BE-PR-09':'საჩივრებისა და აპელაციების განხილვის პროცედურა',
+    'BE-PR-10':'შიდა აუდიტის პროცედურა',
+    'BE-PR-11':'მენეჯმენტის ანალიზის პროცედურა',
+    'BE-PR-12':'შეუსაბამობების, კორექციული და პრევენციული ქმედებების მართვის პროცედურა (CAPA)',
+    'BE-PR-13':'აღჭურვილობის და გაზომვის საშუალებების მართვის პროცედურა',
+    'BE-PR-14':'ქვეკონტრაქტირების მართვის პროცედურა',
+    'BE-PR-15':'ანგარიშგების, დოკუმენტირებისა და გაცემის პროცედურა',
     'BE-WI-01':'ხარჯთაღრიცხვის შესაბამისობის შემოწმება',
     'BE-WI-02':'შესრულებული სამუშაოს ფორმა',
     'BE-WI-03':'ფასწარმოქმნის ადეკვატურობის შემოწმება',
@@ -1185,57 +1185,85 @@ const PROC_TITLE_MAP = {
     'FM-23':'დოკუმენტში ცვლილების წინადადება',
     'FM-24':'ცვლილების რეგისტრაცია',
     'FM-25':'ლიკვიდაციის აქტი',
-    'POL-01':'მიუკერძოებლობის პოლიტიკა',
-    'POL-02':'კონფიდენციალობის პოლიტიკა',
-    'POL-03':'ხარისხის პოლიტიკა',
-    'POL-04':'IT და მონაცემთა უსაფრთხოების პოლიტიკა',
+    // პოლიტიკები — ავტორიტეტული BE-POL-* კოდირება (ფოლდერის შესაბამისად)
+    'BE-POL-01':'მიუკერძოებლობის პოლიტიკა',
+    'BE-POL-02':'კონფიდენციალურობის პოლიტიკა',
+    'BE-POL-03':'ხარისხის პოლიტიკა',
+    'BE-POL-04':'IT და მონაცემთა უსაფრთხოების პოლიტიკა',
     'RM-01':'რისკების რეესტრი',
     'ORD-01':'ბრძანება — ხარისხის მენეჯერის დანიშვნა',
     'ORD-02':'ბრძანება — ტექნიკური მენეჯერის დანიშვნა',
     'ORD-03':'ბრძანება — ინსპექტორების დანიშვნა',
+    'ORD-03B':'ბრძანება — ინსპექტორების დანიშვნა (დანართი)',
     'ORD-04':'ბრძანება — დოკუმენტების მართვის სისტემის დამტკიცება',
     'ORD-05':'ბრძანება — მიუკერძოებლობის კომიტეტის შექმნა',
+    // .docx ფორმები (სათაური ფაილში „ — "-ით არ მოდის) — კანონიკური BE-FM-რეესტრიდან
+    'BE-FM-IMP-COMMITTEE':'მიუკერძოებლობის დაცვის კომიტეტის ოქმი',
+    'BE-FM-PHOTO-LOG':'ფოტო- და ვიდეოდოკუმენტაციის ჟურნალი',
+    'BE-FM-რეესტრი':'ფორმებისა და შაბლონების რეესტრი',
+    // root-level ცვლილებების ჟურნალი
+    'ცვლილებების-ჟურნალი':'ცვლილებების ჟურნალი',
+    'ცვლილებების-ჟურნალი-2':'ცვლილებების ჟურნალი (დანართი)',
 };
+
+// filename → { code, title } — ავტორიტეტული ნუმერაცია (BE-FM-რეესტრი + B/E ფოლდერები).
+// სემანტიკური ფორმები ფაილში მოდის როგორც „CODE — სათაური"; დანარჩენი — leading code token.
+function parseDocName(fname) {
+    const upAscii = (str) => str.replace(/[a-z]/g, c => c.toUpperCase()); // მხოლოდ ASCII — ქართული უცვლელი რჩება
+    const base = fname.replace(/\.(docx?|pdf|xlsx?|xls)$/i, '').trim();
+    if (base.includes('—')) {
+        const parts = base.split('—');
+        return { code: upAscii(parts[0].replace(/[\s_]+$/, '').trim()), title: parts.slice(1).join('—').trim() };
+    }
+    const s = base.replace(/_v\d+(_\d+)?$/i, '');
+    const m = s.match(/^(QM-\d+|BE-PR-(?:MAIN|SET|\d+)|BE-WI-\d+|HR-JD-\d+|BE-POL-\d+|BE-FM-[\wა-ჰ-]+|FM-\d+|POL-\d+|RM-\d+|ORD-\d+[A-Za-z]?)/);
+    const code = upAscii(m ? m[1] : s.split(/[\s_]/)[0]);
+    const title = PROC_TITLE_MAP[code] || PROC_TITLE_MAP[base]
+        || s.slice(m ? m[1].length : 0).replace(/^[-_\s]+/, '').replace(/_/g, ' ').trim() || code;
+    return { code, title };
+}
 
 async function seedProcedures() {
     try {
         const procDir = path.join(__dirname, 'uploads/procedures');
-        if (!fs.existsSync(procDir)) return;
+        if (!fs.existsSync(procDir)) { console.log('ℹ️ uploads/procedures არ არსებობს — seed გამოტოვებულია'); return; }
+        const exts = ['.docx', '.doc', '.pdf', '.xlsx', '.xls'];
+
+        // ფოლდერის რეკურსიული სკანი — ავტორიტეტული ნაკრების მომზადება
+        const pending = [];
+        const walk = (dir, category, relBase) => {
+            for (const ent of fs.readdirSync(dir, { withFileTypes: true })) {
+                const abs = path.join(dir, ent.name);
+                const rel = `${relBase}/${ent.name}`;
+                if (ent.isDirectory()) walk(abs, PROC_FOLDER_MAP[ent.name] || category, rel);
+                else if (exts.some(e => ent.name.toLowerCase().endsWith(e))) pending.push({ fname: ent.name, relPath: rel, category });
+            }
+        };
+        walk(procDir, 'other', '/uploads/procedures');
+        const bundledCodes = [...new Set(pending.map(p => parseDocName(p.fname).code))];
+
+        // ─── reconcile (CR-2 / ISO-002): authoritative ნაკრების ხელახ-ჩაწერამდე წავშალოთ:
+        //  (1) ნებისმიერი ჩანაწერი bundled-კოდით (system თუ user — დუბლიკატების თავიდან აცილება),
+        //  (2) system-seeded ნაშთები, (3) გაუქმებული legacy კოდები (FM-01..25 / POL-0x / BE-FM-NN / BE-PR-SET).
+        // user-ატვირთული არა-სტანდარტული კოდები (bundled-ში არ შედის) რჩება ხელუხლებელი.
+        await ProcedureDoc.deleteMany({ $or: [
+            { code: { $in: bundledCodes } },
+            { uploadedBy: 'system' },
+            { code: { $regex: '^(FM-\\d|POL-\\d|BE-FM-\\d|BE-PR-SET)', $options: 'i' } },
+        ]});
+
         let seeded = 0;
-        // Walk subfolders
-        const entries = fs.readdirSync(procDir, { withFileTypes: true });
-        for (const entry of entries) {
-            const exts = ['.docx', '.doc', '.pdf', '.xlsx'];
-            const scanFiles = (subPath, category) => {
-                const files = fs.readdirSync(subPath).filter(f => exts.some(e => f.endsWith(e)));
-                return files.map(f => ({ fname: f, fullPath: path.join(subPath, f), category, relPath: `/uploads/procedures/${entry.name}/${f}` }));
-            };
-            let filesToProcess = [];
-            if (entry.isDirectory() && PROC_FOLDER_MAP[entry.name]) {
-                filesToProcess = scanFiles(path.join(procDir, entry.name), PROC_FOLDER_MAP[entry.name]);
-            } else if (!entry.isDirectory() && exts.some(e => entry.name.endsWith(e))) {
-                filesToProcess = [{ fname: entry.name, fullPath: path.join(procDir, entry.name), category: 'procedure', relPath: `/uploads/procedures/${entry.name}` }];
-            }
-            for (const { fname, relPath, category } of filesToProcess) {
-                // Extract code: match BE-PR-XX, BE-WI-XX, HR-JD-XXX, FM-XX, POL-XX, RM-XX, ORD-XX, QM-XX
-                const codeMatch = fname.match(/(?:BE-PR-(?:MAIN|SET|\d+)|BE-WI-\d+|HR-JD-\d+|FM-\d+|POL-\d+|RM-\d+|ORD-\d+|QM-\d+)/i);
-                const code = codeMatch ? codeMatch[0].toUpperCase() : fname.replace(/[_v\d.]+$/,'').replace(/_/g,'-');
-                const title = PROC_TITLE_MAP[code] || fname.replace(/_v2_2026\.\w+$/,'').replace(/_/g,' ');
-                const existing = await ProcedureDoc.findOne({ filePath: relPath });
-                if (existing) {
-                    // CR-2: არსებული ჩანაწერების title/code სინქრო canonical map-თან (stale title-ების გასწორება)
-                    if (existing.title !== title || existing.code !== code) {
-                        existing.title = title; existing.code = code; existing.category = category;
-                        await existing.save();
-                    }
-                    continue;
-                }
-                const verMatch = fname.match(/v(\d+)/i);
-                await ProcedureDoc.create({ code, title, category, version: verMatch ? verMatch[1]+'.0' : '2.0', filePath: relPath, originalName: fname, uploadedBy: 'system' });
-                seeded++;
-            }
+        for (const { fname, relPath, category } of pending) {
+            const { code, title } = parseDocName(fname);
+            const verMatch = fname.match(/v(\d+)/i);
+            await ProcedureDoc.create({
+                code, title, category,
+                version: verMatch ? verMatch[1] + '.0' : '2.0',
+                filePath: relPath, originalName: fname, uploadedBy: 'system',
+            });
+            seeded++;
         }
-        console.log(`✅ პროცედურები ჩაიტვირთა: ${seeded} ახალი`);
+        console.log(`✅ პროცედურები (ავტორიტეტული ნაკრები) ჩაიტვირთა: ${seeded} ფაილი`);
     } catch (e) { console.error('Procedure seed error:', e.message); }
 }
 mongoose.connection.once('open', seedProcedures);

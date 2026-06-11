@@ -50,6 +50,11 @@ COPY --chown=node:node package*.json ./
 # Built client bundle served by server.js (server.js:2160 serves client/build).
 COPY --from=builder --chown=node:node /app/client/build ./client/build
 
+# Controlled accreditation documents (QM/BE-PR/BE-WI/HR-JD/BE-FM/BE-POL/RM/ORD) —
+# version-controlled and bundled into the image so seedProcedures populates them
+# deterministically on boot (the document library = the accreditation document set).
+COPY --from=builder --chown=node:node /app/uploads/procedures ./uploads/procedures
+
 # Run as the unprivileged built-in "node" user (OPS-003 — no root in runtime).
 USER node
 
