@@ -91,7 +91,7 @@ const FM12_SubcontractorPdf = ({ data = {} }) => {
       <FieldRow label="ვალიდური ვადა:" value={data.validUntil} />
 
       <SigBlock2 left="ტექნიკური მენეჯერი" right="ხარისხის მენეჯერი" sigs={sigs} />
-      <FormFooter code="BE-FM-SUB-MONITOR v2.0 | 28.04.2026 | შენახვა: 5 წელი" />
+      <FormFooter code="BE-FM-SUB-MONITOR v1.0 | 28.04.2026 | შენახვა: 5 წელი" />
     </Page>
   </Document>
 );};

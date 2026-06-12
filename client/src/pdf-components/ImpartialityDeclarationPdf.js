@@ -74,7 +74,7 @@ const ImpartialityDeclarationPdf = ({ data = {} }) => {
         <View style={s.divider} />
 
         <Text style={s.docTitle}>მიუკერძოებლობის დეკლარაცია</Text>
-        <Text style={s.docCode}>BE-FM-IMP-DECL | ვ.2 | 2026 | ISO/IEC 17020:2012/2013 §4</Text>
+        <Text style={s.docCode}>BE-FM-IMP-DECL | ვ.1 | 2026 | ISO/IEC 17020:2012/2013 §4</Text>
 
         <View style={s.fieldRow}>
           <Text style={s.fieldLabel}>მე, ქვემოხსენებული:</Text>

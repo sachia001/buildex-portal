@@ -59,7 +59,7 @@ const FM30_AuditMeetingPdf = ({ data = {} }) => {
       </View>
 
       <SigBlock3 labels={['აუდიტორი', 'აუდიტირებული', 'ხარისხის მენეჯერი']} sigs={sigs} />
-      <FormFooter code="BE-FM-AUDIT-MEETING v2.0 | 28.04.2026 | ISO §8.6 | შენახვა: 5 წელი" />
+      <FormFooter code="BE-FM-AUDIT-MEETING v1.0 | 28.04.2026 | ISO §8.6 | შენახვა: 5 წელი" />
     </Page>
   </Document>
 );};

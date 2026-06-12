@@ -53,7 +53,7 @@ const FM06_ComplaintAppealPdf = ({ data = {} }) => {
       <FieldRow2 label1="BE-FM-CAPA №:" value1={data.capaNumber} label2="პასუხის გაგზავნის თარიღი:" value2={data.responseSentDate} />
 
       <SigBlock3 labels={['შემდგენი','ხარისხის მენეჯერი','დირექტორი']} sigs={sigs} />
-      <FormFooter code="BE-FM-COMPLAINT v2.0 | 28.04.2026 | შენახვა: 5 წელი" />
+      <FormFooter code="BE-FM-COMPLAINT v1.0 | 28.04.2026 | შენახვა: 5 წელი" />
     </Page>
   </Document>
 );};

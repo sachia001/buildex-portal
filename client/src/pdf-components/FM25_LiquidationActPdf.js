@@ -63,7 +63,7 @@ const FM25_LiquidationActPdf = ({ data = {} }) => {
       </View>
 
       <SigBlock3 labels={['შემდგენი / პასუხისმგებელი','მოწმე','ხარისხის მენეჯერი']} sigs={sigs} />
-      <FormFooter code="BE-FM-DESTROY-ACT v2.0 | 28.04.2026 | შენახვა: 5 წელი" />
+      <FormFooter code="BE-FM-DESTROY-ACT v1.0 | 28.04.2026 | შენახვა: 5 წელი" />
     </Page>
   </Document>
 );};

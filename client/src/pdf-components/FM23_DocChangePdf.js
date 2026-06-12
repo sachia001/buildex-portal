@@ -43,7 +43,7 @@ const FM23_DocChangePdf = ({ data = {} }) => {
       <FieldRow2 label1="ახალი ვერსიის №:"          value1={data.newVersion} label2="ძალაში შესვლის თარიღი:" value2={data.effectiveDate} />
 
       <SigBlock3 labels={['ინიციატორი','ხარისხის მენეჯერი','დამტკიცება / დირექტორი']} sigs={sigs} />
-      <FormFooter code="BE-FM-CHANGE-INIT v2.0 | 28.04.2026 | შენახვა: 5 წელი" />
+      <FormFooter code="BE-FM-CHANGE-INIT v1.0 | 28.04.2026 | შენახვა: 5 წელი" />
     </Page>
   </Document>
 );};

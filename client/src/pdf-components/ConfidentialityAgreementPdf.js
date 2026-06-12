@@ -59,7 +59,7 @@ const ConfidentialityAgreementPdf = ({ data = {} }) => {
         <View style={s.divider} />
 
         <Text style={s.docTitle}>კონფიდენციალურობის შეთანხმება</Text>
-        <Text style={s.docCode}>BE-FM-CONF | ვ.2 | 2026 | ISO/IEC 17020:2012/2013 §5</Text>
+        <Text style={s.docCode}>BE-FM-CONF | ვ.1 | 2026 | ISO/IEC 17020:2012/2013 §5</Text>
 
         <View style={s.fieldRow}>
           <Text style={s.fieldLabel}>მე:</Text>

@@ -40,7 +40,7 @@ const FM29_AuditNCFormPdf = ({ data = {} }) => {
       <FieldRow label="შემოწმების შედეგი:" value={data.checkResult} />
 
       <SigBlock3 labels={['აუდიტორი', 'შემმოწმებელი (ხარისხის მენეჯერი)', 'დამტკიცება (დირექტორი)']} sigs={sigs} />
-      <FormFooter code="BE-FM-AUDIT-NC v2.0 | 28.04.2026 | ISO §8.6/8.7 | შენახვა: 5 წელი" />
+      <FormFooter code="BE-FM-AUDIT-NC v1.0 | 28.04.2026 | ISO §8.6/8.7 | შენახვა: 5 წელი" />
     </Page>
   </Document>
 );};

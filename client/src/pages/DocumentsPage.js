@@ -56,6 +56,7 @@ import { WORD_LAYOUTS }    from '../utils/wordLayouts';
 // ── ახალი ფორმები (BE-PR სამუშაო ნაკადი) ───────────────────────
 import GenericFormPdf from '../pdf-components/GenericFormPdf';
 import NEW_FORMS      from '../components/newFormDefinitions.json';
+import { newFormToConfig } from '../utils/newFormToConfig';
 
 // row → wordGenerator field კონვერტერი
 const rowToField = (r) => {
@@ -80,9 +81,12 @@ const formToWordSections = (form) =>
     fields: (sec.rows || []).map(rowToField),
   }));
 
-// ახალი ფორმების ბარათი
+// ახალი ფორმების ბარათი — ონლაინ შევსება (FormFillModal + GenericFormPdf) + PDF/Word ჩამოტვირთვა
 const NewFormCard = ({ form, color = 'info' }) => {
+  const [showFill, setShowFill] = useState(false);
   const fileName = `${form.code} — ${form.title}`;
+  const fillCfg = newFormToConfig(form);
+  const hasFill = fillCfg && fillCfg.sections.length > 0;
   const handleWord = () => downloadWordDoc({
     title: form.title,
     code: form.code,
@@ -99,6 +103,12 @@ const NewFormCard = ({ form, color = 'info' }) => {
           <div className="fw-bold text-dark mb-1" style={{ fontSize: '0.8rem', lineHeight: 1.3 }}>{form.title}</div>
           <p className="text-muted mb-2 flex-grow-1" style={{ fontSize: '0.62rem' }}>{form.isoRef}</p>
           <div className="d-flex flex-column gap-1">
+            {hasFill && (
+              <Button variant={color} size="sm" className="w-100 fw-bold"
+                style={{ fontSize: '0.68rem', padding: '3px 5px' }} onClick={() => setShowFill(true)}>
+                📝 შევსება
+              </Button>
+            )}
             <PDFDownloadLink
               document={<GenericFormPdf form={form} />}
               fileName={`${fileName}.pdf`}
@@ -114,6 +124,16 @@ const NewFormCard = ({ form, color = 'info' }) => {
           </div>
         </Card.Body>
       </Card>
+      {hasFill && (
+        <FormFillModal
+          show={showFill}
+          onHide={() => setShowFill(false)}
+          config={fillCfg}
+          pdfComponent={<GenericFormPdf form={form} />}
+          pdfFileName={fileName}
+          formCode={form.code}
+        />
+      )}
     </Col>
   );
 };
@@ -121,7 +141,9 @@ const NewFormCard = ({ form, color = 'info' }) => {
 // ჯგუფები BE-PR ნაკადის მიხედვით
 const NEW_FORM_GROUPS = [
   { title: '1️⃣ განცხადება და მიღება (BE-PR-08)', color: 'primary',
-    codes: ['BE-FM-APP', 'BE-FM-REG', 'BE-FM-ACK', 'BE-FM-SCREEN', 'BE-FM-IMP-CHECK'] },
+    codes: ['BE-FM-APP', 'BE-FM-REG', 'BE-FM-ACK', 'BE-FM-SCREEN'] },
+  { title: '🛡️ მიუკერძოებლობა და კონფიდენციალურობა (BE-PR-06)', color: 'success',
+    codes: ['BE-FM-IMP-GEN', 'BE-FM-IMP-CHECK', 'BE-FM-IMP-COMMITTEE'] },
   { title: '2️⃣ შეფასება და გადაწყვეტა', color: 'success',
     codes: ['BE-FM-COMP', 'BE-FM-EST', 'BE-FM-DECLINE', 'BE-FM-DOC-REQ', 'BE-FM-DOC-CHECK'] },
   { title: '3️⃣ ხელშეკრულება და დანიშვნა', color: 'info',
@@ -139,7 +161,7 @@ const findForm = (code) => NEW_FORMS.find((f) => f.code === code);
 // curated/fillable ფორმები (სექციები 2-7) — სრული ბიბლიოთეკის (სექცია 8) გალერეაში არ გავიმეოროთ (გაორების თავიდან აცილება)
 const CURATED_CODES = new Set([
   'BE-FM-APP','BE-FM-REG','BE-FM-SCREEN','BE-FM-CONTRACT-REVIEW','BE-FM-PLAN','BE-FM-VISIT','BE-FM-IR','BE-FM-INSP-REG',
-  'BE-FM-IMP-DECL','BE-FM-IMP-GEN','BE-FM-IMP-CHECK','BE-FM-CONF','BE-FM-COMP-CHECK','BE-FM-IMP-RISK','BE-FM-TRAIN',
+  'BE-FM-IMP-DECL','BE-FM-CONF','BE-FM-COMP-CHECK','BE-FM-IMP-RISK','BE-FM-TRAIN',
   'BE-FM-COMPLAINT','BE-FM-CAPA','BE-FM-NONCONF','BE-FM-MGMT-REVIEW','BE-FM-SATISF','BE-FM-TECH-REVIEW',
   'BE-FM-EQ-CHECK','BE-FM-SUB-MONITOR','BE-FM-EQ-CARD','BE-FM-FAMIL','BE-FM-CHANGE-INIT','BE-FM-CHANGE-REG','BE-FM-DESTROY-ACT',
   'BE-FM-AUDIT-PLAN','BE-FM-AUDIT-CHECK','BE-FM-AUDIT-REPORT','BE-FM-AUDIT-NC','BE-FM-AUDIT-MEETING','BE-FM-AUDIT-PROGRAM',
@@ -328,14 +350,6 @@ const DocumentsPage = () => (
         desc="ISO §4 — პირადი მონაცემები, 4 ავტორიზებული სფერო (BE-PR-01..04), 5 კონფლიქტის კატეგორია კი/არა, ხელმოწერა"
         pdf={<ImpartialityDeclarationPdf data={{}} />} fileName="BE-FM-02_მიუკ_დეკლ" color="success"
         fillConfig={FORM_CONFIGS['BE-FM-IMP-DECL']} instrKey="BE-FM-IMP-DECL" />
-      <DocCard icon="📜" code="BE-FM-IMP-GEN" title="ზოგადი მიუკ. დეკლარაცია"
-        desc="ISO §4.1 — ინსპექტორის ზოგადი ვალდებულება და ინტერესთა კონფლიქტის არარსებობის დადასტურება; წელიწადში ერთხელ"
-        pdf={<ImpartialityGeneralPdf data={{}} />} fileName="BE-FM-02a_ზოგ_მიუკ" color="success"
-        instrKey="BE-FM-IMP-DECL" />
-      <DocCard icon="🔍" code="BE-FM-IMP-CHECK" title="საქმის მიუკ. შეფასება"
-        desc="ISO §4.1.5 — კონკრეტული საქმისთვის: ინსპ. №, კლიენტი, 5 კონფლიქტის კრიტ. კი/არა, დასკვნა; ყოველ საქმეზე"
-        pdf={<ImpartialityPerCasePdf data={{}} />} fileName="BE-FM-02b_საქ_მიუკ" color="success"
-        instrKey="BE-FM-IMP-DECL" />
       <DocCard icon="🤐" code="BE-FM-CONF" title="კონფიდენციალობის შეთანხმება"
         desc="ISO §5 — სახელი/გვარი, თანამდებობა, თარიღი; 5 წლიანი შენახვის ვადა; ორივე მხარის ხელმოწერა"
         pdf={<ConfidentialityAgreementPdf data={{}} />} fileName="BE-FM-03_კონფ_შეთ" color="success"

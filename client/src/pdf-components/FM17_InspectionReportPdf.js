@@ -102,7 +102,7 @@ const FM17_InspectionReportPdf = ({ data = {} }) => {
       <Text style={s.secH}>G. ხელმოწერები</Text>
       <SigBlock3 labels={['ინსპექტორი', 'ტექნიკური მენეჯერი', 'ხარისხის მენეჯერი']} sigs={sigs} />
 
-      <FormFooter code="BE-FM-IR v2.0 | 28.04.2026 | შენახვა: 10 წელი" />
+      <FormFooter code="BE-FM-IR v1.0 | 28.04.2026 | შენახვა: 10 წელი" />
     </Page>
   </Document>
 );};

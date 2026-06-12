@@ -52,7 +52,7 @@ const FM10_CAPAFormPdf = ({ data = {} }) => {
       <FieldRow2 label1="დახურვის თარიღი:" value1={data.closingDate} label2="ხარისხის მენეჯერის ვიზა:" value2={data.qualityMgrVerif} />
 
       <SigBlock3 labels={['შემდგენი','ხარისხის მენეჯერი','დირექტორი']} sigs={sigs} />
-      <FormFooter code="BE-FM-CAPA v2.0 | 28.04.2026 | შენახვა: 5 წელი" />
+      <FormFooter code="BE-FM-CAPA v1.0 | 28.04.2026 | შენახვა: 5 წელი" />
     </Page>
   </Document>
 );};

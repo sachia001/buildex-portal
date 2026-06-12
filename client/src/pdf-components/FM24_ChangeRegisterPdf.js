@@ -46,7 +46,7 @@ const FM24_ChangeRegisterPdf = ({ data = {} }) => {
         </View>
       </View>
 
-      <FormFooter code="BE-FM-CHANGE-REG v2.0 | 28.04.2026 | შენახვა: 5 წელი" />
+      <FormFooter code="BE-FM-CHANGE-REG v1.0 | 28.04.2026 | შენახვა: 5 წელი" />
     </Page>
   </Document>
 );};

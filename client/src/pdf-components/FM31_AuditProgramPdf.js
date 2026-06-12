@@ -49,7 +49,7 @@ const FM31_AuditProgramPdf = ({ data = {} }) => {
       <FieldRow label="შეჯამება / შენიშვნები:" value={data.remarks} />
 
       <SigBlock3 labels={['შემდგენი (ხარისხის მენეჯერი)', 'შემმოწმებელი (აუდიტორი)', 'დამტკიცება (დირექტორი)']} sigs={sigs} />
-      <FormFooter code="BE-FM-AUDIT-PROGRAM v2.0 | 28.04.2026 | ISO §8.6 | შენახვა: 5 წელი" />
+      <FormFooter code="BE-FM-AUDIT-PROGRAM v1.0 | 28.04.2026 | ISO §8.6 | შენახვა: 5 წელი" />
     </Page>
   </Document>
 );};

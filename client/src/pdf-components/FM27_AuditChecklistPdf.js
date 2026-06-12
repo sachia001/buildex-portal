@@ -70,7 +70,7 @@ const FM27_AuditChecklistPdf = ({ data = {} }) => {
                  label2="საერთო შეფასება:" value2={data.overallResult} />
 
       <SigBlock3 labels={['აუდიტორი', 'შემმოწმებელი (ხარისხის მენეჯერი)', 'დამტკიცება (დირექტორი)']} sigs={sigs} />
-      <FormFooter code="BE-FM-AUDIT-CHECK v2.0 | 28.04.2026 | ISO §8.6 | შენახვა: 5 წელი" />
+      <FormFooter code="BE-FM-AUDIT-CHECK v1.0 | 28.04.2026 | ISO §8.6 | შენახვა: 5 წელი" />
     </Page>
   </Document>
 );};

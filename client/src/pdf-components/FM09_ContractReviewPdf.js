@@ -55,7 +55,7 @@ const FM09_ContractReviewPdf = ({ data = {} }) => {
       <YesNoRow label="დამტკიცებულია:" yesNo={data.approved} />
 
       <SigBlock3 labels={['შემდგენი','ტექნიკური მენეჯერი','დირექტორი']} sigs={sigs} />
-      <FormFooter code="BE-FM-CONTRACT-REVIEW v2.0 | 28.04.2026 | შენახვა: 10 წელი" />
+      <FormFooter code="BE-FM-CONTRACT-REVIEW v1.0 | 28.04.2026 | შენახვა: 10 წელი" />
     </Page>
   </Document>
 );};

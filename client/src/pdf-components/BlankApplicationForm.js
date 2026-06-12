@@ -61,9 +61,7 @@ const styles = StyleSheet.create({
 const ALL_SCOPES = [
   'ობიექტის ხარჯთაღრიცხვის ინსპექტირება',
   'ობიექტის ხარჯთაღრიცხვის ფასწარმოქმნის ადეკვატურობის ინსპექტირება',
-  'ობიექტზე შესრულებული სამუშაოების ინსპექტირება (მათ შორის ფორმა#2-ის მიხედვით)',
-  'ობიექტის სამშენებლო სამუშაოებზე ტექნიკური ზედამხედველობა – ინსპექტირება',
-  'სამშენებლო ობიექტის პროექტის ან პროექტის ნაწილის მოქმედ დოკუმენტებთან შესაბამისობის შეფასება/ინსპექტირება'
+  'ობიექტზე შესრულებული სამუშაოების ინსპექტირება (მათ შორის ფორმა#2-ის მიხედვით)'
 ];
 
 const ALL_DOCS = [
@@ -91,7 +89,6 @@ const BlankApplicationForm = ({ data }) => {
 
         <View style={styles.headerContainer}>
           <View style={styles.logosLeft}>
-            <Image src="/gac_logo.png" style={styles.logoGAC} />
             <Image src="/logo.png" style={styles.logoBuildex} />
           </View>
           <View style={styles.directorText}>

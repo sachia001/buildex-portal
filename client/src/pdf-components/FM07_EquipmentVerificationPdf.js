@@ -70,7 +70,7 @@ const FM07_EquipmentVerificationPdf = ({ data = {} }) => {
       <FieldRow2 label1="BE-FM-NONCONF №:" value1={data.fm14Number} label2="ვერიფიკატორის სახელი:" value2={data.verifierName} />
 
       <SigBlock3 labels={['ვერიფიკატორი','შემდგენი','დირექტორი']} sigs={sigs} />
-      <FormFooter code="BE-FM-EQ-CHECK v2.0 | 28.04.2026 | შენახვა: 5 წელი" />
+      <FormFooter code="BE-FM-EQ-CHECK v1.0 | 28.04.2026 | შენახვა: 5 წელი" />
     </Page>
   </Document>
 );};

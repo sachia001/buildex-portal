@@ -43,7 +43,7 @@ const FM26_AuditPlanPdf = ({ data = {} }) => {
       <FieldRow label="შენიშვნა / NC-ები:" value={data.notes} />
 
       <SigBlock3 labels={['შემდგენი (აუდიტორი)', 'შემმოწმებელი (ხარისხის მენეჯერი)', 'დამტკიცება (დირექტორი)']} sigs={sigs} />
-      <FormFooter code="BE-FM-AUDIT-PLAN v2.0 | 28.04.2026 | ISO §8.6 | შენახვა: 5 წელი" />
+      <FormFooter code="BE-FM-AUDIT-PLAN v1.0 | 28.04.2026 | ISO §8.6 | შენახვა: 5 წელი" />
     </Page>
   </Document>
 );};

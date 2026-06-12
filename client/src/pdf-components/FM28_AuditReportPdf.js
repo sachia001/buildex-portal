@@ -62,7 +62,7 @@ const FM28_AuditReportPdf = ({ data = {} }) => {
       <FieldRow2 label1="აუდიტის საბოლოო შეფასება:" value1={data.auditConclusion} label2="" value2="" />
 
       <SigBlock3 labels={['აუდიტორი', 'შემმოწმებელი (ხარისხის მენეჯერი)', 'დამტკიცება (დირექტორი)']} sigs={sigs} />
-      <FormFooter code="BE-FM-AUDIT-REPORT v2.0 | 28.04.2026 | ISO §8.6 | შენახვა: 5 წელი" />
+      <FormFooter code="BE-FM-AUDIT-REPORT v1.0 | 28.04.2026 | ISO §8.6 | შენახვა: 5 წელი" />
     </Page>
   </Document>
 );};

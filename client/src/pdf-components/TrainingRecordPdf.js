@@ -78,7 +78,7 @@ const TrainingRecordPdf = ({ data }) => {
         <View style={s.divider} />
 
         <Text style={s.docTitle}>ტრენინგის ჩანაწერი</Text>
-        <Text style={s.docCode}>BE-FM-TRAIN | ვ.2 | 2026 | ISO/IEC 17020:2012/2013 §6.1</Text>
+        <Text style={s.docCode}>BE-FM-TRAIN | ვ.1 | 2026 | ISO/IEC 17020:2012/2013 §6.1</Text>
 
         {/* Section A */}
         <View style={s.sectionBar}><Text style={s.sectionBarText}>A — თანამშრომლის მონაცემები</Text></View>

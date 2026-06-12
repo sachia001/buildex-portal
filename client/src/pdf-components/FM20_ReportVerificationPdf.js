@@ -82,7 +82,7 @@ const FM20_ReportVerificationPdf = ({ data = {} }) => {
       <Text style={s.secH}>E. ხელმოწერები</Text>
       <SigBlock2 left="ვერიფიკატორი (ტექ. მენეჯერი)" right="ხარისხის მენეჯერი" sigs={sigs} />
 
-      <FormFooter code="BE-FM-TECH-REVIEW v2.0 | 28.04.2026 | შენახვა: 10 წელი" />
+      <FormFooter code="BE-FM-TECH-REVIEW v1.0 | 28.04.2026 | შენახვა: 10 წელი" />
     </Page>
   </Document>
 );};
