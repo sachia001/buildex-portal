@@ -129,6 +129,7 @@ const ReportCoverPdf = ({ data = {} }) => {
 
         {/* ჰედერი */}
         <View style={styles.headerContainer} fixed>
+            <View style={styles.leftLogoAbsolute}><Image src="/gac_logo.png" style={styles.combinedLogoImg} /></View>
             <View style={styles.centerColumn}>
                 <Image src="/logo.png" style={styles.buildexLogoImg} />
                 <Text style={styles.companyInfoText}>A ტიპის ინსპექტირების ორგანო</Text>
