@@ -77,13 +77,10 @@ const FM01_ApplicationRegistrationPdf = ({ data = {} }) => {
         {/* D. წარდგენილი დოკუმენტაცია */}
         <Text style={s.secH}>D. წარდგენილი დოკუმენტაცია</Text>
         <View style={[s.tBorder, { padding: 5, marginBottom: 4 }]}>
-          <ChkRow label="საპროექტო დოკუმენტაცია" />
-          <ChkRow label="ხარჯთაღრიცხვა" />
-          <ChkRow label="ტექნიკური დავალება" />
-          <ChkRow label="სახელშეკრულებო დოკ." />
-          <ChkRow label="ნახაზები / სქემები" />
-          <ChkRow label="ნებართვა / ლიცენზია" />
-          <ChkRow label="სხვა: ___________" />
+          {(() => { const sel = Array.isArray(data.submittedDocs) ? data.submittedDocs : [];
+            const opts = ['საპროექტო დოკუმენტაცია','ხარჯთაღრიცხვა','ტექნიკური დავალება','სახელშეკრულებო დოკ.','ნახაზები / სქემები','ნებართვა / ლიცენზია','სხვა'];
+            return opts.map((o) => <ChkRow key={o} label={o} checked={sel.includes(o)} />);
+          })()}
         </View>
         <TextArea value={data.otherDocs} placeholder="სხვა დოკუმენტები" minHeight={24} />
 
