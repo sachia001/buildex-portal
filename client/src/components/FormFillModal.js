@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { Modal, Button, Form, Row, Col, Nav, Tab, Badge } from 'react-bootstrap';
-import { PDFDownloadLink } from '@react-pdf/renderer';
+import { pdf } from '@react-pdf/renderer';
 import SignaturePad from './SignaturePad';
 
 // ── Auth helper ────────────────────────────────────────────────
@@ -347,6 +347,7 @@ const FormFillModal = ({ show, onHide, config, pdfComponent, pdfFileName, formCo
   const [sigsData,       setSigsData]       = useState({});
   const [staffList,      setStaffList]      = useState([]);
   const [inspectionList, setInspectionList] = useState([]);
+  const [gen,            setGen]            = useState(''); // PDF გენერაცია მხოლოდ ღილაკზე (on-demand — შეფერხების გარეშე)
 
   // Keep stable refs for auto-fill callbacks
   const inspListRef  = useRef([]);
@@ -392,14 +393,25 @@ const FormFillModal = ({ show, onHide, config, pdfComponent, pdfFileName, formCo
 
   const { signers = [], sections = [] } = config;
 
-  const rawData    = config.buildData ? config.buildData(formData) : formData;
-  const filledData = { ...rawData, sigs: buildSigs(signers, sigsData) };
-  const blankData  = { sigs: signers.map(() => undefined) };
-
-  const FilledPDF = React.cloneElement(pdfComponent, { data: filledData });
-  const BlankPDF  = React.cloneElement(pdfComponent, { data: blankData });
-
   const sigCount = Object.values(sigsData).filter(s => s && s.dataURL).length;
+
+  // PDF გენერაცია მხოლოდ ღილაკზე დაჭერისას (არა ყოველ კლავიშზე) — შეფერხების აღმოფხვრა
+  const downloadPdf = async (mode) => {
+    setGen(mode);
+    try {
+      const data = mode === 'filled'
+        ? { ...(config.buildData ? config.buildData(formData) : formData), sigs: buildSigs(signers, sigsData) }
+        : { sigs: signers.map(() => undefined) };
+      const blob = await pdf(React.cloneElement(pdfComponent, { data })).toBlob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${pdfFileName}_${mode === 'filled' ? 'შევსებული' : 'ცარიელი'}.pdf`;
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 1500);
+    } catch (e) { console.error('PDF generation error:', e); }
+    setGen('');
+  };
 
   return (
     <Modal show={show} onHide={onHide} size="lg" backdrop="static" scrollable>
@@ -483,22 +495,12 @@ const FormFillModal = ({ show, onHide, config, pdfComponent, pdfFileName, formCo
 
       <Modal.Footer className="border-0 pt-0 gap-2">
         <Button variant="secondary" size="sm" onClick={onHide}>დახურვა</Button>
-        <PDFDownloadLink
-          document={BlankPDF}
-          fileName={`${pdfFileName}_ცარიელი.pdf`}
-          className="btn btn-outline-primary btn-sm"
-          style={{ textDecoration: 'none' }}
-        >
-          {({ loading }) => loading ? '⏳' : '📄 ცარიელი ჩამოტვირთვა'}
-        </PDFDownloadLink>
-        <PDFDownloadLink
-          document={FilledPDF}
-          fileName={`${pdfFileName}_შევსებული.pdf`}
-          className="btn btn-success btn-sm"
-          style={{ textDecoration: 'none' }}
-        >
-          {({ loading }) => loading ? '⏳' : `📥 შევსებული ჩამოტვირთვა${sigCount > 0 ? ` (${sigCount} ✍️)` : ''}`}
-        </PDFDownloadLink>
+        <Button variant="outline-primary" size="sm" disabled={!!gen} onClick={() => downloadPdf('blank')}>
+          {gen === 'blank' ? '⏳ მზადდება…' : '📄 ცარიელი ჩამოტვირთვა'}
+        </Button>
+        <Button variant="success" size="sm" disabled={!!gen} onClick={() => downloadPdf('filled')}>
+          {gen === 'filled' ? '⏳ მზადდება…' : `📥 შევსებული ჩამოტვირთვა${sigCount > 0 ? ` (${sigCount} ✍️)` : ''}`}
+        </Button>
       </Modal.Footer>
     </Modal>
   );

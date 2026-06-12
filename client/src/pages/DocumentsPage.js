@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Container, Row, Col, Card, Button, Badge } from 'react-bootstrap';
-import { PDFDownloadLink } from '@react-pdf/renderer';
 import { Link } from 'react-router-dom';
+import PdfDownloadButton from '../components/PdfDownloadButton';
 
 // ── PDF კომპონენტები ─────────────────────────────────────────
 import BlankLetterhead               from '../pdf-components/BlankLetterhead';
@@ -110,14 +110,12 @@ const NewFormCard = ({ form, color = 'info' }) => {
                 📝 შევსება
               </Button>
             )}
-            <PDFDownloadLink
+            <PdfDownloadButton
               document={<GenericFormPdf form={form} />}
-              fileName={`${fileName}.pdf`}
+              fileName={fileName}
               className={`btn btn-outline-${color} btn-sm w-100 fw-bold`}
               style={{ fontSize: '0.68rem', padding: '3px 5px', textDecoration: 'none' }}
-            >
-              {({ loading }) => loading ? '⏳' : '📄 PDF ჩამოტვ.'}
-            </PDFDownloadLink>
+              label="📄 PDF ჩამოტვ." />
             <Button variant="outline-secondary" size="sm" className="w-100 fw-bold"
               style={{ fontSize: '0.68rem', padding: '3px 5px' }} onClick={handleWord}>
               📝 Word ჩამოტვ.
@@ -225,14 +223,12 @@ const DocCard = ({ icon, code, title, desc, pdf, fileName, linkTo, color = 'prim
                     📝 შევსება
                   </Button>
                 )}
-                <PDFDownloadLink
+                <PdfDownloadButton
                   document={pdf}
-                  fileName={`${fileName}_ცარიელი.pdf`}
+                  fileName={`${fileName}_ცარიელი`}
                   className={`btn btn-outline-${color} btn-sm w-100 fw-bold`}
                   style={{ fontSize: '0.68rem', padding: '3px 5px', textDecoration: 'none' }}
-                >
-                  {({ loading }) => loading ? '⏳' : '📄 PDF ჩამოტვ.'}
-                </PDFDownloadLink>
+                  label="📄 PDF ჩამოტვ." />
                 <Button
                   variant="outline-secondary"
                   size="sm"

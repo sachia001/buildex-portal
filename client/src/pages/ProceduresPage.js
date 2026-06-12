@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import axios from 'axios';
 import { Row, Col, Button, Modal, Form, Badge } from 'react-bootstrap';
 import { toast, confirmDialog } from '../components/Feedback';
-import { PDFDownloadLink } from '@react-pdf/renderer';
+import PdfDownloadButton from '../components/PdfDownloadButton';
 import { Link } from 'react-router-dom';
 
 // ── All existing PDF form components ─────────────────────────────────────────
@@ -280,9 +280,7 @@ function FormCard({ icon, code, title, desc, pdf, fileName, linkTo, color, fill 
                 {fill && FORM_CONFIGS[fill] && (
                   <Button variant={color} size="sm" className="w-100 fw-bold" style={{ fontSize: '0.68rem' }} onClick={() => setShowFill(true)}>📝 შევსება</Button>
                 )}
-                <PDFDownloadLink document={pdf} fileName={`${fileName}_ცარიელი.pdf`} className={`btn btn-outline-${color} btn-sm w-100 fw-bold`} style={{ textDecoration: 'none', fontSize: '0.68rem' }}>
-                  {({ loading }) => loading ? '⏳' : '📄 ჩამოტვირთვა'}
-                </PDFDownloadLink>
+                <PdfDownloadButton document={pdf} fileName={`${fileName}_ცარიელი`} className={`btn btn-outline-${color} btn-sm w-100 fw-bold`} style={{ textDecoration: 'none', fontSize: '0.68rem' }} label="📄 ჩამოტვირთვა" />
               </div>
             )}
           </div>
