@@ -55,6 +55,7 @@ import { WORD_LAYOUTS }    from '../utils/wordLayouts';
 
 // ── ახალი ფორმები (BE-PR სამუშაო ნაკადი) ───────────────────────
 import GenericFormPdf from '../pdf-components/GenericFormPdf';
+import ReportCoverPdf from '../pdf-components/ReportCoverPdf';
 import NEW_FORMS      from '../components/newFormDefinitions.json';
 import { newFormToConfig } from '../utils/newFormToConfig';
 
@@ -335,7 +336,7 @@ const DocumentsPage = () => (
         fillConfig={FORM_CONFIGS['BE-FM-VISIT']} instrKey="BE-FM-VISIT" />
       <DocCard icon="📊" code="BE-FM-IR" title="ინსპექტირების ანგარიში"
         desc="ISO §7.4 — BE-CASE, ობიექტი, გამოყენებული სტანდარტები, 6 შემოწმებული ელემენტი, მიგნებები, დასკვნა, ხელმოწერები"
-        pdf={<FM17_InspectionReportPdf />} fileName="BE-FM-17_ინსპ_ანგ" color="info"
+        pdf={<ReportCoverPdf data={{}} />} fileName="BE-FM-IR_ინსპ_ანგარიში" color="info"
         fillConfig={FORM_CONFIGS['BE-FM-IR']} instrKey="BE-FM-IR" />
       <DocCard icon="📒" code="BE-FM-INSP-REG" title="ინსპექციების რეგისტრი"
         desc="ISO §7.3 ჟურნალი — ყველა საქმე ერთ ადგილას, პერიოდი, ხარისხის მენეჯერის ვიზა; ყოველწლიური გახსნა"
