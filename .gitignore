@@ -13,11 +13,8 @@ tmp_*
 .env.local
 .env.production
 
-# Uploads — user files not in git, EXCEPT controlled accreditation documents
-# (uploads/procedures is version-controlled: QM/BE-PR/BE-WI/HR-JD/BE-FM/BE-POL/RM/ORD).
-uploads/docs/
-uploads/estimates/
-uploads/norms/
+# Uploads (user files + accreditation docs) — not in git; live docs served from Cloudinary.
+uploads/
 
 # OS
 .DS_Store

@@ -1240,6 +1240,9 @@ async function seedProcedures() {
             }
         };
         walk(procDir, 'other', '/uploads/procedures');
+        // უსაფრთხოება: თუ ფოლდერი ცარიელია (დოკები არ არის bundled-ში), reconcile/delete არ შესრულდეს —
+        // live ProcedureDoc-ები არ უნდა წაიშალოს. დოკუმენტები იტვირთება Cloudinary-ზე upload-API-ით.
+        if (!pending.length) { console.log('ℹ️ uploads/procedures ცარიელია — seed/reconcile გამოტოვებულია'); return; }
         const bundledCodes = [...new Set(pending.map(p => parseDocName(p.fname).code))];
 
         // ─── reconcile (CR-2 / ISO-002): authoritative ნაკრების ხელახ-ჩაწერამდე წავშალოთ:
