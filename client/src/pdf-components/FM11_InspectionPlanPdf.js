@@ -91,11 +91,11 @@ const FM11_InspectionPlanPdf = ({ data = {} }) => {
           <View style={[s.tHead,{width:'26%',...cc}]}><Text>BE-FM-IMP-DECL №</Text></View>
           <View style={[s.tHead,{width:'26%',...cc}]}><Text>ხელმოწერა / თარიღი</Text></View>
         </View>
-        {[...Array(3)].map((_,i) => (
-          <View key={i} style={i%2===0?s.tRow:s.tRowAlt}>
-            <View style={[s.tCell,{flex:1,minHeight:15}]}/><View style={[s.tCell,{width:'26%'}]}/><View style={[s.tCell,{width:'26%'}]}/>
+        {(() => { const rows = Array.isArray(data.inspectorRows) ? data.inspectorRows : []; const W=[{"flex":1,"minHeight":15},{"width":"26%"},{"width":"26%"}]; return [...Array(Math.max(3, rows.length))].map((_,i)=>{const r=rows[i]||{}; return (
+          <View key={i} style={i % 2 === 0 ? s.tRow : s.tRowAlt}>
+            {W.map((st,ci)=>(<View key={ci} style={[s.tCell,{...st}]}><Text style={{ fontSize: 7.5 }}>{r['c'+ci]||''}</Text></View>))}
           </View>
-        ))}
+        );}); })()}
       </View>
 
       <View style={{flexDirection:'row',justifyContent:'flex-end',marginTop:6}}>

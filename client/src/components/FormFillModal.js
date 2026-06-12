@@ -25,7 +25,7 @@ const isExternal = (label = '') =>
   /დამკვეთ|კლიენტ|კონტრაქტ|მომჩივ|მოწმე/i.test(label);
 
 // ── TableRows editor ───────────────────────────────────────────
-const TableRowsEditor = ({ field, value, onChange }) => {
+const TableRowsEditor = ({ field, value, onChange, staffList = [] }) => {
   const minRows = field.minRows || 1;
   const rows = value && value.length > 0 ? value : Array.from({ length: minRows }, () => ({}));
 
@@ -62,6 +62,15 @@ const TableRowsEditor = ({ field, value, onChange }) => {
                     onChange={e => update(idx, col.id, e.target.value)}>
                     <option value="">—</option>
                     {col.options.map(o => <option key={o} value={o}>{o}</option>)}
+                  </Form.Select>
+                ) : col.type === 'staff' ? (
+                  <Form.Select size="sm" value={row[col.id] || ''}
+                    onChange={e => update(idx, col.id, e.target.value)}>
+                    <option value="">— თანამშრომელი —</option>
+                    {staffList.map(u => {
+                      const n = `${u.firstName} ${u.lastName}`;
+                      return <option key={u._id} value={n}>{n}{u.position ? ` — ${u.position}` : ''}</option>;
+                    })}
                   </Form.Select>
                 ) : col.type === 'textarea' ? (
                   <Form.Control as="textarea" rows={2} size="sm" value={row[col.id] || ''}
@@ -142,7 +151,7 @@ const FieldInput = ({ field, value, onChange, staffList, inspectionList }) => {
     );
   }
   if (field.type === 'tablerows')
-    return <TableRowsEditor field={field} value={value} onChange={onChange} />;
+    return <TableRowsEditor field={field} value={value} onChange={onChange} staffList={staffList} />;
   if (field.type === 'textarea')
     return (
       <Form.Control as="textarea" rows={3} size="sm" value={value || ''}

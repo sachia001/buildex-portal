@@ -59,6 +59,12 @@ export const FORM_CONFIGS = {
     title: 'შიდა აუდიტის გეგმა და ანგარიში',
     signers: ['შემავსებელი', 'შემოწმებული', 'დამტკიცებული'],
     sections: [
+      { label: 'შემოსამოწმებელი სფეროები', fields: [
+        { id: 'areaRows', label: 'სფეროები (ISO §§ 4–9)', type: 'tablerows', minRows: 1, columns: [
+          { id: 'c0', label: 'შემოსამოწმებელი ობიექტი (PR/FM/POL)', md: 6 }, { id: 'c1', label: 'ISO §', md: 2 },
+          { id: 'c2', label: 'გეგმური თარიღი', type: 'date', md: 2 }, { id: 'c3', label: 'სტატუსი', md: 2 },
+        ] },
+      ]},
       { label: 'დამატებითი ინფორმაცია', fields: [
         { id: 'approvalDate', label: 'დამტკიცების თარიღი', type: 'date' },
         { id: 'notes', label: 'შენიშვნები', type: 'textarea' },
@@ -307,6 +313,12 @@ export const FORM_CONFIGS = {
       };
     },
     sections: [
+      { label: 'ინსპექტორების შეთანხმება (BE-FM-IMP-DECL)', fields: [
+        { id: 'inspectorRows', label: 'ინსპექტორები', type: 'tablerows', minRows: 1, columns: [
+          { id: 'c0', label: 'ინსპექტორი', type: 'staff', md: 5 }, { id: 'c1', label: 'BE-FM-IMP-DECL №', md: 4 },
+          { id: 'c2', label: 'ხელმოწერა / თარიღი', md: 3 },
+        ] },
+      ]},
       { label: 'საიდენტიფიკაციო მონაცემები', fields: [
         { id: 'caseNumber',     label: 'BE-CASE №',                    type: 'case' },
         { id: 'inspDate',       label: 'ინსპექციის თარიღი',            type: 'date' },
@@ -643,6 +655,14 @@ export const FORM_CONFIGS = {
     title: 'ინსპექციების რეგისტრი (ჟურნალი)',
     signers: ['ხარისხის მენეჯერი'],
     sections: [
+      { label: 'ინსპექციების სია (ჟურნალი)', fields: [
+        { id: 'registerRows', label: 'ჩანაწერები', type: 'tablerows', minRows: 1, columns: [
+          { id: 'c0', label: 'საქმის №', md: 4 }, { id: 'c1', label: 'დამკვეთი', md: 4 },
+          { id: 'c2', label: 'ობიექტი / მისამართი', md: 4 }, { id: 'c3', label: 'სახეობა', md: 3 },
+          { id: 'c4', label: 'ინსპექტორი', type: 'staff', md: 3 }, { id: 'c5', label: 'დასრულება', type: 'date', md: 3 },
+          { id: 'c6', label: 'ოქმის თარიღი', type: 'date', md: 3 }, { id: 'c7', label: 'სტატუსი', md: 12 },
+        ] },
+      ]},
       { label: 'ჟურნალის მონაცემები', fields: [
         { id: 'journalNumber',  label: 'ჟურნალის №',                         type: 'text' },
         { id: 'period',         label: 'პერიოდი (წელი)',                       type: 'text' },
@@ -665,6 +685,14 @@ export const FORM_CONFIGS = {
         { id: 'effectiveDate', label: 'ძალაში შესვლის თარიღი',       type: 'date' },
         { id: 'changeDesc',    label: 'ცვლილების მოკლე აღწერა',      type: 'textarea' },
         { id: 'deadline',      label: 'გაცნობის ვადა (5 სამ. დღე)',  type: 'date' },
+      ]},
+      { label: 'გაცნობის ოქმი — პერსონალი (ხელმოწერა ხელით აქვს)', fields: [
+        { id: 'acknowledgeRows', label: 'პერსონალის ჩამონათვალი', type: 'tablerows', minRows: 1,
+          columns: [
+            { id: 'name',     label: 'სახელი / გვარი', type: 'staff', md: 5 },
+            { id: 'position', label: 'თანამდებობა', md: 4 },
+            { id: 'date',     label: 'თარიღი', type: 'date', md: 3 },
+          ] },
       ]},
     ],
   },
@@ -699,6 +727,14 @@ export const FORM_CONFIGS = {
     title: 'ცვლილებების რეგისტრი',
     signers: ['ხარისხის მენეჯერი'],
     sections: [
+      { label: 'ცვლილებების ჟურნალი', fields: [
+        { id: 'changeRows', label: 'ჩანაწერები', type: 'tablerows', minRows: 1, columns: [
+          { id: 'c0', label: 'BE-FM-CHANGE-INIT №', md: 4 }, { id: 'c1', label: 'დოკუმენტის სახელი', md: 8 },
+          { id: 'c2', label: 'ძველი ვერსია', md: 3 }, { id: 'c3', label: 'ახალი ვერსია', md: 3 },
+          { id: 'c4', label: 'ძალაში შესვლის თარიღი', type: 'date', md: 3 }, { id: 'c5', label: 'ცვლილების ხასიათი', md: 8 },
+          { id: 'c6', label: 'BE-FM-FAMIL (✓)', md: 4 },
+        ] },
+      ]},
       { label: 'ჟურნალის მონაცემები', fields: [
         { id: 'qualityManager', label: 'პასუხისმგებელი (ხარისხის მენეჯერი)', type: 'staffmulti' },
         { id: 'period',         label: 'პერიოდი (წელი)',                      type: 'text' },
@@ -915,6 +951,12 @@ export const FORM_CONFIGS = {
     title: 'შიდა აუდიტის ჩეკლისტი',
     signers: ['აუდიტორი', 'შემმოწმებელი (ხარისხის მენეჯერი)', 'დამტკიცება (დირექტორი)'],
     sections: [
+      { label: 'გამოვლენილი შეუსაბამობები (NC)', fields: [
+        { id: 'ncRows', label: 'NC ჩანაწერები', type: 'tablerows', minRows: 1, columns: [
+          { id: 'c0', label: 'NC №', md: 3 }, { id: 'c1', label: 'ISO §', md: 3 },
+          { id: 'c2', label: 'კატეგორია', md: 3 }, { id: 'c3', label: 'აღწერა', md: 3 },
+        ] },
+      ]},
       { label: 'აუდიტის მონაცემები', fields: [
         { id: 'auditNumber',   label: 'BE-FM-AUDIT-PLAN აუდიტის №',                type: 'text' },
         { id: 'auditDate',     label: 'აუდიტის თარიღი',                 type: 'date' },
@@ -930,6 +972,16 @@ export const FORM_CONFIGS = {
     title: 'შიდა აუდიტის ანგარიში',
     signers: ['აუდიტორი', 'შემმოწმებელი (ხარისხის მენეჯერი)', 'დამტკიცება (დირექტორი)'],
     sections: [
+      { label: 'მიგნებები და ქმედებები', fields: [
+        { id: 'findRows', label: 'მიგნებები (NC)', type: 'tablerows', minRows: 1, columns: [
+          { id: 'c0', label: 'NC №', md: 3 }, { id: 'c1', label: 'ISO §', md: 2 }, { id: 'c2', label: 'კატეგორია', md: 3 },
+          { id: 'c3', label: 'აღწერა', md: 8 }, { id: 'c4', label: 'BE-FM-CAPA №', md: 4 },
+        ] },
+        { id: 'actionRows', label: 'ინიცირებული ქმედებები', type: 'tablerows', minRows: 1, columns: [
+          { id: 'c0', label: 'ქმედება', md: 6 }, { id: 'c1', label: 'პასუხისმგებელი', type: 'staff', md: 4 },
+          { id: 'c2', label: 'ვადა', type: 'date', md: 3 }, { id: 'c3', label: 'სტატუსი', md: 4 },
+        ] },
+      ]},
       { label: 'ანგარიშის მონაცემები', fields: [
         { id: 'auditNumber',      label: 'BE-FM-AUDIT-PLAN აუდიტის №',              type: 'text' },
         { id: 'auditDate',        label: 'აუდიტის თარიღი',               type: 'date' },
@@ -975,6 +1027,14 @@ export const FORM_CONFIGS = {
     title: 'აუდიტის შეხვედრის ოქმი',
     signers: ['აუდიტორი', 'აუდიტირებული', 'ხარისხის მენეჯერი'],
     sections: [
+      { label: 'NC და შეთანხმებული ქმედებები', fields: [
+        { id: 'ncRows', label: 'NC სტატუსი', type: 'tablerows', minRows: 1, columns: [
+          { id: 'c0', label: 'NC №', md: 4 }, { id: 'c1', label: 'სტატუსი', md: 5 }, { id: 'c2', label: 'BE-FM-CAPA №', md: 3 },
+        ] },
+        { id: 'actRows', label: 'შეთანხმებული ქმედებები', type: 'tablerows', minRows: 1, columns: [
+          { id: 'c0', label: 'ქმედება', md: 6 }, { id: 'c1', label: 'პასუხისმგებელი', type: 'staff', md: 3 }, { id: 'c2', label: 'ვადა', type: 'date', md: 3 },
+        ] },
+      ]},
       { label: 'დამატებითი ინფორმაცია', fields: [
         { id: 'scopeDetail', label: 'აუდიტის სფერო (დეტალურად)', type: 'textarea' },
       ]},
@@ -995,6 +1055,14 @@ export const FORM_CONFIGS = {
     title: 'შიდა აუდიტის პროგრამა (წლიური გეგმა)',
     signers: ['შემდგენი (ხარისხის მენეჯერი)', 'შემმოწმებელი (აუდიტორი)', 'დამტკიცება (დირექტორი)'],
     sections: [
+      { label: 'აუდიტირებული ობიექტები (წლიური)', fields: [
+        { id: 'progRows', label: 'ობიექტები', type: 'tablerows', minRows: 1, columns: [
+          { id: 'c0', label: 'აუდიტირებული ობიექტი (PR/FM/POL)', md: 6 }, { id: 'c1', label: 'აუდიტორი', type: 'staff', md: 6 },
+          { id: 'q0', label: 'I კვ. (✓)', md: 3 }, { id: 'q1', label: 'II კვ. (✓)', md: 3 },
+          { id: 'q2', label: 'III კვ. (✓)', md: 3 }, { id: 'q3', label: 'IV კვ. (✓)', md: 3 },
+          { id: 'c2', label: 'სტატუსი', md: 12 },
+        ] },
+      ]},
       { label: 'პროგრამის მონაცემები', fields: [
         { id: 'programNumber',       label: 'პროგრამის №',                     type: 'text', placeholder: 'PROG-2026' },
         { id: 'year',                label: 'წელი',                             type: 'text', placeholder: '2026' },

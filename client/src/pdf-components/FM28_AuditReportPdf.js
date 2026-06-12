@@ -30,15 +30,11 @@ const FM28_AuditReportPdf = ({ data = {} }) => {
           <View style={[s.tHead, { flex: 1, ...p }]}><Text>აღწერა</Text></View>
           <View style={[s.tHead, { width: '18%', ...p }]}><Text>BE-FM-CAPA CAPA №</Text></View>
         </View>
-        {[...Array(5)].map((_, i) => (
+        {(() => { const rows = Array.isArray(data.findRows) ? data.findRows : []; const W=[{"width":"14%","minHeight":12},{"width":"10%"},{"width":"16%"},{"flex":1},{"width":"18%"}]; return [...Array(Math.max(5, rows.length))].map((_,i)=>{const r=rows[i]||{}; return (
           <View key={i} style={i % 2 === 0 ? s.tRow : s.tRowAlt}>
-            <View style={[s.tCell, { width: '14%', ...p, minHeight: 12 }]} />
-            <View style={[s.tCell, { width: '10%', ...p }]} />
-            <View style={[s.tCell, { width: '16%', ...p }]} />
-            <View style={[s.tCell, { flex: 1, ...p }]} />
-            <View style={[s.tCell, { width: '18%', ...p }]} />
+            {W.map((st,ci)=>(<View key={ci} style={[s.tCell,{...st,...p}]}><Text style={{ fontSize: 7.5 }}>{r['c'+ci]||''}</Text></View>))}
           </View>
-        ))}
+        );}); })()}
       </View>
 
       <Text style={s.secH}>D. ინიცირებული ქმედებები</Text>
@@ -49,14 +45,11 @@ const FM28_AuditReportPdf = ({ data = {} }) => {
           <View style={[s.tHead, { width: '18%', ...p }]}><Text>ვადა</Text></View>
           <View style={[s.tHead, { width: '14%', ...p }]}><Text>სტატუსი</Text></View>
         </View>
-        {[...Array(3)].map((_, i) => (
+        {(() => { const rows = Array.isArray(data.actionRows) ? data.actionRows : []; const W=[{"flex":1,"minHeight":12},{"width":"22%"},{"width":"18%"},{"width":"14%"}]; return [...Array(Math.max(3, rows.length))].map((_,i)=>{const r=rows[i]||{}; return (
           <View key={i} style={i % 2 === 0 ? s.tRow : s.tRowAlt}>
-            <View style={[s.tCell, { flex: 1, ...p, minHeight: 12 }]} />
-            <View style={[s.tCell, { width: '22%', ...p }]} />
-            <View style={[s.tCell, { width: '18%', ...p }]} />
-            <View style={[s.tCell, { width: '14%', ...p }]} />
+            {W.map((st,ci)=>(<View key={ci} style={[s.tCell,{...st,...p}]}><Text style={{ fontSize: 7.5 }}>{r['c'+ci]||''}</Text></View>))}
           </View>
-        ))}
+        );}); })()}
       </View>
 
       <FieldRow2 label1="აუდიტის საბოლოო შეფასება:" value1={data.auditConclusion} label2="" value2="" />

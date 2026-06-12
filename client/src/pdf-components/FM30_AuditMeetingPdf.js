@@ -33,13 +33,11 @@ const FM30_AuditMeetingPdf = ({ data = {} }) => {
           <View style={[s.tHead, { flex: 1, ...p }]}><Text>სტატუსი</Text></View>
           <View style={[s.tHead, { width: '22%', ...p }]}><Text>BE-FM-CAPA CAPA №</Text></View>
         </View>
-        {[...Array(5)].map((_, i) => (
+        {(() => { const rows = Array.isArray(data.ncRows) ? data.ncRows : []; const W=[{"width":"18%","minHeight":12},{"flex":1},{"width":"22%"}]; return [...Array(Math.max(5, rows.length))].map((_,i)=>{const r=rows[i]||{}; return (
           <View key={i} style={i % 2 === 0 ? s.tRow : s.tRowAlt}>
-            <View style={[s.tCell, { width: '18%', ...p, minHeight: 12 }]} />
-            <View style={[s.tCell, { flex: 1, ...p }]} />
-            <View style={[s.tCell, { width: '22%', ...p }]} />
+            {W.map((st,ci)=>(<View key={ci} style={[s.tCell,{...st,...p}]}><Text style={{ fontSize: 7.5 }}>{r['c'+ci]||''}</Text></View>))}
           </View>
-        ))}
+        );}); })()}
       </View>
 
       <Text style={s.secH}>D. შეთანხმებული ქმედებები</Text>
@@ -49,13 +47,11 @@ const FM30_AuditMeetingPdf = ({ data = {} }) => {
           <View style={[s.tHead, { width: '24%', ...p }]}><Text>პასუხისმგებელი</Text></View>
           <View style={[s.tHead, { width: '18%', ...p }]}><Text>ვადა</Text></View>
         </View>
-        {[...Array(3)].map((_, i) => (
+        {(() => { const rows = Array.isArray(data.actRows) ? data.actRows : []; const W=[{"flex":1,"minHeight":12},{"width":"24%"},{"width":"18%"}]; return [...Array(Math.max(3, rows.length))].map((_,i)=>{const r=rows[i]||{}; return (
           <View key={i} style={i % 2 === 0 ? s.tRow : s.tRowAlt}>
-            <View style={[s.tCell, { flex: 1, ...p, minHeight: 12 }]} />
-            <View style={[s.tCell, { width: '24%', ...p }]} />
-            <View style={[s.tCell, { width: '18%', ...p }]} />
+            {W.map((st,ci)=>(<View key={ci} style={[s.tCell,{...st,...p}]}><Text style={{ fontSize: 7.5 }}>{r['c'+ci]||''}</Text></View>))}
           </View>
-        ))}
+        );}); })()}
       </View>
 
       <SigBlock3 labels={['აუდიტორი', 'აუდიტირებული', 'ხარისხის მენეჯერი']} sigs={sigs} />

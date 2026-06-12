@@ -30,17 +30,17 @@ const FM31_AuditProgramPdf = ({ data = {} }) => {
           ))}
           <View style={[s.tHead, { width: '11%', ...p }]}><Text>სტატუსი</Text></View>
         </View>
-        {[...Array(10)].map((_, i) => (
+        {(() => { const rows = Array.isArray(data.progRows) ? data.progRows : []; return [...Array(Math.max(10, rows.length))].map((_,i)=>{const r=rows[i]||{}; return (
           <View key={i} style={i % 2 === 0 ? s.tRow : s.tRowAlt}>
             <View style={[s.tCell, { width: '5%', ...p }]}><Text style={{ fontSize: 7 }}>{i + 1}</Text></View>
-            <View style={[s.tCell, { flex: 1, ...p, minHeight: 13 }]} />
-            <View style={[s.tCell, { width: '16%', ...p }]} />
-            {quarters.map(q => (
-              <View key={q} style={[s.tCell, { width: '8%', ...p }]} />
+            <View style={[s.tCell, { flex: 1, ...p, minHeight: 13 }]}><Text style={{ fontSize: 7 }}>{r.c0||''}</Text></View>
+            <View style={[s.tCell, { width: '16%', ...p }]}><Text style={{ fontSize: 7 }}>{r.c1||''}</Text></View>
+            {quarters.map((q,qi) => (
+              <View key={q} style={[s.tCell, { width: '8%', ...p, textAlign:'center' }]}><Text style={{ fontSize: 7 }}>{r['q'+qi]||''}</Text></View>
             ))}
-            <View style={[s.tCell, { width: '11%', ...p }]} />
+            <View style={[s.tCell, { width: '11%', ...p }]}><Text style={{ fontSize: 7 }}>{r.c2||''}</Text></View>
           </View>
-        ))}
+        );}); })()}
       </View>
 
       <Text style={s.secH}>C. წლიური შეჯამება</Text>

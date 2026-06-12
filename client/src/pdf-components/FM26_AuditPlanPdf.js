@@ -26,15 +26,12 @@ const FM26_AuditPlanPdf = ({ data = {} }) => {
           <View style={[s.tHead, { width: '17%', ...p }]}><Text>გეგმური თარიღი</Text></View>
           <View style={[s.tHead, { width: '13%', ...p }]}><Text>სტატუსი</Text></View>
         </View>
-        {[...Array(10)].map((_, i) => (
+        {(() => { const rows = Array.isArray(data.areaRows) ? data.areaRows : []; const W=[{flex:1,minHeight:12},{width:'13%'},{width:'17%'},{width:'13%'}]; return [...Array(Math.max(10, rows.length))].map((_,i)=>{const r=rows[i]||{}; return (
           <View key={i} style={i % 2 === 0 ? s.tRow : s.tRowAlt}>
             <View style={[s.tCell, { width: '6%', ...p }]}><Text style={{ fontSize: 7 }}>{i + 1}</Text></View>
-            <View style={[s.tCell, { flex: 1, ...p, minHeight: 12 }]} />
-            <View style={[s.tCell, { width: '13%', ...p }]} />
-            <View style={[s.tCell, { width: '17%', ...p }]} />
-            <View style={[s.tCell, { width: '13%', ...p }]} />
+            {W.map((st,ci)=>(<View key={ci} style={[s.tCell, { ...st, ...p }]}><Text style={{ fontSize: 7 }}>{r['c'+ci]||''}</Text></View>))}
           </View>
-        ))}
+        );}); })()}
       </View>
 
       <Text style={s.secH}>C. შედეგი</Text>

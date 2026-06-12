@@ -33,12 +33,22 @@ const FM22_FamiliarizationPdf = ({ data = {} }) => {
           <View style={[s.tHead,{width:'22%',...cc}]}><Text>ხელმოწერა</Text></View>
           <View style={[s.tHead,{width:'18%',...cc}]}><Text>თარიღი</Text></View>
         </View>
-        {[...Array(14)].map((_,i) => (
-          <View key={i} style={i%2===0?s.tRow:s.tRowAlt}>
-            <View style={[s.tCell,{width:'5%',...cc}]}><Text style={{fontSize:7.5}}>{i+1}</Text></View>
-            <View style={[s.tCell,{flex:1,...cc}]}/><View style={[s.tCell,{width:'22%',...cc}]}/><View style={[s.tCell,{width:'22%',...cc}]}/><View style={[s.tCell,{width:'18%',...cc}]}/>
-          </View>
-        ))}
+        {(() => {
+          const rows = Array.isArray(data.acknowledgeRows) ? data.acknowledgeRows : [];
+          const total = Math.max(14, rows.length);
+          return [...Array(total)].map((_, i) => {
+            const r = rows[i] || {};
+            return (
+              <View key={i} style={i%2===0?s.tRow:s.tRowAlt}>
+                <View style={[s.tCell,{width:'5%',...cc}]}><Text style={{fontSize:7.5}}>{i+1}</Text></View>
+                <View style={[s.tCell,{flex:1,...cc}]}><Text style={{fontSize:7.5}}>{r.name||''}</Text></View>
+                <View style={[s.tCell,{width:'22%',...cc}]}><Text style={{fontSize:7.5}}>{r.position||''}</Text></View>
+                <View style={[s.tCell,{width:'22%',...cc}]}/>
+                <View style={[s.tCell,{width:'18%',...cc}]}><Text style={{fontSize:7.5}}>{r.date||''}</Text></View>
+              </View>
+            );
+          });
+        })()}
       </View>
 
       <SigBlock3 labels={['შემდგენი','შემმოწმებელი (ხარისხის მენეჯერი)','დამტკიცება (დირექტორი)']} sigs={sigs} />

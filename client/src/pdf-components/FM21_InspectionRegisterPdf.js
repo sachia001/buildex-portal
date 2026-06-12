@@ -29,12 +29,12 @@ const FM21_InspectionRegisterPdf = ({ data = {} }) => {
           <View style={[s.tHead,{width:'7%',...cc}]}><Text>ოქმის თარიღი</Text></View>
           <View style={[s.tHead,{width:'12%',...cc}]}><Text>სტატუსი</Text></View>
         </View>
-        {[...Array(18)].map((_,i) => (
+        {(() => { const rows = Array.isArray(data.registerRows) ? data.registerRows : []; const W=['13%','17%','19%','10%','11%','7%','7%','12%']; return [...Array(Math.max(18, rows.length))].map((_,i)=>{const r=rows[i]||{}; return (
           <View key={i} style={i%2===0?s.tRow:s.tRowAlt}>
             <View style={[s.tCell,{width:'4%',...cc}]}><Text style={{fontSize:7}}>{i+1}</Text></View>
-            <View style={[s.tCell,{width:'13%',...cc}]}/><View style={[s.tCell,{width:'17%',...cc}]}/><View style={[s.tCell,{width:'19%',...cc}]}/><View style={[s.tCell,{width:'10%',...cc}]}/><View style={[s.tCell,{width:'11%',...cc}]}/><View style={[s.tCell,{width:'7%',...cc}]}/><View style={[s.tCell,{width:'7%',...cc}]}/><View style={[s.tCell,{width:'12%',...cc}]}/>
+            {W.map((w,ci)=>(<View key={ci} style={[s.tCell,{width:w,...cc}]}><Text style={{fontSize:7}}>{r['c'+ci]||''}</Text></View>))}
           </View>
-        ))}
+        );}); })()}
       </View>
       <Text style={{fontSize:7,color:'#555',marginBottom:5}}>
         სახეობა: PR-01=ხიდი/გზა | PR-02=ფუნდამენტი | PR-03=ფასადი/ასაწყობი | PR-04=ზარდახში/ინფ. | სტ.: R=რეგისტრირებული | A=მიმდინარე | C=დასრულებული | S=შეჩერებული

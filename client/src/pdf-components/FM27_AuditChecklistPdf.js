@@ -56,14 +56,11 @@ const FM27_AuditChecklistPdf = ({ data = {} }) => {
           <View style={[s.tHead, { width: '18%', ...p }]}><Text>კატეგორია</Text></View>
           <View style={[s.tHead, { flex: 1, ...p }]}><Text>აღწერა</Text></View>
         </View>
-        {[...Array(4)].map((_, i) => (
+        {(() => { const rows = Array.isArray(data.ncRows) ? data.ncRows : []; const W=[{"width":"14%","minHeight":12},{"width":"12%"},{"width":"18%"},{"flex":1}]; return [...Array(Math.max(4, rows.length))].map((_,i)=>{const r=rows[i]||{}; return (
           <View key={i} style={i % 2 === 0 ? s.tRow : s.tRowAlt}>
-            <View style={[s.tCell, { width: '14%', ...p, minHeight: 12 }]} />
-            <View style={[s.tCell, { width: '12%', ...p }]} />
-            <View style={[s.tCell, { width: '18%', ...p }]} />
-            <View style={[s.tCell, { flex: 1, ...p }]} />
+            {W.map((st,ci)=>(<View key={ci} style={[s.tCell,{...st,...p}]}><Text style={{ fontSize: 7.5 }}>{r['c'+ci]||''}</Text></View>))}
           </View>
-        ))}
+        );}); })()}
       </View>
 
       <FieldRow2 label1="ISO მოთხოვნები შესრულებულია (კი/არა):" value1={data.conforming}

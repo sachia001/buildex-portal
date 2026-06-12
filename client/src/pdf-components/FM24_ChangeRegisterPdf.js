@@ -26,12 +26,12 @@ const FM24_ChangeRegisterPdf = ({ data = {} }) => {
           <View style={[s.tHead,{width:'18%',...cc}]}><Text>ცვლილების ხასიათი</Text></View>
           <View style={[s.tHead,{width:'10%',...cc}]}><Text>BE-FM-FAMIL</Text></View>
         </View>
-        {[...Array(22)].map((_,i) => (
+        {(() => { const rows = Array.isArray(data.changeRows) ? data.changeRows : []; const W=[{width:'12%'},{flex:1},{width:'9%'},{width:'9%'},{width:'11%'},{width:'18%'},{width:'10%'}]; return [...Array(Math.max(22, rows.length))].map((_,i)=>{const r=rows[i]||{}; return (
           <View key={i} style={i%2===0?s.tRow:s.tRowAlt}>
             <View style={[s.tCell,{width:'4%',...cc}]}><Text style={{fontSize:7}}>{i+1}</Text></View>
-            <View style={[s.tCell,{width:'12%',...cc}]}/><View style={[s.tCell,{flex:1,...cc}]}/><View style={[s.tCell,{width:'9%',...cc}]}/><View style={[s.tCell,{width:'9%',...cc}]}/><View style={[s.tCell,{width:'11%',...cc}]}/><View style={[s.tCell,{width:'18%',...cc}]}/><View style={[s.tCell,{width:'10%',...cc}]}/>
+            {W.map((st,ci)=>(<View key={ci} style={[s.tCell,{...st,...cc}]}><Text style={{fontSize:7}}>{r['c'+ci]||''}</Text></View>))}
           </View>
-        ))}
+        );}); })()}
       </View>
       <Text style={{fontSize:7,color:'#555',marginBottom:6}}>ცვლ.ხ.: რ — რედაქცია | ა — ახალი | ა/ა — ამოღება/არქივი | შ — შინაარსი | BE-FM-FAMIL: ✓ — ჩატარებული | — — ზ. (ზედმეტი)</Text>
 
