@@ -8,7 +8,7 @@ const FM07_EquipmentVerificationPdf = ({ data = {} }) => {
   <Document>
     <Page size="A4" style={[s.page, { paddingTop: 10, paddingBottom: 16, paddingHorizontal: 28 }]}>
       <WM />
-      <FormHeader code="BE-FM-07" isoRef="სსტ ISO/IEC 17020 §6.2" title="მოწყობილობის ვერიფიკაცია" subtitle="Equipment Verification Record" />
+      <FormHeader code="BE-FM-EQ-CHECK" isoRef="სსტ ISO/IEC 17020 §6.2" title="მოწყობილობის ვერიფიკაცია" subtitle="Equipment Verification Record" />
 
       <Text style={s.secH}>A. მოწყობილობის იდენტიფიკაცია</Text>
       <FieldRow2 label1="დასახელება:"        value1={data.equipmentName}  label2="საინვენტარო №:"               value2={data.inventoryNumber} />
@@ -67,10 +67,10 @@ const FM07_EquipmentVerificationPdf = ({ data = {} }) => {
 
       <Text style={s.secH}>E. შეუსაბამობა და შედეგები</Text>
       <YesNoRow label="შეუსაბამობა ნაპოვნია:" yesNo={data.nonConformityFound} />
-      <FieldRow2 label1="FM-14 №:" value1={data.fm14Number} label2="ვერიფიკატორის სახელი:" value2={data.verifierName} />
+      <FieldRow2 label1="BE-FM-NONCONF №:" value1={data.fm14Number} label2="ვერიფიკატორის სახელი:" value2={data.verifierName} />
 
       <SigBlock3 labels={['ვერიფიკატორი','შემდგენი','დირექტორი']} sigs={sigs} />
-      <FormFooter code="BE-FM-07 v2.0 | 28.04.2026 | შენახვა: 5 წელი" />
+      <FormFooter code="BE-FM-EQ-CHECK v2.0 | 28.04.2026 | შენახვა: 5 წელი" />
     </Page>
   </Document>
 );};

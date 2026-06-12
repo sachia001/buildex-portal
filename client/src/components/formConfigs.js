@@ -6,7 +6,7 @@
 export const FORM_CONFIGS = {
 
   // ══════════════════════════════════════════════════════════
-  'FM-02': {
+  'BE-FM-IMP-DECL': {
     title: 'მიუკერძოებლობის დეკლარაცია',
     signers: ['შემავსებელი', 'შემოწმებული', 'დამტკიცებული'],
     // buildData converts flat c_* yesno fields → conflicts object expected by PDF
@@ -42,7 +42,7 @@ export const FORM_CONFIGS = {
   },
 
   // ══════════════════════════════════════════════════════════
-  'FM-03': {
+  'BE-FM-CONF': {
     title: 'კონფიდენციალობის შეთანხმება',
     signers: ['შემავსებელი', 'შემოწმებული', 'დამტკიცებული'],
     sections: [
@@ -55,7 +55,7 @@ export const FORM_CONFIGS = {
   },
 
   // ══════════════════════════════════════════════════════════
-  'FM-04': {
+  'BE-FM-AUDIT-PLAN': {
     title: 'შიდა აუდიტის გეგმა და ანგარიში',
     signers: ['შემავსებელი', 'შემოწმებული', 'დამტკიცებული'],
     sections: [
@@ -102,7 +102,7 @@ export const FORM_CONFIGS = {
   },
 
   // ══════════════════════════════════════════════════════════
-  'FM-06': {
+  'BE-FM-COMPLAINT': {
     title: 'საჩივარი / აპელაცია',
     signers: ['შემდგენი', 'ხარისხის მენეჯერი', 'დირექტორი'],
     sections: [
@@ -119,15 +119,15 @@ export const FORM_CONFIGS = {
       { label: 'შინაარსი და გადაწყვეტა', fields: [
         { id: 'description',      label: 'საჩივრის შინაარსი',            type: 'textarea' },
         { id: 'resolution',       label: 'გადაწყვეტა',                   type: 'textarea' },
-        { id: 'capaInitiated',    label: 'FM-10 ინიცირებულია',           type: 'yesno' },
-        { id: 'capaNumber',       label: 'FM-10 №',                      type: 'text' },
+        { id: 'capaInitiated',    label: 'BE-FM-CAPA ინიცირებულია',           type: 'yesno' },
+        { id: 'capaNumber',       label: 'BE-FM-CAPA №',                      type: 'text' },
         { id: 'responseSentDate', label: 'პასუხის გაგზავნის თარიღი',     type: 'date' },
       ]},
     ],
   },
 
   // ══════════════════════════════════════════════════════════
-  'FM-07': {
+  'BE-FM-EQ-CHECK': {
     title: 'მოწყობილობის ვერიფიკაცია',
     signers: ['ვერიფიკატორი', 'შემდგენი', 'დირექტორი'],
     sections: [
@@ -177,14 +177,14 @@ export const FORM_CONFIGS = {
       ]},
       { label: 'შეუსაბამობა და შედეგები', fields: [
         { id: 'nonConformityFound', label: 'შეუსაბამობა ნაპოვნია',  type: 'yesno' },
-        { id: 'fm14Number',         label: 'FM-14 №',               type: 'text' },
+        { id: 'fm14Number',         label: 'BE-FM-NONCONF №',               type: 'text' },
         { id: 'verifierName',       label: 'ვერიფიკატორი',          type: 'staff' },
       ]},
     ],
   },
 
   // ══════════════════════════════════════════════════════════
-  'FM-08': {
+  'BE-FM-COMP-CHECK': {
     title: 'კომპეტენციის შეფასება',
     signers: ['ინსპექტორი', 'ტექნიკური მენეჯერი', 'ხარისხის მენეჯერი'],
     sections: [
@@ -213,7 +213,7 @@ export const FORM_CONFIGS = {
   },
 
   // ══════════════════════════════════════════════════════════
-  'FM-09': {
+  'BE-FM-CONTRACT-REVIEW': {
     title: 'ხელშეკრულების განხილვა',
     signers: ['შემდგენი', 'ტექნიკური მენეჯერი', 'დირექტორი'],
     caseAutoFill: (insp) => ({
@@ -230,7 +230,7 @@ export const FORM_CONFIGS = {
         { id: 'contractNumber', label: 'ხელშეკრულების №',                 type: 'text' },
         { id: 'deadline',       label: 'ვადა',                            type: 'date' },
         { id: 'fee',            label: 'გასამრჯელო (₾)',                  type: 'text' },
-        { id: 'fm02Number',     label: 'FM-02 №',                         type: 'text' },
+        { id: 'fm02Number',     label: 'BE-FM-IMP-DECL №',                         type: 'text' },
         { id: 'clientReqs',     label: 'კლიენტის სპეციალური მოთხოვნები', type: 'textarea' },
         { id: 'deviations',     label: 'გადახრები / შენიშვნები',          type: 'textarea' },
         { id: 'approved',       label: 'დამტკიცებულია',                   type: 'yesno' },
@@ -246,14 +246,14 @@ export const FORM_CONFIGS = {
         { id: 'r_7_1_1d_note', label: '§7.1.1d კომენტარი',                              type: 'text' },
         { id: 'r_7_1',         label: '§7.1 კი/არა — ვადა და გასამრჯელო',              type: 'yesno' },
         { id: 'r_7_1_note',    label: '§7.1 კომენტარი',                                 type: 'text' },
-        { id: 'r_fm02',        label: 'FM-02 კი/არა — მიუკ. შეფასება',                 type: 'yesno' },
-        { id: 'r_fm02_note',   label: 'FM-02 კომენტარი',                                type: 'text' },
+        { id: 'r_fm02',        label: 'BE-FM-IMP-DECL კი/არა — მიუკ. შეფასება',                 type: 'yesno' },
+        { id: 'r_fm02_note',   label: 'BE-FM-IMP-DECL კომენტარი',                                type: 'text' },
       ]},
     ],
   },
 
   // ══════════════════════════════════════════════════════════
-  'FM-10': {
+  'BE-FM-CAPA': {
     title: 'CAPA — მაკორექტირებელი ქმედება',
     signers: ['შემდგენი', 'ხარისხის მენეჯერი', 'დირექტორი'],
     sections: [
@@ -287,7 +287,7 @@ export const FORM_CONFIGS = {
   },
 
   // ══════════════════════════════════════════════════════════
-  'FM-11': {
+  'BE-FM-PLAN': {
     title: 'ინსპექციის გეგმა',
     signers: ['ტექნიკური მენეჯერი'],
     caseAutoFill: (insp) => {
@@ -309,7 +309,7 @@ export const FORM_CONFIGS = {
         { id: 'address',        label: 'ობიექტის მისამართი',           type: 'text' },
         { id: 'client',         label: 'დამკვეთი',                     type: 'text' },
         { id: 'contractNumber', label: 'ხელშეკრულების №',              type: 'text' },
-        { id: 'fm09Number',     label: 'FM-09 №',                      type: 'text' },
+        { id: 'fm09Number',     label: 'BE-FM-CONTRACT-REVIEW №',                      type: 'text' },
         { id: 'inspector',      label: 'ინსპექტორი',                   type: 'staff' },
         { id: 'techManager',    label: 'ტექნიკური მენეჯერი',           type: 'staff' },
         { id: 'specialNotes',   label: 'განსაკუთრებული მოთხოვნები / რისკები', type: 'textarea' },
@@ -347,7 +347,7 @@ export const FORM_CONFIGS = {
   },
 
   // ══════════════════════════════════════════════════════════
-  'FM-12': {
+  'BE-FM-SUB-MONITOR': {
     title: 'ქვეკონტრაქტორის შეფასება',
     signers: ['ტექნიკური მენეჯერი', 'ხარისხის მენეჯერი'],
     sections: [
@@ -369,7 +369,7 @@ export const FORM_CONFIGS = {
         { id: 'crit2', label: '§6.6.2 კვალიფიკაცია და აკრედიტაცია',   type: 'yesno' },
         { id: 'crit3', label: '§6.6.3 კლიენტის ინსპექცია',             type: 'yesno' },
         { id: 'crit4', label: '§6.6.4 ISO 17020',                      type: 'yesno' },
-        { id: 'crit5', label: 'FM-01 ანგარიშის შეფასება',              type: 'yesno' },
+        { id: 'crit5', label: 'BE-FM-REG ანგარიშის შეფასება',              type: 'yesno' },
         { id: 'crit6', label: 'PR-02 გამოცდილება ≥5 წელი',             type: 'yesno' },
       ]},
       { label: 'C. კომპეტენციის ქულები (4 სფერო)', fields: [
@@ -390,7 +390,7 @@ export const FORM_CONFIGS = {
   },
 
   // ══════════════════════════════════════════════════════════
-  'FM-13': {
+  'BE-FM-TRAIN': {
     title: 'ტრენინგის ჩანაწერი',
     signers: ['თანამშრომელი', 'ტექნიკური მენეჯერი', 'ხარისხის მენეჯერი'],
     sections: [
@@ -425,7 +425,7 @@ export const FORM_CONFIGS = {
   },
 
   // ══════════════════════════════════════════════════════════
-  'FM-14': {
+  'BE-FM-NONCONF': {
     title: 'შეუსაბამო სამუშაოს მართვა',
     signers: ['ხარისხის მენეჯერი', 'ტექნიკური მენეჯერი', 'დირექტორი'],
     caseAutoFill: (insp) => ({
@@ -454,7 +454,7 @@ export const FORM_CONFIGS = {
         { id: 'rootCause',       label: 'ფესვური მიზეზი',            type: 'textarea' },
       ]},
       { label: '6–7. CAPA და დახურვა', fields: [
-        { id: 'capaNumber',      label: 'FM-10 CAPA №',              type: 'text' },
+        { id: 'capaNumber',      label: 'BE-FM-CAPA CAPA №',              type: 'text' },
         { id: 'capaDeadline',    label: 'CAPA ვადა',                  type: 'date' },
         { id: 'closed',          label: 'დახურულია',                 type: 'yesno' },
         { id: 'closingDate',     label: 'დახურვის თარიღი',           type: 'date' },
@@ -464,7 +464,7 @@ export const FORM_CONFIGS = {
   },
 
   // ══════════════════════════════════════════════════════════
-  'FM-15': {
+  'BE-FM-MGMT-REVIEW': {
     title: 'მართვის ანალიზი — სხდომის ოქმი',
     signers: ['სხდომის თავმჯდომარე', 'ხარისხის მენეჯერი', 'დირექტორი'],
     sections: [
@@ -499,7 +499,7 @@ export const FORM_CONFIGS = {
   },
 
   // ══════════════════════════════════════════════════════════
-  'FM-16': {
+  'BE-FM-VISIT': {
     title: 'ვიზიტის ჩანაწერი',
     signers: ['ინსპექტორი', 'დამკვეთის წარმომადგენელი', 'კონტრაქტორის წარმომადგენელი'],
     caseAutoFill: (insp) => {
@@ -590,7 +590,7 @@ export const FORM_CONFIGS = {
   },
 
   // ══════════════════════════════════════════════════════════
-  'FM-17': {
+  'BE-FM-IR': {
     title: 'ინსპექტირების ანგარიში',
     signers: ['ინსპექტორი', 'ტექნიკური მენეჯერი', 'ხარისხის მენეჯერი'],
     caseAutoFill: (insp) => {
@@ -665,7 +665,7 @@ export const FORM_CONFIGS = {
   },
 
   // ══════════════════════════════════════════════════════════
-  'FM-21': {
+  'BE-FM-INSP-REG': {
     title: 'ინსპექციების რეგისტრი (ჟურნალი)',
     signers: ['ხარისხის მენეჯერი'],
     sections: [
@@ -679,7 +679,7 @@ export const FORM_CONFIGS = {
   },
 
   // ══════════════════════════════════════════════════════════
-  'FM-22': {
+  'BE-FM-FAMIL': {
     title: 'გაცნობის ფურცელი',
     signers: ['შემდგენი', 'შემმოწმებელი (ხარისხის მენეჯერი)', 'დამტკიცება (დირექტორი)'],
     sections: [
@@ -696,7 +696,7 @@ export const FORM_CONFIGS = {
   },
 
   // ══════════════════════════════════════════════════════════
-  'FM-23': {
+  'BE-FM-CHANGE-INIT': {
     title: 'დოკუმენტის ცვლილების წინადადება',
     signers: ['ინიციატორი', 'ხარისხის მენეჯერი', 'დამტკიცება / დირექტორი'],
     sections: [
@@ -721,7 +721,7 @@ export const FORM_CONFIGS = {
   },
 
   // ══════════════════════════════════════════════════════════
-  'FM-24': {
+  'BE-FM-CHANGE-REG': {
     title: 'ცვლილებების რეგისტრი',
     signers: ['ხარისხის მენეჯერი'],
     sections: [
@@ -750,7 +750,7 @@ export const FORM_CONFIGS = {
   },
 
   // ══════════════════════════════════════════════════════════
-  'FM-18': {
+  'BE-FM-APP': {
     title: 'GAC — განცხადება ინსპექტირების შესახებ',
     signers: ['განმცხადებელი'],
     sections: [
@@ -794,7 +794,7 @@ export const FORM_CONFIGS = {
   },
 
   // ══════════════════════════════════════════════════════════
-  'FM-19': {
+  'BE-FM-SATISF': {
     title: 'მომხმარებლის კმაყოფილების კვლევა',
     signers: ['კლიენტის წარმომადგენელი', 'ხარისხის მენეჯერი'],
     caseAutoFill: (insp) => ({
@@ -832,7 +832,7 @@ export const FORM_CONFIGS = {
   },
 
   // ══════════════════════════════════════════════════════════
-  'FM-20': {
+  'BE-FM-TECH-REVIEW': {
     title: 'ანგარიშის ტექნიკური გადამოწმება',
     signers: ['ვერიფიკატორი (ტექ. მენეჯერი)', 'ხარისხის მენეჯერი'],
     caseAutoFill: (insp) => {
@@ -850,7 +850,7 @@ export const FORM_CONFIGS = {
     sections: [
       { label: 'საიდენტიფიკაციო მონაცემები', fields: [
         { id: 'caseNumber',        label: 'BE-CASE №',                          type: 'case' },
-        { id: 'reportNumber',      label: 'BE-FM-17 ანგარიშის №',               type: 'text' },
+        { id: 'reportNumber',      label: 'BE-FM-IR ანგარიშის №',               type: 'text' },
         { id: 'verificationDate',  label: 'გადამოწმების თარიღი',                type: 'date' },
         { id: 'verifier',          label: 'ვერიფიკატორი (ტექ. მენეჯერი)',       type: 'staff' },
         { id: 'inspector',         label: 'ინსპექტორი',                         type: 'staff' },
@@ -887,7 +887,7 @@ export const FORM_CONFIGS = {
   },
 
   // ══════════════════════════════════════════════════════════
-  'FM-25': {
+  'BE-FM-DESTROY-ACT': {
     title: 'ლიკვიდაციის (განადგურების) აქტი',
     signers: ['შემდგენი / პასუხისმგებელი', 'მოწმე', 'ხარისხის მენეჯერი'],
     sections: [
@@ -911,14 +911,14 @@ export const FORM_CONFIGS = {
       { label: 'C–D. განადგურება და შედეგი', fields: [
         { id: 'method',              label: 'განადგურების მეთოდი', type: 'select', options: ['შეშლა (ფიზიკური)','ციფრული წაშლა','სხვა'] },
         { id: 'allCopiesDestroyed',  label: 'ყველა ასლი განადგურებულია',  type: 'yesno' },
-        { id: 'fm24Updated',         label: 'FM-24 განახლებულია',          type: 'yesno' },
+        { id: 'fm24Updated',         label: 'BE-FM-CHANGE-REG განახლებულია',          type: 'yesno' },
         { id: 'qualityMgrVerif',     label: 'ხარისხის მენეჯერის ვიზა',    type: 'staff' },
       ]},
     ],
   },
 
   // ══════════════════════════════════════════════════════════
-  'FM-26': {
+  'BE-FM-AUDIT-PLAN': {
     title: 'შიდა აუდიტის გეგმა',
     signers: ['შემდგენი (აუდიტორი)', 'შემმოწმებელი (ხარისხის მენეჯერი)', 'დამტკიცება (დირექტორი)'],
     sections: [
@@ -939,12 +939,12 @@ export const FORM_CONFIGS = {
   },
 
   // ══════════════════════════════════════════════════════════
-  'FM-27': {
+  'BE-FM-AUDIT-CHECK': {
     title: 'შიდა აუდიტის ჩეკლისტი',
     signers: ['აუდიტორი', 'შემმოწმებელი (ხარისხის მენეჯერი)', 'დამტკიცება (დირექტორი)'],
     sections: [
       { label: 'აუდიტის მონაცემები', fields: [
-        { id: 'auditNumber',   label: 'FM-26 აუდიტის №',                type: 'text' },
+        { id: 'auditNumber',   label: 'BE-FM-AUDIT-PLAN აუდიტის №',                type: 'text' },
         { id: 'auditDate',     label: 'აუდიტის თარიღი',                 type: 'date' },
         { id: 'conforming',    label: 'ISO მოთხოვნები შესრულებულია (კი/არა)', type: 'yesno' },
         { id: 'overallResult', label: 'საერთო შეფასება', type: 'select',
@@ -954,12 +954,12 @@ export const FORM_CONFIGS = {
   },
 
   // ══════════════════════════════════════════════════════════
-  'FM-28': {
+  'BE-FM-AUDIT-REPORT': {
     title: 'შიდა აუდიტის ანგარიში',
     signers: ['აუდიტორი', 'შემმოწმებელი (ხარისხის მენეჯერი)', 'დამტკიცება (დირექტორი)'],
     sections: [
       { label: 'ანგარიშის მონაცემები', fields: [
-        { id: 'auditNumber',      label: 'FM-26 აუდიტის №',              type: 'text' },
+        { id: 'auditNumber',      label: 'BE-FM-AUDIT-PLAN აუდიტის №',              type: 'text' },
         { id: 'auditDate',        label: 'აუდიტის თარიღი',               type: 'date' },
         { id: 'auditedSections',  label: 'აუდიტირებული ISO §§',          type: 'text' },
         { id: 'keyFindings',      label: 'ძირითადი მიგნებები',           type: 'textarea' },
@@ -970,12 +970,12 @@ export const FORM_CONFIGS = {
   },
 
   // ══════════════════════════════════════════════════════════
-  'FM-29': {
+  'BE-FM-AUDIT-NC': {
     title: 'აუდიტის შეუსაბამობის ფორმა',
     signers: ['აუდიტორი', 'შემმოწმებელი (ხარისხის მენეჯერი)', 'დამტკიცება (დირექტორი)'],
     sections: [
       { label: 'შეუსაბამობის საიდენტიფიკაციო მონაცემები', fields: [
-        { id: 'auditNumber',  label: 'FM-26 აუდიტის №',      type: 'text' },
+        { id: 'auditNumber',  label: 'BE-FM-AUDIT-PLAN აუდიტის №',      type: 'text' },
         { id: 'ncNumber',     label: 'NC №',                   type: 'text', placeholder: 'ANC-2026-01' },
         { id: 'isoClause',    label: 'ISO §',                   type: 'text' },
         { id: 'severity',     label: 'კატეგორია', type: 'select', options: ['მცირე (Minor)','არსებითი (Major)','კრიტიკული (Critical)'] },
@@ -984,7 +984,7 @@ export const FORM_CONFIGS = {
       { label: 'CAPA', fields: [
         { id: 'rootCause',         label: 'ფესვური მიზეზი (5-Why)', type: 'textarea' },
         { id: 'correctiveAction',  label: 'მაკორექტირებელი ქმედება', type: 'textarea' },
-        { id: 'capaNumber',        label: 'FM-10 CAPA №',             type: 'text' },
+        { id: 'capaNumber',        label: 'BE-FM-CAPA CAPA №',             type: 'text' },
         { id: 'deadline',          label: 'ვადა',                     type: 'date' },
         { id: 'checkDate',         label: 'შემოწმების თარიღი',        type: 'date' },
         { id: 'effective',         label: 'ეფექტურია (კი/არა)',        type: 'yesno' },
@@ -993,12 +993,12 @@ export const FORM_CONFIGS = {
   },
 
   // ══════════════════════════════════════════════════════════
-  'FM-30': {
+  'BE-FM-AUDIT-MEETING': {
     title: 'აუდიტის შეხვედრის ოქმი',
     signers: ['აუდიტორი', 'აუდიტირებული', 'ხარისხის მენეჯერი'],
     sections: [
       { label: 'შეხვედრის მონაცემები', fields: [
-        { id: 'auditNumber',  label: 'FM-26 აუდიტის №',                     type: 'text' },
+        { id: 'auditNumber',  label: 'BE-FM-AUDIT-PLAN აუდიტის №',                     type: 'text' },
         { id: 'meetingType',  label: 'შეხვედრის ტიპი', type: 'select', options: ['გახსნის შეხვედრა (kick-off)','დახურვის შეხვედრა (closing)'] },
         { id: 'meetingDate',  label: 'შეხვედრის თარიღი',                    type: 'date' },
         { id: 'auditor',      label: 'აუდიტორი',                            type: 'staff' },
@@ -1010,7 +1010,7 @@ export const FORM_CONFIGS = {
   },
 
   // ══════════════════════════════════════════════════════════
-  'FM-31': {
+  'BE-FM-AUDIT-PROGRAM': {
     title: 'შიდა აუდიტის პროგრამა (წლიური გეგმა)',
     signers: ['შემდგენი (ხარისხის მენეჯერი)', 'შემმოწმებელი (აუდიტორი)', 'დამტკიცება (დირექტორი)'],
     sections: [
@@ -1027,7 +1027,7 @@ export const FORM_CONFIGS = {
   },
 
   // ══════════════════════════════════════════════════════════
-  'FM-01': {
+  'BE-FM-REG': {
     title: 'მოთხოვნის სარეგისტრაციო ფორმა',
     signers: ['ადმინისტრატორი', 'ტექნიკური მენეჯერი', 'ხარისხის მენეჯერი'],
     sections: [
@@ -1063,14 +1063,14 @@ export const FORM_CONFIGS = {
       { label: 'E. წ-ი შ. (ტ. მ.)', fields: [
         { id: 'completenessCheck',  label: 'დ-ა ს-ე დ.',    type: 'yesno' },
         { id: 'scopeCheck',         label: 'ი-ბ. სფ. გ.',   type: 'yesno' },
-        { id: 'impartialityCheck',  label: 'FM-02 ი-ბ.',    type: 'yesno' },
+        { id: 'impartialityCheck',  label: 'BE-FM-IMP-DECL ი-ბ.',    type: 'yesno' },
         { id: 'tmNote',             label: 'შ-ა / მ-ბი',    type: 'textarea' },
       ]},
     ],
   },
 
   // ══════════════════════════════════════════════════════════
-  'FM-05': {
+  'BE-FM-SCREEN': {
     title: 'ხელშეკრულების განხილვა და სამუშაოს მიღება',
     signers: ['ტექნიკური მენეჯერი', 'ხარისხის მენეჯერი', 'დირექტორი'],
     sections: [
@@ -1082,7 +1082,7 @@ export const FORM_CONFIGS = {
         { id: 'contractNum', label: 'ხელშ. №',              type: 'text' },
         { id: 'deadline',    label: 'ვადა',                 type: 'date' },
         { id: 'fee',         label: 'გასამრ. (₾)',          type: 'text' },
-        { id: 'fm01Num',     label: 'FM-01 №',              type: 'text' },
+        { id: 'fm01Num',     label: 'BE-FM-REG №',              type: 'text' },
       ]},
       { label: 'B. ტექ. გადახ. კრიტ. (ISO §7.1.1)', fields: [
         { id: 'r_scope',      label: '§7.1.1a — ობ. იდენტ.',   type: 'yesno' },
@@ -1090,7 +1090,7 @@ export const FORM_CONFIGS = {
         { id: 'r_content',    label: '§7.1.1c — მომს. შ.',       type: 'yesno' },
         { id: 'r_clientReqs', label: '§7.1.1d — კლ. მ.',         type: 'yesno' },
         { id: 'r_deadline',   label: '§7.1 — ვადა / გასამ.',     type: 'yesno' },
-        { id: 'r_fm02',       label: 'FM-02 — მიუკ.',             type: 'yesno' },
+        { id: 'r_fm02',       label: 'BE-FM-IMP-DECL — მიუკ.',             type: 'yesno' },
         { id: 'r_conflict',   label: 'ინტ. კონფ.',                type: 'yesno' },
       ]},
       { label: 'C. შ-ძ. დადასტ.', fields: [
@@ -1108,7 +1108,7 @@ export const FORM_CONFIGS = {
   },
 
   // ══════════════════════════════════════════════════════════
-  'FM-33': {
+  'BE-FM-IMP-RISK': {
     title: 'მიუკერძოებლობის რისკების შეფასება',
     signers: ['ინსპექტორი', 'ხარისხის მენეჯერი', 'დირექტორი'],
     sections: [
@@ -1129,7 +1129,7 @@ export const FORM_CONFIGS = {
   },
 
   // ══════════════════════════════════════════════════════════
-  'FM-34': {
+  'BE-FM-EQ-CARD': {
     title: 'აღჭურვილობის სარეგისტრაციო ბარათი',
     signers: ['ტექნიკური მენეჯერი', 'ხარისხის მენეჯერი', 'დირექტორი'],
     sections: [
@@ -1159,7 +1159,7 @@ export const FORM_CONFIGS = {
   },
 
   // ══════════════════════════════════════════════════════════
-  'FM-35': {
+  'BE-FM-SUB-MONITOR': {
     title: 'ქვეკონტრაქტორის შეფასება და მონიტ. ჩ.',
     signers: ['ტექნიკური მენეჯერი', 'ხარისხის მენეჯერი', 'დირექტორი'],
     sections: [

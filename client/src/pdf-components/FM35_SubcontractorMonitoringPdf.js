@@ -17,7 +17,7 @@ const FM35_SubcontractorMonitoringPdf = ({ data = {} }) => {
       <Page size="A4" style={[s.page, { paddingTop: 12, paddingBottom: 22, paddingHorizontal: 28 }]}>
         <WM />
         <FormHeader
-          code="BE-FM-35"
+          code="BE-FM-SUB-MONITOR"
           isoRef="სსტ ISO/IEC 17020 §6.3 (BE-PR-14)"
           title="ქვეკონტრაქტორის შეფასება და მონიტ. ჩ."
           subtitle="Subcontractor Assessment & Monitoring Record"
@@ -78,7 +78,7 @@ const FM35_SubcontractorMonitoringPdf = ({ data = {} }) => {
         </View>
 
         <SigBlock3 labels={['ტექნიკური მენეჯერი', 'ხარისხის მენეჯერი', 'დირექტორი']} sigs={sigs} />
-        <FormFooter code="BE-FM-35 v1.0 | 2026 | ISO §6.3 | შენახვა: 5 წელი" />
+        <FormFooter code="BE-FM-SUB-MONITOR v1.0 | 2026 | ISO §6.3 | შენახვა: 5 წელი" />
       </Page>
     </Document>
   );

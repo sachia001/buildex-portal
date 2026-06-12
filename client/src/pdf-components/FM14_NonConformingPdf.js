@@ -8,7 +8,7 @@ const FM14_NonConformingPdf = ({ data = {} }) => {
   <Document>
     <Page size="A4" style={s.page}>
       <WM />
-      <FormHeader code="BE-FM-14" isoRef="სსტ ISO/IEC 17020 §8.7" title="შეუსაბამო სამუშაოს მართვა" subtitle="Non-Conforming Work Control" />
+      <FormHeader code="BE-FM-NONCONF" isoRef="სსტ ISO/IEC 17020 §8.7" title="შეუსაბამო სამუშაოს მართვა" subtitle="Non-Conforming Work Control" />
 
       <Text style={s.secH}>1. იდენტიფიკაცია (§8.7.1)</Text>
       <FieldRow2 label1="NC № (BE-NC-YYYY-____):" value1={data.ncNumber} label2="გამოვლენის თარიღი:" value2={data.detectionDate} />
@@ -48,7 +48,7 @@ const FM14_NonConformingPdf = ({ data = {} }) => {
       <Text style={s.secH}>5. ფესვური მიზეზი</Text>
       <TextArea value={data.rootCause} placeholder="(ფესვური მიზეზის ანალიზი)" minHeight={22} />
 
-      <Text style={s.secH}>6. CAPA (FM-10)</Text>
+      <Text style={s.secH}>6. CAPA (BE-FM-CAPA)</Text>
       <FieldRow2 label1="CAPA №:" value1={data.capaNumber} label2="ვადა:" value2={data.capaDeadline} />
 
       <Text style={s.secH}>7. დახურვა / ვიზა</Text>
@@ -56,7 +56,7 @@ const FM14_NonConformingPdf = ({ data = {} }) => {
       <FieldRow2 label1="დახურვის თარიღი:" value1={data.closingDate} label2="ხარისხის მენეჯერის ვიზა:" value2={data.qualityMgrVerif} />
 
       <SigBlock3 labels={['ხარისხის მენეჯერი','ტექნიკური მენეჯერი','დირექტორი']} sigs={sigs} />
-      <FormFooter code="BE-FM-14 v2.0 | 28.04.2026 | შენახვა: 5 წელი" />
+      <FormFooter code="BE-FM-NONCONF v2.0 | 28.04.2026 | შენახვა: 5 წელი" />
     </Page>
   </Document>
 );};

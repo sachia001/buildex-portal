@@ -59,7 +59,7 @@ const ConfidentialityAgreementPdf = ({ data = {} }) => {
         <View style={s.divider} />
 
         <Text style={s.docTitle}>კონფიდენციალურობის შეთანხმება</Text>
-        <Text style={s.docCode}>BE-FM-03 | ვ.2 | 2026 | ISO/IEC 17020:2012/2013 §5</Text>
+        <Text style={s.docCode}>BE-FM-CONF | ვ.2 | 2026 | ISO/IEC 17020:2012/2013 §5</Text>
 
         <View style={s.fieldRow}>
           <Text style={s.fieldLabel}>მე:</Text>
@@ -120,7 +120,7 @@ const ConfidentialityAgreementPdf = ({ data = {} }) => {
 
         <View style={[s.divider, { marginTop: 18 }]} />
         <Text style={{ fontSize: 7, color: '#aaa', textAlign: 'center' }}>
-          კონფიდენციალური — მხოლოდ შიდა გამოყენებისთვის | BE-FM-03 v.2 | შპს „ბილდექს ექსპერტიზა"
+          კონფიდენციალური — მხოლოდ შიდა გამოყენებისთვის | BE-FM-CONF v.2 | შპს „ბილდექს ექსპერტიზა"
         </Text>
       </Page>
     </Document>

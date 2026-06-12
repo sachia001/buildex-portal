@@ -11,7 +11,7 @@ const FM17_InspectionReportPdf = ({ data = {} }) => {
   <Document>
     <Page size="A4" style={s.page}>
       <WM />
-      <FormHeader code="BE-FM-17" isoRef="სსტ ISO/IEC 17020 §7.4" title="ინსპექტირების ანგარიში" subtitle="Inspection Report" />
+      <FormHeader code="BE-FM-IR" isoRef="სსტ ISO/IEC 17020 §7.4" title="ინსპექტირების ანგარიში" subtitle="Inspection Report" />
 
       <Text style={s.secH}>A. საიდენტიფიკაციო მონაცემები</Text>
       <FieldRow2 label1="BE-CASE №:" value1={data.caseNumber} label2="ანგარიშის №:" value2={data.reportNumber} />
@@ -102,7 +102,7 @@ const FM17_InspectionReportPdf = ({ data = {} }) => {
       <Text style={s.secH}>G. ხელმოწერები</Text>
       <SigBlock3 labels={['ინსპექტორი', 'ტექნიკური მენეჯერი', 'ხარისხის მენეჯერი']} sigs={sigs} />
 
-      <FormFooter code="BE-FM-17 v2.0 | 28.04.2026 | შენახვა: 10 წელი" />
+      <FormFooter code="BE-FM-IR v2.0 | 28.04.2026 | შენახვა: 10 წელი" />
     </Page>
   </Document>
 );};

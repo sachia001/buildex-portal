@@ -74,7 +74,7 @@ const ImpartialityDeclarationPdf = ({ data = {} }) => {
         <View style={s.divider} />
 
         <Text style={s.docTitle}>მიუკერძოებლობის დეკლარაცია</Text>
-        <Text style={s.docCode}>BE-FM-02 | ვ.2 | 2026 | ISO/IEC 17020:2012/2013 §4</Text>
+        <Text style={s.docCode}>BE-FM-IMP-DECL | ვ.2 | 2026 | ISO/IEC 17020:2012/2013 §4</Text>
 
         <View style={s.fieldRow}>
           <Text style={s.fieldLabel}>მე, ქვემოხსენებული:</Text>
@@ -154,7 +154,7 @@ const ImpartialityDeclarationPdf = ({ data = {} }) => {
 
         <View style={[s.divider, { marginTop: 18 }]} />
         <Text style={{ fontSize: 7, color: '#aaa', textAlign: 'center' }}>
-          კონფიდენციალური — მხოლოდ შიდა გამოყენებისთვის | BE-FM-02 v.2 | შპს „ბილდექს ექსპერტიზა"
+          კონფიდენციალური — მხოლოდ შიდა გამოყენებისთვის | BE-FM-IMP-DECL v.2 | შპს „ბილდექს ექსპერტიზა"
         </Text>
       </Page>
     </Document>

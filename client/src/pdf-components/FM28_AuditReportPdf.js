@@ -10,11 +10,11 @@ const FM28_AuditReportPdf = ({ data = {} }) => {
   <Document>
     <Page size="A4" style={[s.page, { paddingTop: 12, paddingBottom: 22, paddingHorizontal: 28 }]}>
       <WM />
-      <FormHeader code="BE-FM-28" isoRef="სსტ ISO/IEC 17020 §8.6" title="შიდა აუდიტის ანგარიში" subtitle="Internal Audit Report" />
+      <FormHeader code="BE-FM-AUDIT-REPORT" isoRef="სსტ ISO/IEC 17020 §8.6" title="შიდა აუდიტის ანგარიში" subtitle="Internal Audit Report" />
 
       <Text style={s.secH}>A. ანგარიშის მონაცემები</Text>
-      <FieldRow2 label1="FM-26 №:" value1={data.auditNumber} label2="აუდიტის თარიღი:" value2={data.auditDate} />
-      <FieldRow label="აუდიტირებული ISO §§ (FM-27):" value={data.auditedSections} />
+      <FieldRow2 label1="BE-FM-AUDIT-PLAN №:" value1={data.auditNumber} label2="აუდიტის თარიღი:" value2={data.auditDate} />
+      <FieldRow label="აუდიტირებული ISO §§ (BE-FM-AUDIT-CHECK):" value={data.auditedSections} />
 
       <Text style={s.secH}>B. ძირითადი მიგნებები</Text>
       <View style={[s.textarea, { minHeight: 32 }]}>
@@ -28,7 +28,7 @@ const FM28_AuditReportPdf = ({ data = {} }) => {
           <View style={[s.tHead, { width: '10%', ...p }]}><Text>ISO §</Text></View>
           <View style={[s.tHead, { width: '16%', ...p }]}><Text>კატეგორია</Text></View>
           <View style={[s.tHead, { flex: 1, ...p }]}><Text>აღწერა</Text></View>
-          <View style={[s.tHead, { width: '18%', ...p }]}><Text>FM-10 CAPA №</Text></View>
+          <View style={[s.tHead, { width: '18%', ...p }]}><Text>BE-FM-CAPA CAPA №</Text></View>
         </View>
         {[...Array(5)].map((_, i) => (
           <View key={i} style={i % 2 === 0 ? s.tRow : s.tRowAlt}>
@@ -62,7 +62,7 @@ const FM28_AuditReportPdf = ({ data = {} }) => {
       <FieldRow2 label1="აუდიტის საბოლოო შეფასება:" value1={data.auditConclusion} label2="" value2="" />
 
       <SigBlock3 labels={['აუდიტორი', 'შემმოწმებელი (ხარისხის მენეჯერი)', 'დამტკიცება (დირექტორი)']} sigs={sigs} />
-      <FormFooter code="BE-FM-28 v2.0 | 28.04.2026 | ISO §8.6 | შენახვა: 5 წელი" />
+      <FormFooter code="BE-FM-AUDIT-REPORT v2.0 | 28.04.2026 | ISO §8.6 | შენახვა: 5 წელი" />
     </Page>
   </Document>
 );};

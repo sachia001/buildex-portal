@@ -10,10 +10,10 @@ const FM30_AuditMeetingPdf = ({ data = {} }) => {
   <Document>
     <Page size="A4" style={[s.page, { paddingTop: 12, paddingBottom: 22, paddingHorizontal: 28 }]}>
       <WM />
-      <FormHeader code="BE-FM-30" isoRef="სსტ ISO/IEC 17020 §8.6" title="აუდიტის შეხვედრის ოქმი" subtitle="Audit Meeting Minutes" />
+      <FormHeader code="BE-FM-AUDIT-MEETING" isoRef="სსტ ISO/IEC 17020 §8.6" title="აუდიტის შეხვედრის ოქმი" subtitle="Audit Meeting Minutes" />
 
       <Text style={s.secH}>A. შეხვედრის მონაცემები</Text>
-      <FieldRow2 label1="FM-26 აუდიტის №:" value1={data.auditNumber} label2="შეხვედრის ტიპი:" value2={data.meetingType} />
+      <FieldRow2 label1="BE-FM-AUDIT-PLAN აუდიტის №:" value1={data.auditNumber} label2="შეხვედრის ტიპი:" value2={data.meetingType} />
       <FieldRow2 label1="შეხვედრის თარიღი:" value1={data.meetingDate} label2="აუდიტორი:" value2={data.auditor} />
       <FieldRow label="აუდიტირებული პირ(ებ)ი:" value={data.auditees} />
       <FieldRow label="სხვა მონაწილეები:" value={data.participants} />
@@ -31,7 +31,7 @@ const FM30_AuditMeetingPdf = ({ data = {} }) => {
         <View style={s.tHeader}>
           <View style={[s.tHead, { width: '18%', ...p }]}><Text>NC №</Text></View>
           <View style={[s.tHead, { flex: 1, ...p }]}><Text>სტატუსი</Text></View>
-          <View style={[s.tHead, { width: '22%', ...p }]}><Text>FM-10 CAPA №</Text></View>
+          <View style={[s.tHead, { width: '22%', ...p }]}><Text>BE-FM-CAPA CAPA №</Text></View>
         </View>
         {[...Array(5)].map((_, i) => (
           <View key={i} style={i % 2 === 0 ? s.tRow : s.tRowAlt}>
@@ -59,7 +59,7 @@ const FM30_AuditMeetingPdf = ({ data = {} }) => {
       </View>
 
       <SigBlock3 labels={['აუდიტორი', 'აუდიტირებული', 'ხარისხის მენეჯერი']} sigs={sigs} />
-      <FormFooter code="BE-FM-30 v2.0 | 28.04.2026 | ISO §8.6 | შენახვა: 5 წელი" />
+      <FormFooter code="BE-FM-AUDIT-MEETING v2.0 | 28.04.2026 | ISO §8.6 | შენახვა: 5 წელი" />
     </Page>
   </Document>
 );};

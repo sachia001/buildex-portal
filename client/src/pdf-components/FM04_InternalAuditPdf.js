@@ -10,7 +10,7 @@ const FM04_InternalAuditPdf = ({ data = {} }) => {
   <Document>
     <Page size="A4" style={s.page}>
       <WM />
-      <FormHeader code="BE-FM-04" isoRef="სსტ ISO/IEC 17020 §8.6" title="შიდა აუდიტის გეგმა და ანგარიში" subtitle="Internal Audit Plan & Report" />
+      <FormHeader code="BE-FM-AUDIT-PLAN" isoRef="სსტ ISO/IEC 17020 §8.6" title="შიდა აუდიტის გეგმა და ანგარიში" subtitle="Internal Audit Plan & Report" />
 
       <Text style={s.secH}>A. საიდენტიფიკაციო მონაცემები</Text>
       <FieldRow2 label1="აუდიტის №:" value1={data.auditNumber}  label2="პერიოდი (წელი):"     value2={data.period} />
@@ -58,7 +58,7 @@ const FM04_InternalAuditPdf = ({ data = {} }) => {
       </View>
       <Text style={{fontSize:7,color:'#555',marginBottom:3}}>კატეგ.: კ — კრიტიკული | მ — მცირე | გ — გამოსწორებული</Text>
 
-      <Text style={s.secH}>D. CAPA (FM-10)</Text>
+      <Text style={s.secH}>D. CAPA (BE-FM-CAPA)</Text>
       <View style={s.tBorder}>
         <View style={s.tHeader}>
           <View style={[s.tHead,{width:'5%',...cc}]}><Text>#</Text></View>
@@ -83,7 +83,7 @@ const FM04_InternalAuditPdf = ({ data = {} }) => {
       <TextArea  value={data.generalComment} placeholder="კომენტარი / შენიშვნა" minHeight={22} />
 
       <SigBlock3 sigs={sigs} />
-      <FormFooter code="BE-FM-04 v2.0 | 28.04.2026 | შენახვა: 5 წელი" />
+      <FormFooter code="BE-FM-AUDIT-PLAN v2.0 | 28.04.2026 | შენახვა: 5 წელი" />
     </Page>
   </Document>
 );};

@@ -14,7 +14,7 @@ const FM12_SubcontractorPdf = ({ data = {} }) => {
   <Document>
     <Page size="A4" style={s.page}>
       <WM />
-      <FormHeader code="BE-FM-12" isoRef="სსტ ISO/IEC 17020 §6.6" title="ქვეკონტრაქტორის შეფასება" subtitle="Subcontractor Assessment" />
+      <FormHeader code="BE-FM-SUB-MONITOR" isoRef="სსტ ISO/IEC 17020 §6.6" title="ქვეკონტრაქტორის შეფასება" subtitle="Subcontractor Assessment" />
 
       <Text style={s.secH}>1. საიდენტიფიკაციო მონაცემები</Text>
       <View style={[s.tBorder,{marginBottom:4}]}>
@@ -44,7 +44,7 @@ const FM12_SubcontractorPdf = ({ data = {} }) => {
           <View style={[s.tHead,{width:'19%'}]}><Text>კი / არა</Text></View>
           <View style={[s.tHead,{width:'26%'}]}><Text>კომენტარი</Text></View>
         </View>
-        {[['6.6.1','ინსპექციის ობიექტის მუშაობის გამოცდილება','crit1'],['6.6.2','კვალიფიკაცია და აკრედიტაცია','crit2'],['6.6.3','კლიენტის ინსპექცია','crit3'],['6.6.4','ISO 17020','crit4'],['FM-01','ანგარიშის შეფასება','crit5'],['PR-02','გამოცდილება ≥5 წელი','crit6']].map(([cl,req,key],i) => {
+        {[['6.6.1','ინსპექციის ობიექტის მუშაობის გამოცდილება','crit1'],['6.6.2','კვალიფიკაცია და აკრედიტაცია','crit2'],['6.6.3','კლიენტის ინსპექცია','crit3'],['6.6.4','ISO 17020','crit4'],['BE-FM-REG','ანგარიშის შეფასება','crit5'],['PR-02','გამოცდილება ≥5 წელი','crit6']].map(([cl,req,key],i) => {
           const v = data[key];
           return (
           <View key={cl} style={i%2===0?s.tRow:s.tRowAlt}>
@@ -91,7 +91,7 @@ const FM12_SubcontractorPdf = ({ data = {} }) => {
       <FieldRow label="ვალიდური ვადა:" value={data.validUntil} />
 
       <SigBlock2 left="ტექნიკური მენეჯერი" right="ხარისხის მენეჯერი" sigs={sigs} />
-      <FormFooter code="BE-FM-12 v2.0 | 28.04.2026 | შენახვა: 5 წელი" />
+      <FormFooter code="BE-FM-SUB-MONITOR v2.0 | 28.04.2026 | შენახვა: 5 წელი" />
     </Page>
   </Document>
 );};

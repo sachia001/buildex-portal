@@ -1261,7 +1261,7 @@ async function seedProcedures() {
             const verMatch = fname.match(/v(\d+)/i);
             await ProcedureDoc.create({
                 code, title, category,
-                version: verMatch ? verMatch[1] + '.0' : '2.0',
+                version: '1.0',
                 filePath: relPath, originalName: fname, uploadedBy: 'system',
             });
             seeded++;
@@ -2443,7 +2443,7 @@ api.post('/procedures', procUpload.single('file'), async (req, res) => {
             code:         code || '',
             title:        title || originalName,
             category:     category || 'procedure',
-            version:      version || '2.0',
+            version:      version || '1.0',
             cloudinaryId,
             cloudinaryUrl,
             filePath,

@@ -15,7 +15,7 @@ const FM15_MgmtReviewPdf = ({ data = {} }) => {
   <Document>
     <Page size="A4" style={[s.page, { paddingTop: 10, paddingBottom: 16, paddingHorizontal: 28 }]}>
       <WM />
-      <FormHeader code="BE-FM-15" isoRef="სსტ ISO/IEC 17020 §8.5" title="მართვის ანალიზი — სხდომის ოქმი" subtitle="Management Review Record" />
+      <FormHeader code="BE-FM-MGMT-REVIEW" isoRef="სსტ ISO/IEC 17020 §8.5" title="მართვის ანალიზი — სხდომის ოქმი" subtitle="Management Review Record" />
 
       <Text style={s.secH}>1. სხდომის რეკვიზიტები</Text>
       <View style={[s.tBorder,{marginBottom:4}]}>
@@ -54,7 +54,7 @@ const FM15_MgmtReviewPdf = ({ data = {} }) => {
           <View style={[s.tHead,{width:'12%',...cc}]}><Text>სტატუსი</Text></View>
           <View style={[s.tHead,{width:'26%',...cc}]}><Text>შენიშვნა / გადაწყვეტილება</Text></View>
         </View>
-        {[['1','წინა სხდომის გადაწყვეტილებები','FM-15'],['2','ხარისხის პოლიტიკა და მიზნები','POL-01'],['3','შიდა აუდიტი','FM-04'],['4','გარე შემოწმება',''],['5','საჩივარი','FM-06'],['6','შეუსაბამო სამუშაო','FM-14'],['7','CAPA','FM-10'],['8','პერსონალის კომპეტენცია','FM-08/13'],['9','კალიბრაცია / ვერიფიკაცია','FM-07'],['10','მომხმარებელთა ცვლილება',''],['11','რესურსები',''],['12','მართვის საფუძვლები','RM-01'],['13','ქვეკონტრაქტირება','FM-12'],['14','ხარისხის მენეჯმენტის მიმოხილვა','']].map(([n,item,form],i) => (
+        {[['1','წინა სხდომის გადაწყვეტილებები','BE-FM-MGMT-REVIEW'],['2','ხარისხის პოლიტიკა და მიზნები','POL-01'],['3','შიდა აუდიტი','BE-FM-AUDIT-PLAN'],['4','გარე შემოწმება',''],['5','საჩივარი','BE-FM-COMPLAINT'],['6','შეუსაბამო სამუშაო','BE-FM-NONCONF'],['7','CAPA','BE-FM-CAPA'],['8','პერსონალის კომპეტენცია','BE-FM-COMP-CHECK/13'],['9','კალიბრაცია / ვერიფიკაცია','BE-FM-EQ-CHECK'],['10','მომხმარებელთა ცვლილება',''],['11','რესურსები',''],['12','მართვის საფუძვლები','RM-01'],['13','ქვეკონტრაქტირება','BE-FM-SUB-MONITOR'],['14','ხარისხის მენეჯმენტის მიმოხილვა','']].map(([n,item,form],i) => (
           <View key={n} style={i%2===0?s.tRow:s.tRowAlt}>
             <View style={[s.tCell,{width:'5%',...cc}]}><Text>{n}</Text></View>
             <View style={[s.tCell,{flex:1,...cc}]}><Text>{item}</Text></View>
@@ -96,7 +96,7 @@ const FM15_MgmtReviewPdf = ({ data = {} }) => {
       </View>
 
       <SigBlock3 labels={['სხდომის თავმჯდომარე','ხარისხის მენეჯერი','დირექტორი']} sigs={sigs} />
-      <FormFooter code="BE-FM-15 v2.0 | 28.04.2026 | შენახვა: 5 წელი" />
+      <FormFooter code="BE-FM-MGMT-REVIEW v2.0 | 28.04.2026 | შენახვა: 5 წელი" />
     </Page>
   </Document>
 );};

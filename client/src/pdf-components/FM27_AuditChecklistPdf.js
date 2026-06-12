@@ -26,9 +26,9 @@ const FM27_AuditChecklistPdf = ({ data = {} }) => {
   <Document>
     <Page size="A4" style={[s.page, { paddingTop: 12, paddingBottom: 22, paddingHorizontal: 28 }]}>
       <WM />
-      <FormHeader code="BE-FM-27" isoRef="სსტ ISO/IEC 17020 §8.6" title="შიდა აუდიტის ჩეკლისტი" subtitle="Internal Audit Checklist" />
+      <FormHeader code="BE-FM-AUDIT-CHECK" isoRef="სსტ ISO/IEC 17020 §8.6" title="შიდა აუდიტის ჩეკლისტი" subtitle="Internal Audit Checklist" />
 
-      <FieldRow2 label1="FM-26 აუდიტის №:" value1={data.auditNumber} label2="აუდიტის თარიღი:" value2={data.auditDate} />
+      <FieldRow2 label1="BE-FM-AUDIT-PLAN აუდიტის №:" value1={data.auditNumber} label2="აუდიტის თარიღი:" value2={data.auditDate} />
 
       <Text style={s.secH}>ISO §§ შეფასება</Text>
       <View style={s.tBorder}>
@@ -70,7 +70,7 @@ const FM27_AuditChecklistPdf = ({ data = {} }) => {
                  label2="საერთო შეფასება:" value2={data.overallResult} />
 
       <SigBlock3 labels={['აუდიტორი', 'შემმოწმებელი (ხარისხის მენეჯერი)', 'დამტკიცება (დირექტორი)']} sigs={sigs} />
-      <FormFooter code="BE-FM-27 v2.0 | 28.04.2026 | ISO §8.6 | შენახვა: 5 წელი" />
+      <FormFooter code="BE-FM-AUDIT-CHECK v2.0 | 28.04.2026 | ISO §8.6 | შენახვა: 5 წელი" />
     </Page>
   </Document>
 );};

@@ -10,7 +10,7 @@ const FM21_InspectionRegisterPdf = ({ data = {} }) => {
   <Document>
     <Page size="A4" orientation="landscape" style={[s.page,{paddingHorizontal:28}]}>
       <WM />
-      <FormHeader code="BE-FM-21" isoRef="სსტ ISO/IEC 17020 §7.3" title="ინსპექციების რეგისტრი (ჟურნალი)" subtitle="Inspection Register / Journal" />
+      <FormHeader code="BE-FM-INSP-REG" isoRef="სსტ ISO/IEC 17020 §7.3" title="ინსპექციების რეგისტრი (ჟურნალი)" subtitle="Inspection Register / Journal" />
 
       <Text style={s.secH}>A. ჟურნალის მონაცემები</Text>
       <FieldRow2 label1="ჟურნალის №:" value1={data.journalNumber} label2="პერიოდი (წელი):" value2={data.period} />
@@ -69,7 +69,7 @@ const FM21_InspectionRegisterPdf = ({ data = {} }) => {
         </View>
       </View>
 
-      <FormFooter code="BE-FM-21 v2.0 | 28.04.2026 | შენახვა: 10 წელი" />
+      <FormFooter code="BE-FM-INSP-REG v2.0 | 28.04.2026 | შენახვა: 10 წელი" />
     </Page>
   </Document>
 );};

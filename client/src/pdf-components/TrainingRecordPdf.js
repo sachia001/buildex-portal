@@ -78,7 +78,7 @@ const TrainingRecordPdf = ({ data }) => {
         <View style={s.divider} />
 
         <Text style={s.docTitle}>ტრენინგის ჩანაწერი</Text>
-        <Text style={s.docCode}>FM-13 | ვ.2 | 2026 | ISO/IEC 17020:2012/2013 §6.1</Text>
+        <Text style={s.docCode}>BE-FM-TRAIN | ვ.2 | 2026 | ISO/IEC 17020:2012/2013 §6.1</Text>
 
         {/* Section A */}
         <View style={s.sectionBar}><Text style={s.sectionBarText}>A — თანამშრომლის მონაცემები</Text></View>
@@ -176,7 +176,7 @@ const TrainingRecordPdf = ({ data }) => {
 
         <View style={[s.divider, { marginTop: 12 }]} />
         <Text style={{ fontSize: 7, color: '#aaa', textAlign: 'center' }}>
-          კონფიდენციალური — მხოლოდ შიდა გამოყენებისთვის | FM-13 v.2 | შპს „ბილდექს ექსპერტიზა" | შენახვა: 5 წელი
+          კონფიდენციალური — მხოლოდ შიდა გამოყენებისთვის | BE-FM-TRAIN v.2 | შპს „ბილდექს ექსპერტიზა" | შენახვა: 5 წელი
         </Text>
       </Page>
     </Document>

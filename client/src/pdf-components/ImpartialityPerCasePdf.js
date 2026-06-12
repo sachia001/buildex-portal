@@ -69,7 +69,7 @@ const ImpartialityPerCasePdf = ({ data }) => {
         <View style={s.divider} />
 
         <Text style={s.docTitle}>მიუკერძოებლობის შეფასება — კონკრეტული საქმისთვის</Text>
-        <Text style={s.docCode}>FM-02b | ვ.1 | 2026 | ISO/IEC 17020:2012/2013 §4.1.5</Text>
+        <Text style={s.docCode}>BE-FM-IMP-CHECK | ვ.1 | 2026 | ISO/IEC 17020:2012/2013 §4.1.5</Text>
 
         {/* Section A — Inspector data */}
         <View style={s.sectionBar}>
@@ -176,7 +176,7 @@ const ImpartialityPerCasePdf = ({ data }) => {
 
         <View style={[s.divider, { marginTop: 14 }]} />
         <Text style={{ fontSize: 7, color: '#aaa', textAlign: 'center' }}>
-          კონფიდენციალური | FM-02b v.1 | შპს „ბილდექს ექსპერტიზა" | შენახვა: 5 წელი
+          კონფიდენციალური | BE-FM-IMP-CHECK v.1 | შპს „ბილდექს ექსპერტიზა" | შენახვა: 5 წელი
         </Text>
       </Page>
     </Document>

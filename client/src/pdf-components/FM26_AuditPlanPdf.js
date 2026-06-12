@@ -10,7 +10,7 @@ const FM26_AuditPlanPdf = ({ data = {} }) => {
   <Document>
     <Page size="A4" style={[s.page, { paddingTop: 12, paddingBottom: 22, paddingHorizontal: 28 }]}>
       <WM />
-      <FormHeader code="BE-FM-26" isoRef="სსტ ISO/IEC 17020 §8.6" title="შიდა აუდიტის გეგმა" subtitle="Internal Audit Plan" />
+      <FormHeader code="BE-FM-AUDIT-PLAN" isoRef="სსტ ISO/IEC 17020 §8.6" title="შიდა აუდიტის გეგმა" subtitle="Internal Audit Plan" />
 
       <Text style={s.secH}>A. აუდიტის საიდენტიფიკაციო მონაცემები</Text>
       <FieldRow2 label1="აუდიტის №:" value1={data.auditNumber} label2="პერიოდი:" value2={data.period} />
@@ -43,7 +43,7 @@ const FM26_AuditPlanPdf = ({ data = {} }) => {
       <FieldRow label="შენიშვნა / NC-ები:" value={data.notes} />
 
       <SigBlock3 labels={['შემდგენი (აუდიტორი)', 'შემმოწმებელი (ხარისხის მენეჯერი)', 'დამტკიცება (დირექტორი)']} sigs={sigs} />
-      <FormFooter code="BE-FM-26 v2.0 | 28.04.2026 | ISO §8.6 | შენახვა: 5 წელი" />
+      <FormFooter code="BE-FM-AUDIT-PLAN v2.0 | 28.04.2026 | ISO §8.6 | შენახვა: 5 წელი" />
     </Page>
   </Document>
 );};

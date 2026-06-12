@@ -62,7 +62,7 @@ const ImpartialityGeneralPdf = ({ data }) => {
         <View style={s.divider} />
 
         <Text style={s.docTitle}>მიუკერძოებლობისა და დამოუკიდებლობის ზოგადი დეკლარაცია</Text>
-        <Text style={s.docCode}>FM-02a | ვ.1 | 2026 | ISO/IEC 17020:2012/2013 §4.1</Text>
+        <Text style={s.docCode}>BE-FM-IMP-GEN | ვ.1 | 2026 | ISO/IEC 17020:2012/2013 §4.1</Text>
 
         <View style={s.fieldRow}>
           <Text style={s.fieldLabel}>სახელი, გვარი:</Text>
@@ -131,7 +131,7 @@ const ImpartialityGeneralPdf = ({ data }) => {
 
         <View style={[s.divider, { marginTop: 14 }]} />
         <Text style={{ fontSize: 7, color: '#aaa', textAlign: 'center' }}>
-          კონფიდენციალური — მხოლოდ შიდა გამოყენებისთვის | FM-02a v.1 | შპს „ბილდექს ექსპერტიზა" | შენახვა: 5 წელი
+          კონფიდენციალური — მხოლოდ შიდა გამოყენებისთვის | BE-FM-IMP-GEN v.1 | შპს „ბილდექს ექსპერტიზა" | შენახვა: 5 წელი
         </Text>
       </Page>
     </Document>

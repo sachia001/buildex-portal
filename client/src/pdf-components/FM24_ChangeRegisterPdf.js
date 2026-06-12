@@ -10,7 +10,7 @@ const FM24_ChangeRegisterPdf = ({ data = {} }) => {
   <Document>
     <Page size="A4" orientation="landscape" style={[s.page,{paddingHorizontal:28}]}>
       <WM />
-      <FormHeader code="BE-FM-24" isoRef="სსტ ISO/IEC 17020 §8.3 (PR-01)" title="ცვლილებების რეგისტრი" subtitle="Document Change Register" />
+      <FormHeader code="BE-FM-CHANGE-REG" isoRef="სსტ ISO/IEC 17020 §8.3 (PR-01)" title="ცვლილებების რეგისტრი" subtitle="Document Change Register" />
 
       <FieldRow2 label1="პასუხისმგებელი (ხარისხის მენეჯერი):" value1={data.qualityManager} label2="პერიოდი (წელი):" value2={data.period} />
 
@@ -18,13 +18,13 @@ const FM24_ChangeRegisterPdf = ({ data = {} }) => {
       <View style={s.tBorder}>
         <View style={s.tHeader}>
           <View style={[s.tHead,{width:'4%',...cc}]}><Text>#</Text></View>
-          <View style={[s.tHead,{width:'12%',...cc}]}><Text>FM-23 №</Text></View>
+          <View style={[s.tHead,{width:'12%',...cc}]}><Text>BE-FM-CHANGE-INIT №</Text></View>
           <View style={[s.tHead,{flex:1,...cc}]}><Text>დოკუმენტის სახელი</Text></View>
           <View style={[s.tHead,{width:'9%',...cc}]}><Text>ძველი ვერსია</Text></View>
           <View style={[s.tHead,{width:'9%',...cc}]}><Text>ახალი ვერსია</Text></View>
           <View style={[s.tHead,{width:'11%',...cc}]}><Text>ძალაში შესვლის თარიღი</Text></View>
           <View style={[s.tHead,{width:'18%',...cc}]}><Text>ცვლილების ხასიათი</Text></View>
-          <View style={[s.tHead,{width:'10%',...cc}]}><Text>FM-22</Text></View>
+          <View style={[s.tHead,{width:'10%',...cc}]}><Text>BE-FM-FAMIL</Text></View>
         </View>
         {[...Array(22)].map((_,i) => (
           <View key={i} style={i%2===0?s.tRow:s.tRowAlt}>
@@ -33,7 +33,7 @@ const FM24_ChangeRegisterPdf = ({ data = {} }) => {
           </View>
         ))}
       </View>
-      <Text style={{fontSize:7,color:'#555',marginBottom:6}}>ცვლ.ხ.: რ — რედაქცია | ა — ახალი | ა/ა — ამოღება/არქივი | შ — შინაარსი | FM-22: ✓ — ჩატარებული | — — ზ. (ზედმეტი)</Text>
+      <Text style={{fontSize:7,color:'#555',marginBottom:6}}>ცვლ.ხ.: რ — რედაქცია | ა — ახალი | ა/ა — ამოღება/არქივი | შ — შინაარსი | BE-FM-FAMIL: ✓ — ჩატარებული | — — ზ. (ზედმეტი)</Text>
 
       <View style={{flexDirection:'row',justifyContent:'flex-end',marginTop:6}}>
         <View style={{width:'35%'}}>
@@ -46,7 +46,7 @@ const FM24_ChangeRegisterPdf = ({ data = {} }) => {
         </View>
       </View>
 
-      <FormFooter code="BE-FM-24 v2.0 | 28.04.2026 | შენახვა: 5 წელი" />
+      <FormFooter code="BE-FM-CHANGE-REG v2.0 | 28.04.2026 | შენახვა: 5 წელი" />
     </Page>
   </Document>
 );};

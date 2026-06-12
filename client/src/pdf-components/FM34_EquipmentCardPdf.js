@@ -18,7 +18,7 @@ const FM34_EquipmentCardPdf = ({ data = {} }) => {
       <Page size="A4" style={[s.page, { paddingTop: 12, paddingBottom: 22, paddingHorizontal: 28 }]}>
         <WM />
         <FormHeader
-          code="BE-FM-34"
+          code="BE-FM-EQ-CARD"
           isoRef="სსტ ISO/IEC 17020 §6.2 (BE-PR-13)"
           title="აღჭურვილობის სარეგისტრაციო ბარათი"
           subtitle="Equipment Registration & Calibration Card"
@@ -89,7 +89,7 @@ const FM34_EquipmentCardPdf = ({ data = {} }) => {
         </View>
 
         <SigBlock3 labels={['ტექნიკური მენეჯერი', 'ხარისხის მენეჯერი', 'დირექტორი']} sigs={sigs} />
-        <FormFooter code="BE-FM-34 v1.0 | 2026 | ISO §6.2 | შენახვა: 10 წელი" />
+        <FormFooter code="BE-FM-EQ-CARD v1.0 | 2026 | ISO §6.2 | შენახვა: 10 წელი" />
       </Page>
     </Document>
   );

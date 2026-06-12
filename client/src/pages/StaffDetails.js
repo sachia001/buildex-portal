@@ -36,11 +36,11 @@ const StaffDetails = () => {
     const [startDate, setStartDate] = useState(today);
     const [contractNumber, setContractNumber] = useState('LC-2026-001');
 
-    // FM-02 — ზოგადი სფეროები + კონფლიქტი
+    // BE-FM-IMP-DECL — ზოგადი სფეროები + კონფლიქტი
     const [genScopes, setGenScopes] = useState([]);
     const [genConflicts, setGenConflicts] = useState({ ownership: false, family: false, employment: false, financial: false, contract: false });
 
-    // FM-02b — საქმეზე მიბმული
+    // BE-FM-IMP-CHECK — საქმეზე მიბმული
     const [caseSearchNum, setCaseSearchNum] = useState('');
     const [caseSearching, setCaseSearching] = useState(false);
     const [foundCase, setFoundCase] = useState(null);
@@ -48,7 +48,7 @@ const StaffDetails = () => {
     const [caseConflicts, setCaseConflicts] = useState({ acquainted: false, employed: false, financial: false, participated: false, other: false });
     const [caseConclusion, setCaseConclusion] = useState('clear');
 
-    // FM-13 — ტრენინგის ჩანაწერი
+    // BE-FM-TRAIN — ტრენინგის ჩანაწერი
     const [trainingDate, setTrainingDate] = useState(today);
     const [duration, setDuration] = useState('');
     const [trainingType, setTrainingType] = useState('შიდა');
@@ -327,9 +327,9 @@ const StaffDetails = () => {
                                             <Accordion.Header>📋 ISO 17020 სავალდებულო ფორმები</Accordion.Header>
                                             <Accordion.Body>
 
-                                                {/* FM-02 — მიუკ. დეკლარაცია (სფეროები + კონფლიქტი) */}
+                                                {/* BE-FM-IMP-DECL — მიუკ. დეკლარაცია (სფეროები + კონფლიქტი) */}
                                                 <div className="mb-4 border-bottom pb-4">
-                                                    <h6 className="fw-bold text-primary mb-2">FM-02 — მიუკერძოებლობის დეკლარაცია <small className="text-muted fw-normal">(ინსპექტორის სფეროები)</small></h6>
+                                                    <h6 className="fw-bold text-primary mb-2">BE-FM-IMP-DECL — მიუკერძოებლობის დეკლარაცია <small className="text-muted fw-normal">(ინსპექტორის სფეროები)</small></h6>
                                                     <p className="small text-muted mb-2">ინსპექტორი ამოწმებს ავტ. სფეროებს და ადასტურებს ინტ. კონფ. არარსებობას.</p>
 
                                                     <Form.Label className="small fw-bold">ავტ. სფეროები (მონიშნეთ):</Form.Label>
@@ -368,13 +368,13 @@ const StaffDetails = () => {
 
                                                     <PDFDownloadLink document={<ImpartialityDeclarationPdf data={buildImpartialityDeclarationData()} />}
                                                         fileName={`FM-02_მიუკ_დეკ_${fname}.pdf`} className="btn btn-outline-primary btn-sm mt-2" style={{ textDecoration: 'none' }}>
-                                                        {({ loading: l }) => l ? '...' : '📥 FM-02 — მიუკ. დეკლარაცია'}
+                                                        {({ loading: l }) => l ? '...' : '📥 BE-FM-IMP-DECL — მიუკ. დეკლარაცია'}
                                                     </PDFDownloadLink>
                                                 </div>
 
-                                                {/* FM-02a — ზოგადი */}
+                                                {/* BE-FM-IMP-GEN — ზოგადი */}
                                                 <div className="mb-4 border-bottom pb-4">
-                                                    <h6 className="fw-bold text-primary mb-3">FM-02a — ზოგადი მიუკერძოებლობის დეკლარაცია <small className="text-muted fw-normal">(ახალი თანამშრომელი)</small></h6>
+                                                    <h6 className="fw-bold text-primary mb-3">BE-FM-IMP-GEN — ზოგადი მიუკერძოებლობის დეკლარაცია <small className="text-muted fw-normal">(ახალი თანამშრომელი)</small></h6>
                                                     <p className="small text-muted mb-3">
                                                         თანამშრომელი ადასტურებს ინტერესთა კონფლიქტის არარსებობას და ვალდებულებას,
                                                         შეატყობინოს ნებისმიერი კონფლიქტის შემთხვევაში.
@@ -382,13 +382,13 @@ const StaffDetails = () => {
 
                                                     <PDFDownloadLink document={<ImpartialityGeneralPdf data={buildImpartialityGeneralData()} />}
                                                         fileName={`FM-02a_ზოგ_მიუკ_${fname}.pdf`} className="btn btn-outline-primary btn-sm mt-2" style={{ textDecoration: 'none' }}>
-                                                        {({ loading: l }) => l ? '...' : '📥 FM-02a — ზოგადი მიუკერძოებლობის დეკლარაცია'}
+                                                        {({ loading: l }) => l ? '...' : '📥 BE-FM-IMP-GEN — ზოგადი მიუკერძოებლობის დეკლარაცია'}
                                                     </PDFDownloadLink>
                                                 </div>
 
-                                                {/* FM-02b — საქმეზე მიბმული */}
+                                                {/* BE-FM-IMP-CHECK — საქმეზე მიბმული */}
                                                 <div className="mb-4 border-bottom pb-4">
-                                                    <h6 className="fw-bold text-primary mb-3">FM-02b — მიუკერძოებლობის შეფასება <small className="text-muted fw-normal">(კონკრეტული საქმე)</small></h6>
+                                                    <h6 className="fw-bold text-primary mb-3">BE-FM-IMP-CHECK — მიუკერძოებლობის შეფასება <small className="text-muted fw-normal">(კონკრეტული საქმე)</small></h6>
 
                                                     <div className="d-flex gap-2 mb-3">
                                                         <Form.Control size="sm" placeholder="საქმის ნომერი (BX-INS-... ან IN-...)"
@@ -445,14 +445,14 @@ const StaffDetails = () => {
                                                     ) : (
                                                         <PDFDownloadLink document={<ImpartialityPerCasePdf data={buildImpartialityPerCaseData()} />}
                                                             fileName={`FM-02b_${foundCase.inspectionNumber}_${fname}.pdf`} className="btn btn-outline-danger btn-sm" style={{ textDecoration: 'none' }}>
-                                                            {({ loading: l }) => l ? '...' : '📥 FM-02b — საქმის მიუკერძოებლობის შეფასება'}
+                                                            {({ loading: l }) => l ? '...' : '📥 BE-FM-IMP-CHECK — საქმის მიუკერძოებლობის შეფასება'}
                                                         </PDFDownloadLink>
                                                     )}
                                                 </div>
 
-                                                {/* FM-03 */}
+                                                {/* BE-FM-CONF */}
                                                 <div>
-                                                    <h6 className="fw-bold text-primary border-bottom pb-1 mb-3">FM-03 — კონფიდენციალურობის შეთანხმება</h6>
+                                                    <h6 className="fw-bold text-primary border-bottom pb-1 mb-3">BE-FM-CONF — კონფიდენციალურობის შეთანხმება</h6>
                                                     <p className="text-muted small mb-3">ავტომატურად ივსება პირადი საქმის მონაცემებით. ხელმოწერის შეყვანის შემდეგ PDF-ში ჩაიდება.</p>
                                                     <PDFDownloadLink
                                                         document={<ConfidentialityAgreementPdf data={buildConfidentialityData()} />}
@@ -460,7 +460,7 @@ const StaffDetails = () => {
                                                         className="btn btn-outline-primary btn-sm"
                                                         style={{ textDecoration: 'none' }}
                                                     >
-                                                        {({ loading: l }) => l ? '...' : '📥 FM-03 — კონფიდენციალურობის შეთანხმება'}
+                                                        {({ loading: l }) => l ? '...' : '📥 BE-FM-CONF — კონფიდენციალურობის შეთანხმება'}
                                                     </PDFDownloadLink>
                                                 </div>
                                             </Accordion.Body>
@@ -516,7 +516,7 @@ const StaffDetails = () => {
 
                                         {/* === ტრენინგის ჩანაწერი === */}
                                         <Accordion.Item eventKey="training">
-                                            <Accordion.Header>🎓 FM-13 — ტრენინგის ჩანაწერი</Accordion.Header>
+                                            <Accordion.Header>🎓 BE-FM-TRAIN — ტრენინგის ჩანაწერი</Accordion.Header>
                                             <Accordion.Body>
                                                 <Row className="g-3 mb-3">
                                                     <Col md={6}>
@@ -589,7 +589,7 @@ const StaffDetails = () => {
                                                     className="btn btn-outline-success btn-sm"
                                                     style={{ textDecoration: 'none' }}
                                                 >
-                                                    {({ loading: l }) => l ? '...' : '📥 FM-13 — ტრენინგის ჩანაწერი'}
+                                                    {({ loading: l }) => l ? '...' : '📥 BE-FM-TRAIN — ტრენინგის ჩანაწერი'}
                                                 </PDFDownloadLink>
                                             </Accordion.Body>
                                         </Accordion.Item>

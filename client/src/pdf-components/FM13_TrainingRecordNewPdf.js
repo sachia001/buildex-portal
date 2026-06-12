@@ -8,7 +8,7 @@ const FM13_TrainingRecordNewPdf = ({ data = {} }) => {
   <Document>
     <Page size="A4" style={s.page}>
       <WM />
-      <FormHeader code="BE-FM-13" isoRef="სსტ ISO/IEC 17020 §6.1" title="ტრენინგის ჩანაწერი" subtitle="Training Record" />
+      <FormHeader code="BE-FM-TRAIN" isoRef="სსტ ISO/IEC 17020 §6.1" title="ტრენინგის ჩანაწერი" subtitle="Training Record" />
 
       <Text style={s.secH}>A. თანამშრომლის მონაცემები</Text>
       <FieldRow2 label1="სახელი / გვარი:"       value1={data.name}       label2="პირადი №:"                    value2={data.personalId} />
@@ -73,7 +73,7 @@ const FM13_TrainingRecordNewPdf = ({ data = {} }) => {
       <FieldRow label="მომდევნო ტრენინგის თარიღი:" value={data.nextTraining} />
 
       <SigBlock3 labels={['თანამშრომელი','ტექნიკური მენეჯერი','ხარისხის მენეჯერი']} sigs={sigs} />
-      <FormFooter code="BE-FM-13 v2.0 | 28.04.2026 | შენახვა: 5 წელი" />
+      <FormFooter code="BE-FM-TRAIN v2.0 | 28.04.2026 | შენახვა: 5 წელი" />
     </Page>
   </Document>
 );};

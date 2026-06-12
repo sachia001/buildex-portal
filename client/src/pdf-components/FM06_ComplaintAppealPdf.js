@@ -9,7 +9,7 @@ const FM06_ComplaintAppealPdf = ({ data = {} }) => {
   <Document>
     <Page size="A4" style={[s.page, { paddingTop: 10, paddingBottom: 16, paddingHorizontal: 28 }]}>
       <WM />
-      <FormHeader code="BE-FM-06" isoRef="სსტ ISO/IEC 17020 §7.5/7.7/7.8" title="საჩივარი / აპელაცია" subtitle="Complaint & Appeal Form" />
+      <FormHeader code="BE-FM-COMPLAINT" isoRef="სსტ ISO/IEC 17020 §7.5/7.7/7.8" title="საჩივარი / აპელაცია" subtitle="Complaint & Appeal Form" />
 
       <Text style={s.secH}>A. ტიპი</Text>
       <View style={{flexDirection:'row',gap:25,marginBottom:5,marginLeft:5}}>
@@ -49,11 +49,11 @@ const FM06_ComplaintAppealPdf = ({ data = {} }) => {
 
       <Text style={s.secH}>E. გადაწყვეტა</Text>
       <TextArea value={data.resolution} placeholder="(გადაწყვეტის აღწერა)" minHeight={28} />
-      <YesNoRow label="FM-10 CAPA ინიცირებულია:" yesNo={data.capaInitiated} />
-      <FieldRow2 label1="FM-10 №:" value1={data.capaNumber} label2="პასუხის გაგზავნის თარიღი:" value2={data.responseSentDate} />
+      <YesNoRow label="BE-FM-CAPA CAPA ინიცირებულია:" yesNo={data.capaInitiated} />
+      <FieldRow2 label1="BE-FM-CAPA №:" value1={data.capaNumber} label2="პასუხის გაგზავნის თარიღი:" value2={data.responseSentDate} />
 
       <SigBlock3 labels={['შემდგენი','ხარისხის მენეჯერი','დირექტორი']} sigs={sigs} />
-      <FormFooter code="BE-FM-06 v2.0 | 28.04.2026 | შენახვა: 5 წელი" />
+      <FormFooter code="BE-FM-COMPLAINT v2.0 | 28.04.2026 | შენახვა: 5 წელი" />
     </Page>
   </Document>
 );};

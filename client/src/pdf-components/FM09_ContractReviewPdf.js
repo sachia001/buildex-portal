@@ -8,7 +8,7 @@ const FM09_ContractReviewPdf = ({ data = {} }) => {
   <Document>
     <Page size="A4" style={s.page}>
       <WM />
-      <FormHeader code="BE-FM-09" isoRef="სსტ ISO/IEC 17020 §7.1" title="ხელშეკრულების განხილვა" subtitle="Contract / Tender Review" />
+      <FormHeader code="BE-FM-CONTRACT-REVIEW" isoRef="სსტ ISO/IEC 17020 §7.1" title="ხელშეკრულების განხილვა" subtitle="Contract / Tender Review" />
 
       <Text style={s.secH}>A. საიდენტიფიკაციო მონაცემები</Text>
       <FieldRow2 label1="BE-CASE №:" value1={data.caseNumber}    label2="თარიღი:"    value2={data.reviewDate} />
@@ -22,7 +22,7 @@ const FM09_ContractReviewPdf = ({ data = {} }) => {
         ))}
       </View>
       <FieldRow2 label1="ხელშეკრულების №:" value1={data.contractNumber} label2="ვადა:"     value2={data.deadline} />
-      <FieldRow2 label1="გასამრჯელო (₾):"   value1={data.fee}           label2="FM-02 №:" value2={data.fm02Number} />
+      <FieldRow2 label1="გასამრჯელო (₾):"   value1={data.fee}           label2="BE-FM-IMP-DECL №:" value2={data.fm02Number} />
 
       <Text style={s.secH}>B. ISO §7.1.1 — კრიტერიუმები</Text>
       <View style={s.tBorder}>
@@ -32,7 +32,7 @@ const FM09_ContractReviewPdf = ({ data = {} }) => {
           <View style={[s.tHead,{width:'17%'}]}><Text>კი / არა</Text></View>
           <View style={[s.tHead,{width:'28%'}]}><Text>კომენტარი</Text></View>
         </View>
-        {[['§7.1.1a','ობიექტის იდენტიფიკაცია','r_7_1_1a','r_7_1_1a_note'],['§7.1.1b','შესაძლებლობის დადასტურება','r_7_1_1b','r_7_1_1b_note'],['§7.1.1c','მომსახურების შინაარსი','r_7_1_1c','r_7_1_1c_note'],['§7.1.1d','კლიენტის მოთხოვნები','r_7_1_1d','r_7_1_1d_note'],['§7.1','ვადა და გასამრჯელო','r_7_1','r_7_1_note'],['FM-02','მიუკერძოებლობის შეფასება','r_fm02','r_fm02_note']].map(([cl,req,yesnoKey,noteKey],i) => (
+        {[['§7.1.1a','ობიექტის იდენტიფიკაცია','r_7_1_1a','r_7_1_1a_note'],['§7.1.1b','შესაძლებლობის დადასტურება','r_7_1_1b','r_7_1_1b_note'],['§7.1.1c','მომსახურების შინაარსი','r_7_1_1c','r_7_1_1c_note'],['§7.1.1d','კლიენტის მოთხოვნები','r_7_1_1d','r_7_1_1d_note'],['§7.1','ვადა და გასამრჯელო','r_7_1','r_7_1_note'],['BE-FM-IMP-DECL','მიუკერძოებლობის შეფასება','r_fm02','r_fm02_note']].map(([cl,req,yesnoKey,noteKey],i) => (
           <View key={cl} style={i%2===0?s.tRow:s.tRowAlt}>
             <View style={[s.tCell,{width:'10%'}]}><Text>{cl}</Text></View>
             <View style={[s.tCell,{flex:1}]}><Text>{req}</Text></View>
@@ -55,7 +55,7 @@ const FM09_ContractReviewPdf = ({ data = {} }) => {
       <YesNoRow label="დამტკიცებულია:" yesNo={data.approved} />
 
       <SigBlock3 labels={['შემდგენი','ტექნიკური მენეჯერი','დირექტორი']} sigs={sigs} />
-      <FormFooter code="BE-FM-09 v2.0 | 28.04.2026 | შენახვა: 10 წელი" />
+      <FormFooter code="BE-FM-CONTRACT-REVIEW v2.0 | 28.04.2026 | შენახვა: 10 წელი" />
     </Page>
   </Document>
 );};

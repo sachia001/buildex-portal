@@ -17,7 +17,7 @@ const FM33_ImpartialityRiskPdf = ({ data = {} }) => {
       <Page size="A4" style={[s.page, { paddingTop: 12, paddingBottom: 22, paddingHorizontal: 28 }]}>
         <WM />
         <FormHeader
-          code="BE-FM-33"
+          code="BE-FM-IMP-RISK"
           isoRef="სსტ ISO/IEC 17020 §4.1 (BE-PR-06)"
           title="მიუკერძოებლობის რისკების შეფასება"
           subtitle="Impartiality Risk Assessment Form"
@@ -99,7 +99,7 @@ const FM33_ImpartialityRiskPdf = ({ data = {} }) => {
         </View>
 
         <SigBlock3 labels={['ინსპექტორი', 'ხარისხის მენეჯერი', 'დირექტორი']} sigs={sigs} />
-        <FormFooter code="BE-FM-33 v1.0 | 2026 | ISO §4.1 | შენახვა: 5 წელი" />
+        <FormFooter code="BE-FM-IMP-RISK v1.0 | 2026 | ISO §4.1 | შენახვა: 5 წელი" />
       </Page>
     </Document>
   );

@@ -9,14 +9,14 @@ const FM11_InspectionPlanPdf = ({ data = {} }) => {
   const pairs = [
     ['BE-CASE №:',data.caseNumber,'ინსპექციის თარიღი:',data.inspDate],
     ['ობიექტის მისამართი:',data.address,'დამკვეთი:',data.client],
-    ['ხელშეკრულების №:',data.contractNumber,'FM-09 №:',data.fm09Number],
+    ['ხელშეკრულების №:',data.contractNumber,'BE-FM-CONTRACT-REVIEW №:',data.fm09Number],
     ['ინსპექტორი:',data.inspector,'ტექნიკური მენეჯერი:',data.techManager],
   ];
   return (
   <Document>
     <Page size="A4" style={s.page}>
       <WM />
-      <FormHeader code="BE-FM-11" isoRef="სსტ ISO/IEC 17020 §7.1" title="ინსპექციის გეგმა" subtitle="Inspection Plan" />
+      <FormHeader code="BE-FM-PLAN" isoRef="სსტ ISO/IEC 17020 §7.1" title="ინსპექციის გეგმა" subtitle="Inspection Plan" />
 
       <Text style={s.secH}>A. საიდენტიფიკაციო მონაცემები</Text>
       <View style={[s.tBorder,{marginBottom:4}]}>
@@ -84,11 +84,11 @@ const FM11_InspectionPlanPdf = ({ data = {} }) => {
       <Text style={s.secH}>E. განსაკუთრებული მოთხოვნები / რისკები</Text>
       <TextArea value={data.specialNotes} placeholder="(განსაკუთრებული მოთხოვნები)" minHeight={22} />
 
-      <Text style={s.secH}>F. FM-02 ინსპექტორის შეთანხმება</Text>
+      <Text style={s.secH}>F. BE-FM-IMP-DECL ინსპექტორის შეთანხმება</Text>
       <View style={s.tBorder}>
         <View style={s.tHeader}>
           <View style={[s.tHead,{flex:1,...cc}]}><Text>ინსპექტორი</Text></View>
-          <View style={[s.tHead,{width:'26%',...cc}]}><Text>FM-02 №</Text></View>
+          <View style={[s.tHead,{width:'26%',...cc}]}><Text>BE-FM-IMP-DECL №</Text></View>
           <View style={[s.tHead,{width:'26%',...cc}]}><Text>ხელმოწერა / თარიღი</Text></View>
         </View>
         {[...Array(3)].map((_,i) => (
@@ -109,7 +109,7 @@ const FM11_InspectionPlanPdf = ({ data = {} }) => {
         </View>
       </View>
 
-      <FormFooter code="BE-FM-11 v2.0 | 28.04.2026 | შენახვა: 10 წელი" />
+      <FormFooter code="BE-FM-PLAN v2.0 | 28.04.2026 | შენახვა: 10 წელი" />
     </Page>
   </Document>
 );};

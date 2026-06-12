@@ -226,33 +226,33 @@ const FORMS_DATA = [
   ]},
   { section: '🔍 ინსპექტირების ფორმები', items: [
     { icon: '📝', code: 'BE-FM-APP', title: 'განაცხადის ფორმა',         desc: 'ინსპექციის მოთხოვნა',           pdf: <BlankApplicationForm />,          fileName: 'FM-18_განაცხადება',  color: 'info' },
-    { icon: '📋', code: 'BE-FM-CONTRACT-REVIEW', title: 'ხელშეკრულების განხილვა',   desc: 'ISO §7.1',                      pdf: <FM09_ContractReviewPdf />,        fileName: 'FM-09_ხელშ_განხ',    color: 'info', fill: 'FM-09' },
-    { icon: '🗺️', code: 'BE-FM-PLAN', title: 'ინსპექტირების გეგმა',      desc: 'ISO §7.1',                      pdf: <FM11_InspectionPlanPdf />,        fileName: 'FM-11_ინსპ_გეგმა',  color: 'info', fill: 'FM-11' },
-    { icon: '📍', code: 'BE-FM-VISIT', title: 'ვიზიტის ჩანაწერი',         desc: 'ISO §7.3',                      pdf: <FM16_VisitRecordPdf />,           fileName: 'FM-16_ვიზ_ჩანაწ',   color: 'info', fill: 'FM-16' },
-    { icon: '📊', code: 'BE-FM-INSP-REG', title: 'ინსპექტირების რეგისტრი',   desc: 'ISO §7.3',                      pdf: <FM21_InspectionRegisterPdf />,   fileName: 'FM-21_ინსპ_რეგ',    color: 'info', fill: 'FM-21' },
+    { icon: '📋', code: 'BE-FM-CONTRACT-REVIEW', title: 'ხელშეკრულების განხილვა',   desc: 'ISO §7.1',                      pdf: <FM09_ContractReviewPdf />,        fileName: 'FM-09_ხელშ_განხ',    color: 'info', fill: 'BE-FM-CONTRACT-REVIEW' },
+    { icon: '🗺️', code: 'BE-FM-PLAN', title: 'ინსპექტირების გეგმა',      desc: 'ISO §7.1',                      pdf: <FM11_InspectionPlanPdf />,        fileName: 'FM-11_ინსპ_გეგმა',  color: 'info', fill: 'BE-FM-PLAN' },
+    { icon: '📍', code: 'BE-FM-VISIT', title: 'ვიზიტის ჩანაწერი',         desc: 'ISO §7.3',                      pdf: <FM16_VisitRecordPdf />,           fileName: 'FM-16_ვიზ_ჩანაწ',   color: 'info', fill: 'BE-FM-VISIT' },
+    { icon: '📊', code: 'BE-FM-INSP-REG', title: 'ინსპექტირების რეგისტრი',   desc: 'ISO §7.3',                      pdf: <FM21_InspectionRegisterPdf />,   fileName: 'FM-21_ინსპ_რეგ',    color: 'info', fill: 'BE-FM-INSP-REG' },
   ]},
   { section: '👥 პერსონალი და კომპეტენცია', items: [
-    { icon: '⚖️', code: 'BE-FM-IMP-DECL', title: 'მიუკერძოებლობის დეკლარაცია', desc: 'ISO §4',                     pdf: <ImpartialityDeclarationPdf data={{}} />,  fileName: 'FM-02_მიუკ_დეკლ', color: 'success', fill: 'FM-02' },
-    { icon: '🤐', code: 'BE-FM-CONF', title: 'კონფიდენციალობის შეთანხმება',  desc: 'ISO §5 — 5 წელი',           pdf: <ConfidentialityAgreementPdf data={{}} />, fileName: 'FM-03_კონფ_შეთ',  color: 'success', fill: 'FM-03' },
-    { icon: '🎯', code: 'BE-FM-COMP-CHECK', title: 'კომპეტენციის შეფასება',        desc: 'ISO §6.1',                  pdf: <FM08_CompetencyAssessmentPdf />,          fileName: 'FM-08_კომპ_შეფ',  color: 'success', fill: 'FM-08' },
-    { icon: '📚', code: 'BE-FM-TRAIN', title: 'ტრენინგის ჩანაწერი',           desc: 'ISO §6.1 — 5 წელი',         pdf: <FM13_TrainingRecordNewPdf />,             fileName: 'FM-13_ტრენ_ჩანაწ', color: 'success', fill: 'FM-13' },
+    { icon: '⚖️', code: 'BE-FM-IMP-DECL', title: 'მიუკერძოებლობის დეკლარაცია', desc: 'ISO §4',                     pdf: <ImpartialityDeclarationPdf data={{}} />,  fileName: 'FM-02_მიუკ_დეკლ', color: 'success', fill: 'BE-FM-IMP-DECL' },
+    { icon: '🤐', code: 'BE-FM-CONF', title: 'კონფიდენციალობის შეთანხმება',  desc: 'ISO §5 — 5 წელი',           pdf: <ConfidentialityAgreementPdf data={{}} />, fileName: 'FM-03_კონფ_შეთ',  color: 'success', fill: 'BE-FM-CONF' },
+    { icon: '🎯', code: 'BE-FM-COMP-CHECK', title: 'კომპეტენციის შეფასება',        desc: 'ISO §6.1',                  pdf: <FM08_CompetencyAssessmentPdf />,          fileName: 'FM-08_კომპ_შეფ',  color: 'success', fill: 'BE-FM-COMP-CHECK' },
+    { icon: '📚', code: 'BE-FM-TRAIN', title: 'ტრენინგის ჩანაწერი',           desc: 'ISO §6.1 — 5 წელი',         pdf: <FM13_TrainingRecordNewPdf />,             fileName: 'FM-13_ტრენ_ჩანაწ', color: 'success', fill: 'BE-FM-TRAIN' },
   ]},
   { section: '🛡️ ხარისხის მართვა', items: [
-    { icon: '📣', code: 'BE-FM-COMPLAINT', title: 'საჩივარი / აპელაცია',         desc: 'ISO §7.5/7.7/7.8',            pdf: <FM06_ComplaintAppealPdf />,       fileName: 'FM-06_საჩ_აპ',     color: 'danger', fill: 'FM-06' },
-    { icon: '⚠️', code: 'BE-FM-CAPA', title: 'CAPA — კორექტირებითი ქმედება',desc: 'ISO §8.5',                   pdf: <FM10_CAPAFormPdf />,              fileName: 'FM-10_CAPA',        color: 'danger', fill: 'FM-10' },
-    { icon: '🚫', code: 'BE-FM-NONCONF', title: 'შეუსაბამო სამუშაოს მართვა',   desc: 'ISO §8.7',                   pdf: <FM14_NonConformingPdf />,         fileName: 'FM-14_შეუსაბ',      color: 'danger', fill: 'FM-14' },
-    { icon: '🔎', code: 'BE-FM-AUDIT-PLAN', title: 'შიდა აუდიტი',                  desc: 'ISO §8.6 — 2-ჯერ/წელ.',     pdf: <FM04_InternalAuditPdf />,         fileName: 'FM-04_შ_აუდ',       color: 'danger', fill: 'FM-04' },
-    { icon: '📈', code: 'BE-FM-MGMT-REVIEW', title: 'მენეჯმენტის ანალიზი',          desc: 'ISO §8.5',                   pdf: <FM15_MgmtReviewPdf />,            fileName: 'FM-15_მენ_ანალ',    color: 'danger', fill: 'FM-15' },
+    { icon: '📣', code: 'BE-FM-COMPLAINT', title: 'საჩივარი / აპელაცია',         desc: 'ISO §7.5/7.7/7.8',            pdf: <FM06_ComplaintAppealPdf />,       fileName: 'FM-06_საჩ_აპ',     color: 'danger', fill: 'BE-FM-COMPLAINT' },
+    { icon: '⚠️', code: 'BE-FM-CAPA', title: 'CAPA — კორექტირებითი ქმედება',desc: 'ISO §8.5',                   pdf: <FM10_CAPAFormPdf />,              fileName: 'FM-10_CAPA',        color: 'danger', fill: 'BE-FM-CAPA' },
+    { icon: '🚫', code: 'BE-FM-NONCONF', title: 'შეუსაბამო სამუშაოს მართვა',   desc: 'ISO §8.7',                   pdf: <FM14_NonConformingPdf />,         fileName: 'FM-14_შეუსაბ',      color: 'danger', fill: 'BE-FM-NONCONF' },
+    { icon: '🔎', code: 'BE-FM-AUDIT-PLAN', title: 'შიდა აუდიტი',                  desc: 'ISO §8.6 — 2-ჯერ/წელ.',     pdf: <FM04_InternalAuditPdf />,         fileName: 'FM-04_შ_აუდ',       color: 'danger', fill: 'BE-FM-AUDIT-PLAN' },
+    { icon: '📈', code: 'BE-FM-MGMT-REVIEW', title: 'მენეჯმენტის ანალიზი',          desc: 'ISO §8.5',                   pdf: <FM15_MgmtReviewPdf />,            fileName: 'FM-15_მენ_ანალ',    color: 'danger', fill: 'BE-FM-MGMT-REVIEW' },
   ]},
   { section: '🔧 მოწყობილობა და ქვეკონტრაქტორები', items: [
-    { icon: '🔩', code: 'BE-FM-EQ-CHECK', title: 'მოწყობილობის ვერიფიკაცია',    desc: 'ISO §6.2',                   pdf: <FM07_EquipmentVerificationPdf />, fileName: 'FM-07_მოწყ_ვერ',   color: 'warning', fill: 'FM-07' },
-    { icon: '🏗️', code: 'BE-FM-SUB-MONITOR', title: 'ქვეკონტრაქტორის შეფასება',    desc: 'ISO §6.6',                   pdf: <FM12_SubcontractorPdf />,         fileName: 'FM-12_ქვეკ_შეფ',   color: 'warning', fill: 'FM-12' },
+    { icon: '🔩', code: 'BE-FM-EQ-CHECK', title: 'მოწყობილობის ვერიფიკაცია',    desc: 'ISO §6.2',                   pdf: <FM07_EquipmentVerificationPdf />, fileName: 'FM-07_მოწყ_ვერ',   color: 'warning', fill: 'BE-FM-EQ-CHECK' },
+    { icon: '🏗️', code: 'BE-FM-SUB-MONITOR', title: 'ქვეკონტრაქტორის შეფასება',    desc: 'ISO §6.6',                   pdf: <FM12_SubcontractorPdf />,         fileName: 'FM-12_ქვეკ_შეფ',   color: 'warning', fill: 'BE-FM-SUB-MONITOR' },
   ]},
   { section: '🗂️ დოკუმენტაციის მართვა', items: [
-    { icon: '👁️', code: 'BE-FM-FAMIL', title: 'გაცნობის ფურცელი',             desc: 'ISO §6.1 — 5 სამ. დღე',      pdf: <FM22_FamiliarizationPdf />,       fileName: 'FM-22_გაცნ_ფ',      color: 'secondary', fill: 'FM-22' },
-    { icon: '✍️', code: 'BE-FM-CHANGE-INIT', title: 'ცვლილების წინადადება',         desc: 'BE-PR-12',                   pdf: <FM23_DocChangePdf />,             fileName: 'FM-23_ცვლ_წინ',     color: 'secondary', fill: 'FM-23' },
-    { icon: '📒', code: 'BE-FM-CHANGE-REG', title: 'ცვლილებების რეგისტრი',         desc: 'BE-PR-12 (ჟურნალი)',         pdf: <FM24_ChangeRegisterPdf />,        fileName: 'FM-24_ცვლ_რეგ',     color: 'secondary', fill: 'FM-24' },
-    { icon: '🗑️', code: 'BE-FM-DESTROY-ACT', title: 'ლიკვიდაციის აქტი',            desc: 'BE-PR-12 §6',                pdf: <FM25_LiquidationActPdf />,        fileName: 'FM-25_ლიკვ',         color: 'secondary', fill: 'FM-25' },
+    { icon: '👁️', code: 'BE-FM-FAMIL', title: 'გაცნობის ფურცელი',             desc: 'ISO §6.1 — 5 სამ. დღე',      pdf: <FM22_FamiliarizationPdf />,       fileName: 'FM-22_გაცნ_ფ',      color: 'secondary', fill: 'BE-FM-FAMIL' },
+    { icon: '✍️', code: 'BE-FM-CHANGE-INIT', title: 'ცვლილების წინადადება',         desc: 'BE-PR-12',                   pdf: <FM23_DocChangePdf />,             fileName: 'FM-23_ცვლ_წინ',     color: 'secondary', fill: 'BE-FM-CHANGE-INIT' },
+    { icon: '📒', code: 'BE-FM-CHANGE-REG', title: 'ცვლილებების რეგისტრი',         desc: 'BE-PR-12 (ჟურნალი)',         pdf: <FM24_ChangeRegisterPdf />,        fileName: 'FM-24_ცვლ_რეგ',     color: 'secondary', fill: 'BE-FM-CHANGE-REG' },
+    { icon: '🗑️', code: 'BE-FM-DESTROY-ACT', title: 'ლიკვიდაციის აქტი',            desc: 'BE-PR-12 §6',                pdf: <FM25_LiquidationActPdf />,        fileName: 'FM-25_ლიკვ',         color: 'secondary', fill: 'BE-FM-DESTROY-ACT' },
   ]},
 ];
 
@@ -307,7 +307,7 @@ function ProcUploadModal({ show, onHide, onSaved, existing, prefill, defaultCate
   const [code, setCode]         = useState('');
   const [title, setTitle]       = useState('');
   const [category, setCategory] = useState(defaultCategory || 'procedure');
-  const [version, setVersion]   = useState('2.0');
+  const [version, setVersion]   = useState('1.0');
   const [notes, setNotes]       = useState('');
   const [file, setFile]         = useState(null);
   const [saving, setSaving]     = useState(false);
@@ -322,7 +322,7 @@ function ProcUploadModal({ show, onHide, onSaved, existing, prefill, defaultCate
     setCode(src.code     || '');
     setTitle(src.title   || '');
     setCategory(src.category || defaultCategory || 'procedure');
-    setVersion(src.version   || '2.0');
+    setVersion(src.version   || '1.0');
     setNotes(src.notes       || '');
     setFile(null);
     setErr('');
@@ -413,7 +413,7 @@ function ProcUploadModal({ show, onHide, onSaved, existing, prefill, defaultCate
           <Form.Label className="small fw-bold mb-1">შენიშვნა / კომენტარი</Form.Label>
           <Form.Control as="textarea" size="sm" rows={2} value={notes}
             onChange={e => setNotes(e.target.value)}
-            placeholder="მაგ. ვერსია 2.0, განახლდა 2026-05..."
+            placeholder="მაგ. ვერსია 1.0, განახლდა 2026-05..."
             style={notes ? { background: '#fffbeb', borderColor: '#d97706' } : {}} />
         </Form.Group>
       </Modal.Body>
@@ -428,7 +428,7 @@ function ProcUploadModal({ show, onHide, onSaved, existing, prefill, defaultCate
 }
 
 // ═══════════════════════════════════════════════════════════════════
-// Code normaliser — "QM-1" → "QM-01", "FM-9" → "FM-09", etc.
+// Code normaliser — "QM-1" → "QM-01", "FM-9" → "BE-FM-CONTRACT-REVIEW", etc.
 // ═══════════════════════════════════════════════════════════════════
 function normalizeCode(code) {
   if (!code) return '';

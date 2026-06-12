@@ -33,10 +33,10 @@ const FM20_ReportVerificationPdf = ({ data = {} }) => {
   <Document>
     <Page size="A4" style={s.page}>
       <WM />
-      <FormHeader code="BE-FM-20" isoRef="სსტ ISO/IEC 17020 §7.4" title="ანგარიშის ტექნიკური გადამოწმება" subtitle="Technical Report Verification Checklist" />
+      <FormHeader code="BE-FM-TECH-REVIEW" isoRef="სსტ ISO/IEC 17020 §7.4" title="ანგარიშის ტექნიკური გადამოწმება" subtitle="Technical Report Verification Checklist" />
 
       <Text style={s.secH}>A. საიდენტიფიკაციო მონაცემები</Text>
-      <FieldRow2 label1="BE-CASE №:" value1={data.caseNumber} label2="BE-FM-17 ანგარიშის №:" value2={data.reportNumber} />
+      <FieldRow2 label1="BE-CASE №:" value1={data.caseNumber} label2="BE-FM-IR ანგარიშის №:" value2={data.reportNumber} />
       <FieldRow2 label1="გადამოწმების თარიღი:" value1={data.verificationDate} label2="ვერიფიკატორი:" value2={data.verifier} />
       <FieldRow2 label1="ინსპექტორი:" value1={data.inspector} label2="ინსპექციის სფერო:" value2={data.inspScope} />
 
@@ -82,7 +82,7 @@ const FM20_ReportVerificationPdf = ({ data = {} }) => {
       <Text style={s.secH}>E. ხელმოწერები</Text>
       <SigBlock2 left="ვერიფიკატორი (ტექ. მენეჯერი)" right="ხარისხის მენეჯერი" sigs={sigs} />
 
-      <FormFooter code="BE-FM-20 v2.0 | 28.04.2026 | შენახვა: 10 წელი" />
+      <FormFooter code="BE-FM-TECH-REVIEW v2.0 | 28.04.2026 | შენახვა: 10 წელი" />
     </Page>
   </Document>
 );};

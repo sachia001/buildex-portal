@@ -19,7 +19,7 @@ const FM05_ContractAcceptancePdf = ({ data = {} }) => {
       <Page size="A4" style={[s.page, { paddingTop: 12, paddingBottom: 22, paddingHorizontal: 28 }]}>
         <WM />
         <FormHeader
-          code="BE-FM-05"
+          code="BE-FM-SCREEN"
           isoRef="სსტ ISO/IEC 17020 §7.1 (BE-PR-08)"
           title="ხელშეკრულების განხილვა და სამუშაოს მიღება"
           subtitle="Contract Review & Work Acceptance Form"
@@ -39,7 +39,7 @@ const FM05_ContractAcceptancePdf = ({ data = {} }) => {
         />
         <FieldRow2
           label1="გასამრ. (₾):" value1={fee}
-          label2="FM-01 №:"     value2={fm01Num}
+          label2="BE-FM-REG №:"     value2={fm01Num}
         />
 
         {/* B. ტექ. გადახ. კრიტ. */}
@@ -49,7 +49,7 @@ const FM05_ContractAcceptancePdf = ({ data = {} }) => {
         <YesNoRow label="§7.1.1c — მომს. შინ. ზუსტად განსაზ."           yesNo={r_content} />
         <YesNoRow label="§7.1.1d — კლ. სპეც. მოთხ. ჩართ."               yesNo={r_clientReqs} />
         <YesNoRow label="§7.1 — ვადა და გასამ. დამ."                    yesNo={r_deadline} />
-        <YesNoRow label="FM-02 — მიუკ. შ. ჩართ."                         yesNo={r_fm02} />
+        <YesNoRow label="BE-FM-IMP-DECL — მიუკ. შ. ჩართ."                         yesNo={r_fm02} />
         <YesNoRow label="ინტ. კონფ. — გამოვლ."                           yesNo={r_conflict} />
 
         {/* C. შ-ძ. დადასტ. */}
@@ -78,7 +78,7 @@ const FM05_ContractAcceptancePdf = ({ data = {} }) => {
         <TextArea value={decisionNote} placeholder="გ-ის დასაბ. / შ-ბა" minHeight={28} />
 
         <SigBlock3 labels={['ტექნიკური მენეჯერი', 'ხარისხის მენეჯერი', 'დირექტორი']} sigs={sigs} />
-        <FormFooter code="BE-FM-05 v1.0 | 2026 | ISO §7.1 | შენახვა: 10 წელი" />
+        <FormFooter code="BE-FM-SCREEN v1.0 | 2026 | ISO §7.1 | შენახვა: 10 წელი" />
       </Page>
     </Document>
   );

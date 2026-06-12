@@ -16,7 +16,7 @@ const FM01_ApplicationRegistrationPdf = ({ data = {} }) => {
       <Page size="A4" style={[s.page, { paddingTop: 12, paddingBottom: 22, paddingHorizontal: 28 }]}>
         <WM />
         <FormHeader
-          code="BE-FM-01"
+          code="BE-FM-REG"
           isoRef="სსტ ISO/IEC 17020 §7.1"
           title="მოთხოვნის სარეგისტრაციო ფორმა"
           subtitle="Application Registration Form"
@@ -91,11 +91,11 @@ const FM01_ApplicationRegistrationPdf = ({ data = {} }) => {
         <Text style={s.secH}>E. წინასწარი შეფასება (ტექნიკური მენეჯერი)</Text>
         <YesNoRow label="დოკ. სისრულე დადასტ.:"        yesNo={completenessCheck} />
         <YesNoRow label="ინსპ. სფეო განსაზღვრ.:"       yesNo={scopeCheck} />
-        <YesNoRow label="მიუკ. შ. ინიც. (FM-02):"      yesNo={impartialityCheck} />
+        <YesNoRow label="მიუკ. შ. ინიც. (BE-FM-IMP-DECL):"      yesNo={impartialityCheck} />
         <TextArea value={tmNote} placeholder="შენიშვნები / მოთხოვნები" minHeight={28} />
 
         <SigBlock3 labels={['ადმინისტრატორი', 'ტექნიკური მენეჯერი', 'ხარისხის მენეჯერი']} sigs={sigs} />
-        <FormFooter code="BE-FM-01 v1.0 | 2026 | ISO §7.1 | შენახვა: 10 წელი" />
+        <FormFooter code="BE-FM-REG v1.0 | 2026 | ISO §7.1 | შენახვა: 10 წელი" />
       </Page>
     </Document>
   );
