@@ -71,7 +71,7 @@ const FoundingAgreementPdf = ({ data = {} }) => {
     directorId = '20001017959',
     directorAddress = 'ქ.თელავი, არაყიშვილის ქუჩა 2',
     address = 'საქართველო, ქ. თელავი, ლიონიძის ქუჩა №22',
-    email = 'info@buildexexpertise.com',
+    email = 'info@buildexpertise.com',
     phone = '+995 511 747 400',
     foundingDate = '09 მარტი, 2026 წელი',
     totalShares = '100',
