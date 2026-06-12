@@ -51,7 +51,7 @@ const FM22_FamiliarizationPdf = ({ data = {} }) => {
         })()}
       </View>
 
-      <SigBlock3 labels={['შემდგენი','შემმოწმებელი (ხარისხის მენეჯერი)','დამტკიცება (დირექტორი)']} sigs={sigs} />
+      <SigBlock3 labels={['შემმოწმებელი (ხარისხის მენეჯერი)','დამტკიცება (დირექტორი)']} sigs={sigs} />
       <FormFooter code="BE-FM-FAMIL v1.0 | 28.04.2026 | შენახვა: 5 წელი" />
     </Page>
   </Document>
