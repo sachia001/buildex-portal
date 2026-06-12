@@ -113,6 +113,34 @@ const FieldInput = ({ field, value, onChange, staffList, inspectionList }) => {
       </Form.Select>
     );
   }
+  // multi-select პერსონალი — ჩამოსაშლელი ჩექბოქსებით (ერთი/რამდენიმე/ყველა); ინახება მძიმით გამოყოფილ სტრიქონად
+  if (field.type === 'staffmulti') {
+    const selected = (value || '').split(',').map(x => x.trim()).filter(Boolean);
+    const allNames = staffList.map(u => `${u.firstName} ${u.lastName}`);
+    const allSel = allNames.length > 0 && allNames.every(n => selected.includes(n));
+    const toggle = (n) => {
+      const next = selected.includes(n) ? selected.filter(x => x !== n) : [...selected, n];
+      onChange(field.id, next.join(', '));
+    };
+    return (
+      <div className="border rounded p-2" style={{ maxHeight: 170, overflowY: 'auto', background: '#f8f9fa' }}>
+        {staffList.length === 0 && <div className="text-muted small">პერსონალი არ არის რეგისტრირებული</div>}
+        {staffList.length > 0 && (
+          <>
+            <Form.Check type="checkbox" className="fw-bold" label="✓ ყველას მონიშვნა"
+              checked={allSel} onChange={() => onChange(field.id, allSel ? '' : allNames.join(', '))} />
+            <hr className="my-1" />
+            {staffList.map(u => {
+              const n = `${u.firstName} ${u.lastName}`;
+              return <Form.Check key={u._id} type="checkbox"
+                label={`${n}${u.position ? ` — ${u.position}` : ''}`}
+                checked={selected.includes(n)} onChange={() => toggle(n)} />;
+            })}
+          </>
+        )}
+      </div>
+    );
+  }
   if (field.type === 'tablerows')
     return <TableRowsEditor field={field} value={value} onChange={onChange} />;
   if (field.type === 'textarea')
@@ -400,7 +428,7 @@ const FormFillModal = ({ show, onHide, config, pdfComponent, pdfFileName, formCo
                   </div>
                   <Row className="g-2">
                     {sec.fields.map(field => {
-                      const fullWidth = ['textarea','multicheck','tablerows','case'].includes(field.type);
+                      const fullWidth = ['textarea','multicheck','tablerows','case','staffmulti'].includes(field.type);
                       return (
                         <Col key={field.id} md={fullWidth ? 12 : 6}>
                           <Form.Label className="small fw-semibold mb-1" style={{ fontSize: '0.75rem' }}>
