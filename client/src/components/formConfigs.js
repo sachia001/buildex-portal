@@ -59,6 +59,10 @@ export const FORM_CONFIGS = {
     title: 'შიდა აუდიტის გეგმა და ანგარიში',
     signers: ['შემავსებელი', 'შემოწმებული', 'დამტკიცებული'],
     sections: [
+      { label: 'დამატებითი ინფორმაცია', fields: [
+        { id: 'approvalDate', label: 'დამტკიცების თარიღი', type: 'date' },
+        { id: 'notes', label: 'შენიშვნები', type: 'textarea' },
+      ]},
       { label: 'საიდენტიფიკაციო მონაცემები', fields: [
         { id: 'auditNumber',  label: 'აუდიტის №',                    type: 'text' },
         { id: 'period',       label: 'პერიოდი (წელი)',                type: 'text' },
@@ -942,6 +946,12 @@ export const FORM_CONFIGS = {
     title: 'აუდიტის შეუსაბამობის ფორმა',
     signers: ['აუდიტორი', 'შემმოწმებელი (ხარისხის მენეჯერი)', 'დამტკიცება (დირექტორი)'],
     sections: [
+      { label: 'დამატებითი ინფორმაცია', fields: [
+        { id: 'descriptionDetail', label: 'შეუსაბამობის დეტალური აღწერა', type: 'textarea' },
+        { id: 'rootCauseDetail', label: 'ფესვური მიზეზი (დეტალურად)', type: 'textarea' },
+        { id: 'correctiveActionDetail', label: 'მაკორექტირებელი ქმედება (დეტალურად)', type: 'textarea' },
+        { id: 'checkResult', label: 'ეფექტურობის შემოწმების შედეგი', type: 'text' },
+      ]},
       { label: 'შეუსაბამობის საიდენტიფიკაციო მონაცემები', fields: [
         { id: 'auditNumber',  label: 'BE-FM-AUDIT-PLAN აუდიტის №',      type: 'text' },
         { id: 'ncNumber',     label: 'NC №',                   type: 'text', placeholder: 'ANC-2026-01' },
@@ -965,6 +975,9 @@ export const FORM_CONFIGS = {
     title: 'აუდიტის შეხვედრის ოქმი',
     signers: ['აუდიტორი', 'აუდიტირებული', 'ხარისხის მენეჯერი'],
     sections: [
+      { label: 'დამატებითი ინფორმაცია', fields: [
+        { id: 'scopeDetail', label: 'აუდიტის სფერო (დეტალურად)', type: 'textarea' },
+      ]},
       { label: 'შეხვედრის მონაცემები', fields: [
         { id: 'auditNumber',  label: 'BE-FM-AUDIT-PLAN აუდიტის №',                     type: 'text' },
         { id: 'meetingType',  label: 'შეხვედრის ტიპი', type: 'select', options: ['გახსნის შეხვედრა (kick-off)','დახურვის შეხვედრა (closing)'] },
