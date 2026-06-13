@@ -46,9 +46,10 @@ const FM08_CompetencyAssessmentPdf = ({ data = {} }) => {
       <Text style={s.secH}>C. გადაწყვეტილება</Text>
       <FieldRow  label="გადაწყვეტილება:"            value={data.decision} />
       <TextArea  value={data.trainingNeeded} placeholder="ტრენინგის საჭიროება" minHeight={28} />
+      <TextArea  value={data.notes} placeholder="შენიშვნა" minHeight={28} />
       <FieldRow  label="მომდევნო შეფასების თარიღი:" value={data.nextAssessment} />
 
-      <SigBlock3 labels={['ინსპექტორი','ტექნიკური მენეჯერი','ხარისხის მენეჯერი']} sigs={sigs} />
+      <SigBlock3 labels={['ხარისხის მენეჯერი','ტექნიკური მენეჯერი','დირექტორი (ამტკიცებს)']} sigs={sigs} />
       <FormFooter code="BE-FM-COMP-CHECK v1.0 | 28.04.2026 | შენახვა: 5 წელი" />
     </Page>
   </Document>

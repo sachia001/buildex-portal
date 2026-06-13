@@ -196,7 +196,7 @@ export const FORM_CONFIGS = {
   // ══════════════════════════════════════════════════════════
   'BE-FM-COMP-CHECK': {
     title: 'კომპეტენციის შეფასება',
-    signers: ['ინსპექტორი', 'ტექნიკური მენეჯერი', 'ხარისხის მენეჯერი'],
+    signers: ['ხარისხის მენეჯერი', 'ტექნიკური მენეჯერი', 'დირექტორი (ამტკიცებს)'],
     sections: [
       { label: 'ინსპექტორის მონაცემები', fields: [
         { id: 'name',           label: 'სახელი / გვარი',       type: 'staffmulti' },
@@ -217,6 +217,7 @@ export const FORM_CONFIGS = {
         { id: 'score5',         label: '5. witnessing',                    type: 'number' },
         { id: 'decision',       label: 'გადაწყვეტილება', type: 'select', options: ['ავტორიზებული','გაგრძელება','ტრენინგი','ჩამოშორება'] },
         { id: 'trainingNeeded', label: 'ტრენინგის საჭიროება',              type: 'textarea' },
+        { id: 'notes',          label: 'შენიშვნა',                         type: 'textarea' },
         { id: 'nextAssessment', label: 'მომდევნო შეფასების თარიღი',       type: 'date' },
       ]},
     ],
