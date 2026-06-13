@@ -26,7 +26,7 @@ const FM33_ImpartialityRiskPdf = ({ data = {} }) => {
         {/* A. ზოგადი ინფ. */}
         <Text style={s.secH}>A. ზოგადი ინფორმაცია</Text>
         <FieldRow2
-          label1="შეფ. №:"   value1={assessmentId}
+          label1="შეფასების №:"   value1={assessmentId}
           label2="თარიღი:"     value2={assessmentDate}
         />
         <FieldRow2
@@ -42,7 +42,7 @@ const FM33_ImpartialityRiskPdf = ({ data = {} }) => {
         <Text style={s.secH}>B. რისკების შეფასების ცხრილი (Risk Matrix 4×5)</Text>
         <View style={s.tBorder}>
           <View style={s.tHeader}>
-            {['რ-ის კ.', 'რ-ის სახე / გარ.', 'G (1-5)', 'A (1-5)', 'G×A', 'დ.', 'კ-ბი'].map((h, i) => (
+            {['რისკის კატეგორია', 'რისკის სახე / გარემოება', 'G (1-5)', 'A (1-5)', 'G×A', 'დონე', 'კონტროლის ზომები'].map((h, i) => (
               <View key={i} style={[s.tHead, { width: riskCols[i] }]}>
                 <Text>{h}</Text>
               </View>
@@ -55,15 +55,15 @@ const FM33_ImpartialityRiskPdf = ({ data = {} }) => {
         <View style={{ flexDirection: 'row', gap: 10, marginBottom: 5 }}>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 3 }}>
             <View style={{ width: 8, height: 8, backgroundColor: '#28a745' }} />
-            <Text style={{ fontSize: 7 }}>1–4: დ-ბ. (Acceptable)</Text>
+            <Text style={{ fontSize: 7 }}>1–4: დაბალი (Acceptable)</Text>
           </View>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 3 }}>
             <View style={{ width: 8, height: 8, backgroundColor: '#ffc107' }} />
-            <Text style={{ fontSize: 7 }}>5–9: საშ. (Review)</Text>
+            <Text style={{ fontSize: 7 }}>5–9: საშუალო (Review)</Text>
           </View>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 3 }}>
             <View style={{ width: 8, height: 8, backgroundColor: '#dc3545' }} />
-            <Text style={{ fontSize: 7 }}>10–25: მ-ლი (Mitigation/Restriction)</Text>
+            <Text style={{ fontSize: 7 }}>10–25: მაღალი (Mitigation/Restriction)</Text>
           </View>
         </View>
 
@@ -72,8 +72,8 @@ const FM33_ImpartialityRiskPdf = ({ data = {} }) => {
 
         {/* საერ. რ-ის დ. */}
         <View style={[s.fRow, { alignItems: 'center', marginBottom: 6 }]}>
-          <Text style={s.fLabel}>საერ. რ-ის დ.:</Text>
-          {[['დ.', 'acceptable'], ['საშ.', 'review'], ['მ-ლი', 'mitigate']].map(([label, val]) => (
+          <Text style={s.fLabel}>საერთო რისკის დონე:</Text>
+          {[['დაბალი', 'acceptable'], ['საშუალო', 'review'], ['მაღალი', 'mitigate']].map(([label, val]) => (
             <View key={val} style={{ flexDirection: 'row', alignItems: 'center', marginRight: 14 }}>
               <View style={overallRiskLevel === val ? s.boxChecked : s.box}>
                 {overallRiskLevel === val && <Text style={{ color: '#fff', fontSize: 6.5, fontWeight: 'bold' }}>✓</Text>}
@@ -83,12 +83,12 @@ const FM33_ImpartialityRiskPdf = ({ data = {} }) => {
           ))}
         </View>
 
-        <TextArea value={controlMeasures} placeholder="კ-ბი / რ-ბ. შ-ები" minHeight={36} />
+        <TextArea value={controlMeasures} placeholder="კონტროლის ზომები / რისკების შემცირების ღონისძიებები" minHeight={36} />
 
-        {/* გ-ა */}
+        {/* გადაწყვეტილება */}
         <View style={[s.fRow, { alignItems: 'center', marginBottom: 6 }]}>
-          <Text style={s.fLabel}>გ-ა:</Text>
-          {[['მიღ.', 'accept'], ['შეზ. მ.', 'restricted'], ['ჩამ.', 'rejected']].map(([label, val]) => (
+          <Text style={s.fLabel}>გადაწყვეტილება:</Text>
+          {[['მიღება', 'accept'], ['შეზღუდული მიღება', 'restricted'], ['ჩამოშორება', 'rejected']].map(([label, val]) => (
             <View key={val} style={{ flexDirection: 'row', alignItems: 'center', marginRight: 14 }}>
               <View style={decision === val ? s.boxChecked : s.box}>
                 {decision === val && <Text style={{ color: '#fff', fontSize: 6.5, fontWeight: 'bold' }}>✓</Text>}

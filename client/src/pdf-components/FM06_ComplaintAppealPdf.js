@@ -24,7 +24,7 @@ const FM06_ComplaintAppealPdf = ({ data = {} }) => {
       <Text style={s.secH}>B. ძირითადი მონაცემები</Text>
       <FieldRow2 label1="რეგისტრაციის №:" value1={data.regNumber}       label2="თარიღი:"       value2={data.date} />
       <FieldRow  label="მომჩივნის სახელი / ორგანიზაცია:" value={data.complainantName} />
-      <FieldRow2 label1="ტელეფონი:"  value1={data.phone}  label2="ელ. ფოსტა:" value2={data.email} />
+      <FieldRow2 label1="ტელეფონი:"  value1={data.phone}  label2="ელექტრონული ფოსტა:" value2={data.email} />
       <FieldRow  label="კონტაქტის ფორმა:"  value={data.contactForm} />
       <FieldRow  label="BE-CASE №:"         value={data.caseNumber} />
 

@@ -29,40 +29,40 @@ const FM05_ContractAcceptancePdf = ({ data = {} }) => {
         <Text style={s.secH}>A. საიდენტიფიკაციო მონაცემები</Text>
         <FieldRow2
           label1="BE-CASE №:"      value1={caseId}
-          label2="განხ. თარიღი:"   value2={reviewDate}
+          label2="განხილვის თარიღი:"   value2={reviewDate}
         />
         <FieldRow label="დამკვეთი:"             value={clientName} />
-        <FieldRow label="ინსპ. სფერო (BE-PR):"  value={inspScope} />
+        <FieldRow label="ინსპექტირების სფერო (BE-PR):"  value={inspScope} />
         <FieldRow2
-          label1="ხელშ. №:"  value1={contractNum}
+          label1="ხელშეკრულების №:"  value1={contractNum}
           label2="ვადა:"      value2={deadline}
         />
         <FieldRow2
-          label1="გასამრ. (₾):" value1={fee}
+          label1="გასამრჯელო (₾):" value1={fee}
           label2="BE-FM-REG №:"     value2={fm01Num}
         />
 
-        {/* B. ტექ. გადახ. კრიტ. */}
+        {/* B. ტექნიკური გადახედვის კრიტერიუმები */}
         <Text style={s.secH}>B. ტექნიკური გადახედვის კრიტერიუმები (ISO §7.1.1)</Text>
         <YesNoRow label="§7.1.1a — ობიექტი ნათლად იდენტიფიცირებულია"  yesNo={r_scope} />
-        <YesNoRow label="§7.1.1b — ორგ. შესაძ. კ. დადასტ."              yesNo={r_capability} />
-        <YesNoRow label="§7.1.1c — მომს. შინ. ზუსტად განსაზ."           yesNo={r_content} />
-        <YesNoRow label="§7.1.1d — კლ. სპეც. მოთხ. ჩართ."               yesNo={r_clientReqs} />
-        <YesNoRow label="§7.1 — ვადა და გასამ. დამ."                    yesNo={r_deadline} />
-        <YesNoRow label="BE-FM-IMP-DECL — მიუკ. შ. ჩართ."                         yesNo={r_fm02} />
-        <YesNoRow label="ინტ. კონფ. — გამოვლ."                           yesNo={r_conflict} />
+        <YesNoRow label="§7.1.1b — ორგანიზაციის შესაძლებლობა და კომპეტენცია დადასტურებულია"              yesNo={r_capability} />
+        <YesNoRow label="§7.1.1c — მომსახურების შინაარსი ზუსტად განსაზღვრულია"           yesNo={r_content} />
+        <YesNoRow label="§7.1.1d — კლიენტის სპეციალური მოთხოვნები ჩართულია"               yesNo={r_clientReqs} />
+        <YesNoRow label="§7.1 — ვადა და გასამრჯელო დამტკიცებულია"                    yesNo={r_deadline} />
+        <YesNoRow label="BE-FM-IMP-DECL — მიუკერძოებლობის შემოწმება ჩართულია"                         yesNo={r_fm02} />
+        <YesNoRow label="ინტერესთა კონფლიქტი — გამოვლენილია"                           yesNo={r_conflict} />
 
-        {/* C. შ-ძ. დადასტ. */}
+        {/* C. შესაძლებლობის დადასტურება */}
         <Text style={s.secH}>C. შესაძლებლობის დადასტურება</Text>
         <YesNoRow label="საჭირო პერსონალი ხელმისაწვდომია:"    yesNo={staffAvailable} />
         <YesNoRow label="საჭირო აღჭურვილობა ხელმისაწვდომია:"          yesNo={equipAvailable} />
         <YesNoRow label="ვადა რეალური:"                       yesNo={timeAvailable} />
 
-        {/* D. შეზღ. / შ-ბები */}
-        <Text style={s.secH}>D. სფეროს შეზღუდვები / სპეც. პ-ბი / შ-ბები</Text>
-        <TextArea value={scopeLimitations} placeholder="სფეროს შეზღუდვები / სპეც. პ-ბი / შ-ბები" minHeight={36} />
+        {/* D. სფეროს შეზღუდვები / შენიშვნები */}
+        <Text style={s.secH}>D. სფეროს შეზღუდვები / სპეციალური პირობები / შენიშვნები</Text>
+        <TextArea value={scopeLimitations} placeholder="სფეროს შეზღუდვები / სპეციალური პირობები / შენიშვნები" minHeight={36} />
 
-        {/* E. გ-ა (Decision Gate) */}
+        {/* E. გადაწყვეტილება (Decision Gate) */}
         <Text style={s.secH}>E. გადაწყვეტილება (Decision Gate)</Text>
         <View style={[s.fRow, { alignItems: 'center', marginBottom: 6 }]}>
           {[['მიღება', 'accept'], ['უარყოფა', 'reject'], ['გადადება', 'defer']].map(([label, val]) => (
@@ -75,7 +75,7 @@ const FM05_ContractAcceptancePdf = ({ data = {} }) => {
           ))}
         </View>
         <FieldRow label="გადაწყვეტილების თარიღი:"    value={decisionDate} />
-        <TextArea value={decisionNote} placeholder="გ-ის დასაბ. / შ-ბა" minHeight={28} />
+        <TextArea value={decisionNote} placeholder="გადაწყვეტილების დასაბუთება / შენიშვნა" minHeight={28} />
 
         <SigBlock3 labels={['ტექნიკური მენეჯერი', 'ხარისხის მენეჯერი', 'დირექტორი']} sigs={sigs} />
         <FormFooter code="BE-FM-SCREEN v1.0 | 2026 | ISO §7.1 | შენახვა: 10 წელი" />

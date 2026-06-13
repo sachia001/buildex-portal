@@ -19,7 +19,7 @@ const FM35_SubcontractorMonitoringPdf = ({ data = {} }) => {
         <FormHeader
           code="BE-FM-SUB-MONITOR"
           isoRef="სსტ ISO/IEC 17020 §6.3 (BE-PR-14)"
-          title="ქვეკონტრაქტორის შეფასება და მონიტ. ჩ."
+          title="ქვეკონტრაქტორის შეფასება და მონიტორინგის ჩანაწერი"
           subtitle="Subcontractor Assessment & Monitoring Record"
         />
 
@@ -35,14 +35,14 @@ const FM35_SubcontractorMonitoringPdf = ({ data = {} }) => {
           label2="ტელეფონი:"      value2={phone}
         />
         <FieldRow2
-          label1="ელ. ფოსტა:"  value1={email}
+          label1="ელექტრონული ფოსტა:"  value1={email}
           label2="მისამართი:"    value2={address}
         />
-        <TextArea value={services} placeholder="გ-ბ. მომს. სახ." minHeight={28} />
+        <TextArea value={services} placeholder="გაწეული მომსახურების სახეები" minHeight={28} />
         <FieldRow label="აკრედიტაცია / ლიცენზია №:" value={accreditation} />
 
         {/* B. კ-ა შ-ა ც-ლი */}
-        <Text style={s.secH}>B. კვალიფიკაციის შეფასების ცხრილი (6 კრ. — კი/არა)</Text>
+        <Text style={s.secH}>B. კვალიფიკაციის შეფასების ცხრილი (6 კრიტერიუმი — კი/არა)</Text>
         <YesNoRow label="1. იურიდიული სტატუსის დადასტურება (ISO §6.3.1):"          yesNo={q1} />
         <YesNoRow label="2. ინსპექტირების უნარი და კომპეტენცია (ISO §6.3.2):"         yesNo={q2} />
         <YesNoRow label="3. პერსონალის კომპეტენცია (ISO §6.3.3):"           yesNo={q3} />
@@ -53,7 +53,7 @@ const FM35_SubcontractorMonitoringPdf = ({ data = {} }) => {
 
         {/* decision */}
         <View style={[s.fRow, { alignItems: 'center', marginBottom: 6 }]}>
-          <Text style={s.fLabel}>გ-ა:</Text>
+          <Text style={s.fLabel}>გადაწყვეტილება:</Text>
           {[['დამტკიცებული', 'approved'], ['პირობითი', 'conditional'], ['უარყოფილი', 'rejected']].map(([label, val]) => (
             <View key={val} style={{ flexDirection: 'row', alignItems: 'center', marginRight: 14 }}>
               <View style={decision === val ? s.boxChecked : s.box}>
@@ -68,7 +68,7 @@ const FM35_SubcontractorMonitoringPdf = ({ data = {} }) => {
         <Text style={s.secH}>C. ხელშეკრულებული გამოყენების ისტორია</Text>
         <View style={s.tBorder}>
           <View style={s.tHeader}>
-            {['თ-ღი', 'ო-ბ. / BE-CASE', 'მ-ბ.', 'შ-ა', 'ს-ი', 'ხ.'].map((h, i) => (
+            {['თარიღი', 'ობიექტი / BE-CASE', 'მომსახურება', 'შეფასება', 'სტატუსი', 'ხელმოწერა'].map((h, i) => (
               <View key={i} style={[s.tHead, { width: monitorCols[i] }]}>
                 <Text>{h}</Text>
               </View>

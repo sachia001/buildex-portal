@@ -31,7 +31,7 @@ const FM29_AuditNCFormPdf = ({ data = {} }) => {
       <View style={[s.textarea, { minHeight: 26 }]}>
         {data.correctiveActionDetail
           ? <Text style={{ fontSize: 8.5, lineHeight: 1.4 }}>{data.correctiveActionDetail}</Text>
-          : <Text style={{ fontSize: 8, color: '#bbb' }}>მაკ. ქმედების დეტალური გეგმა...</Text>}
+          : <Text style={{ fontSize: 8, color: '#bbb' }}>მაკორექტირებელი ქმედების დეტალური გეგმა...</Text>}
       </View>
       <FieldRow2 label1="BE-FM-CAPA CAPA №:" value1={data.capaNumber} label2="ვადა:" value2={data.deadline} />
 

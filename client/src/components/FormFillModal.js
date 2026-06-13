@@ -101,7 +101,7 @@ const FieldInput = ({ field, value, onChange, staffList, inspectionList }) => {
     return (
       <Form.Select size="sm" value={value || ''}
         onChange={e => onChange(field.id, e.target.value)}>
-        <option value="">— საქმე (BE-CASE) — მონაცემები ავტ. ჩაიწერება —</option>
+        <option value="">— საქმე (BE-CASE) — მონაცემები ავტომატურად ჩაიწერება —</option>
         {inspectionList.map(i => (
           <option key={i._id} value={i.inspectionNumber}>
             {i.inspectionNumber}
@@ -356,7 +356,7 @@ const ExternalSignerBlock = ({ label, index, sigsData, onSigChange, inspectionLi
             საქმიდან ავტო-შევსება <span className="text-muted">(კლიენტის სახელი ჩაჯდება)</span>
           </Form.Label>
           <Form.Select size="sm" value={sig.caseNum || ''} onChange={e => handleCasePick(e.target.value)}>
-            <option value="">— BE-CASE (სახელი ავტ. ჩაიწერება) —</option>
+            <option value="">— BE-CASE (სახელი ავტომატურად ჩაიწერება) —</option>
             {inspectionList.map(i => (
               <option key={i._id} value={i.inspectionNumber}>
                 {i.inspectionNumber}{i.clientName ? ` — ${i.clientName}` : ''}

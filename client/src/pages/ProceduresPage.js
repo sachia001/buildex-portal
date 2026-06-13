@@ -43,7 +43,7 @@ const CATEGORIES = [
   {
     key: 'manual',
     label: '📖 ხარისხის სახელმძღვანელო',
-    shortLabel: '📖 სახ.',
+    shortLabel: '📖 სახელმძღვანელო',
     color: '#003366',
     bg: '#e8f0f7',
     folderLetter: 'A',
@@ -67,7 +67,7 @@ const CATEGORIES = [
   {
     key: 'job_description',
     label: '👤 სამუშაო აღწერილობები',
-    shortLabel: '👤 აღწ.',
+    shortLabel: '👤 აღწერა',
     color: '#7c3aed',
     bg: '#ede9fe',
     folderLetter: 'D',
@@ -83,7 +83,7 @@ const CATEGORIES = [
   {
     key: 'policy',
     label: '🛡️ პოლიტიკები',
-    shortLabel: '🛡️ პოლ.',
+    shortLabel: '🛡️ პოლიტიკა',
     color: '#b45309',
     bg: '#fef3c7',
     folderLetter: 'F',
@@ -99,7 +99,7 @@ const CATEGORIES = [
   {
     key: 'order',
     label: '📜 ბრძანებები',
-    shortLabel: '📜 ბრძ.',
+    shortLabel: '📜 ბრძანება',
     color: '#15803d',
     bg: '#dcfce7',
     folderLetter: 'H',
@@ -241,7 +241,7 @@ const FORMS_DATA = [
     { icon: '📣', code: 'BE-FM-COMPLAINT', title: 'საჩივარი / აპელაცია',         desc: 'ISO §7.5/7.7/7.8',            pdf: <FM06_ComplaintAppealPdf />,       fileName: 'FM-06_საჩ_აპ',     color: 'danger', fill: 'BE-FM-COMPLAINT' },
     { icon: '⚠️', code: 'BE-FM-CAPA', title: 'CAPA — კორექტირებითი ქმედება',desc: 'ISO §8.5',                   pdf: <FM10_CAPAFormPdf />,              fileName: 'FM-10_CAPA',        color: 'danger', fill: 'BE-FM-CAPA' },
     { icon: '🚫', code: 'BE-FM-NONCONF', title: 'შეუსაბამო სამუშაოს მართვა',   desc: 'ISO §8.7',                   pdf: <FM14_NonConformingPdf />,         fileName: 'FM-14_შეუსაბ',      color: 'danger', fill: 'BE-FM-NONCONF' },
-    { icon: '🔎', code: 'BE-FM-AUDIT-PLAN', title: 'შიდა აუდიტი',                  desc: 'ISO §8.6 — 2-ჯერ/წელ.',     pdf: <FM04_InternalAuditPdf />,         fileName: 'FM-04_შ_აუდ',       color: 'danger', fill: 'BE-FM-AUDIT-PLAN' },
+    { icon: '🔎', code: 'BE-FM-AUDIT-PLAN', title: 'შიდა აუდიტი',                  desc: 'ISO §8.6 — 2-ჯერ წელიწადში',     pdf: <FM04_InternalAuditPdf />,         fileName: 'FM-04_შ_აუდ',       color: 'danger', fill: 'BE-FM-AUDIT-PLAN' },
     { icon: '📈', code: 'BE-FM-MGMT-REVIEW', title: 'მენეჯმენტის ანალიზი',          desc: 'ISO §8.5',                   pdf: <FM15_MgmtReviewPdf />,            fileName: 'FM-15_მენ_ანალ',    color: 'danger', fill: 'BE-FM-MGMT-REVIEW' },
   ]},
   { section: '🔧 მოწყობილობა და ქვეკონტრაქტორები', items: [
@@ -249,7 +249,7 @@ const FORMS_DATA = [
     { icon: '🏗️', code: 'BE-FM-SUB-MONITOR', title: 'ქვეკონტრაქტორის შეფასება',    desc: 'ISO §6.6',                   pdf: <FM12_SubcontractorPdf />,         fileName: 'FM-12_ქვეკ_შეფ',   color: 'warning', fill: 'BE-FM-SUB-MONITOR' },
   ]},
   { section: '🗂️ დოკუმენტაციის მართვა', items: [
-    { icon: '👁️', code: 'BE-FM-FAMIL', title: 'გაცნობის ფურცელი',             desc: 'ISO §6.1 — 5 სამ. დღე',      pdf: <FM22_FamiliarizationPdf />,       fileName: 'FM-22_გაცნ_ფ',      color: 'secondary', fill: 'BE-FM-FAMIL' },
+    { icon: '👁️', code: 'BE-FM-FAMIL', title: 'გაცნობის ფურცელი',             desc: 'ISO §6.1 — 5 სამუშაო დღე',      pdf: <FM22_FamiliarizationPdf />,       fileName: 'FM-22_გაცნ_ფ',      color: 'secondary', fill: 'BE-FM-FAMIL' },
     { icon: '✍️', code: 'BE-FM-CHANGE-INIT', title: 'ცვლილების წინადადება',         desc: 'BE-PR-12',                   pdf: <FM23_DocChangePdf />,             fileName: 'FM-23_ცვლ_წინ',     color: 'secondary', fill: 'BE-FM-CHANGE-INIT' },
     { icon: '📒', code: 'BE-FM-CHANGE-REG', title: 'ცვლილებების რეგისტრი',         desc: 'BE-PR-12 (ჟურნალი)',         pdf: <FM24_ChangeRegisterPdf />,        fileName: 'FM-24_ცვლ_რეგ',     color: 'secondary', fill: 'BE-FM-CHANGE-REG' },
     { icon: '🗑️', code: 'BE-FM-DESTROY-ACT', title: 'ლიკვიდაციის აქტი',            desc: 'BE-PR-12 §6',                pdf: <FM25_LiquidationActPdf />,        fileName: 'FM-25_ლიკვ',         color: 'secondary', fill: 'BE-FM-DESTROY-ACT' },
@@ -411,7 +411,7 @@ function ProcUploadModal({ show, onHide, onSaved, existing, prefill, defaultCate
           <Form.Label className="small fw-bold mb-1">შენიშვნა / კომენტარი</Form.Label>
           <Form.Control as="textarea" size="sm" rows={2} value={notes}
             onChange={e => setNotes(e.target.value)}
-            placeholder="მაგ. ვერსია 1.0, განახლდა 2026-05..."
+            placeholder="მაგალითად: ვერსია 1.0, განახლდა 2026-05..."
             style={notes ? { background: '#fffbeb', borderColor: '#d97706' } : {}} />
         </Form.Group>
       </Modal.Body>

@@ -38,7 +38,7 @@ const FM25_LiquidationActPdf = ({ data = {} }) => {
           </View>
         ))}
       </View>
-      <Text style={{fontSize:7,color:'#555',marginBottom:4}}>შ./ც.: ფ — ფიზიკური შეუსაბამობა | ც — ციფრული წაშლა | ა.რ.: სულ ფიზიკური / ციფრული ასლების რაოდენობა</Text>
+      <Text style={{fontSize:7,color:'#555',marginBottom:4}}>შეუსაბამობა / ციფრული: ფ — ფიზიკური შეუსაბამობა | ც — ციფრული წაშლა | ასლების რაოდენობა: სულ ფიზიკური / ციფრული ასლების რაოდენობა</Text>
 
       <Text style={s.secH}>C. განადგურების მეთოდი</Text>
       <View style={{flexDirection:'row',gap:30,marginBottom:5,marginLeft:6}}>

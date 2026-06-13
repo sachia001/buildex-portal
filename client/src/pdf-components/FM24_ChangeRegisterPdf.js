@@ -33,7 +33,7 @@ const FM24_ChangeRegisterPdf = ({ data = {} }) => {
           </View>
         );}); })()}
       </View>
-      <Text style={{fontSize:7,color:'#555',marginBottom:6}}>ცვლ.ხ.: რ — რედაქცია | ა — ახალი | ა/ა — ამოღება/არქივი | შ — შინაარსი | BE-FM-FAMIL: ✓ — ჩატარებული | — — ზ. (ზედმეტი)</Text>
+      <Text style={{fontSize:7,color:'#555',marginBottom:6}}>ცვლილების ხასიათი: რ — რედაქცია | ა — ახალი | ა/ა — ამოღება/არქივი | შ — შინაარსი | BE-FM-FAMIL: ✓ — ჩატარებული | — — ზედმეტი</Text>
 
       <View style={{flexDirection:'row',justifyContent:'flex-end',marginTop:6}}>
         <View style={{width:'35%'}}>

@@ -81,7 +81,7 @@ const BlankLetterhead = ({ data }) => {
           <Image src="/logo.png" style={styles.logoImage} />
           <Text style={styles.companyInfoText}>A ტიპის ინსპექტირების ორგანო</Text>
           <Text style={styles.companyNameText}>ბილდექს ექსპერტიზა</Text>
-          <Text style={styles.companyInfoText}>ს/კ</Text>
+          <Text style={styles.companyInfoText}>საიდენტიფიკაციო კოდი</Text>
           <Text style={styles.companyInfoText}>აკრედიტაცია N</Text>
         </View>
 

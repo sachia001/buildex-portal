@@ -138,7 +138,7 @@ const InstructionsPdf = ({ instrData, code }) => {
     { label: 'შემავსებელი', value: instrData.filledBy },
     { label: 'შევსების დრო', value: instrData.when },
     { label: 'შენახვა', value: instrData.retention },
-    { label: 'ISO მინ.', value: instrData.isoRef },
+    { label: 'ISO მითითება', value: instrData.isoRef },
   ];
 
   return (

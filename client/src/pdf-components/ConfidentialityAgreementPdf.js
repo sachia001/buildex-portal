@@ -53,8 +53,8 @@ const ConfidentialityAgreementPdf = ({ data = {} }) => {
         <View style={s.header}>
           <Image src="/logo.png" style={s.logo} />
           <Text style={s.companyName}>შპს „ბილდექს ექსპერტიზა"</Text>
-          <Text style={s.companyInfo}>A ტიპის ინსპექტირების ორგანო | ს/კ 431188010</Text>
-          <Text style={s.companyInfo}>ქ. თელავი, ჭ. ამირეჯიბის ქ. №26 | info@buildexpertise.com</Text>
+          <Text style={s.companyInfo}>A ტიპის ინსპექტირების ორგანო | საიდენტიფიკაციო კოდი 431188010</Text>
+          <Text style={s.companyInfo}>ქალაქი თელავი, ჭაბუა ამირეჯიბის ქუჩა №26 | info@buildexpertise.com</Text>
         </View>
         <View style={s.divider} />
 

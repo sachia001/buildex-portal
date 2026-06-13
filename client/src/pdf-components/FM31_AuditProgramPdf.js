@@ -6,7 +6,7 @@ const p = { padding: 2 };
 
 const FM31_AuditProgramPdf = ({ data = {} }) => {
   const sigs = data.sigs || [];
-  const quarters = ['I კვ.', 'II კვ.', 'III კვ.', 'IV კვ.'];
+  const quarters = ['I კვარტალი', 'II კვარტალი', 'III კვარტალი', 'IV კვარტალი'];
   return (
   <Document>
     <Page size="A4" style={[s.page, { paddingTop: 12, paddingBottom: 22, paddingHorizontal: 28 }]}>

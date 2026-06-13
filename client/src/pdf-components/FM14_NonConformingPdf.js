@@ -31,7 +31,7 @@ const FM14_NonConformingPdf = ({ data = {} }) => {
 
       <Text style={s.secH}>3. გადაუდებელი შეჩერება (§8.7.2)</Text>
       <View style={{gap:3,marginBottom:4,marginLeft:4}}>
-        {[['კლიენტი — სამუშაო შეჩერება','კლიენტი — სამუშაო შეჩერება'],['ობიექტი — კორექცია','ობიექტი — კორექცია'],['სხვა საქმეების გადახედვა','სხვა საქმეების გადახედვა'],['კლიენტთან გარკვევა საჭ. არ არის','კლიენტთან გარკვევა საჭ. არ არის']].map(([key,lbl],i) => (
+        {[['კლიენტი — სამუშაო შეჩერება','კლიენტი — სამუშაო შეჩერება'],['ობიექტი — კორექცია','ობიექტი — კორექცია'],['სხვა საქმეების გადახედვა','სხვა საქმეების გადახედვა'],['კლიენტთან გარკვევა საჭირო არ არის','კლიენტთან გარკვევა საჭირო არ არის']].map(([key,lbl],i) => (
           <View key={i} style={{flexDirection:'row',alignItems:'center',gap:4}}>
             <View style={(data.suspensionActions||[]).includes(key)?s.boxChecked:s.box}>
               {(data.suspensionActions||[]).includes(key)&&<Text style={{color:'#fff',fontSize:6,fontWeight:'bold'}}>✓</Text>}

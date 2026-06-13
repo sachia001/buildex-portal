@@ -42,12 +42,12 @@ const PriceAdequacyReportPdf = ({ data = {} }) => {
         <Text style={s.secH}>2. სტატისტიკური შეჯამება</Text>
         <View style={{ flexDirection: 'row', gap: 6, marginBottom: 5 }}>
           {[
-            ['სულ პოზ.', data.totalLines, '#003366', '#e8f0f7'],
+            ['სულ პოზიცია', data.totalLines, '#003366', '#e8f0f7'],
             ['შემოწმდა', data.matchedLines, '#1d4ed8', '#dbeafe'],
-            ['შესაბამ.', data.okCount, '#15803d', '#dcfce7'],
-            ['გაფრთხ.', data.warningCount, '#b45309', '#fef9c3'],
+            ['შესაბამისი', data.okCount, '#15803d', '#dcfce7'],
+            ['გაფრთხილება', data.warningCount, '#b45309', '#fef9c3'],
             ['დარღვევა', data.violationCount, '#b91c1c', '#fee2e2'],
-            ['ვერ შემ.', data.unmatchedCount, '#6b7280', '#f3f4f6'],
+            ['ვერ შეესაბამა', data.unmatchedCount, '#6b7280', '#f3f4f6'],
           ].map(([label, val, textColor, bg]) => (
             <View key={label} style={{ flex: 1, backgroundColor: bg, borderRadius: 3, padding: 5, alignItems: 'center' }}>
               <Text style={{ fontSize: 16, fontWeight: 'bold', color: textColor }}>{val ?? 0}</Text>

@@ -135,7 +135,7 @@ const ReportCoverPdf = ({ data = {} }) => {
                 <Text style={styles.companyInfoText}>A ტიპის ინსპექტირების ორგანო</Text>
                 <Text style={styles.companyNameText}>„ბილდექს ექსპერტიზა“</Text>
                 
-                <Text style={styles.companyInfoText}>ს/კ 43118010</Text>
+                <Text style={styles.companyInfoText}>საიდენტიფიკაციო კოდი 43118010</Text>
                 <Text style={styles.companyInfoText}>აკრედიტაცია N GAC-IB-XXXX</Text>
             </View>
         </View>

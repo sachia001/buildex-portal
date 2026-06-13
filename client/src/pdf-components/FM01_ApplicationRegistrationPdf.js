@@ -31,7 +31,7 @@ const FM01_ApplicationRegistrationPdf = ({ data = {} }) => {
         {/* მიღების ფორმა */}
         <View style={[s.fRow, { alignItems: 'center', flexWrap: 'wrap' }]}>
           <Text style={s.fLabel}>მიღების ფორმა:</Text>
-          {['ელ.ფოსტა', 'ფოსტა', 'პირადად', 'ტელ.'].map(opt => (
+          {['ელექტრონული ფოსტა', 'ფოსტა', 'პირადად', 'ტელეფონი'].map(opt => (
             <View key={opt} style={{ flexDirection: 'row', alignItems: 'center', marginRight: 10 }}>
               <View style={receiptMethod === opt ? s.boxChecked : s.box}>
                 {receiptMethod === opt && <Text style={{ color: '#fff', fontSize: 6.5, fontWeight: 'bold' }}>✓</Text>}
@@ -60,7 +60,7 @@ const FM01_ApplicationRegistrationPdf = ({ data = {} }) => {
           label1="საიდენტიფიკაციო კოდი / პირადი ნომერი:" value1={clientId}
           label2="ტელეფონი:"            value2={clientPhone}
         />
-        <FieldRow label="ელ. ფოსტა:"    value={clientEmail} />
+        <FieldRow label="ელექტრონული ფოსტა:"    value={clientEmail} />
         <FieldRow label="მისამართი:"   value={clientAddress} />
         <FieldRow label="წარმომადგენელი / პირი:" value={representative} />
 
@@ -70,7 +70,7 @@ const FM01_ApplicationRegistrationPdf = ({ data = {} }) => {
         <FieldRow label="ობიექტის მისამართი:"  value={objectAddress} />
         <FieldRow2
           label1="ობიექტის კატეგორია:" value1={objectCategory}
-          label2="ხელშ./შეთ. №:"    value2={contractNum}
+          label2="ხელშეკრულების / შეთანხმების №:"    value2={contractNum}
         />
         <TextArea value={description} placeholder="ინსპექტირების ობიექტის მოკლე აღწერა" minHeight={36} />
 
@@ -78,7 +78,7 @@ const FM01_ApplicationRegistrationPdf = ({ data = {} }) => {
         <Text style={s.secH}>D. წარდგენილი დოკუმენტაცია</Text>
         <View style={[s.tBorder, { padding: 5, marginBottom: 4 }]}>
           {(() => { const sel = Array.isArray(data.submittedDocs) ? data.submittedDocs : [];
-            const opts = ['საპროექტო დოკუმენტაცია','ხარჯთაღრიცხვა','ტექნიკური დავალება','სახელშეკრულებო დოკ.','ნახაზები / სქემები','ნებართვა / ლიცენზია','სხვა'];
+            const opts = ['საპროექტო დოკუმენტაცია','ხარჯთაღრიცხვა','ტექნიკური დავალება','სახელშეკრულებო დოკუმენტაცია','ნახაზები / სქემები','ნებართვა / ლიცენზია','სხვა'];
             return opts.map((o) => <ChkRow key={o} label={o} checked={sel.includes(o)} />);
           })()}
         </View>

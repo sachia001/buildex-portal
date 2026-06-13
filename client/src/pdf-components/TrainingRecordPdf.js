@@ -73,7 +73,7 @@ const TrainingRecordPdf = ({ data }) => {
         <View style={s.header}>
           <Image src="/logo.png" style={s.logo} />
           <Text style={s.companyName}>შპს „ბილდექს ექსპერტიზა"</Text>
-          <Text style={s.companyInfo}>A ტიპის ინსპექტირების ორგანო | ს/კ 431188010 | ქ. თელავი</Text>
+          <Text style={s.companyInfo}>A ტიპის ინსპექტირების ორგანო | საიდენტიფიკაციო კოდი 431188010 | ქალაქი თელავი</Text>
         </View>
         <View style={s.divider} />
 
@@ -85,7 +85,7 @@ const TrainingRecordPdf = ({ data }) => {
         {[
           ['სახელი, გვარი:', name],
           ['თანამდებობა:', position],
-          ['საიდენტ. №:', personalId],
+          ['პირადი ნომერი:', personalId],
           ['ტრენინგის თარიღი:', trainingDate || date],
           ['ხანგრძლივობა:', duration ? `${duration} საათი` : ''],
         ].map(([label, value]) => (
@@ -163,12 +163,12 @@ const TrainingRecordPdf = ({ data }) => {
             <Text style={{ fontSize: 7.5, marginTop: 3 }}>თარიღი: {date}</Text>
           </View>
           <View style={s.sigBlock}>
-            <Text style={{ fontSize: 8.5, marginBottom: 22 }}>ტექნ. მენეჯერი:</Text>
+            <Text style={{ fontSize: 8.5, marginBottom: 22 }}>ტექნიკური მენეჯერი:</Text>
             <View style={s.sigLine}><Text>(ხელმოწერა)</Text></View>
             <Text style={{ fontSize: 7.5, marginTop: 3 }}>თარიღი: ___________</Text>
           </View>
           <View style={s.sigBlock}>
-            <Text style={{ fontSize: 8.5, marginBottom: 22 }}>ხარ. მენეჯერი:</Text>
+            <Text style={{ fontSize: 8.5, marginBottom: 22 }}>ხარისხის მენეჯერი:</Text>
             <View style={s.sigLine}><Text>(ხელმოწერა)</Text></View>
             <Text style={{ fontSize: 7.5, marginTop: 3 }}>თარიღი: ___________</Text>
           </View>
@@ -176,7 +176,7 @@ const TrainingRecordPdf = ({ data }) => {
 
         <View style={[s.divider, { marginTop: 12 }]} />
         <Text style={{ fontSize: 7, color: '#aaa', textAlign: 'center' }}>
-          კონფიდენციალური — მხოლოდ შიდა გამოყენებისთვის | BE-FM-TRAIN v.2 | შპს „ბილდექს ექსპერტიზა" | შენახვა: 5 წელი
+          კონფიდენციალური — მხოლოდ შიდა გამოყენებისთვის | BE-FM-TRAIN v1.0 | შპს „ბილდექს ექსპერტიზა" | შენახვა: 5 წელი
         </Text>
       </Page>
     </Document>
