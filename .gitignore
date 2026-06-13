@@ -37,3 +37,6 @@ BUILDEXEXPERTISE_files/
 
 # Claude config
 .claude/
+
+# ლოკალური ფორმების PDF-ები (გენერირებადი, არ ვაკომიტებთ)
+ფორმები/
