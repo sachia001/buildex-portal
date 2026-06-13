@@ -97,11 +97,12 @@ const NewFormCard = ({ form, color = 'info' }) => {
     isoRef: form.isoRef,
   });
   return (
-    <Col xl={3} lg={4} md={6}>
+    <Col xl={2} lg={3} md={4} sm={6}>
       <Card className="h-100 shadow-sm border-0" style={{ borderTop: `3px solid var(--bs-${color})` }}>
-        <Card.Body className="d-flex flex-column p-2">
-          <Badge bg={color} className="mb-1 align-self-start" style={{ fontSize: '0.6rem' }}>{form.code}</Badge>
-          <div className="fw-bold text-dark mb-1" style={{ fontSize: '0.8rem', lineHeight: 1.3 }}>{form.title}</div>
+        <Card.Body className="d-flex flex-column p-2 text-center">
+          <div className="fs-3 mb-1">📋</div>
+          <Badge bg={color} className="mb-1" style={{ fontSize: '0.6rem' }}>{form.code}</Badge>
+          <div className="fw-bold text-dark mb-1" style={{ fontSize: '0.78rem', lineHeight: 1.3 }}>{form.title}</div>
           <p className="text-muted mb-2 flex-grow-1" style={{ fontSize: '0.62rem' }}>{form.isoRef}</p>
           <div className="d-flex flex-column gap-1">
             {hasFill && (
