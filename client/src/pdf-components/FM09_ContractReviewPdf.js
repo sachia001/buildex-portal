@@ -14,7 +14,7 @@ const FM09_ContractReviewPdf = ({ data = {} }) => {
       <FieldRow2 label1="BE-CASE №:" value1={data.caseNumber}    label2="თარიღი:"    value2={data.reviewDate} />
       <FieldRow  label="დამკვეთი:"   value={data.clientName} />
       <View style={{flexDirection:'row',gap:12,marginBottom:3,marginLeft:4}}>
-        {['BE-PR-01','BE-PR-02','BE-PR-03','BE-PR-04','სხვა'].map(c => (
+        {['BE-PR-01','BE-PR-02','BE-PR-03','სხვა'].map(c => (
           <View key={c} style={{flexDirection:'row',alignItems:'center',gap:3}}>
             <View style={data.inspScope===c?s.boxChecked:s.box}>{data.inspScope===c&&<Text style={{color:'#fff',fontSize:6,fontWeight:'bold'}}>✓</Text>}</View>
             <Text style={{fontSize:8}}>{c}</Text>

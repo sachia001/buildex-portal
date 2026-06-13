@@ -29,7 +29,7 @@ export const FORM_CONFIGS = {
       ]},
       { label: 'ავტორიზებული სფეროები', fields: [
         { id: 'scopes', label: 'ინსპექციის სფეროები', type: 'multicheck',
-          options: ['BE-PR-01','BE-PR-02','BE-PR-03','BE-PR-04'] },
+          options: ['BE-PR-01','BE-PR-02','BE-PR-03'] },
       ]},
       { label: 'ინტერესთა კონფლიქტი (კი / არა)', fields: [
         { id: 'c_ownership',  label: 'მფლობელობითი ინტერესი კლიენტის კომპანიაში',      type: 'yesno' },
@@ -241,7 +241,7 @@ export const FORM_CONFIGS = {
         { id: 'caseNumber',     label: 'BE-CASE №',                       type: 'case' },
         { id: 'reviewDate',     label: 'განხილვის თარიღი',                type: 'date' },
         { id: 'clientName',     label: 'დამკვეთი',                        type: 'text' },
-        { id: 'inspScope',      label: 'ინსპექციის სფერო', type: 'select', options: ['BE-PR-01','BE-PR-02','BE-PR-03','BE-PR-04','სხვა'] },
+        { id: 'inspScope',      label: 'ინსპექციის სფერო', type: 'select', options: ['BE-PR-01','BE-PR-02','BE-PR-03','სხვა'] },
         { id: 'contractNumber', label: 'ხელშეკრულების №',                 type: 'text' },
         { id: 'deadline',       label: 'ვადა',                            type: 'date' },
         { id: 'fee',            label: 'გასამრჯელო (₾)',                  type: 'text' },
@@ -823,7 +823,7 @@ export const FORM_CONFIGS = {
         { id: 'clientName',  label: 'კლიენტი / ორგანიზაცია',     type: 'text' },
         { id: 'clientRep',   label: 'წარმომადგენელი',             type: 'text' },
         { id: 'email',       label: 'ელექტრონული ფოსტა',                   type: 'text' },
-        { id: 'inspScope',   label: 'ინსპექტირების სფერო',        type: 'select', options: ['BE-PR-01','BE-PR-02','BE-PR-03','BE-PR-04','სხვა'] },
+        { id: 'inspScope',   label: 'ინსპექტირების სფერო',        type: 'select', options: ['BE-PR-01','BE-PR-02','BE-PR-03','სხვა'] },
       ]},
       { label: 'B. კმაყოფილების შეფასება (1–5)', fields: [
         { id: 'q1', label: '1. მომსახურების ზოგადი ხარისხი',               type: 'select', options: ['1','2','3','4','5'] },
@@ -868,7 +868,7 @@ export const FORM_CONFIGS = {
         { id: 'verificationDate',  label: 'გადამოწმების თარიღი',                type: 'date' },
         { id: 'verifier',          label: 'ვერიფიკატორი (ტექნიკური მენეჯერი)',       type: 'staffmulti' },
         { id: 'inspector',         label: 'ინსპექტორი',                         type: 'staffmulti' },
-        { id: 'inspScope',         label: 'ინსპექციის სფერო',                   type: 'select', options: ['BE-PR-01','BE-PR-02','BE-PR-03','BE-PR-04','სხვა'] },
+        { id: 'inspScope',         label: 'ინსპექციის სფერო',                   type: 'select', options: ['BE-PR-01','BE-PR-02','BE-PR-03','სხვა'] },
       ]},
       { label: 'B. ტექნიკური შემოწმების ჩამონათვალი (კი / არა / N/A)', fields: [
         { id: 'ck1',  label: '1. ანგარიში შეიცავს BE-CASE და მისამართს',                   type: 'yesno' },
