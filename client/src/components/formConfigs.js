@@ -410,10 +410,8 @@ export const FORM_CONFIGS = {
     title: 'ტრენინგის ჩანაწერი',
     signers: ['თანამშრომელი', 'ტექნიკური მენეჯერი', 'ხარისხის მენეჯერი'],
     sections: [
-      { label: 'თანამშრომლის მონაცემები', fields: [
-        { id: 'name',         label: 'სახელი / გვარი',              type: 'staffmulti' },
-        { id: 'personalId',   label: 'პირადი №',                    type: 'text' },
-        { id: 'position',     label: 'თანამდებობა',                 type: 'text' },
+      { label: 'A. მონაწილე პერსონალი', fields: [
+        { id: 'participants', label: 'მონაწილეები (მონიშნეთ — თითო ცხრილში ცალკე მწკრივად, პირადი ნომრით)', type: 'staffrows' },
         { id: 'trainingDate', label: 'ტრენინგის თარიღი',            type: 'date' },
         { id: 'duration',     label: 'ხანგრძლივობა (საათი)',        type: 'number' },
         { id: 'location',     label: 'ადგილმდებარეობა',             type: 'text' },

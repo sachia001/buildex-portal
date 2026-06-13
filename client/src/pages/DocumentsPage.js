@@ -137,34 +137,20 @@ const NewFormCard = ({ form, color = 'info' }) => {
   );
 };
 
-// ჯგუფები BE-PR ნაკადის მიხედვით
-const NEW_FORM_GROUPS = [
-  { title: '1️⃣ განცხადება და მიღება (BE-PR-08)', color: 'primary',
-    codes: ['BE-FM-APP', 'BE-FM-REG', 'BE-FM-ACK', 'BE-FM-SCREEN'] },
-  { title: '🛡️ მიუკერძოებლობა და კონფიდენციალურობა (BE-PR-06)', color: 'success',
-    codes: ['BE-FM-IMP-GEN', 'BE-FM-IMP-CHECK', 'BE-FM-IMP-COMMITTEE'] },
-  { title: '2️⃣ შეფასება და გადაწყვეტა', color: 'success',
-    codes: ['BE-FM-COMP', 'BE-FM-EST', 'BE-FM-DECLINE', 'BE-FM-DOC-REQ', 'BE-FM-DOC-CHECK'] },
-  { title: '3️⃣ ხელშეკრულება და დანიშვნა', color: 'info',
-    codes: ['BE-FM-NORM-PROFILE', 'BE-FM-OFFER', 'BE-FM-CONTRACT', 'BE-FM-CONTRACT-REGISTRY', 'BE-FM-ORD', 'BE-FM-NOTIFY', 'BE-FM-COMP-CHECK'] },
-  { title: '4️⃣ საველე ინსპექტირება და ანალიზი', color: 'warning',
-    codes: ['BE-FM-PLAN', 'BE-FM-EQ-CHECK', 'BE-FM-FIELD-LOG', 'BE-FM-MEASURE', 'BE-FM-OBSERVATION', 'BE-FM-PHOTO-LOG', 'BE-FM-COMPARE', 'BE-FM-CALC', 'BE-FM-NORM-CHECK', 'BE-FM-FINDING'] },
-  { title: '5️⃣ ანგარიში და გაცემა (BE-PR-15)', color: 'danger',
-    codes: ['BE-FM-IR', 'BE-FM-TECH-REVIEW', 'BE-FM-QM-CHECK', 'BE-FM-IR-REGISTRY', 'BE-FM-DELIVERY-LETTER', 'BE-FM-ACCEPT-ACT'] },
-  { title: '6️⃣ დოკუმენტაცია და საჩივრები', color: 'secondary',
-    codes: ['BE-FM-CHANGE-INIT', 'BE-FM-DESTROY-ACT', 'BE-FM-COMPLAINT', 'BE-FM-APPEAL'] },
-];
-
 const findForm = (code) => NEW_FORMS.find((f) => f.code === code);
 
-// curated/fillable ფორმები (სექციები 2-7) — სრული ბიბლიოთეკის (სექცია 8) გალერეაში არ გავიმეოროთ (გაორების თავიდან აცილება)
-const CURATED_CODES = new Set([
-  'BE-FM-APP','BE-FM-REG','BE-FM-SCREEN','BE-FM-CONTRACT-REVIEW','BE-FM-PLAN','BE-FM-VISIT','BE-FM-IR','BE-FM-INSP-REG',
-  'BE-FM-IMP-DECL','BE-FM-CONF','BE-FM-COMP-CHECK','BE-FM-IMP-RISK','BE-FM-TRAIN',
-  'BE-FM-COMPLAINT','BE-FM-CAPA','BE-FM-NONCONF','BE-FM-MGMT-REVIEW','BE-FM-SATISF','BE-FM-TECH-REVIEW',
-  'BE-FM-EQ-CHECK','BE-FM-SUB-MONITOR','BE-FM-EQ-CARD','BE-FM-FAMIL','BE-FM-CHANGE-INIT','BE-FM-CHANGE-REG','BE-FM-DESTROY-ACT',
-  'BE-FM-AUDIT-PLAN','BE-FM-AUDIT-CHECK','BE-FM-AUDIT-REPORT','BE-FM-AUDIT-NC','BE-FM-AUDIT-MEETING','BE-FM-AUDIT-PROGRAM',
-]);
+// დამატებითი სამუშაო-ნაკადის ფორმები, განაწილებული ძირითად სექციებში შესაბამისი ჯგუფის მიხედვით
+const EXTRA_INSPECTION = [
+  'BE-FM-ACK','BE-FM-EST','BE-FM-DECLINE','BE-FM-DOC-REQ','BE-FM-DOC-CHECK',
+  'BE-FM-NORM-PROFILE','BE-FM-OFFER','BE-FM-CONTRACT','BE-FM-CONTRACT-REGISTRY','BE-FM-ORD','BE-FM-NOTIFY',
+  'BE-FM-FIELD-LOG','BE-FM-MEASURE','BE-FM-OBSERVATION','BE-FM-PHOTO-LOG','BE-FM-COMPARE','BE-FM-CALC','BE-FM-NORM-CHECK','BE-FM-FINDING',
+  'BE-FM-QM-CHECK','BE-FM-IR-REGISTRY','BE-FM-DELIVERY-LETTER','BE-FM-ACCEPT-ACT',
+];
+const EXTRA_PERSONNEL = ['BE-FM-COMP','BE-FM-IMP-GEN','BE-FM-IMP-CHECK','BE-FM-IMP-COMMITTEE'];
+const EXTRA_QUALITY   = ['BE-FM-APPEAL'];
+
+const renderExtras = (codes, color) =>
+  codes.map((code) => { const f = findForm(code); return f ? <NewFormCard key={code} form={f} color={color} /> : null; });
 
 // ── ბარათის კომპონენტი ────────────────────────────────────────
 const DocCard = ({ icon, code, title, desc, pdf, fileName, linkTo, color = 'primary', fillConfig, instrKey, wordIsoRef }) => {
@@ -338,6 +324,7 @@ const DocumentsPage = () => (
         desc="ISO §7.3 ჟურნალი — ყველა საქმე ერთ ადგილას, პერიოდი, ხარისხის მენეჯერის ვიზა; ყოველწლიური გახსნა"
         pdf={<FM21_InspectionRegisterPdf />} fileName="BE-FM-21_ინსპ_რეგ" color="info"
         fillConfig={FORM_CONFIGS['BE-FM-INSP-REG']} instrKey="BE-FM-INSP-REG" />
+      {renderExtras(EXTRA_INSPECTION, 'info')}
     </Row>
 
     {/* ── 3. პერსონალი და კომპეტენცია ── */}
@@ -369,6 +356,7 @@ const DocumentsPage = () => (
       <DocCard icon="🤝" code="HR-ხელშ." title="შრომის ხელშეკრულება"
         desc="სრული HR პაკეტი — შრომითი ხელშეკრულება + ინსტრუქცია + მატ. პასუხისმგებლობა; ყველა ახალ თანამშრომელზე"
         linkTo="/contract-generator" color="success" />
+      {renderExtras(EXTRA_PERSONNEL, 'success')}
     </Row>
 
     {/* ── 4. ხარისხის მართვა ── */}
@@ -398,6 +386,7 @@ const DocumentsPage = () => (
         desc="ISO §7.4 — 10 შემოწმების კრიტერიუმი (კი/არა/N/A), გადამოწმების შედეგი, შენიშვნები; ტექნიკური მენეჯერი ვიზირებს"
         pdf={<FM20_ReportVerificationPdf />} fileName="BE-FM-20_ანგ_გადამ" color="danger"
         fillConfig={FORM_CONFIGS['BE-FM-TECH-REVIEW']} instrKey="BE-FM-TECH-REVIEW" />
+      {renderExtras(EXTRA_QUALITY, 'danger')}
     </Row>
 
     {/* ── 5. მოწყობილობა და ქვეკონტრაქტირება ── */}
@@ -466,27 +455,6 @@ const DocumentsPage = () => (
         pdf={<FM31_AuditProgramPdf />} fileName="BE-FM-31_ა_პ_წ_გ" color="warning"
         fillConfig={FORM_CONFIGS['BE-FM-AUDIT-PROGRAM']} instrKey="BE-FM-AUDIT-PROGRAM" />
     </Row>
-
-    {/* ── 8. ახალი ფორმები — BE-PR სამუშაო ნაკადი (37 ფორმა) ── */}
-    <div className="mt-5 mb-2 p-3 rounded" style={{ background: 'linear-gradient(90deg,#003366,#0d6efd)' }}>
-      <h5 className="fw-bold text-white m-0">🗂️ დამატებითი სამუშაო-ნაკადის ფორმები — BE-PR-01–15</h5>
-      <p className="text-white-50 small m-0 mt-1">
-        ინსპექტირების სამუშაო ნაკადის დამატებითი ფორმები (განცხადებიდან დასკვნამდე), რომლებიც ზემოთ curated სექციებში არ შედის. ყველა ფორმა ხელმისაწვდომია PDF და Word ფორმატში. ზემოთ მოცემული ფორმები აქ აღარ მეორდება.
-      </p>
-    </div>
-
-    {NEW_FORM_GROUPS.map((grp) => {
-      const codes = grp.codes.filter((code) => !CURATED_CODES.has(code) && findForm(code));
-      if (!codes.length) return null;
-      return (
-        <div key={grp.title}>
-          <SectionTitle icon="📋" title={grp.title} color="#003366" />
-          <Row className="g-2">
-            {codes.map((code) => <NewFormCard key={code} form={findForm(code)} color={grp.color} />)}
-          </Row>
-        </div>
-      );
-    })}
 
   </Container>
 );

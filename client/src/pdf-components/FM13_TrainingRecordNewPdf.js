@@ -10,10 +10,32 @@ const FM13_TrainingRecordNewPdf = ({ data = {} }) => {
       <WM />
       <FormHeader code="BE-FM-TRAIN" isoRef="სსტ ISO/IEC 17020 §6.1" title="ტრენინგის ჩანაწერი" subtitle="Training Record" />
 
-      <Text style={s.secH}>A. თანამშრომლის მონაცემები</Text>
-      <FieldRow2 label1="სახელი / გვარი:"       value1={data.name}       label2="პირადი №:"                    value2={data.personalId} />
-      <FieldRow2 label1="თანამდებობა:"           value1={data.position}   label2="ტრენინგის თარიღი:"            value2={data.trainingDate} />
-      <FieldRow2 label1="ხანგრძლივობა (საათი):" value1={data.duration}   label2="ადგილმდებარეობა:"             value2={data.location} />
+      <Text style={s.secH}>A. მონაწილე პერსონალი</Text>
+      <View style={s.tBorder}>
+        <View style={s.tHeader}>
+          <View style={[s.tHead,{width:'7%',padding:2}]}><Text>#</Text></View>
+          <View style={[s.tHead,{flex:1,padding:2}]}><Text>სახელი, გვარი</Text></View>
+          <View style={[s.tHead,{width:'28%',padding:2}]}><Text>პირადი ნომერი</Text></View>
+          <View style={[s.tHead,{width:'30%',padding:2}]}><Text>თანამდებობა</Text></View>
+        </View>
+        {(() => {
+          const rows = Array.isArray(data.participants) ? data.participants : [];
+          const total = Math.max(6, rows.length);
+          return [...Array(total)].map((_, i) => {
+            const r = rows[i] || {};
+            return (
+              <View key={i} style={i%2===0?s.tRow:s.tRowAlt}>
+                <View style={[s.tCell,{width:'7%',padding:2}]}><Text style={{fontSize:7.5}}>{i+1}</Text></View>
+                <View style={[s.tCell,{flex:1,padding:2}]}><Text style={{fontSize:7.5}}>{r.name||''}</Text></View>
+                <View style={[s.tCell,{width:'28%',padding:2}]}><Text style={{fontSize:7.5}}>{r.personalId||''}</Text></View>
+                <View style={[s.tCell,{width:'30%',padding:2}]}><Text style={{fontSize:7.5}}>{r.position||''}</Text></View>
+              </View>
+            );
+          });
+        })()}
+      </View>
+      <FieldRow2 label1="ტრენინგის თარიღი:"      value1={data.trainingDate} label2="ხანგრძლივობა (საათი):"          value2={data.duration} />
+      <FieldRow  label="ადგილმდებარეობა:"        value={data.location} />
 
       <Text style={s.secH}>B. ტრენინგის სახეობა</Text>
       <View style={{flexDirection:'row',flexWrap:'wrap',gap:10,marginBottom:4,marginLeft:4}}>

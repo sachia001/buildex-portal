@@ -24,6 +24,9 @@ const buildSigs = (signers, sigsData) => {
 const isExternal = (label = '') =>
   /დამკვეთ|კლიენტ|კონტრაქტ|მომჩივ|მოწმე/i.test(label);
 
+// ── Trimmed full name (იცავს ბოლო/დამატებითი probელებისგან — DAT გასუფთავება) ──
+const fullName = (u) => [u.firstName, u.lastName].map(x => (x || '').trim()).filter(Boolean).join(' ');
+
 // ── TableRows editor ───────────────────────────────────────────
 const TableRowsEditor = ({ field, value, onChange, staffList = [] }) => {
   const minRows = field.minRows || 1;
@@ -68,7 +71,7 @@ const TableRowsEditor = ({ field, value, onChange, staffList = [] }) => {
                     onChange={e => update(idx, col.id, e.target.value)}>
                     <option value="">— თანამშრომელი —</option>
                     {staffList.map(u => {
-                      const n = `${u.firstName} ${u.lastName}`;
+                      const n = fullName(u);
                       return <option key={u._id} value={n}>{n}{u.position ? ` — ${u.position}` : ''}</option>;
                     })}
                   </Form.Select>
@@ -115,8 +118,8 @@ const FieldInput = ({ field, value, onChange, staffList, inspectionList }) => {
         onChange={e => onChange(field.id, e.target.value)}>
         <option value="">— აირჩიეთ თანამშრომელი —</option>
         {staffList.map(u => {
-          const label = `${u.firstName} ${u.lastName}${u.position ? ` — ${u.position}` : ''}`;
-          const val   = `${u.firstName} ${u.lastName}`;
+          const val   = fullName(u);
+          const label = `${val}${u.position ? ` — ${u.position}` : ''}`;
           return <option key={u._id} value={val}>{label}</option>;
         })}
       </Form.Select>
@@ -125,7 +128,7 @@ const FieldInput = ({ field, value, onChange, staffList, inspectionList }) => {
   // multi-select პერსონალი — ჩამოსაშლელი ჩექბოქსებით (ერთი/რამდენიმე/ყველა); ინახება მძიმით გამოყოფილ სტრიქონად
   if (field.type === 'staffmulti') {
     const selected = (value || '').split(',').map(x => x.trim()).filter(Boolean);
-    const allNames = staffList.map(u => `${u.firstName} ${u.lastName}`);
+    const allNames = staffList.map(fullName);
     const allSel = allNames.length > 0 && allNames.every(n => selected.includes(n));
     const toggle = (n) => {
       const next = selected.includes(n) ? selected.filter(x => x !== n) : [...selected, n];
@@ -140,11 +143,37 @@ const FieldInput = ({ field, value, onChange, staffList, inspectionList }) => {
               checked={allSel} onChange={() => onChange(field.id, allSel ? '' : allNames.join(', '))} />
             <hr className="my-1" />
             {staffList.map(u => {
-              const n = `${u.firstName} ${u.lastName}`;
+              const n = fullName(u);
               return <Form.Check key={u._id} type="checkbox"
                 label={`${n}${u.position ? ` — ${u.position}` : ''}`}
                 checked={selected.includes(n)} onChange={() => toggle(n)} />;
             })}
+          </>
+        )}
+      </div>
+    );
+  }
+  // multi-select პერსონალი → ცხრილის მწკრივები: თითო მონიშნული თანამშრომელი ცალკე მწკრივად,
+  // ავტომატურად შევსებული პირადი ნომრითა და თანამდებობით (ინახება ობიექტების მასივად)
+  if (field.type === 'staffrows') {
+    const rows = Array.isArray(value) ? value : [];
+    const rowOf = (u) => ({ _id: u._id, name: fullName(u), personalId: (u.personalId || '').trim(), position: (u.position || '').trim() });
+    const isSel = (u) => rows.some(r => r._id === u._id);
+    const toggle = (u) => onChange(field.id, isSel(u) ? rows.filter(r => r._id !== u._id) : [...rows, rowOf(u)]);
+    const allSel = staffList.length > 0 && staffList.every(isSel);
+    return (
+      <div className="border rounded p-2" style={{ maxHeight: 220, overflowY: 'auto', background: '#f8f9fa' }}>
+        {staffList.length === 0 && <div className="text-muted small">პერსონალი არ არის რეგისტრირებული</div>}
+        {staffList.length > 0 && (
+          <>
+            <Form.Check type="checkbox" className="fw-bold" label="✓ ყველას მონიშვნა"
+              checked={allSel} onChange={() => onChange(field.id, allSel ? [] : staffList.map(rowOf))} />
+            <hr className="my-1" />
+            {staffList.map(u => (
+              <Form.Check key={u._id} type="checkbox"
+                label={`${fullName(u)}${u.personalId ? ` — ${(u.personalId || '').trim()}` : ''}${u.position ? ` (${u.position})` : ''}`}
+                checked={isSel(u)} onChange={() => toggle(u)} />
+            ))}
           </>
         )}
       </div>
@@ -210,7 +239,7 @@ const StaffSignerBlock = ({ label, index, sigsData, onSigChange, staffList }) =>
   const setName = v => onSigChange(index, { ...sig, name: v });
   const setDate = v => onSigChange(index, { ...sig, date: v });
 
-  const inStaffList = staffList.some(u => `${u.firstName} ${u.lastName}` === sig.name);
+  const inStaffList = staffList.some(u => fullName(u) === sig.name);
   const manualMode = showManual || (sig.name && !inStaffList);
 
   return (
@@ -234,7 +263,7 @@ const StaffSignerBlock = ({ label, index, sigsData, onSigChange, staffList }) =>
             }}>
               <option value="">— სიიდან —</option>
               {staffList.map(u => {
-                const val = `${u.firstName} ${u.lastName}`;
+                const val = fullName(u);
                 return <option key={u._id} value={val}>{val}{u.position ? ` — ${u.position}` : ''}</option>;
               })}
               <option value="__manual__">✏️ ხელით ჩაწერა…</option>
@@ -449,7 +478,7 @@ const FormFillModal = ({ show, onHide, config, pdfComponent, pdfFileName, formCo
                   </div>
                   <Row className="g-2">
                     {sec.fields.map(field => {
-                      const fullWidth = ['textarea','multicheck','tablerows','case','staffmulti'].includes(field.type);
+                      const fullWidth = ['textarea','multicheck','tablerows','case','staffmulti','staffrows'].includes(field.type);
                       return (
                         <Col key={field.id} md={fullWidth ? 12 : 6}>
                           <Form.Label className="small fw-semibold mb-1" style={{ fontSize: '0.75rem' }}>
