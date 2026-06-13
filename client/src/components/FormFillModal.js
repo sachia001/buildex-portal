@@ -161,22 +161,42 @@ const FieldInput = ({ field, value, onChange, staffList, inspectionList }) => {
     const isSel = (u) => rows.some(r => r._id === u._id);
     const toggle = (u) => onChange(field.id, isSel(u) ? rows.filter(r => r._id !== u._id) : [...rows, rowOf(u)]);
     const allSel = staffList.length > 0 && staffList.every(isSel);
+    const sf = field.statusField; // არასავალდებულო: თითო მონიშნული მონაწილის სტატუსი (მაგ. კომპეტენცია)
+    const setStatus = (id, v) => onChange(field.id, rows.map(r => r._id === id ? { ...r, [sf.id]: v } : r));
     return (
-      <div className="border rounded p-2" style={{ maxHeight: 220, overflowY: 'auto', background: '#f8f9fa' }}>
-        {staffList.length === 0 && <div className="text-muted small">პერსონალი არ არის რეგისტრირებული</div>}
-        {staffList.length > 0 && (
-          <>
-            <Form.Check type="checkbox" className="fw-bold" label="✓ ყველას მონიშვნა"
-              checked={allSel} onChange={() => onChange(field.id, allSel ? [] : staffList.map(rowOf))} />
-            <hr className="my-1" />
-            {staffList.map(u => (
-              <Form.Check key={u._id} type="checkbox"
-                label={`${fullName(u)}${u.personalId ? ` — ${(u.personalId || '').trim()}` : ''}${u.position ? ` (${u.position})` : ''}`}
-                checked={isSel(u)} onChange={() => toggle(u)} />
+      <>
+        <div className="border rounded p-2" style={{ maxHeight: 220, overflowY: 'auto', background: '#f8f9fa' }}>
+          {staffList.length === 0 && <div className="text-muted small">პერსონალი არ არის რეგისტრირებული</div>}
+          {staffList.length > 0 && (
+            <>
+              <Form.Check type="checkbox" className="fw-bold" label="✓ ყველას მონიშვნა"
+                checked={allSel} onChange={() => onChange(field.id, allSel ? [] : staffList.map(rowOf))} />
+              <hr className="my-1" />
+              {staffList.map(u => (
+                <Form.Check key={u._id} type="checkbox"
+                  label={`${fullName(u)}${u.personalId ? ` — ${(u.personalId || '').trim()}` : ''}${u.position ? ` (${u.position})` : ''}`}
+                  checked={isSel(u)} onChange={() => toggle(u)} />
+              ))}
+            </>
+          )}
+        </div>
+        {sf && rows.length > 0 && (
+          <div className="border rounded p-2 mt-2" style={{ background: '#fff' }}>
+            <div className="fw-bold small mb-1" style={{ fontSize: '0.72rem' }}>{sf.label}</div>
+            {rows.map(r => (
+              <Row key={r._id} className="g-1 align-items-center mb-1">
+                <Col xs={5}><span style={{ fontSize: '0.72rem' }}>{r.name}</span></Col>
+                <Col xs={7}>
+                  <Form.Select size="sm" value={r[sf.id] || ''} onChange={e => setStatus(r._id, e.target.value)}>
+                    <option value="">— აირჩიეთ —</option>
+                    {sf.options.map(o => <option key={o.value || o} value={o.value || o}>{o.label || o}</option>)}
+                  </Form.Select>
+                </Col>
+              </Row>
             ))}
-          </>
+          </div>
         )}
-      </div>
+      </>
     );
   }
   if (field.type === 'tablerows')
