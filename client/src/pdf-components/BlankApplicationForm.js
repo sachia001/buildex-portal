@@ -110,7 +110,7 @@ const BlankApplicationForm = ({ data }) => {
             : <View style={styles.infoValueLine} />}
         </View>
         <View style={styles.infoRow}>
-          <Text style={styles.infoLabel}>ID/კოდი/პ.ნომ.:</Text>
+          <Text style={styles.infoLabel}>ID / კოდი / პირადი ნომერი:</Text>
           {d.idCode
             ? <Text style={{ fontSize: 10, marginLeft: 5 }}>{d.idCode}</Text>
             : <View style={styles.infoValueLine} />}

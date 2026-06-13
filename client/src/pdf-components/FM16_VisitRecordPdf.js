@@ -122,7 +122,7 @@ const FM16_VisitRecordPdf = ({ data = {} }) => {
           </View>
         ))}
       </View>
-      <Text style={{fontSize:7,color:'#555',marginBottom:3}}>კატეგ.: კ — კრიტიკული | ა — არსებითი | ფ — ფორმალური / ობსერვაცია</Text>
+      <Text style={{fontSize:7,color:'#555',marginBottom:3}}>კატეგორია: კ — კრიტიკული | ა — არსებითი | ფ — ფორმალური / ობსერვაცია</Text>
 
       <Text style={s.secH}>G. ადგილზე ხელმოწერები</Text>
       <View style={s.tBorder}>

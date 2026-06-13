@@ -56,7 +56,7 @@ const FM04_InternalAuditPdf = ({ data = {} }) => {
           </View>
         ))}
       </View>
-      <Text style={{fontSize:7,color:'#555',marginBottom:3}}>კატეგ.: კ — კრიტიკული | მ — მცირე | გ — გამოსწორებული</Text>
+      <Text style={{fontSize:7,color:'#555',marginBottom:3}}>კატეგორია: კ — კრიტიკული | მ — მცირე | გ — გამოსწორებული</Text>
 
       <Text style={s.secH}>D. CAPA (BE-FM-CAPA)</Text>
       <View style={s.tBorder}>
