@@ -25,36 +25,36 @@ const FM35_SubcontractorMonitoringPdf = ({ data = {} }) => {
 
         {/* A. ქ-კ. საიდ. */}
         <Text style={s.secH}>A. ქვეკონტრაქტორის საიდენტიფიკაციო მონაცემები</Text>
-        <FieldRow label="ო-ბ. სახ.:" value={companyName} />
+        <FieldRow label="ორგანიზაციის დასახელება:" value={companyName} />
         <FieldRow2
-          label1="ი-ბ. ფ.:"  value1={legalForm}
-          label2="ს/კ:"       value2={taxId}
+          label1="იურიდიული ფორმა:"  value1={legalForm}
+          label2="საიდენტიფიკაციო კოდი:"       value2={taxId}
         />
         <FieldRow2
-          label1="კ-ტ. პ.:"  value1={contact}
-          label2="ტ-ნი:"      value2={phone}
+          label1="საკონტაქტო პირი:"  value1={contact}
+          label2="ტელეფონი:"      value2={phone}
         />
         <FieldRow2
-          label1="ელ-ფ.:"  value1={email}
-          label2="მ-ბი:"    value2={address}
+          label1="ელ. ფოსტა:"  value1={email}
+          label2="მისამართი:"    value2={address}
         />
         <TextArea value={services} placeholder="გ-ბ. მომს. სახ." minHeight={28} />
-        <FieldRow label="ა-ბ. / ლ-ა №:" value={accreditation} />
+        <FieldRow label="აკრედიტაცია / ლიცენზია №:" value={accreditation} />
 
         {/* B. კ-ა შ-ა ც-ლი */}
         <Text style={s.secH}>B. კვალიფიკაციის შეფასების ცხრილი (6 კრ. — კი/არა)</Text>
-        <YesNoRow label="1. იურ. სტ. დ. (ISO §6.3.1):"          yesNo={q1} />
-        <YesNoRow label="2. ი-ო. და კ-ბ. (ISO §6.3.2):"         yesNo={q2} />
-        <YesNoRow label="3. პ-ლ. კომპ. (ISO §6.3.3):"           yesNo={q3} />
-        <YesNoRow label="4. ა-ბ. / ი-ბ. ო-ბ. (ISO §6.3.4):"     yesNo={q4} />
-        <YesNoRow label="5. CAPA ს-ა დ. (ISO §8.7):"             yesNo={q5} />
-        <YesNoRow label="6. კ-ბ. დ-ბ. / მ-ბ. (ISO §6.2):"       yesNo={q6} />
-        <FieldRow label="ჯ-ი ქ-ა (0–6):" value={totalScore} />
+        <YesNoRow label="1. იურიდიული სტატუსის დადასტურება (ISO §6.3.1):"          yesNo={q1} />
+        <YesNoRow label="2. ინსპექტირების უნარი და კომპეტენცია (ISO §6.3.2):"         yesNo={q2} />
+        <YesNoRow label="3. პერსონალის კომპეტენცია (ISO §6.3.3):"           yesNo={q3} />
+        <YesNoRow label="4. აკრედიტაცია / იურიდიული საფუძველი (ISO §6.3.4):"     yesNo={q4} />
+        <YesNoRow label="5. CAPA სისტემის დანერგვა (ISO §8.7):"             yesNo={q5} />
+        <YesNoRow label="6. კალიბრაცია/დადასტურება (ISO §6.2):"       yesNo={q6} />
+        <FieldRow label="ჯამური ქულა (0–6):" value={totalScore} />
 
         {/* decision */}
         <View style={[s.fRow, { alignItems: 'center', marginBottom: 6 }]}>
           <Text style={s.fLabel}>გ-ა:</Text>
-          {[['დ-ბ.', 'approved'], ['პ-ბ.', 'conditional'], ['ა-ბ.', 'rejected']].map(([label, val]) => (
+          {[['დამტკიცებული', 'approved'], ['პირობითი', 'conditional'], ['უარყოფილი', 'rejected']].map(([label, val]) => (
             <View key={val} style={{ flexDirection: 'row', alignItems: 'center', marginRight: 14 }}>
               <View style={decision === val ? s.boxChecked : s.box}>
                 {decision === val && <Text style={{ color: '#fff', fontSize: 6.5, fontWeight: 'bold' }}>✓</Text>}

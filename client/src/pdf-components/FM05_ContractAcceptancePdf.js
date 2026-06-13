@@ -54,8 +54,8 @@ const FM05_ContractAcceptancePdf = ({ data = {} }) => {
 
         {/* C. შ-ძ. დადასტ. */}
         <Text style={s.secH}>C. შესაძლებლობის დადასტურება</Text>
-        <YesNoRow label="ბ-ლი პერსონალი ხელმისაწვდომია:"    yesNo={staffAvailable} />
-        <YesNoRow label="ბ-ლი აღჭ. ხელმისაწვდომია:"          yesNo={equipAvailable} />
+        <YesNoRow label="საჭირო პერსონალი ხელმისაწვდომია:"    yesNo={staffAvailable} />
+        <YesNoRow label="საჭირო აღჭურვილობა ხელმისაწვდომია:"          yesNo={equipAvailable} />
         <YesNoRow label="ვადა რეალური:"                       yesNo={timeAvailable} />
 
         {/* D. შეზღ. / შ-ბები */}
@@ -74,7 +74,7 @@ const FM05_ContractAcceptancePdf = ({ data = {} }) => {
             </View>
           ))}
         </View>
-        <FieldRow label="გ-ის თ-ღი:"    value={decisionDate} />
+        <FieldRow label="გადაწყვეტილების თარიღი:"    value={decisionDate} />
         <TextArea value={decisionNote} placeholder="გ-ის დასაბ. / შ-ბა" minHeight={28} />
 
         <SigBlock3 labels={['ტექნიკური მენეჯერი', 'ხარისხის მენეჯერი', 'დირექტორი']} sigs={sigs} />

@@ -57,10 +57,10 @@ const FM01_ApplicationRegistrationPdf = ({ data = {} }) => {
         <Text style={s.secH}>B. დამკვეთის მონაცემები</Text>
         <FieldRow label="ორგანიზაცია / სახელი, გვარი:" value={clientName} />
         <FieldRow2
-          label1="საიდ. კოდი / პ.ნ.:" value1={clientId}
+          label1="საიდენტიფიკაციო კოდი / პირადი ნომერი:" value1={clientId}
           label2="ტელეფონი:"            value2={clientPhone}
         />
-        <FieldRow label="ელ-ფოსტა:"    value={clientEmail} />
+        <FieldRow label="ელ. ფოსტა:"    value={clientEmail} />
         <FieldRow label="მისამართი:"   value={clientAddress} />
         <FieldRow label="წარმომადგენელი / პირი:" value={representative} />
 
@@ -69,7 +69,7 @@ const FM01_ApplicationRegistrationPdf = ({ data = {} }) => {
         <FieldRow label="ობიექტის დასახელება:" value={objectName} />
         <FieldRow label="ობიექტის მისამართი:"  value={objectAddress} />
         <FieldRow2
-          label1="ობიექტის კატეგ.:" value1={objectCategory}
+          label1="ობიექტის კატეგორია:" value1={objectCategory}
           label2="ხელშ./შეთ. №:"    value2={contractNum}
         />
         <TextArea value={description} placeholder="ინსპექტირების ობიექტის მოკლე აღწერა" minHeight={36} />
@@ -86,9 +86,9 @@ const FM01_ApplicationRegistrationPdf = ({ data = {} }) => {
 
         {/* E. წინასწარი შეფასება */}
         <Text style={s.secH}>E. წინასწარი შეფასება (ტექნიკური მენეჯერი)</Text>
-        <YesNoRow label="დოკ. სისრულე დადასტ.:"        yesNo={completenessCheck} />
-        <YesNoRow label="ინსპ. სფეო განსაზღვრ.:"       yesNo={scopeCheck} />
-        <YesNoRow label="მიუკ. შ. ინიც. (BE-FM-IMP-DECL):"      yesNo={impartialityCheck} />
+        <YesNoRow label="დოკუმენტაციის სისრულე დადასტურდა:"        yesNo={completenessCheck} />
+        <YesNoRow label="ინსპექტირების სფერო განსაზღვრულია:"       yesNo={scopeCheck} />
+        <YesNoRow label="მიუკერძოებლობის შემოწმება ინიცირებულია (BE-FM-IMP-DECL):"      yesNo={impartialityCheck} />
         <TextArea value={tmNote} placeholder="შენიშვნები / მოთხოვნები" minHeight={28} />
 
         <SigBlock3 labels={['ადმინისტრატორი', 'ტექნიკური მენეჯერი', 'ხარისხის მენეჯერი']} sigs={sigs} />

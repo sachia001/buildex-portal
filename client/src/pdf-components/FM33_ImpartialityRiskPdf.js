@@ -27,15 +27,15 @@ const FM33_ImpartialityRiskPdf = ({ data = {} }) => {
         <Text style={s.secH}>A. ზოგადი ინფორმაცია</Text>
         <FieldRow2
           label1="შეფ. №:"   value1={assessmentId}
-          label2="თ-ღი:"     value2={assessmentDate}
+          label2="თარიღი:"     value2={assessmentDate}
         />
         <FieldRow2
           label1="BE-CASE №:" value1={caseId}
-          label2="ინსპ.:"     value2={inspector}
+          label2="ინსპექტორი:"     value2={inspector}
         />
         <FieldRow2
-          label1="დამკ.:"  value1={clientName}
-          label2="ობ.:"    value2={objectName}
+          label1="დამკვეთი:"  value1={clientName}
+          label2="ობიექტი:"    value2={objectName}
         />
 
         {/* B. რისკების შეფასების ცხრილი */}

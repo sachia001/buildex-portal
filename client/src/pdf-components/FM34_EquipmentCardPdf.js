@@ -27,46 +27,46 @@ const FM34_EquipmentCardPdf = ({ data = {} }) => {
         {/* A. ა-ბ. საიდ. */}
         <Text style={s.secH}>A. აღჭურვილობის საიდენტიფიკაციო მონაცემები</Text>
         <FieldRow2
-          label1="ს/კ. №:"  value1={equipId}
-          label2="სტ.:"      value2={status}
+          label1="სარეგისტრაციო №:"  value1={equipId}
+          label2="სტატუსი:"      value2={status}
         />
-        <FieldRow label="დასახ.:" value={name} />
+        <FieldRow label="დასახელება:" value={name} />
         <FieldRow2
-          label1="მოდ.:"   value1={model}
-          label2="სერ. №:" value2={serialNum}
-        />
-        <FieldRow2
-          label1="მწარ.:"  value1={manufacturer}
-          label2="ქ.:"      value2={country}
+          label1="მოდელი:"   value1={model}
+          label2="სერიული №:" value2={serialNum}
         />
         <FieldRow2
-          label1="შ-ძ. თ-ღი:"  value1={purchaseDate}
-          label2="მდ-ბ.:"       value2={location}
+          label1="მწარმოებელი:"  value1={manufacturer}
+          label2="ქვეყანა:"      value2={country}
         />
         <FieldRow2
-          label1="გ-ვ. დ-ი:"  value1={measRange}
-          label2="ს-ე:"        value2={accuracy}
+          label1="შეძენის თარიღი:"  value1={purchaseDate}
+          label2="მდებარეობა:"       value2={location}
+        />
+        <FieldRow2
+          label1="გაზომვის დიაპაზონი:"  value1={measRange}
+          label2="სიზუსტე:"        value2={accuracy}
         />
 
         {/* B. კ-ბ. ი-ა */}
         <Text style={s.secH}>B. კალიბრაციის ინფორმაცია</Text>
-        <FieldRow label="კ-ბ. ლ-ა / ო-ბ.:"    value={calibCenter} />
+        <FieldRow label="კალიბრაციის ლაბორატორია / ორგანო:"    value={calibCenter} />
         <FieldRow2
-          label1="ბ-ლი კ-ბ.:"   value1={lastCalibDate}
-          label2="შ-მდ. კ-ბ.:"  value2={nextCalibDate}
+          label1="ბოლო კალიბრაცია:"   value1={lastCalibDate}
+          label2="შემდეგი კალიბრაცია:"  value2={nextCalibDate}
         />
         <FieldRow2
-          label1="ინ-ი (თვე):"  value1={calibInterval}
-          label2="ს-ტ. №:"       value2={certNum}
+          label1="ინტერვალი (თვე):"  value1={calibInterval}
+          label2="სერტიფიკატის №:"       value2={certNum}
         />
-        <FieldRow label="ე-ბ. (ეროვ./საერ. ეტ.):" value={traceability} />
-        <YesNoRow label="კ-ბ. სა-ე (ვ-ა):" yesNo={calibResult} />
+        <FieldRow label="ეტალონთან კავშირი (ეროვნ./საერთ. ეტალონი):" value={traceability} />
+        <YesNoRow label="კალიბრაცია ვარგისია:" yesNo={calibResult} />
 
         {/* C. კ-ბ. ისტ. ცხ. */}
         <Text style={s.secH}>C. კალიბრაციის ისტორია</Text>
         <View style={s.tBorder}>
           <View style={s.tHeader}>
-            {['თ-ღი', 'ო-ბ.', 'ს-ტ. №', 'შ-დ.', 'ვ-ა', 'ხ.'].map((h, i) => (
+            {['თარიღი', 'ორგანო', 'სერტიფიკატის №', 'შედეგი', 'ვარგისია', 'ხელმოწერა'].map((h, i) => (
               <View key={i} style={[s.tHead, { width: calibHistCols[i] }]}>
                 <Text>{h}</Text>
               </View>
@@ -79,7 +79,7 @@ const FM34_EquipmentCardPdf = ({ data = {} }) => {
         <Text style={s.secH}>D. გამოყენების ჩანაწერები</Text>
         <View style={s.tBorder}>
           <View style={s.tHeader}>
-            {['თ-ღი', 'BE-CASE', 'ი-ი', 'მ-ბ.', 'შ-ბა'].map((h, i) => (
+            {['თარიღი', 'BE-CASE', 'ინსპექტორი', 'მაჩვენებელი', 'შენიშვნა'].map((h, i) => (
               <View key={i} style={[s.tHead, { width: usageHistCols[i] }]}>
                 <Text>{h}</Text>
               </View>
