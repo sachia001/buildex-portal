@@ -28,12 +28,12 @@ const FM08_CompetencyAssessmentPdf = ({ data = {} }) => {
           <View style={[s.tHead,{width:'17%'}]}><Text>ქულა</Text></View>
           <View style={[s.tHead,{width:'28%'}]}><Text>კომენტარი</Text></View>
         </View>
-        {[['სამუშაო ნიმუში / ნორმები',data.score1],['ISO 17020',data.score2],['გადაწყვეტილების მიღების პრაქტიკა',data.score3],['ანგარიშის შედგენა',data.score4],['witnessing',data.score5]].map(([cr,sc],i) => (
+        {[['სამუშაო ნიმუში / ნორმები',data.score1,data.comment1],['ISO 17020',data.score2,data.comment2],['გადაწყვეტილების მიღების პრაქტიკა',data.score3,data.comment3],['ანგარიშის შედგენა',data.score4,data.comment4],['witnessing',data.score5,data.comment5]].map(([cr,sc,cm],i) => (
           <View key={i} style={i%2===0?s.tRow:s.tRowAlt}>
             <View style={[s.tCell,{width:'5%'}]}><Text>{i+1}</Text></View>
             <View style={[s.tCell,{flex:1}]}><Text>{cr}</Text></View>
             <View style={[s.tCell,{width:'17%',minHeight:18}]}>{sc?<Text style={{fontSize:8.5,fontWeight:'bold'}}>{sc}</Text>:null}</View>
-            <View style={[s.tCell,{width:'28%'}]}/>
+            <View style={[s.tCell,{width:'28%'}]}>{cm?<Text style={{fontSize:7.5}}>{cm}</Text>:null}</View>
           </View>
         ))}
         <View style={[s.tRow,{backgroundColor:'#e8f0f7'}]}>
@@ -46,7 +46,6 @@ const FM08_CompetencyAssessmentPdf = ({ data = {} }) => {
       <Text style={s.secH}>C. გადაწყვეტილება</Text>
       <FieldRow  label="გადაწყვეტილება:"            value={data.decision} />
       <TextArea  value={data.trainingNeeded} placeholder="ტრენინგის საჭიროება" minHeight={28} />
-      <TextArea  value={data.notes} placeholder="შენიშვნა" minHeight={28} />
       <FieldRow  label="მომდევნო შეფასების თარიღი:" value={data.nextAssessment} />
 
       <SigBlock3 labels={['ხარისხის მენეჯერი','ტექნიკური მენეჯერი','დირექტორი (ამტკიცებს)']} sigs={sigs} />
