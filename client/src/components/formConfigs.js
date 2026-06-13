@@ -8,7 +8,7 @@ export const FORM_CONFIGS = {
   // ══════════════════════════════════════════════════════════
   'BE-FM-IMP-DECL': {
     title: 'მიუკერძოებლობის დეკლარაცია',
-    signers: ['შემავსებელი', 'შემოწმებული', 'დამტკიცებული'],
+    signers: ['თანამშრომელი'],
     // buildData converts flat c_* yesno fields → conflicts object expected by PDF
     buildData: (fd) => ({
       ...fd,
@@ -44,7 +44,7 @@ export const FORM_CONFIGS = {
   // ══════════════════════════════════════════════════════════
   'BE-FM-CONF': {
     title: 'კონფიდენციალობის შეთანხმება',
-    signers: ['შემავსებელი', 'შემოწმებული', 'დამტკიცებული'],
+    signers: ['თანამშრომელი'],
     sections: [
       { label: 'მონაცემები', fields: [
         { id: 'name',     label: 'სახელი / გვარი', type: 'staffmulti' },

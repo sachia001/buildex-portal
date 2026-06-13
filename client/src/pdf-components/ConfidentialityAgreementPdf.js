@@ -96,31 +96,11 @@ const ConfidentialityAgreementPdf = ({ data = {} }) => {
               <Text>{sigs[0]?.date || date || '___________'}</Text>
             </View>
           </View>
-          <View style={s.sigBlock}>
-            <Text style={{ fontSize: 9, marginBottom: 4 }}>შემოწმებული:</Text>
-            {sigs[1]?.name ? <Text style={{ fontSize: 8, marginBottom: 1 }}>{sigs[1].name}</Text> : null}
-            {sigs[1]?.dataURL
-              ? <Image src={sigs[1].dataURL} style={s.sigImage} />
-              : <View style={{ height: 42 }} />}
-            <View style={s.sigLine}>
-              <Text>{sigs[1]?.date || '___________'}</Text>
-            </View>
-          </View>
-          <View style={s.sigBlock}>
-            <Text style={{ fontSize: 9, marginBottom: 4 }}>დამტკიცებული:</Text>
-            {sigs[2]?.name ? <Text style={{ fontSize: 8, marginBottom: 1 }}>{sigs[2].name}</Text> : null}
-            {sigs[2]?.dataURL
-              ? <Image src={sigs[2].dataURL} style={s.sigImage} />
-              : <View style={{ height: 42 }} />}
-            <View style={s.sigLine}>
-              <Text>{sigs[2]?.date || '___________'}</Text>
-            </View>
-          </View>
         </View>
 
         <View style={[s.divider, { marginTop: 18 }]} />
         <Text style={{ fontSize: 7, color: '#aaa', textAlign: 'center' }}>
-          კონფიდენციალური — მხოლოდ შიდა გამოყენებისთვის | BE-FM-CONF v.2 | შპს „ბილდექს ექსპერტიზა"
+          კონფიდენციალური — მხოლოდ შიდა გამოყენებისთვის | BE-FM-CONF v1.0 | შპს „ბილდექს ექსპერტიზა"
         </Text>
       </Page>
     </Document>
