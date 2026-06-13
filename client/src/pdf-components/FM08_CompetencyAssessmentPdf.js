@@ -48,7 +48,7 @@ const FM08_CompetencyAssessmentPdf = ({ data = {} }) => {
       <TextArea  value={data.trainingNeeded} placeholder="ტრენინგის საჭიროება" minHeight={28} />
       <FieldRow  label="მომდევნო შეფასების თარიღი:" value={data.nextAssessment} />
 
-      <SigBlock3 labels={['ხარისხის მენეჯერი','ტექნიკური მენეჯერი','დირექტორი (ამტკიცებს)']} sigs={sigs} />
+      <SigBlock3 labels={['ხარისხის მენეჯერი','ტექნიკური მენეჯერი','დირექტორი (დამტკიცებულია)']} sigs={sigs} />
       <FormFooter code="BE-FM-COMP-CHECK v1.0 | 28.04.2026 | შენახვა: 5 წელი" />
     </Page>
   </Document>
