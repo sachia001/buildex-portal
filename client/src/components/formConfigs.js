@@ -139,7 +139,7 @@ export const FORM_CONFIGS = {
   // ══════════════════════════════════════════════════════════
   'BE-FM-EQ-CHECK': {
     title: 'მოწყობილობის ვერიფიკაცია',
-    signers: ['ვერიფიკატორი', 'შემდგენი', 'დირექტორი'],
+    signers: ['ვერიფიკატორი', 'დირექტორი'],
     sections: [
       { label: 'მოწყობილობის იდენტიფიკაცია', fields: [
         { id: 'equipmentName',   label: 'დასახელება',            type: 'text' },
@@ -187,8 +187,6 @@ export const FORM_CONFIGS = {
       ]},
       { label: 'შეუსაბამობა და შედეგები', fields: [
         { id: 'nonConformityFound', label: 'შეუსაბამობა ნაპოვნია',  type: 'yesno' },
-        { id: 'fm14Number',         label: 'BE-FM-NONCONF №',               type: 'text' },
-        { id: 'verifierName',       label: 'ვერიფიკატორი',          type: 'staffmulti' },
       ]},
     ],
   },

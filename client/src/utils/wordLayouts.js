@@ -295,7 +295,7 @@ export const WORD_LAYOUTS = {
   // ── BE-FM-EQ-CHECK  მოწყობილობის ვერიფიკაცია ──────────────────────
   'BE-FM-EQ-CHECK': {
     isoRef: 'სსტ ISO/IEC 17020 §6.2',
-    signers: ['ვერიფიკატორი', 'შემდგენი', 'დირექტორი'],
+    signers: ['ვერიფიკატორი', 'დირექტორი'],
     sections: [
       {
         label: 'A. მოწყობილობის იდენტიფიკაცია',
@@ -351,7 +351,6 @@ export const WORD_LAYOUTS = {
         label: 'E. შეუსაბამობა და შედეგები',
         fields: [
           { type: 'yesno',  label: 'შეუსაბამობა ნაპოვნია:' },
-          { type: 'field2', label1: 'BE-FM-NONCONF №:', label2: 'ვერიფიკატორის სახელი:' },
         ],
       },
     ],
