@@ -1,12 +1,13 @@
 import React from 'react';
 import { Page, Text, View, Document } from '@react-pdf/renderer';
-import { s, WM, FormHeader, FormFooter, FieldRow, FieldRow2, YesNoRow, SigBlock3, EmptyRows } from './FormBase';
+import { s, WM, FormHeader, FormFooter, FieldRow, FieldRow2, YesNoRow, SigBlock2 } from './FormBase';
 
 const FM34_EquipmentCardPdf = ({ data = {} }) => {
   const {
     equipId, status, name, model, serialNum, manufacturer, country,
-    purchaseDate, location, measRange, accuracy,
-    calibCenter, lastCalibDate, nextCalibDate, calibInterval, certNum, traceability, calibResult,
+    purchaseDate, location, accuracy,
+    calibCenter, lastCalibDate, nextCalibDate, calibInterval, certNum, calibResult,
+    calibHistRows = [], usageRows = [],
     sigs = [],
   } = data;
 
@@ -43,10 +44,7 @@ const FM34_EquipmentCardPdf = ({ data = {} }) => {
           label1="შეძენის თარიღი:"  value1={purchaseDate}
           label2="მდებარეობა:"       value2={location}
         />
-        <FieldRow2
-          label1="გაზომვის დიაპაზონი:"  value1={measRange}
-          label2="სიზუსტე:"        value2={accuracy}
-        />
+        <FieldRow label="სიზუსტე:" value={accuracy} />
 
         {/* B. კ-ბ. ი-ა */}
         <Text style={s.secH}>B. კალიბრაციის ინფორმაცია</Text>
@@ -59,7 +57,6 @@ const FM34_EquipmentCardPdf = ({ data = {} }) => {
           label1="ინტერვალი (თვე):"  value1={calibInterval}
           label2="სერტიფიკატის №:"       value2={certNum}
         />
-        <FieldRow label="ეტალონთან კავშირი (ეროვნ./საერთ. ეტალონი):" value={traceability} />
         <YesNoRow label="კალიბრაცია ვარგისია:" yesNo={calibResult} />
 
         {/* C. კ-ბ. ისტ. ცხ. */}
@@ -72,7 +69,18 @@ const FM34_EquipmentCardPdf = ({ data = {} }) => {
               </View>
             ))}
           </View>
-          <EmptyRows count={5} cols={calibHistCols} minH={18} />
+          {[...Array(Math.max(5, calibHistRows.length))].map((_, i) => {
+            const r = calibHistRows[i] || {};
+            return (
+              <View key={i} style={i % 2 === 0 ? s.tRow : s.tRowAlt}>
+                {calibHistCols.map((w, j) => (
+                  <View key={j} style={[s.tCell, { width: w, minHeight: 18 }]}>
+                    <Text style={{ fontSize: 7.5 }}>{r['c' + j] || ''}</Text>
+                  </View>
+                ))}
+              </View>
+            );
+          })}
         </View>
 
         {/* D. გ-ბ. ჩ. */}
@@ -85,10 +93,21 @@ const FM34_EquipmentCardPdf = ({ data = {} }) => {
               </View>
             ))}
           </View>
-          <EmptyRows count={5} cols={usageHistCols} minH={18} />
+          {[...Array(Math.max(5, usageRows.length))].map((_, i) => {
+            const r = usageRows[i] || {};
+            return (
+              <View key={i} style={i % 2 === 0 ? s.tRow : s.tRowAlt}>
+                {usageHistCols.map((w, j) => (
+                  <View key={j} style={[s.tCell, { width: w, minHeight: 18 }]}>
+                    <Text style={{ fontSize: 7.5 }}>{r['c' + j] || ''}</Text>
+                  </View>
+                ))}
+              </View>
+            );
+          })}
         </View>
 
-        <SigBlock3 labels={['ტექნიკური მენეჯერი', 'ხარისხის მენეჯერი', 'დირექტორი']} sigs={sigs} />
+        <SigBlock2 left="ხარისხის მენეჯერი" right="დირექტორი" sigs={sigs} />
         <FormFooter code="BE-FM-EQ-CARD v1.0 | 2026 | ISO §6.2 | შენახვა: 10 წელი" />
       </Page>
     </Document>

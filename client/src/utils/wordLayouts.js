@@ -1800,7 +1800,7 @@ export const WORD_LAYOUTS = {
   // ── BE-FM-EQ-CARD  აღჭურვილობის სარეგისტრაციო ბარათი ──────────
   'BE-FM-EQ-CARD': {
     isoRef: 'სსტ ISO/IEC 17020 §6.2 (BE-PR-13)',
-    signers: ['ტექნიკური მენეჯერი', 'ხარისხის მენეჯერი', 'დირექტორი'],
+    signers: ['ხარისხის მენეჯერი', 'დირექტორი'],
     sections: [
       {
         label: 'A. აღჭ. საიდ. მ-ბი',
@@ -1810,7 +1810,7 @@ export const WORD_LAYOUTS = {
           { type: 'field2', label1: 'მოდ.:', label2: 'სერ. №:' },
           { type: 'field2', label1: 'მწარ.:', label2: 'ქ.:' },
           { type: 'field2', label1: 'შ-ძ. თ-ღი:', label2: 'მდ-ბ.:' },
-          { type: 'field2', label1: 'გ-ვ. დ-ი:', label2: 'ს-ე:' },
+          { type: 'field',  label: 'ს-ე:' },
         ],
       },
       {
@@ -1819,7 +1819,6 @@ export const WORD_LAYOUTS = {
           { type: 'field',  label: 'კ-ბ. ლ-ა / ო-ბ.:' },
           { type: 'field2', label1: 'ბ-ლი კ-ბ.:', label2: 'შ-მდ. კ-ბ.:' },
           { type: 'field2', label1: 'ინ-ი (თვე):', label2: 'ს-ტ. №:' },
-          { type: 'field',  label: 'ე-ბ. (ეროვ./საერ. ეტ.):' },
           { type: 'yesno',  label: 'კ-ბ. სა-ე (ვ-ა)' },
         ],
       },

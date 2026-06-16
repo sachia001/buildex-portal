@@ -1189,7 +1189,7 @@ export const FORM_CONFIGS = {
   // ══════════════════════════════════════════════════════════
   'BE-FM-EQ-CARD': {
     title: 'აღჭურვილობის სარეგისტრაციო ბარათი',
-    signers: ['ტექნიკური მენეჯერი', 'ხარისხის მენეჯერი', 'დირექტორი'],
+    signers: ['ხარისხის მენეჯერი', 'დირექტორი'],
     sections: [
       { label: 'A. აღჭურვილობის საიდენტიფიკაცია', fields: [
         { id: 'equipId',      label: 'სარეგისტრაციო №',          type: 'text' },
@@ -1201,7 +1201,6 @@ export const FORM_CONFIGS = {
         { id: 'country',      label: 'ქვეყანა',               type: 'text' },
         { id: 'purchaseDate', label: 'შეძენის თარიღი',       type: 'date' },
         { id: 'location',     label: 'მდებარეობა',            type: 'text' },
-        { id: 'measRange',    label: 'გაზომვის დიაპაზონი',        type: 'text' },
         { id: 'accuracy',     label: 'სიზუსტე',              type: 'text' },
       ]},
       { label: 'B. კალიბრაციის ინფორმაცია', fields: [
@@ -1210,8 +1209,26 @@ export const FORM_CONFIGS = {
         { id: 'nextCalibDate',  label: 'შემდეგი კალიბრაცია',        type: 'date' },
         { id: 'calibInterval',  label: 'ინტერვალი (თვე)',         type: 'number' },
         { id: 'certNum',        label: 'სერტიფიკატის №',             type: 'text' },
-        { id: 'traceability',   label: 'ეტალონთან კავშირი',               type: 'text' },
         { id: 'calibResult',    label: 'კალიბრაცია ვარგისია',   type: 'yesno' },
+      ]},
+      { label: 'C. კალიბრაციის ისტორია', fields: [
+        { id: 'calibHistRows', label: 'კალიბრაციის ჩანაწერები', type: 'tablerows', minRows: 1, columns: [
+          { id: 'c0', label: 'თარიღი',          type: 'date', md: 2 },
+          { id: 'c1', label: 'ორგანო',          md: 3 },
+          { id: 'c2', label: 'სერტიფიკატის №',   md: 2 },
+          { id: 'c3', label: 'შედეგი',           md: 2 },
+          { id: 'c4', label: 'ვარგისია',         type: 'select', options: ['კი', 'არა'], md: 1 },
+          { id: 'c5', label: 'ხელმოწერა',        md: 2 },
+        ] },
+      ]},
+      { label: 'D. გამოყენების ჩანაწერები', fields: [
+        { id: 'usageRows', label: 'გამოყენების ჩანაწერები', type: 'tablerows', minRows: 1, columns: [
+          { id: 'c0', label: 'თარიღი',     type: 'date', md: 2 },
+          { id: 'c1', label: 'BE-CASE',    md: 2 },
+          { id: 'c2', label: 'ინსპექტორი', type: 'staff', md: 3 },
+          { id: 'c3', label: 'მაჩვენებელი', md: 2 },
+          { id: 'c4', label: 'შენიშვნა',   md: 3 },
+        ] },
       ]},
     ],
   },
