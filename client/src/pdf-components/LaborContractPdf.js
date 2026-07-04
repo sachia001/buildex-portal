@@ -47,8 +47,8 @@ const styles = StyleSheet.create({
 const Header = () => (
     <View style={styles.header}>
         <Image src="/logo.png" style={styles.logoImage} />
-        <Text style={styles.companyNameText}>შპს „ბილდექს ექსპერტიზა“ (ს/კ 431180746)</Text>
-        <Text style={styles.companyInfoText}>მისამართი: ქ. თელავი, ლეონიძის ქ. 22 | ტელ: +995 511 74 74 00</Text>
+        <Text style={styles.companyNameText}>შპს „ბილდექს ექსპერტიზა“ (ს/კ 431188010)</Text>
+        <Text style={styles.companyInfoText}>მისამართი: ქ. თელავი, ლიონიძის ქ. 22 | ტელ: +995 511 747 400</Text>
     </View>
 );
 
@@ -64,7 +64,7 @@ const LaborContractPdf = ({ data }) => {
         <Text style={{textAlign: 'right', fontSize: 9, marginBottom: 10}}>ქ. თელავი, {data.date}</Text>
         
         <Text style={styles.sectionTitle}>1. ხელშეკრულების მხარეები და ზოგადი დებულებები</Text>
-        <Text style={styles.text}>1.1. <Text style={styles.bold}>დამსაქმებელი:</Text> შპს „ბილდექს ექსპერტიზა“ (ს/ნ 431180746), იურიდიული მისამართი: საქართველო, ქ. თელავი, ლეონიძის ქ. N22; წარმოდგენილი დირექტორის, ლევან საჩიშვილის სახით.</Text>
+        <Text style={styles.text}>1.1. <Text style={styles.bold}>დამსაქმებელი:</Text> შპს „ბილდექს ექსპერტიზა“ (ს/ნ 431188010), იურიდიული მისამართი: საქართველო, ქ. თელავი, ლიონიძის ქ. N22; წარმოდგენილი დირექტორის, ლევან საჩიშვილის სახით.</Text>
         <Text style={styles.text}>1.2. <Text style={styles.bold}>დასაქმებული:</Text> {data.employeeName} (პ/ნ {data.personalId}), მცხოვრები: {data.address}, ტელ: {data.phone}.</Text>
         <Text style={styles.text}>1.3. წინამდებარე ხელშეკრულება არეგულირებს მხარეთა შორის შრომით-სამართლებრივ ურთიერთობებს და ეფუძნება საქართველოს კონსტიტუციას, საქართველოს ორგანული კანონის „საქართველოს შრომის კოდექსს“ (შემდგომში – „შრომის კოდექსი“), „მეწარმეთა შესახებ“ საქართველოს კანონს, კომპანიის წესდებას, შრომის შინაგანაწესს და SST ISO/IEC 17020:2012 საერთაშორისო სტანდარტს.</Text>
 

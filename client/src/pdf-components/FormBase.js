@@ -67,7 +67,7 @@ export const FormHeader = ({ code, isoRef, title, subtitle }) => (
     <View style={s.header}>
       <Image src="/logo.png" style={s.logo} />
       <Text style={s.co}>შპს „ბილდექს ექსპერტიზა"</Text>
-      <Text style={s.coSub}>საიდენტიფიკაციო კოდი 431188010  |  ქალაქი თელავი, ლეონიძის ქუჩა 22  |  info@buildexpertise.com</Text>
+      <Text style={s.coSub}>საიდენტიფიკაციო კოდი 431188010  |  ქალაქი თელავი, ლიონიძის ქუჩა 22  |  buildexexspertise@gmail.com</Text>
     </View>
     <View style={s.metaBar}>
       <Text style={s.metaTxt}>{code}  |  ვერსია 1.0  |  2026  |  მოქმედი</Text>

@@ -63,7 +63,7 @@ const CharterPdf = ({ data = {} }) => {
     director = 'ლევან საჩიშვილი',       // eslint-disable-line no-unused-vars
     directorId = '20001017959',          // eslint-disable-line no-unused-vars
     address = 'ქ. თელავი, ლიონიძის ქ. №22',
-    email = 'info@buildexpertise.com',
+    email = 'buildexexspertise@gmail.com',
     charterDate = '09 მარტი, 2026 წელი',
     withSignature = false,
   } = data;

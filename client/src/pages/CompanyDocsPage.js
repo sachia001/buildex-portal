@@ -18,7 +18,7 @@ const DEFAULT_PARTNERS = [
 const DEFAULT_CONFIG = {
   address: 'საქართველო, ქ. თელავი, ლიონიძის ქუჩა №22',
   addressShort: 'ქ. თელავი, ლიონიძის ქ. №22',
-  email: 'info@buildexpertise.com',
+  email: 'buildexexspertise@gmail.com',
   phone: '+995 511 747 400',
   director: 'ლევან საჩიშვილი',
   directorId: '20001017959',

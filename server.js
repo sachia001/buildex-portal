@@ -167,6 +167,8 @@ app.use(cors({
 app.use(compression());
 
 // ─── Request logging (C9 / PERF-009 / OPS-007) ───────────────────────────────
+// static-ფაილების auth-ტოკენი (?token=...) ლოგებში არ უნდა მოხვდეს
+morgan.token('url', (req) => (req.originalUrl || req.url || '').replace(/([?&]token=)[^&]*/g, '$1[REDACTED]'));
 app.use(morgan(process.env.NODE_ENV === 'production' ? 'combined' : 'dev'));
 
 // ─── Body parsing with size limit (API-003) — base64 photos need headroom ─────
@@ -940,26 +942,28 @@ async function runMatchingEngine(lineItems, normYear, normQuarter, normType) {
 }
 
 function generateWordReport(check) {
+    // Excel-იდან წამოსული ტექსტი HTML-ში escape-ით ჯდება (HTML-ინექციის პრევენცია)
+    const esc = v => String(v ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
     const fmtNum = n => n != null ? n.toLocaleString('ka-GE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '';
     const fmtDev = d => d != null ? (d > 0 ? `+${d}%` : `${d}%`) : '—';
     const statusBg = s => s === 'დარღვევა' ? '#fee2e2' : s === 'გაფრთხილება' ? '#fef9c3' : s === 'შესაბამისი' ? '#dcfce7' : '#f3f4f6';
     const rows = check.lineItems.map((it) => `
         <tr style="background:${statusBg(it.lineStatus)}">
             <td style="text-align:center">${it.lineNum}</td>
-            <td>${it.code || ''}</td>
-            <td>${it.description || ''}</td>
-            <td style="text-align:center">${it.unit || ''}</td>
+            <td>${esc(it.code)}</td>
+            <td>${esc(it.description)}</td>
+            <td style="text-align:center">${esc(it.unit)}</td>
             <td style="text-align:right">${it.quantity || ''}</td>
             <td style="text-align:right">${fmtNum(it.unitPrice)}</td>
             <td style="text-align:right">${fmtNum(it.normUnitPrice)}</td>
-            <td style="text-align:center">${it.normSource || ''}</td>
+            <td style="text-align:center">${esc(it.normSource)}</td>
             <td style="text-align:center">${fmtDev(it.deviation)}</td>
-            <td style="text-align:center"><b>${it.lineStatus}</b></td>
+            <td style="text-align:center"><b>${esc(it.lineStatus)}</b></td>
         </tr>`).join('');
     const sourcesUsed = [...new Set(check.lineItems.filter(r => r.normSource).map(r => r.normSource))];
     const normLabel = sourcesUsed.length > 0 ? sourcesUsed.join(', ') : (check.normType || 'ყველა');
     return `<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40">
-<head><meta charset="UTF-8"><title>${check.checkNumber}</title>
+<head><meta charset="UTF-8"><title>${esc(check.checkNumber)}</title>
 <style>
 body{font-family:Sylfaen,Arial,sans-serif;font-size:10pt;margin:2cm}
 h1{font-size:14pt;text-align:center;color:#003366}
@@ -973,16 +977,16 @@ td{border:1px solid #ccc;padding:3px 4px}
 <body>
 <h1>ფასწარმოქმნის ადეკვატურობის ინსპექციის ანგარიში</h1>
 <h2>1. ზოგადი ინფორმაცია</h2>
-<table class="meta"><tr><td><b>შემოწმების №:</b></td><td>${check.checkNumber}</td><td><b>თარიღი:</b></td><td>${new Date(check.checkDate).toLocaleDateString('ka-GE')}</td></tr>
-<tr><td><b>BE-CASE №:</b></td><td>${check.caseNumber || '—'}</td><td><b>ობიექტი:</b></td><td>${check.objectName || '—'}</td></tr>
-<tr><td><b>შემმოწმებელი:</b></td><td>${check.checkedBy || '—'}</td><td><b>ნორმ. წყარო:</b></td><td>${normLabel}${check.normYear ? ' ' + check.normYear : ''}${check.normQuarter ? ' კვ.' + check.normQuarter : ''}</td></tr>
-<tr><td><b>ხარჯთაღრ. ფაილი:</b></td><td colspan="3">${check.estimateFileName || '—'}</td></tr></table>
+<table class="meta"><tr><td><b>შემოწმების №:</b></td><td>${esc(check.checkNumber)}</td><td><b>თარიღი:</b></td><td>${new Date(check.checkDate).toLocaleDateString('ka-GE')}</td></tr>
+<tr><td><b>BE-CASE №:</b></td><td>${esc(check.caseNumber) || '—'}</td><td><b>ობიექტი:</b></td><td>${esc(check.objectName) || '—'}</td></tr>
+<tr><td><b>შემმოწმებელი:</b></td><td>${esc(check.checkedBy) || '—'}</td><td><b>ნორმ. წყარო:</b></td><td>${esc(normLabel)}${check.normYear ? ' ' + check.normYear : ''}${check.normQuarter ? ' კვ.' + check.normQuarter : ''}</td></tr>
+<tr><td><b>ხარჯთაღრ. ფაილი:</b></td><td colspan="3">${esc(check.estimateFileName) || '—'}</td></tr></table>
 <h2>2. შემოწმების შედეგები</h2>
 <table class="meta">
 <tr><td><b>სულ პოზიცია:</b> ${check.totalLines}</td><td><b>შემოწმდა:</b> ${check.matchedLines}</td><td><b>შესაბამისი:</b> ${check.okCount}</td><td><b>გაფრთხ.:</b> ${check.warningCount}</td><td><b>დარღვევა:</b> ${check.violationCount}</td><td><b>ვერ შემოწ.:</b> ${check.unmatchedCount}</td></tr>
 </table>
 <h2>3. დასკვნა</h2>
-<p>${check.conclusion || '—'}</p>
+<p>${esc(check.conclusion) || '—'}</p>
 <h2>4. ხარჯთაღრიცხვის ანალიზი</h2>
 <table>
 <tr><th>#</th><th>კოდი</th><th>დასახელება</th><th>ერთ.</th><th>რაოდ.</th><th>ხარჯთ. ფასი (₾)</th><th>ნორმ. ფასი (₾)</th><th>ნორმ. წყარო</th><th>გადახ. %</th><th>სტატუსი</th></tr>
@@ -990,7 +994,7 @@ ${rows}
 </table>
 <div class="footer">
 <table class="meta"><tr>
-<td style="width:30%"><b>შემმოწმებელი:</b><br><br>_______________________<br><small>${check.checkedBy || ''}</small></td>
+<td style="width:30%"><b>შემმოწმებელი:</b><br><br>_______________________<br><small>${esc(check.checkedBy)}</small></td>
 <td style="width:30%"><b>ტექნიკური მენეჯერი:</b><br><br>_______________________</td>
 <td style="width:30%"><b>ხარისხის მენეჯერი:</b><br><br>_______________________</td>
 </tr></table>
@@ -1092,6 +1096,8 @@ CorrectiveAction.schema.index({ status: 1, deadline: 1 });
 Insurance.schema.index({ status: 1, endDate: 1 });
 AuditLog.schema.index({ timestamp: -1 });
 AuditLog.schema.index({ resource: 1, timestamp: -1 });
+// TTL — აუდიტ-ლოგი retention-ვადის (6 წ.) შემდეგ ავტომატურად იწმინდება, უსაზღვროდ არ იზრდება
+AuditLog.schema.index({ timestamp: 1 }, { expireAfterSeconds: RETENTION_YEARS.default * 365 * 24 * 3600 });
 NormEntry.schema.index({ normType: 1, year: 1, quarter: 1 });
 NormEntry.schema.index({ code: 1 });
 NormEntry.schema.index({ description: 'text', keywords: 'text' }); // DAT-018: $regex→text search
@@ -1154,10 +1160,10 @@ const PROC_TITLE_MAP = {
     'BE-PR-13':'აღჭურვილობის და გაზომვის საშუალებების მართვის პროცედურა',
     'BE-PR-14':'ქვეკონტრაქტირების მართვის პროცედურა',
     'BE-PR-15':'ანგარიშგების, დოკუმენტირებისა და გაცემის პროცედურა',
+    'BE-PR-16':'აკრედიტაციის კომბინირებული სიმბოლოს გამოყენების პროცედურა',
     'BE-WI-01':'ხარჯთაღრიცხვის შესაბამისობის შემოწმება',
     'BE-WI-02':'შესრულებული სამუშაოს ფორმა',
     'BE-WI-03':'ფასწარმოქმნის ადეკვატურობის შემოწმება',
-    'BE-WI-04':'ტექნიკური ზედამხედველობა',
     'HR-JD-001':'სამუშაო აღწერილობა — დირექტორი',
     'HR-JD-002':'სამუშაო აღწერილობა — ხარისხის მენეჯერი',
     'HR-JD-003':'სამუშაო აღწერილობა — ტექნიკური მენეჯერი',
@@ -1199,7 +1205,7 @@ const PROC_TITLE_MAP = {
     'ORD-05':'ბრძანება — მიუკერძოებლობის კომიტეტის შექმნა',
     // .docx ფორმები (სათაური ფაილში „ — "-ით არ მოდის) — კანონიკური BE-FM-რეესტრიდან
     'BE-FM-IMP-COMMITTEE':'მიუკერძოებლობის დაცვის კომიტეტის ოქმი',
-    'BE-FM-PHOTO-LOG':'ფოტო- და ვიდეოდოკუმენტაციის ჟურნალი',
+    'BE-FM-PHOTO-LOG':'ფოტოდოკუმენტაციის ჟურნალი',
     'BE-FM-რეესტრი':'ფორმებისა და შაბლონების რეესტრი',
     // root-level ცვლილებების ჟურნალი
     'ცვლილებების-ჟურნალი':'ცვლილებების ჟურნალი',
@@ -1287,7 +1293,13 @@ api.use(requireAuth);
 const PROTECTED_FIELDS = ['isDeleted', 'deletedAt', 'deletedBy', '__v',
     'inspectionNumber', 'applicationNumber', 'complaintNumber', 'auditNumber', 'carNumber'];
 function stripProtected(obj) {
-    if (obj && typeof obj === 'object') for (const f of PROTECTED_FIELDS) delete obj[f];
+    if (!obj || typeof obj !== 'object') return obj;
+    for (const key of Object.keys(obj)) {
+        // MongoDB operator-ინექცია ($set/$inc/...) და dotted-path გასაღებები იბლოკება ნებისმიერ სიღრმეზე —
+        // წინააღმდეგ შემთხვევაში {"$set":{"isDeleted":false}} top-level დაცვას გვერდს უვლის.
+        if (key.startsWith('$') || key.includes('.') || PROTECTED_FIELDS.includes(key)) { delete obj[key]; continue; }
+        if (obj[key] && typeof obj[key] === 'object') stripProtected(obj[key]);
+    }
     return obj;
 }
 api.use((req, res, next) => { stripProtected(req.body); next(); });
@@ -1328,18 +1340,37 @@ function paging(req, defLimit = 1000, maxLimit = 2000) {
 }
 
 // --- INSPECTIONS ---
+// მართვის როლები ყველა საქმეს ხედავენ/არედაქტირებენ; ინსპექტორი — მხოლოდ მასზე მიწერილს.
+const INSPECTION_MANAGER_ROLES = ['admin', 'chancellor', 'tech_manager', 'quality_manager'];
+const isAssignedToInspection = (insp, staffId) => {
+    if (!staffId) return false;
+    const sid = String(staffId);
+    return [...(insp.expert || []), ...(insp.technicalManager || [])]
+        .map(x => String(x && x._id ? x._id : x))
+        .includes(sid);
+};
+
 api.post('/inspections', validate({
     objectName: { required: true, type: 'string', maxLength: 300, label: 'ობიექტის დასახელება' },
 }), async (req, res) => {
     if (!['admin', 'chancellor'].includes(req.user.role))
         return res.status(403).json({ error: 'საქმის რეგისტრაციის უფლება არ გაქვთ' });
     try {
-        const appNum  = await generateDocumentNumber('IN');
-        const inspNum = await generateDocumentNumber('BX-INS');
-        const newInsp = new Inspection({ ...req.body, applicationNumber: appNum, inspectionNumber: inspNum });
-        await newInsp.save();
+        // ნომრები ბოლო ჩანაწერიდან გამოითვლება — პარალელური რეგისტრაციისას შესაძლო კოლიზიაზე retry
+        let newInsp;
+        for (let attempt = 0; ; attempt++) {
+            const appNum  = await generateDocumentNumber('IN');
+            const inspNum = await generateDocumentNumber('BX-INS');
+            try {
+                newInsp = await new Inspection({ ...req.body, applicationNumber: appNum, inspectionNumber: inspNum }).save();
+                break;
+            } catch (e) {
+                if (e.code === 11000 && attempt < 4) continue;
+                throw e;
+            }
+        }
         await OfficeDocument.create({
-            docNumber: appNum, category: 'IN',
+            docNumber: newInsp.applicationNumber, category: 'IN',
             title: `განცხადება: ${req.body.objectName}`,
             content: req.body.applicationContent,
             signatory: req.body.clientName
@@ -1352,7 +1383,8 @@ api.post('/inspections', validate({
 api.get('/inspections', async (req, res) => {
     try {
         let query = {};
-        if (req.user.role === 'inspector' && req.user.staffId) {
+        if (!INSPECTION_MANAGER_ROLES.includes(req.user.role)) {
+            if (!req.user.staffId) return res.json([]); // მიუწერელი არა-მართვის როლი საქმეებს ვერ ხედავს
             query = { $or: [{ expert: req.user.staffId }, { technicalManager: req.user.staffId }] };
         }
         const p = paging(req);
@@ -1365,6 +1397,8 @@ api.get('/inspections/:id', async (req, res) => {
     try {
         const item = await Inspection.findById(req.params.id).populate('expert technicalManager qualityManager');
         if (!item) return res.status(404).json({ error: 'ვერ მოიძებნა' });
+        if (!INSPECTION_MANAGER_ROLES.includes(req.user.role) && !isAssignedToInspection(item, req.user.staffId))
+            return res.status(403).json({ error: 'ამ საქმეზე წვდომა არ გაქვთ' });
         res.json(item);
     } catch (err) { res.status(500).json({ error: err.message }); }
 });
@@ -1381,6 +1415,9 @@ api.delete('/inspections/:id', async (req, res) => {
 api.put('/inspections/:id', async (req, res) => {
     try {
         const before = await Inspection.findById(req.params.id).lean();
+        if (!before) return res.status(404).json({ error: 'ვერ მოიძებნა' });
+        if (!INSPECTION_MANAGER_ROLES.includes(req.user.role) && !isAssignedToInspection(before, req.user.staffId))
+            return res.status(403).json({ error: 'ამ საქმის რედაქტირების უფლება არ გაქვთ' });
         const updated = await Inspection.findByIdAndUpdate(req.params.id, req.body, { new: true });
         if (updated) {
             const changes = diffDoc(before, updated, ['status', 'objectName', 'objectAddress', 'inspectionScope', 'clientName', 'deadline']);
@@ -1396,6 +1433,10 @@ api.post('/inspections/:id/upload', upload.single('file'), async (req, res) => {
         const webPath = `uploads/docs/${req.file.filename}`;
         const insp = await Inspection.findById(req.params.id);
         if (!insp) return res.status(404).json({ error: 'ვერ მოიძებნა' });
+        if (!INSPECTION_MANAGER_ROLES.includes(req.user.role) && !isAssignedToInspection(insp, req.user.staffId)) {
+            try { fs.unlinkSync(req.file.path); } catch {} // უკვე ჩაწერილი ფაილი არ დარჩეს
+            return res.status(403).json({ error: 'ამ საქმეზე ატვირთვის უფლება არ გაქვთ' });
+        }
         if (!insp.documents) insp.documents = {};
         insp.documents[req.body.docType] = webPath;
         insp.markModified('documents');
@@ -1835,20 +1876,27 @@ const estimateUploadDir = './uploads/estimates/';
 if (!fs.existsSync(normsUploadDir)) fs.mkdirSync(normsUploadDir, { recursive: true });
 if (!fs.existsSync(estimateUploadDir)) fs.mkdirSync(estimateUploadDir, { recursive: true });
 
+// მხოლოდ Excel + ზომის ლიმიტი — /uploads/norms საჯარო static-ია (stored-XSS/disk-fill პრევენცია)
+const EXCEL_EXT = ['.xlsx', '.xls', '.xlsm'];
+const excelFileFilter = (req, file, cb) => {
+    const ext = path.extname(file.originalname).toLowerCase();
+    if (EXCEL_EXT.includes(ext)) return cb(null, true);
+    cb(new Error('დაუშვებელი ფაილის ტიპი: ' + ext + ' — მხოლოდ Excel (.xlsx/.xls/.xlsm)'));
+};
 const normUpload = multer({ storage: multer.diskStorage({
     destination: (req, file, cb) => cb(null, normsUploadDir),
     filename: (req, file, cb) => {
         const safeName = Buffer.from(file.originalname, 'latin1').toString('utf8').replace(/\s+/g, '_');
         cb(null, Date.now() + '-' + safeName);
     }
-}) });
+}), fileFilter: excelFileFilter, limits: { fileSize: 20 * 1024 * 1024 } });
 const estimateUpload = multer({ storage: multer.diskStorage({
     destination: (req, file, cb) => cb(null, estimateUploadDir),
     filename: (req, file, cb) => {
         const safeName = Buffer.from(file.originalname, 'latin1').toString('utf8').replace(/\s+/g, '_');
         cb(null, Date.now() + '-' + safeName);
     }
-}) });
+}), fileFilter: excelFileFilter, limits: { fileSize: 20 * 1024 * 1024 } });
 
 api.post('/norms/upload', requireRole('admin', 'quality_manager'), normUpload.single('file'), async (req, res) => {
     if (!['admin', 'quality_manager'].includes(req.user.role))
@@ -1896,7 +1944,7 @@ api.get('/norms/entries', async (req, res) => {
 });
 
 // --- PRICE ADEQUACY: CHECKS ---
-api.post('/price-adequacy/check', estimateUpload.single('file'), async (req, res) => {
+api.post('/price-adequacy/check', requireRole('admin', 'quality_manager', 'tech_manager'), estimateUpload.single('file'), async (req, res) => {
     try {
         if (!req.file) return res.status(400).json({ error: 'ხარჯთაღრიცხვის ფაილი არ არის' });
         const { caseId, caseNumber, objectName, normYear, normQuarter, normType, checkedBy } = req.body;
@@ -2347,6 +2395,9 @@ authRouter.post('/users', requireAuth, async (req, res) => {
             return res.status(400).json({ message: 'მომხმარებლის სახელი ძალიან მოკლეა (მინ. 3 სიმბოლო)' });
         if (typeof password !== 'string' || password.length < 6)
             return res.status(400).json({ message: 'პაროლი ძალიან მოკლეა (მინ. 6 სიმბოლო)' });
+        // როლი მხოლოდ ცნობილი ჩამონათვალიდან (AdminRegister.js → ROLE_OPTIONS-ის შესაბამისი)
+        const VALID_ROLES = ['admin', 'chancellor', 'tech_manager', 'quality_manager', 'hr', 'inspector'];
+        if (role && !VALID_ROLES.includes(role)) return res.status(400).json({ message: 'უცნობი როლი' });
         // HR cannot create admin accounts
         if (req.user.role === 'hr' && role === 'admin') return res.status(403).json({ message: 'HR-ს არ შეუძლია ადმინის შექმნა' });
         const hash = await bcrypt.hash(password, 10);
@@ -2538,7 +2589,7 @@ api.get('/checklists/:id', async (req, res) => {
     } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-api.post('/checklists', async (req, res) => {
+api.post('/checklists', requireRole('admin', 'quality_manager'), async (req, res) => {
     try {
         const num = await generateDocumentNumber('MON');
         const s = await ChecklistSession.create({
@@ -2550,7 +2601,7 @@ api.post('/checklists', async (req, res) => {
     } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-api.put('/checklists/:id', async (req, res) => {
+api.put('/checklists/:id', requireRole('admin', 'quality_manager'), async (req, res) => {
     try {
         const s = await ChecklistSession.findByIdAndUpdate(req.params.id, req.body, { new: true });
         if (!s) return res.status(404).json({ error: 'ვერ მოიძებნა' });

@@ -157,8 +157,8 @@ const ReportCoverPdf = ({ data = {} }) => {
         <View style={styles.yearContainer}><Text style={styles.yearText}>{currentYear} წელი</Text></View>
         
         <View style={styles.coverFooter}>
-            <Text style={{fontSize: 9, color: '#003366'}}>თელავი, ლეონიძის ქუჩა 22; ტელ: +995 511 74 74 00</Text>
-            <Text style={{fontSize: 9, color: '#003366'}}>info@buildexpertise.com</Text>
+            <Text style={{fontSize: 9, color: '#003366'}}>თელავი, ლიონიძის ქუჩა 22; ტელ: +995 511 747 400</Text>
+            <Text style={{fontSize: 9, color: '#003366'}}>buildexexspertise@gmail.com</Text>
         </View>
 
         <Text break />

@@ -67,7 +67,7 @@ function buildDocHeader(logoData, code, isoRef, title) {
   children.push(new Paragraph({
     alignment: AlignmentType.CENTER,
     spacing: { after: 60 },
-    children: [run('ს/კ 431188010  |  ქ. თელავი, ლიონიძის ქ. 22  |  info@buildexpertise.com', {
+    children: [run('ს/კ 431188010  |  ქ. თელავი, ლიონიძის ქ. 22  |  buildexexspertise@gmail.com', {
       size: 14, color: C_GREY,
     })],
   }));

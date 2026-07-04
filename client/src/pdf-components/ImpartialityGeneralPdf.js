@@ -57,7 +57,7 @@ const ImpartialityGeneralPdf = ({ data }) => {
           <Image src="/logo.png" style={s.logo} />
           <Text style={s.companyName}>შპს „ბილდექს ექსპერტიზა"</Text>
           <Text style={s.companyInfo}>A ტიპის ინსპექტირების ორგანო | საიდენტიფიკაციო კოდი 431188010</Text>
-          <Text style={s.companyInfo}>ქალაქი თელავი, ჭაბუა ამირეჯიბის ქუჩა №26 | info@buildexpertise.com</Text>
+          <Text style={s.companyInfo}>ქალაქი თელავი, ლიონიძის ქუჩა №22 | buildexexspertise@gmail.com</Text>
         </View>
         <View style={s.divider} />
 

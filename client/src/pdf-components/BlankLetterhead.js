@@ -128,8 +128,8 @@ const BlankLetterhead = ({ data }) => {
         </View>
 
         <View style={styles.footerFixed} fixed>
-          <Text style={styles.footerText}>მისამართი: თელავი, ლეონიძის ქუჩა 22</Text>
-          <Text style={styles.contactText}>ტელ: +995 511 74 74 00  |  ელ.ფოსტა: info@buildexpertise.com</Text>
+          <Text style={styles.footerText}>მისამართი: თელავი, ლიონიძის ქუჩა 22</Text>
+          <Text style={styles.contactText}>ტელ: +995 511 747 400  |  ელ.ფოსტა: buildexexspertise@gmail.com</Text>
         </View>
 
       </Page>
