@@ -7,6 +7,7 @@ client/build/
 
 # Throwaway extraction/scan artifacts (OPS-004)
 tmp_*
+extract_sig.py
 
 # Environment variables
 .env
