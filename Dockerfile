@@ -43,8 +43,10 @@ RUN chown -R node:node /app
 # Production-only node_modules from the builder stage.
 COPY --from=builder --chown=node:node /app/node_modules ./node_modules
 
-# Server source.
+# Server source (lib/ — server.js-ის helpers-მოდულები; ამის გარეშე require ვარდება და healthcheck იჭრება).
 COPY --chown=node:node server.js ./
+COPY --chown=node:node lib ./lib
+COPY --chown=node:node scripts/seed-admin.js ./scripts/seed-admin.js
 COPY --chown=node:node package*.json ./
 
 # Built client bundle served by server.js (server.js:2160 serves client/build).
