@@ -32,6 +32,12 @@ const ChecklistPage        = lazy(() => import('./pages/ChecklistPage'));
 const ProceduresPage       = lazy(() => import('./pages/ProceduresPage'));
 const AuditLogPage         = lazy(() => import('./pages/AuditLogPage'));
 const TrashPage            = lazy(() => import('./pages/TrashPage'));
+// D-მოდულები (ISO §6.3 / §4.1 / RM-01 / §8.3 / კმაყოფილება)
+const SubcontractorsPage        = lazy(() => import('./pages/SubcontractorsPage'));
+const ImpartialityCommitteePage = lazy(() => import('./pages/ImpartialityCommitteePage'));
+const RiskRegisterPage          = lazy(() => import('./pages/RiskRegisterPage'));
+const DocChangesPage            = lazy(() => import('./pages/DocChangesPage'));
+const SatisfactionPage          = lazy(() => import('./pages/SatisfactionPage'));
 const ProcurementPricePage = lazy(() => import('./pages/ProcurementPricePage'));
 
 // Attach token to every axios request
@@ -200,12 +206,17 @@ const Navbar = ({ username, role, onLogout }) => {
         { to: '/internal-audits',     label: '🔍 შიდა აუდიტი',       show: show.audits },
         { to: '/corrective-actions',  label: '⚙️ CAR',               show: show.corrections },
         { to: '/complaints',          label: '📨 საჩივრები',         show: show.complaints },
+        { to: '/impartiality-committee', label: '🏛️ მიუკერძ. კომიტეტი', show: show.management },
+        { to: '/risks',               label: '⚠️ რისკები (RM-01)',   show: show.management },
+        { to: '/doc-changes',         label: '✍️ დოკ. ცვლილებები',   show: show.management },
+        { to: '/satisfaction',        label: '😊 კმაყოფილება',       show: ['admin', 'quality_manager', 'chancellor'].includes(role) },
         { to: '/audit-log',           label: '📋 აუდიტის ჟურნალი',  show: show.auditLog },
         { to: '/admin-trash',         label: '🗄️ არქივი',            show: role === 'admin' },
     ];
     const resourcesItems = [
         { to: '/admin',          label: '👥 პერსონალი',      show: show.staff },
         { to: '/equipment',      label: '🛠️ აპარატურა',       show: show.equipment },
+        { to: '/subcontractors', label: '🔗 ქვეკონტრაქტ.',    show: ['admin', 'quality_manager', 'tech_manager'].includes(role) },
         { to: '/insurance',      label: '🛡️ დაზღვევა',        show: show.insurance },
         { to: '/price-adequacy', label: '💰 ფასადეკვატ.',     show: show.priceAdequacy },
         { to: '/procurement',    label: '🏗️ სამშ. ფასები',    show: show.procurement },
@@ -387,6 +398,11 @@ function AppContent() {
                             <Route path="/procedures" element={<ProceduresPage role={role} />} />
                             <Route path="/audit-log" element={<AuditLogPage role={role} />} />
                             <Route path="/admin-trash" element={<TrashPage />} />
+                            <Route path="/subcontractors" element={<SubcontractorsPage role={role} />} />
+                            <Route path="/impartiality-committee" element={<ImpartialityCommitteePage role={role} />} />
+                            <Route path="/risks" element={<RiskRegisterPage role={role} />} />
+                            <Route path="/doc-changes" element={<DocChangesPage role={role} />} />
+                            <Route path="/satisfaction" element={<SatisfactionPage role={role} />} />
                             <Route path="/procurement" element={<ProcurementPricePage />} />
                             <Route path="*" element={
                                 <div className="text-center mt-5">

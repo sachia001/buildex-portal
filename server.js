@@ -470,6 +470,69 @@ const CompanySettings = mongoose.model('CompanySettings', new mongoose.Schema({
     config: { type: Object, default: {} },
 }, { timestamps: true }));
 
+// --- ISO-მოდულები (D-ბლოკი): ქვეკონტრაქტორები, კომიტეტი, რისკები, DCR, კმაყოფილება ---
+
+// §6.3 / BE-PR-14 — ქვეკონტრაქტორების რეესტრი და შეფასება
+const Subcontractor = mongoose.model('Subcontractor', new mongoose.Schema({
+    name:               { type: String, required: true },
+    identification:     { type: String, default: '' },      // ს/კ
+    scope:              { type: String, default: '' },      // რა სამუშაოზეა დაშვებული
+    competenceEvidence: { type: String, default: '' },      // აკრედიტაცია/სერტიფიკატები
+    contractRef:        { type: String, default: '' },
+    evaluationDate:     { type: Date, default: null },      // BE-FM-SUB-MONITOR
+    evaluationResult:   { type: String, default: '' },
+    status:             { type: String, enum: ['მოწონებული', 'შეჩერებული', 'ამოღებული'], default: 'მოწონებული' },
+    notes:              { type: String, default: '' },
+}, { timestamps: true }));
+
+// §4.1 / OBS-02 — მიუკერძოებლობის დაცვის კომიტეტის სხდომების ჟურნალი (BE-FM-IMP-COMMITTEE)
+const ImpartialityMeeting = mongoose.model('ImpartialityMeeting', new mongoose.Schema({
+    meetingNumber: { type: String, unique: true },           // IC-N/YY
+    meetingDate:   { type: Date, required: true },
+    participants:  { type: String, required: true },
+    agenda:        { type: String, default: '' },
+    risksReviewed: { type: String, default: '' },            // განხილული რისკები/დეკლარაციები
+    decisions:     { type: String, default: '' },
+    nextMeeting:   { type: Date, default: null },
+}, { timestamps: true }));
+
+// RM-01 — რისკების რეესტრი (მიუკერძოებლობის და საოპერაციო რისკები)
+const RiskItem = mongoose.model('RiskItem', new mongoose.Schema({
+    category:    { type: String, default: 'მიუკერძოებლობა' }, // მიუკერძოებლობა / საოპერაციო / IT / ფინანსური
+    description: { type: String, required: true },
+    likelihood:  { type: Number, min: 1, max: 5, default: 3 },
+    impact:      { type: Number, min: 1, max: 5, default: 3 },
+    mitigation:  { type: String, default: '' },
+    owner:       { type: String, default: '' },
+    reviewDate:  { type: Date, default: null },
+    status:      { type: String, enum: ['ღია', 'კონტროლდება', 'დახურული'], default: 'ღია' },
+}, { timestamps: true }));
+
+// §8.3 / BE-PR-04 — დოკუმენტის ცვლილების მოთხოვნა (DCR: ინიცირება→დამტკიცება→დანერგვა)
+const DocChangeRequest = mongoose.model('DocChangeRequest', new mongoose.Schema({
+    dcrNumber:       { type: String, unique: true },          // BE-DCR-YYYY-NNNN
+    docCode:         { type: String, required: true },        // რომელი დოკუმენტი იცვლება (BE-PR-04, HR-JD-002...)
+    initiator:       { type: String, default: '' },
+    description:     { type: String, required: true },        // რა იცვლება
+    reason:          { type: String, default: '' },
+    status:          { type: String, enum: ['წარდგენილი', 'დამტკიცებული', 'უარყოფილი', 'დანერგილი'], default: 'წარდგენილი' },
+    approvedBy:      { type: String, default: '' },
+    approvedDate:    { type: Date, default: null },
+    implementedDate: { type: Date, default: null },
+}, { timestamps: true }));
+
+// BE-FM-SATISF — მომხმარებლის კმაყოფილების ჩანაწერები
+const SatisfactionRecord = mongoose.model('SatisfactionRecord', new mongoose.Schema({
+    clientName:  { type: String, required: true },
+    caseNumber:  { type: String, default: '' },
+    surveyDate:  { type: Date, default: Date.now },
+    scoreQuality:       { type: Number, min: 1, max: 5, default: 5 },
+    scoreTimeliness:    { type: Number, min: 1, max: 5, default: 5 },
+    scoreCommunication: { type: Number, min: 1, max: 5, default: 5 },
+    comments:    { type: String, default: '' },
+    followUp:    { type: String, default: '' },
+}, { timestamps: true }));
+
 // --- PRICE ADEQUACY MODELS ---
 
 const NormFile = mongoose.model('NormFile', new mongoose.Schema({
@@ -589,6 +652,8 @@ async function generateDocumentNumber(type, date = new Date()) {
         case 'CAR':  return `CAR-${seq}/${yearShort}`;
         case 'PA':   return `PA-${seq4}/${yearShort}`;
         case 'MON':  return `MON-${seq}/${yearShort}`; // API-004: management review — case აკლდა
+        case 'IC':   return `IC-${yearFull}-${seq2}`;         // მიუკერძოებლობის კომიტეტის სხდომა
+        case 'DCR':  return `BE-DCR-${yearFull}-${seq4}`;     // დოკ. ცვლილების მოთხოვნა
         default: throw new Error("უცნობი კატეგორია");
     }
 }
@@ -1608,6 +1673,57 @@ api.get('/dashboard/stats', async (req, res) => {
     } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
+// ─── რეესტრის CRUD-ფაბრიკა (D-მოდულები) ────────────────────────────────────────
+// ერთგვაროვანი ჟურნალ-მოდულებისთვის: GET სია (paging) / POST / PUT / DELETE + აუდიტ-ლოგი.
+// writeRoles — ვის შეუძლია ცვლილება; წაშლა ყოველთვის admin/quality_manager. numberType —
+// ავტო-ნუმერაცია generateDocumentNumber-ით (ველი numberField-ში).
+function mountRegistry(pathName, Model, resourceKey, writeRoles, opts = {}) {
+    const { numberType = null, numberField = null, nameOf = (d) => String(d._id), sortBy = { createdAt: -1 } } = opts;
+    api.get(`/${pathName}`, async (req, res) => {
+        try { const p = paging(req); res.json(await Model.find().sort(sortBy).skip(p.skip).limit(p.limit)); }
+        catch (err) { res.status(500).json({ error: err.message }); }
+    });
+    api.post(`/${pathName}`, requireRole(...writeRoles), async (req, res) => {
+        try {
+            const body = { ...req.body };
+            if (numberType && numberField && !body[numberField]) body[numberField] = await generateDocumentNumber(numberType);
+            const item = await Model.create(body);
+            await logAudit(req, 'შექმნა', resourceKey, item._id, nameOf(item));
+            res.status(201).json(item);
+        } catch (err) { res.status(400).json({ error: err.message }); }
+    });
+    api.put(`/${pathName}/:id`, requireRole(...writeRoles), async (req, res) => {
+        try {
+            const body = { ...req.body };
+            if (numberField) delete body[numberField]; // ნომერი უცვლელია
+            const updated = await Model.findByIdAndUpdate(req.params.id, body, { new: true, runValidators: true });
+            if (!updated) return res.status(404).json({ error: 'ვერ მოიძებნა' });
+            await logAudit(req, 'განახლება', resourceKey, updated._id, nameOf(updated));
+            res.json(updated);
+        } catch (err) { res.status(400).json({ error: err.message }); }
+    });
+    api.delete(`/${pathName}/:id`, async (req, res) => {
+        if (!['admin', 'quality_manager'].includes(req.user.role)) return res.status(403).json({ error: 'უფლება არ გაქვთ' });
+        try {
+            const del = await softDeleteById(Model, req.params.id, req);
+            if (del) await logAudit(req, 'წაშლა', resourceKey, del._id, nameOf(del));
+            res.json({ ok: true });
+        } catch (err) { res.status(500).json({ error: err.message }); }
+    });
+}
+
+// D-მოდულების როუტები (ISO §6.3, §4.1, RM-01, §8.3, კმაყოფილება)
+mountRegistry('subcontractors', Subcontractor, 'subcontractor',
+    ['admin', 'quality_manager', 'tech_manager'], { nameOf: d => d.name });
+mountRegistry('impartiality-meetings', ImpartialityMeeting, 'impartiality_meeting',
+    ['admin', 'quality_manager'], { numberType: 'IC', numberField: 'meetingNumber', nameOf: d => d.meetingNumber || '', sortBy: { meetingDate: -1 } });
+mountRegistry('risks', RiskItem, 'risk',
+    ['admin', 'quality_manager'], { nameOf: d => (d.description || '').slice(0, 60) });
+mountRegistry('doc-changes', DocChangeRequest, 'doc_change',
+    ['admin', 'quality_manager'], { numberType: 'DCR', numberField: 'dcrNumber', nameOf: d => `${d.dcrNumber} (${d.docCode})` });
+mountRegistry('satisfaction', SatisfactionRecord, 'satisfaction',
+    ['admin', 'quality_manager', 'chancellor'], { nameOf: d => d.clientName, sortBy: { surveyDate: -1 } });
+
 // --- COMPLAINTS ---
 api.get('/complaints', async (req, res) => {
     try { const p = paging(req); res.json(await Complaint.find().sort({ createdAt: -1 }).skip(p.skip).limit(p.limit)); }
@@ -2216,6 +2332,11 @@ const SOFT_DELETE_MODELS = {
     checklist:         { model: ChecklistSession,   retention: RETENTION_YEARS.checklist },
     price_adequacy:    { model: PriceAdequacyCheck, retention: RETENTION_YEARS.price_adequacy },
     filled_form:       { model: FilledForm,         retention: RETENTION_YEARS.default },
+    subcontractor:     { model: Subcontractor,      retention: RETENTION_YEARS.default },
+    impartiality_meeting: { model: ImpartialityMeeting, retention: RETENTION_YEARS.default },
+    risk:              { model: RiskItem,           retention: RETENTION_YEARS.default },
+    doc_change:        { model: DocChangeRequest,   retention: RETENTION_YEARS.procedure },
+    satisfaction:      { model: SatisfactionRecord, retention: RETENTION_YEARS.default },
     auth_user:         { model: AuthUser,           retention: RETENTION_YEARS.user },
 };
 
