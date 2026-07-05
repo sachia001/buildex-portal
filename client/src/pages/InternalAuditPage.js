@@ -99,6 +99,12 @@ const InternalAuditPage = ({ role }) => {
                                 <td className="text-center">
                                     <div className="d-flex gap-1 justify-content-center">
                                         <Button size="sm" variant="outline-primary" onClick={() => openEdit(item)}>✏️</Button>
+                                        {item.correctiveActionRequired && ['admin', 'quality_manager'].includes(role) && (
+                                            <Button size="sm" variant="outline-danger" title="მაკორექტირებელი ქმედების შექმნა ამ აუდიტიდან"
+                                                as={Link} to={`/corrective-actions?sourceType=${encodeURIComponent('შიდა აუდიტი')}&sourceRef=${encodeURIComponent(item.auditNumber || '')}&description=${encodeURIComponent(item.nonConformities || '')}`}>
+                                                ⚙️ CAR
+                                            </Button>
+                                        )}
                                         {role === 'admin' && <Button size="sm" variant="outline-danger" onClick={() => handleDelete(item._id)}>🗑️</Button>}
                                     </div>
                                 </td>

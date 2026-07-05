@@ -12,6 +12,16 @@ import ImpartialityPerCasePdf from '../pdf-components/ImpartialityPerCasePdf';
 import ConfidentialityAgreementPdf from '../pdf-components/ConfidentialityAgreementPdf';
 import TrainingRecordPdf from '../pdf-components/TrainingRecordPdf';
 import { generateDocNumber } from '../utils/docCategories';
+import FormLauncher from '../components/FormLauncher';
+
+// თანამშრომლის მონაცემები → ფორმის ველების წინასწარი შევსება (ლეიბლის ფრაგმენტებით)
+const staffPrefill = (u) => ({
+    'სახელი': `${u.firstName || ''} ${u.lastName || ''}`.trim(),
+    'თანამშრომ': `${u.firstName || ''} ${u.lastName || ''}`.trim(),
+    'პოზიცია': u.position || '',
+    'თანამდებობ': u.position || '',
+    'პირადი': u.personalId || '',
+});
 
 const today = new Date().toISOString().split('T')[0];
 const todayGe = new Date().toLocaleDateString('ka-GE');
@@ -263,6 +273,13 @@ const StaffDetails = () => {
                                 <p className="mb-1"><strong>🆔 პ/ნ:</strong> {user.personalId}</p>
                                 <p className="mb-1"><strong>📞 ტელ:</strong> {user.phone || '-'}</p>
                                 <p className="mb-0"><strong>📅 ვადა:</strong> {user.authExpiry ? new Date(user.authExpiry).toLocaleDateString() : '-'}</p>
+                            </div>
+                            {/* ISO §6.1 — პერსონალის ფორმები ამ თანამშრომელზე (FilledForm-რეესტრში ინახება) */}
+                            <div className="d-flex gap-1 flex-wrap justify-content-center mt-3">
+                                <FormLauncher code="BE-FM-COMP-CHECK" label="🎯 კომპეტენცია" initialStaff={user} initialByLabel={staffPrefill(user)} />
+                                <FormLauncher code="BE-FM-TRAIN" label="📚 ტრენინგი" initialStaff={user} initialByLabel={staffPrefill(user)} />
+                                <FormLauncher code="BE-FM-CONF" label="🤐 კონფიდენც." initialStaff={user} initialByLabel={staffPrefill(user)} />
+                                <FormLauncher code="BE-FM-IMP-DECL" label="⚖️ მიუკერძ." initialStaff={user} initialByLabel={staffPrefill(user)} />
                             </div>
                         </Card.Body>
                     </Card>

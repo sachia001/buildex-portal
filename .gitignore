@@ -41,3 +41,12 @@ BUILDEXEXPERTISE_files/
 
 # ლოკალური ფორმების PDF-ები (გენერირებადი, არ ვაკომიტებთ)
 ფორმები/
+
+# ბაზის სარეზერვო ასლები (ლოკალური)
+backups/
+
+# QA/რენდერის დროებითი არტეფაქტები scripts-ში
+scripts/qa*.py
+scripts/check.py
+scripts/render*.py
+scripts/*.png

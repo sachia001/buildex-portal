@@ -7,6 +7,7 @@ import { toast, confirmDialog } from '../components/Feedback';
 const ManagementReview = () => {
     const [reviews, setReviews] = useState([]);
     const [show, setShow] = useState(false);
+    const [editItem, setEditItem] = useState(null); // არსებული ოქმის რედაქტირება
     
     // ISO 17020-ის შესაბამისი ფორმის მონაცემები
     const [formData, setFormData] = useState({
@@ -43,7 +44,8 @@ const ManagementReview = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            await axios.post('/api/management-reviews', formData);
+            if (editItem) await axios.put(`/api/management-reviews/${editItem._id}`, formData);
+            else await axios.post('/api/management-reviews', formData);
             setShow(false);
             fetchReviews();
             toast("✅ ოქმი წარმატებით შეინახა!", 'success');
@@ -74,7 +76,7 @@ const ManagementReview = () => {
                 </div>
                 <div className="d-flex gap-2">
                     <Button as={Link} to="/" variant="secondary">← მთავარი</Button>
-                    <Button variant="primary" onClick={() => setShow(true)}>+ ახალი ოქმი</Button>
+                    <Button variant="primary" onClick={() => { setEditItem(null); setFormData({ reviewDate: '', participants: '', inputs: { prevActions: '', internalAudits: '', complaints: '', resources: '' }, outputs: { improvements: '', trainingNeeds: '', decisions: '' } }); setShow(true); }}>+ ახალი ოქმი</Button>
                 </div>
             </div>
 
@@ -118,7 +120,7 @@ const ManagementReview = () => {
             {/* --- ახალი ოქმის დამატების მოდალი (ISO ველებით) --- */}
             <Modal show={show} onHide={() => setShow(false)} size="xl" backdrop="static">
                 <Modal.Header closeButton>
-                    <Modal.Title className="fw-bold">ახალი გადახედვის ოქმი</Modal.Title>
+                    <Modal.Title className="fw-bold">{editItem ? 'ოქმის რედაქტირება' : 'ახალი გადახედვის ოქმი'}</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
                     <Form onSubmit={handleSubmit}>

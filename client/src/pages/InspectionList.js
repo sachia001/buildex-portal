@@ -3,6 +3,7 @@ import { Container, Card, Table, Button, Form, Row, Col, Badge, Spinner } from '
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { toast, confirmDialog } from '../components/Feedback';
+import { CASE_STATUSES, STATUS_COLORS } from '../utils/caseStatuses';
 
 const InspectionList = ({ role }) => {
     const navigate = useNavigate();
@@ -102,13 +103,8 @@ const InspectionList = ({ role }) => {
         }
     };
 
-    const getStatusBadge = (status) => {
-        switch(status) {
-            case 'დასრულებული': return <Badge bg="success" style={{backgroundColor: THEME.success}}>დასრულებული</Badge>;
-            case 'მიმდინარე': return <Badge bg="warning" text="dark" style={{backgroundColor: THEME.warning, color: '#fff'}}>მიმდინარე</Badge>;
-            default: return <Badge bg="primary" style={{backgroundColor: '#3498db'}}>ახალი</Badge>;
-        }
-    };
+    const getStatusBadge = (status) =>
+        <Badge bg={STATUS_COLORS[status] || 'primary'} text={STATUS_COLORS[status] === 'warning' ? 'dark' : undefined}>{status || 'ახალი'}</Badge>;
 
     if (loading) return <Container className="mt-5 text-center"><Spinner animation="border" style={{color: THEME.primary}} /></Container>;
 
@@ -169,9 +165,7 @@ const InspectionList = ({ role }) => {
                                 <Form.Label htmlFor="fld-status" className="small fw-bold text-muted">სტატუსი</Form.Label>
                                 <Form.Select id="fld-status" size="sm" name="status" value={filter.status} onChange={handleFilterChange} style={{borderColor: THEME.border}}>
                                     <option value="">ყველა</option>
-                                    <option value="რეგისტრირებული">რეგისტრირებული</option>
-                                    <option value="მიმდინარე">მიმდინარე</option>
-                                    <option value="დასრულებული">დასრულებული</option>
+                                    {CASE_STATUSES.map(s => <option key={s} value={s}>{s}</option>)}
                                 </Form.Select>
                             </Col>
                             <Col md={2}>

@@ -26,6 +26,19 @@ const CorrectiveActionsPage = ({ role }) => {
 
     useEffect(() => { fetch(); }, []);
 
+    // აუდიტის/საჩივრის გვერდიდან გადმოსვლა: ?sourceType=...&sourceRef=... → ახალი CAR წინასწარ შევსებული
+    useEffect(() => {
+        const params = new URLSearchParams(window.location.search);
+        const st = params.get('sourceType'), sr = params.get('sourceRef');
+        if (st || sr) {
+            setEditItem(null);
+            setFormData(f => ({ ...f, sourceType: st || f.sourceType, sourceRef: sr || '', description: params.get('description') || '' }));
+            setShow(true);
+            window.history.replaceState({}, '', '/corrective-actions'); // param-ები ერთჯერადია
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+
     const openAdd = () => {
         setEditItem(null);
         setFormData({ sourceType: 'შიდა აუდიტი', sourceRef: '', description: '', rootCause: '', actionPlan: '', responsiblePerson: '', deadline: '', completedDate: '', effectiveness: '', status: 'ღია' });

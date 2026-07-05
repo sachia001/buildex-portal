@@ -55,62 +55,6 @@ export const FORM_CONFIGS = {
   },
 
   // ══════════════════════════════════════════════════════════
-  'BE-FM-AUDIT-PLAN': {
-    title: 'შიდა აუდიტის გეგმა და ანგარიში',
-    signers: ['შემავსებელი', 'შემოწმებული', 'დამტკიცებული'],
-    sections: [
-      { label: 'შემოსამოწმებელი სფეროები', fields: [
-        { id: 'areaRows', label: 'სფეროები (ISO §§ 4–9)', type: 'tablerows', minRows: 1, columns: [
-          { id: 'c0', label: 'შემოსამოწმებელი ობიექტი (PR/FM/POL)', md: 6 }, { id: 'c1', label: 'ISO §', md: 2 },
-          { id: 'c2', label: 'გეგმური თარიღი', type: 'date', md: 2 }, { id: 'c3', label: 'სტატუსი', md: 2 },
-        ] },
-      ]},
-      { label: 'დამატებითი ინფორმაცია', fields: [
-        { id: 'approvalDate', label: 'დამტკიცების თარიღი', type: 'date' },
-        { id: 'notes', label: 'შენიშვნები', type: 'textarea' },
-      ]},
-      { label: 'საიდენტიფიკაციო მონაცემები', fields: [
-        { id: 'auditNumber',  label: 'აუდიტის №',                    type: 'text' },
-        { id: 'period',       label: 'პერიოდი (წელი)',                type: 'text' },
-        { id: 'auditor',      label: 'აუდიტორი',                      type: 'staffmulti' },
-        { id: 'auditDate',    label: 'თარიღი',                        type: 'date' },
-        { id: 'auditedStaff', label: 'შემოწმებული პერსონალი',         type: 'text', placeholder: 'მაგალითად: ნ. ბეგიაშვილი, გ. ვალიაშვილი' },
-        { id: 'documents',    label: 'შემოწმებული დოკუმენტები',        type: 'text' },
-        { id: 'cases',        label: 'შემოწმებული საქმეები (№)',        type: 'text' },
-      ]},
-      { label: 'B. შემოწმების ფარგლები (ISO §§)', fields: [
-        { id: 'auditScopes', label: 'შემოწმებული §§', type: 'multicheck',
-          options: ['§4','§5','§6.1','§6.2','§7.1','§7.3','§7.4','§8.1','§8.5','§8.6','§8.7'] },
-      ]},
-      { label: 'C–D. შეუსაბამობები და CAPA', fields: [
-        { id: 'nc1_desc',     label: 'NC1. შეუსაბამობის აღწერა',      type: 'textarea' },
-        { id: 'nc1_clause',   label: 'NC1. ISO §',                    type: 'text' },
-        { id: 'nc1_category', label: 'NC1. კატეგორია',                type: 'select', options: ['კ — კრიტიკული','მ — მცირე','გ — გამოსწორებული'] },
-        { id: 'nc2_desc',     label: 'NC2. შეუსაბამობის აღწერა',      type: 'textarea' },
-        { id: 'nc2_clause',   label: 'NC2. ISO §',                    type: 'text' },
-        { id: 'nc2_category', label: 'NC2. კატეგორია',                type: 'select', options: ['კ — კრიტიკული','მ — მცირე','გ — გამოსწორებული'] },
-        { id: 'nc3_desc',     label: 'NC3. შეუსაბამობის აღწერა',      type: 'textarea' },
-        { id: 'nc3_clause',   label: 'NC3. ISO §',                    type: 'text' },
-        { id: 'nc3_category', label: 'NC3. კატეგორია',                type: 'select', options: ['კ — კრიტიკული','მ — მცირე','გ — გამოსწორებული'] },
-        { id: 'nc4_desc',     label: 'NC4. შეუსაბამობის აღწერა',      type: 'textarea' },
-        { id: 'nc4_clause',   label: 'NC4. ISO §',                    type: 'text' },
-        { id: 'nc4_category', label: 'NC4. კატეგორია',                type: 'select', options: ['კ — კრიტიკული','მ — მცირე','გ — გამოსწორებული'] },
-        { id: 'capa1_num',    label: 'CAPA1. №',                      type: 'text' },
-        { id: 'capa1_action', label: 'CAPA1. ქმედება',                type: 'textarea' },
-        { id: 'capa1_deadline',label: 'CAPA1. ვადა / სტატუსი',        type: 'text' },
-        { id: 'capa2_num',    label: 'CAPA2. №',                      type: 'text' },
-        { id: 'capa2_action', label: 'CAPA2. ქმედება',                type: 'textarea' },
-        { id: 'capa2_deadline',label: 'CAPA2. ვადა / სტატუსი',        type: 'text' },
-      ]},
-      { label: 'შეჯამება', fields: [
-        { id: 'allRequirementsMet', label: 'ყველა ISO §8.6 მოთხოვნა დაკმაყოფილებულია', type: 'yesno' },
-        { id: 'reauditNeeded',      label: 'ხელმეორე შემოწმება საჭიროა',                type: 'yesno' },
-        { id: 'reauditDate',        label: 'ხელმეორე შემოწმების თარიღი',               type: 'date' },
-        { id: 'generalComment',     label: 'კომენტარი / შენიშვნა',                      type: 'textarea' },
-      ]},
-    ],
-  },
-
   // ══════════════════════════════════════════════════════════
   'BE-FM-COMPLAINT': {
     title: 'საჩივარი / აპელაცია',
@@ -366,48 +310,6 @@ export const FORM_CONFIGS = {
   },
 
   // ══════════════════════════════════════════════════════════
-  'BE-FM-SUB-MONITOR': {
-    title: 'ქვეკონტრაქტორის შეფასება',
-    signers: ['ტექნიკური მენეჯერი', 'ხარისხის მენეჯერი'],
-    sections: [
-      { label: 'საიდენტიფიკაციო მონაცემები', fields: [
-        { id: 'assessmentNumber', label: 'შეფასების №',               type: 'text' },
-        { id: 'date',             label: 'შეფასების თარიღი',          type: 'date' },
-        { id: 'subName',          label: 'ქვეკონტრაქტორის სახელი',   type: 'text' },
-        { id: 'serviceType',      label: 'მომსახურების სახეობა',      type: 'text' },
-        { id: 'licenseNumber',    label: 'ლიცენზიის №',               type: 'text' },
-        { id: 'licenseExpiry',    label: 'ლიცენზიის ვადა',            type: 'date' },
-        { id: 'validator',        label: 'შემმოწმებელი',              type: 'staffmulti' },
-        { id: 'caseNumber',       label: 'BE-CASE №',                 type: 'text' },
-        { id: 'decision',         label: 'გადაწყვეტილება', type: 'select', options: ['დამტკიცებულია','პირობით დამტკიცება','უარყოფილია'] },
-        { id: 'condition',        label: 'პირობები (პირობითი დამტ.)', type: 'text' },
-        { id: 'validUntil',       label: 'ვალიდური ვადა',             type: 'date' },
-      ]},
-      { label: '2. ISO §6.6 კრიტერიუმები', fields: [
-        { id: 'crit1', label: '§6.6.1 ინსპექტირების ობიექტის გამოცდილება',    type: 'yesno' },
-        { id: 'crit2', label: '§6.6.2 კვალიფიკაცია და აკრედიტაცია',   type: 'yesno' },
-        { id: 'crit3', label: '§6.6.3 კლიენტის ინსპექცია',             type: 'yesno' },
-        { id: 'crit4', label: '§6.6.4 ISO 17020',                      type: 'yesno' },
-        { id: 'crit5', label: 'BE-FM-REG ანგარიშის შეფასება',              type: 'yesno' },
-        { id: 'crit6', label: 'PR-02 გამოცდილება ≥5 წელი',             type: 'yesno' },
-      ]},
-      { label: 'C. კომპეტენციის ქულები (4 სფერო)', fields: [
-        { id: 'comp1_scope',   label: 'C1. ინსპექტირების სფერო',    type: 'text' },
-        { id: 'comp1_score',   label: 'C1. ქულა (1–5)',      type: 'number' },
-        { id: 'comp1_comment', label: 'C1. კომენტარი',       type: 'text' },
-        { id: 'comp2_scope',   label: 'C2. ინსპექტირების სფერო',    type: 'text' },
-        { id: 'comp2_score',   label: 'C2. ქულა (1–5)',      type: 'number' },
-        { id: 'comp2_comment', label: 'C2. კომენტარი',       type: 'text' },
-        { id: 'comp3_scope',   label: 'C3. ინსპექტირების სფერო',    type: 'text' },
-        { id: 'comp3_score',   label: 'C3. ქულა (1–5)',      type: 'number' },
-        { id: 'comp3_comment', label: 'C3. კომენტარი',       type: 'text' },
-        { id: 'comp4_scope',   label: 'C4. ინსპექტირების სფერო',    type: 'text' },
-        { id: 'comp4_score',   label: 'C4. ქულა (1–5)',      type: 'number' },
-        { id: 'comp4_comment', label: 'C4. კომენტარი',       type: 'text' },
-      ]},
-    ],
-  },
-
   // ══════════════════════════════════════════════════════════
   'BE-FM-TRAIN': {
     title: 'ტრენინგის ჩანაწერი',

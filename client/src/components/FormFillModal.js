@@ -391,12 +391,22 @@ const ExternalSignerBlock = ({ label, index, sigsData, onSigChange, inspectionLi
 };
 
 // ── Main modal ─────────────────────────────────────────────────
-const FormFillModal = ({ show, onHide, config, pdfComponent, pdfFileName, formCode }) => {
+// initialData    — { fieldId: value } წინასწარი შევსება (id-ებით)
+// initialByLabel — { 'ლეიბლის ფრაგმენტი': value } — ველი label-ით მოიძებნება (generic ფორმებისთვის)
+// initialCase    — inspection ობიექტი: case-ველის + caseAutoFill-ის ავტო-შევსება; შენახვისას caseId ებმის
+// initialStaff   — user ობიექტი: შენახვისას staffId ებმის
+// savedForm      — არსებული FilledForm ჩანაწერი (ხელახლა გახსნა/რედაქტირება)
+// onSaved        — callback შენახვის შემდეგ (სიის განახლებისთვის)
+const FormFillModal = ({ show, onHide, config, pdfComponent, pdfFileName, formCode,
+  initialData, initialByLabel, initialCase, initialStaff, savedForm, onSaved }) => {
   const [formData,       setFormData]       = useState({});
   const [sigsData,       setSigsData]       = useState({});
   const [staffList,      setStaffList]      = useState([]);
   const [inspectionList, setInspectionList] = useState([]);
   const [gen,            setGen]            = useState(''); // PDF გენერაცია მხოლოდ ღილაკზე (on-demand — შეფერხების გარეშე)
+  const [saving,         setSaving]         = useState(false);
+  const [savedId,        setSavedId]        = useState(null);
+  const [saveMsg,        setSaveMsg]        = useState('');
 
   // Keep stable refs for auto-fill callbacks
   const inspListRef  = useRef([]);
@@ -416,6 +426,66 @@ const FormFillModal = ({ show, onHide, config, pdfComponent, pdfFileName, formCo
       .then(d => setInspectionList(Array.isArray(d) ? d : []))
       .catch(() => {});
   }, [show]);
+
+  // ── გახსნისას წინასწარი შევსება: savedForm > initialData/initialByLabel/initialCase ──
+  useEffect(() => {
+    if (!show || !config) return;
+    setSaveMsg('');
+    if (savedForm && savedForm.data) {
+      setFormData(savedForm.data.formData || {});
+      setSigsData(savedForm.data.sigsData || {});
+      setSavedId(savedForm._id);
+      return;
+    }
+    setSavedId(null);
+    setSigsData({});
+    const next = { ...(initialData || {}) };
+    const allFields = (config.sections || []).flatMap(s => s.fields);
+    if (initialByLabel) {
+      for (const [frag, val] of Object.entries(initialByLabel)) {
+        const f = allFields.find(fl => (fl.label || '').includes(frag));
+        if (f && next[f.id] === undefined) next[f.id] = val;
+      }
+    }
+    if (initialCase) {
+      const caseField = allFields.find(f => f.type === 'case');
+      if (caseField) next[caseField.id] = initialCase.inspectionNumber || '';
+      if (config.caseAutoFill) Object.assign(next, config.caseAutoFill(initialCase));
+    }
+    setFormData(next);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [show, savedForm, config]);
+
+  // ── შენახვა FilledForm-რეესტრში (caseId/staffId ბმებით) ──
+  const saveForm = async () => {
+    setSaving(true); setSaveMsg('');
+    try {
+      const allFields = (config.sections || []).flatMap(s => s.fields);
+      const caseField = allFields.find(f => f.type === 'case');
+      const caseNum = initialCase?.inspectionNumber
+        || (caseField ? (formData[caseField.id] || '') : '')
+        || (savedForm?.caseNumber || '');
+      const insp = initialCase || inspectionList.find(i => i.inspectionNumber === caseNum) || null;
+      const body = {
+        code: formCode, title: config.title,
+        caseId: insp?._id || savedForm?.caseId || null,
+        caseNumber: caseNum,
+        staffId: initialStaff?._id || savedForm?.staffId || null,
+        data: { formData, sigsData },
+      };
+      const res = await fetch(savedId ? `/api/filled-forms/${savedId}` : '/api/filled-forms', {
+        method: savedId ? 'PUT' : 'POST',
+        headers: { ...authHeaders(), 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      });
+      const j = await res.json();
+      if (!res.ok) throw new Error(j.error || 'შენახვა ვერ მოხერხდა');
+      setSavedId(j._id);
+      setSaveMsg('✓ შენახულია');
+      if (onSaved) onSaved(j);
+    } catch (e) { setSaveMsg('✗ ' + e.message); }
+    setSaving(false);
+  };
 
   // Field setter with case auto-fill support
   const setField = useCallback((id, val) => {
@@ -543,13 +613,21 @@ const FormFillModal = ({ show, onHide, config, pdfComponent, pdfFileName, formCo
       </Modal.Body>
 
       <Modal.Footer className="border-0 pt-0 gap-2">
+        {saveMsg && <span className={`small me-auto ${saveMsg.startsWith('✓') ? 'text-success' : 'text-danger'}`}>{saveMsg}</span>}
         <Button variant="secondary" size="sm" onClick={onHide}>დახურვა</Button>
-        <Button variant="outline-primary" size="sm" disabled={!!gen} onClick={() => downloadPdf('blank')}>
-          {gen === 'blank' ? '⏳ მზადდება…' : '📄 ცარიელი ჩამოტვირთვა'}
+        <Button variant="primary" size="sm" disabled={saving} onClick={saveForm}>
+          {saving ? '⏳ ინახება…' : (savedId ? '💾 განახლება' : '💾 შენახვა')}
         </Button>
-        <Button variant="success" size="sm" disabled={!!gen} onClick={() => downloadPdf('filled')}>
-          {gen === 'filled' ? '⏳ მზადდება…' : `📥 შევსებული ჩამოტვირთვა${sigCount > 0 ? ` (${sigCount} ✍️)` : ''}`}
-        </Button>
+        {pdfComponent && (
+          <>
+            <Button variant="outline-primary" size="sm" disabled={!!gen} onClick={() => downloadPdf('blank')}>
+              {gen === 'blank' ? '⏳ მზადდება…' : '📄 ცარიელი ჩამოტვირთვა'}
+            </Button>
+            <Button variant="success" size="sm" disabled={!!gen} onClick={() => downloadPdf('filled')}>
+              {gen === 'filled' ? '⏳ მზადდება…' : `📥 შევსებული ჩამოტვირთვა${sigCount > 0 ? ` (${sigCount} ✍️)` : ''}`}
+            </Button>
+          </>
+        )}
       </Modal.Footer>
     </Modal>
   );

@@ -10,6 +10,16 @@ import PdfDocument from '../pdf-components/PdfDocument';
 import ReportCoverPdf from '../pdf-components/ReportCoverPdf';
 import ServiceContractPdf from '../pdf-components/ServiceContractPdf';
 
+// საქმის ჰაბი: ფორმების შევსება/რეესტრი + ფას-ადეკვატურობის ბმა
+import FormFillModal from '../components/FormFillModal';
+import { getFormConfig, FILLABLE_CODES, formTitle } from '../utils/getFormConfig';
+import { getFormPdf } from '../utils/formPdfMap';
+import { CASE_STATUSES } from '../utils/caseStatuses';
+
+// საქმეზე ყველაზე ხშირად შესავსები ფორმები — dropdown-ის თავში
+const CASE_FORM_PRIORITY = ['BE-FM-VISIT', 'BE-FM-PLAN', 'BE-FM-CONTRACT-REVIEW', 'BE-FM-SCREEN',
+    'BE-FM-IR', 'BE-FM-TECH-REVIEW', 'BE-FM-FIELD-LOG', 'BE-FM-MEASURE', 'BE-FM-PHOTO-LOG', 'BE-FM-IMP-DECL'];
+
 const InspectionDetails = ({ role }) => {
     const isReadOnly = role === 'quality_manager';
     const { id } = useParams();
@@ -148,6 +158,24 @@ const InspectionDetails = ({ role }) => {
         "ინსპექტირების ანგარიში (BX-INS)", "ფოტო მასალა", "სხვა"
     ];
 
+    // საქმეზე მიბმული შევსებული ფორმები და PA-შემოწმებები
+    const [filledForms, setFilledForms] = useState([]);
+    const [paChecks, setPaChecks] = useState([]);
+    const [fillCode, setFillCode] = useState('BE-FM-VISIT');
+    const [fillOpen, setFillOpen] = useState(false);
+    const [fillSaved, setFillSaved] = useState(null); // არსებული ჩანაწერის ხელახლა გახსნა
+
+    const fetchLinked = async () => {
+        try {
+            const [ff, pa] = await Promise.all([
+                axios.get(`/api/filled-forms?caseId=${id}`),
+                axios.get(`/api/price-adequacy?caseId=${id}`),
+            ]);
+            setFilledForms(Array.isArray(ff.data) ? ff.data : []);
+            setPaChecks(Array.isArray(pa.data) ? pa.data : []);
+        } catch { /* ბმული მონაცემები არაკრიტიკულია */ }
+    };
+
     const fetchData = async () => {
         try {
             const res = await axios.get(`/api/inspections/${id}`);
@@ -157,7 +185,10 @@ const InspectionDetails = ({ role }) => {
         } catch (err) { console.error(err); setLoading(false); }
     };
 
-    useEffect(() => { fetchData(); }, [id]); // eslint-disable-line react-hooks/exhaustive-deps
+    useEffect(() => { fetchData(); fetchLinked(); }, [id]); // eslint-disable-line react-hooks/exhaustive-deps
+
+    const openFill = (code, saved = null) => { setFillCode(code); setFillSaved(saved); setFillOpen(true); };
+    const fillResolved = getFormConfig(fillCode);
 
     // სტატუსის და ინფოს განახლება
     const handleSave = async () => {
@@ -237,9 +268,8 @@ const InspectionDetails = ({ role }) => {
                                     <Form.Label className="small fw-bold text-muted">სტატუსი</Form.Label>
                                     {editMode ? (
                                         <Form.Select value={formData.status} onChange={e => setFormData({...formData, status: e.target.value})}>
-                                            <option>რეგისტრირებული</option>
-                                            <option>მიმდინარე</option>
-                                            <option>დასრულებული</option>
+                                            {CASE_STATUSES.map(s => <option key={s}>{s}</option>)}
+                                            {!CASE_STATUSES.includes(formData.status) && formData.status && <option>{formData.status}</option>}
                                         </Form.Select>
                                     ) : <div className="fw-bold"><Badge bg="info">{data.status}</Badge></div>}
                                 </Col>
@@ -364,6 +394,74 @@ const InspectionDetails = ({ role }) => {
                                         </tr>
                                     ))}
                                     {(!data.documents || Object.keys(data.documents).length === 0) && <tr><td colSpan="2" className="text-center text-muted">დოკუმენტები არ არის</td></tr>}
+                                </tbody>
+                            </Table>
+                        </Card.Body>
+                    </Card>
+
+                    {/* საქმის ფორმები — შევსება/რეესტრი (FilledForm) */}
+                    <Card className="shadow-sm border-0 mt-4">
+                        <Card.Header className="bg-white py-3 d-flex justify-content-between align-items-center flex-wrap gap-2">
+                            <h6 className="m-0 fw-bold text-primary">📋 საქმის ფორმები</h6>
+                            {!isReadOnly && (
+                                <div className="d-flex gap-2">
+                                    <Form.Select size="sm" style={{ maxWidth: 340 }} value={fillCode} onChange={e => setFillCode(e.target.value)}>
+                                        {[...CASE_FORM_PRIORITY.filter(c => getFormConfig(c)),
+                                          ...FILLABLE_CODES.filter(c => !CASE_FORM_PRIORITY.includes(c))].map(c =>
+                                            <option key={c} value={c}>{c} — {formTitle(c)}</option>)}
+                                    </Form.Select>
+                                    <Button size="sm" variant="primary" onClick={() => openFill(fillCode)}>📝 შევსება</Button>
+                                </div>
+                            )}
+                        </Card.Header>
+                        <Card.Body>
+                            <Table hover size="sm" className="align-middle">
+                                <thead><tr><th>ფორმა</th><th>თარიღი</th><th>შემვსები</th><th></th></tr></thead>
+                                <tbody>
+                                    {filledForms.map(f => (
+                                        <tr key={f._id}>
+                                            <td><Badge bg="info" className="me-1">{f.code}</Badge> <span className="small">{f.title}</span></td>
+                                            <td className="small">{new Date(f.createdAt).toLocaleDateString('ka-GE')}</td>
+                                            <td className="small">{f.createdBy}</td>
+                                            <td className="text-end">
+                                                <Button size="sm" variant="outline-primary" onClick={() => openFill(f.code, f)}>📂 გახსნა</Button>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                    {filledForms.length === 0 && <tr><td colSpan="4" className="text-center text-muted small">ამ საქმეზე შევსებული ფორმები ჯერ არ არის</td></tr>}
+                                </tbody>
+                            </Table>
+                        </Card.Body>
+                    </Card>
+
+                    {/* ფას-ადეკვატურობის შემოწმებები ამ საქმეზე (BE-PR-03 / BE-WI-03) */}
+                    <Card className="shadow-sm border-0 mt-4">
+                        <Card.Header className="bg-white py-3 d-flex justify-content-between align-items-center">
+                            <h6 className="m-0 fw-bold text-primary">📊 ფას-ადეკვატურობა (BE-PR-03)</h6>
+                            <Button size="sm" variant="outline-success" onClick={() => navigate(`/price-adequacy?case=${id}`)}>➕ ახალი შემოწმება</Button>
+                        </Card.Header>
+                        <Card.Body>
+                            <Table hover size="sm" className="align-middle">
+                                <thead><tr><th>№</th><th>თარიღი</th><th>შედეგი</th><th></th></tr></thead>
+                                <tbody>
+                                    {paChecks.map(c => (
+                                        <tr key={c._id}>
+                                            <td className="small fw-bold">{c.checkNumber}</td>
+                                            <td className="small">{new Date(c.checkDate).toLocaleDateString('ka-GE')}</td>
+                                            <td className="small">
+                                                {c.violationCount > 0
+                                                    ? <Badge bg="danger">{c.violationCount} დარღვევა</Badge>
+                                                    : c.warningCount > 0
+                                                    ? <Badge bg="warning" text="dark">{c.warningCount} გაფრთხილება</Badge>
+                                                    : <Badge bg="success">შესაბამისი</Badge>}
+                                                <span className="text-muted ms-2">{c.matchedLines}/{c.totalLines} შემოწმდა</span>
+                                            </td>
+                                            <td className="text-end">
+                                                <Button size="sm" variant="outline-primary" onClick={() => navigate(`/price-adequacy?check=${c._id}`)}>👁 ნახვა</Button>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                    {paChecks.length === 0 && <tr><td colSpan="4" className="text-center text-muted small">შემოწმებები არ არის</td></tr>}
                                 </tbody>
                             </Table>
                         </Card.Body>
@@ -587,6 +685,21 @@ const InspectionDetails = ({ role }) => {
                 </PDFDownloadLink>
             </Modal.Footer>
         </Modal>
+
+        {/* საქმის ფორმის შევსება — caseId ავტომატურად ებმის */}
+        {fillOpen && fillResolved && (
+            <FormFillModal
+                show={fillOpen}
+                onHide={() => { setFillOpen(false); setFillSaved(null); }}
+                config={fillResolved.config}
+                pdfComponent={getFormPdf(fillCode)}
+                pdfFileName={`${fillCode} — ${data.inspectionNumber}`}
+                formCode={fillCode}
+                initialCase={data}
+                savedForm={fillSaved}
+                onSaved={fetchLinked}
+            />
+        )}
         </>
     );
 };

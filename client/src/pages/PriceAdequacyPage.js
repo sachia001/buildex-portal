@@ -50,6 +50,17 @@ export default function PriceAdequacyPage({ role }) {
 
     useEffect(() => { loadData(); }, [loadData]);
 
+    // InspectionDetails-იდან გადმოსვლა: ?case=<id> → საქმის წინასწარი არჩევა + ახალი შემოწმების ხედი;
+    // ?check=<id> → კონკრეტული შედეგის გახსნა
+    useEffect(() => {
+        const params = new URLSearchParams(window.location.search);
+        const caseParam = params.get('case');
+        const checkParam = params.get('check');
+        if (caseParam) { setView('new'); handleCaseChange(caseParam); }
+        else if (checkParam) { openCheck(checkParam); }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+
     const handleCaseChange = async (id) => {
         setSelectedCase(id);
         setCaseData(null);

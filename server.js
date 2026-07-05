@@ -12,6 +12,7 @@ const compression = require('compression');
 const morgan = require('morgan');
 const rateLimit = require('express-rate-limit');
 const XLSX_LIB = require('xlsx');
+const { normalizeGeo, extractKeywords, kwMatchScore, diffDoc, validateBody } = require('./lib/helpers');
 
 // ─── FAIL-FAST ENV GUARD (CR-1 / SEC-001 / API-019 / OPS-009) ─────────────────
 // სავალდებულო env ცვლადები — მათ გარეშე აპლიკაცია არ უნდა ჩაირთოს.
@@ -279,7 +280,9 @@ const AuthUser = mongoose.model('AuthUser', new mongoose.Schema({
     username: { type: String, required: true, unique: true },
     passwordHash: { type: String, required: true },
     role: { type: String, default: 'inspector' },
-    staffId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null }
+    staffId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null },
+    failedLogins: { type: Number, default: 0 },   // per-account lockout (BE-POL-04)
+    lockUntil: { type: Date, default: null },
 }, { timestamps: true }));
 
 // CR-1 / OPS-009: hardcoded default admin (admin / Buildex@2026) წაიშალა.
@@ -595,68 +598,7 @@ async function generateDocumentNumber(type, date = new Date()) {
 // =============================================
 
 // Georgian construction synonym map — maps variants to canonical root
-const GEO_SYNONYMS = {
-    'გრუნტ': 'ნიადაგ', 'გრუნტის': 'ნიადაგ', 'გრუნტი': 'ნიადაგ',
-    'ექსკავ': 'გათხ', 'ექსკავატორ': 'გათხ', 'ექსკავაციი': 'გათხ',
-    'ამოთხრ': 'გათხ', 'გაჭრ': 'გათხ', 'გათხრ': 'გათხ',
-    'დამუშავ': 'გათხ',
-    'შევსებ': 'მოყრ', 'გადავსებ': 'მოყრ', 'ყრ': 'მოყრ', 'ყრილ': 'მოყრ',
-    'გატკეპნ': 'ტკეპნ', 'ტკეპნ': 'ტკეპნ', 'შეტკეპნ': 'ტკეპნ',
-    'ბეტონ': 'ბეტ', 'ბეტ': 'ბეტ', 'რკინაბეტ': 'ბეტ',
-    'ქვიშ': 'ქვიშ', 'ქვიშის': 'ქვიშ',
-    'ბალიშ': 'ქვიშ',
-    'ასფალტ': 'ასფ', 'ასფ': 'ასფ', 'ასფალტბეტ': 'ასფ',
-    'სრიალ': 'ასფ',
-    'ფილ': 'ფილ', 'ბეტონის ფილ': 'ფილ',
-    'კონსტრუქც': 'კონსტ', 'სტრუქტურ': 'კონსტ',
-    'მილ': 'მილ', 'მილსადენ': 'მილ', 'სადენ': 'მილ', 'ტრუბ': 'მილ',
-    'ჭ': 'ჭა', 'ჭები': 'ჭა', 'ჭის': 'ჭა', 'სანიაღვრ': 'ჭა', 'სალუქ': 'ჭა',
-    'ჰიდრ': 'ჭა',
-    'ბორდიურ': 'ბორდ', 'ევრობ': 'ბორდ', 'ლილვ': 'ბორდ',
-    'სადრენ': 'დრენ', 'დრენაჟ': 'დრენ', 'წყაბ': 'დრენ',
-    'კირ': 'კირ', 'კირხსნ': 'კირ',
-    'ცემ': 'ცემ', 'ცემენტ': 'ცემ',
-    'ხელ': 'ხელ', 'ხელით': 'ხელ', 'ხელნ': 'ხელ',
-    'მექ': 'მექ', 'მექანიზ': 'მექ', 'მანქან': 'მექ',
-    'გათბ': 'გათბ', 'გათბობ': 'გათბ',
-    'იზოლ': 'იზოლ', 'თბო': 'იზოლ', 'ჰიდრო': 'ჰიდრ',
-    'საღებავ': 'ღებ', 'შეღებ': 'ღებ',
-    'ლითონ': 'ლით', 'მეტალ': 'ლით',
-    'კარ': 'კარ', 'ფანჯარ': 'ფანჯ',
-    'სახურავ': 'სახ', 'გადახურვ': 'სახ',
-    'ლესვ': 'შტუკ', 'შტუკატ': 'შტუკ', 'გათეთრ': 'შტუკ',
-    'ტრასა': 'ტრასა', 'ტრასის': 'ტრასა', 'ტრაპ': 'ტრასა',
-    'ფენ': 'ფენ', 'მოფენ': 'ფენ', 'დაგებ': 'ფენ',
-    'სარეაბ': 'რემ', 'სარემ': 'რემ', 'რეაბ': 'რემ', 'რეკ': 'რემ',
-    'ნგრ': 'დემ', 'დანგრ': 'დემ', 'დემონტ': 'დემ',
-    'მოხსნ': 'დემ', 'ამოღ': 'დემ',
-};
-
-function normalizeGeo(word) {
-    if (GEO_SYNONYMS[word]) return GEO_SYNONYMS[word];
-    // Try prefix match for longer words (e.g. "გრუნტებს" → check "გრუნტ")
-    for (const [key, val] of Object.entries(GEO_SYNONYMS)) {
-        if (word.startsWith(key) && key.length >= 4) return val;
-    }
-    return word;
-}
-
-function extractKeywords(text) {
-    if (!text) return [];
-    return String(text).toLowerCase()
-        .replace(/[()[\]{}/\\,;:.!?«»""''–—]/g, ' ')
-        .split(/\s+/)
-        .filter(w => w.length > 2)
-        .map(normalizeGeo);
-}
-
-function kwMatchScore(words1, words2) {
-    if (!words1.length || !words2.length) return 0;
-    const set2 = new Set(words2);
-    const matches = words1.filter(w => set2.has(w)).length;
-    return matches / Math.max(words1.length, words2.length);
-}
-
+// GEO_SYNONYMS/normalizeGeo/extractKeywords/kwMatchScore — იხ. lib/helpers.js
 function parseNormExcel(buffer) {
     const wb = XLSX_LIB.read(buffer, { type: 'buffer' });
     const entries = [];
@@ -1056,16 +998,7 @@ async function logAudit(req, action, resource, resourceId, resourceName, details
 }
 
 // before/after diff (DAT-016) — tracked ველებზე ცვლილებების მოკლე ტექსტი audit-ისთვის
-function diffDoc(before, after, fields) {
-    if (!before || !after) return '';
-    const parts = [];
-    for (const f of fields) {
-        const sa = before[f] === undefined || before[f] === null ? '' : String(before[f]);
-        const sb = after[f]  === undefined || after[f]  === null ? '' : String(after[f]);
-        if (sa !== sb) parts.push(`${f}: "${sa}" → "${sb}"`);
-    }
-    return parts.join('; ');
-}
+// diffDoc — იხ. lib/helpers.js
 
 // CHECKLIST SESSION MODEL
 const ChecklistSession = mongoose.model('ChecklistSession', new mongoose.Schema({
@@ -1080,9 +1013,23 @@ const ChecklistSession = mongoose.model('ChecklistSession', new mongoose.Schema(
     qmSig:         { type: String, default: '' },
 }, { timestamps: true }));
 
+// FILLED FORM MODEL — შევსებული ფორმების ცენტრალური რეესტრი (ISO §8.4 ჩანაწერები).
+// ფორმა ივსება FormFillModal-ით და ინახება აქ; caseId-ით ებმის ინსპექტირების საქმეს,
+// staffId-ით — თანამშრომელს. data — ველების მნიშვნელობები config-ის id-სქემით.
+const FilledForm = mongoose.model('FilledForm', new mongoose.Schema({
+    code:       { type: String, required: true, index: true },   // BE-FM-*
+    title:      { type: String, default: '' },
+    caseId:     { type: mongoose.Schema.Types.ObjectId, ref: 'Inspection', default: null, index: true },
+    caseNumber: { type: String, default: '' },
+    staffId:    { type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null },
+    data:       { type: Object, default: {} },
+    createdBy:  { type: String, default: '' },
+}, { timestamps: true }));
+
 // ─── DB indexes (C7 / PERF-006 / DAT-018 / DAT-003) ───────────────────────────
 // query/sort/ფილტრ-ველებზე ინდექსები — list-ები და dashboard-აგრეგაცია სწრაფდება.
 // (additive; mongoose ფონურად ქმნის. sparse-unique personalId — null-ებს უშვებს.)
+FilledForm.schema.index({ caseId: 1, code: 1, createdAt: -1 });
 User.schema.index({ lastName: 1 });
 User.schema.index({ personalId: 1 }, { unique: true, sparse: true }); // DAT-003
 Inspection.schema.index({ status: 1, createdAt: -1 });
@@ -1169,28 +1116,6 @@ const PROC_TITLE_MAP = {
     'HR-JD-003':'სამუშაო აღწერილობა — ტექნიკური მენეჯერი',
     'HR-JD-004':'სამუშაო აღწერილობა — ინსპექტორი',
     'HR-JD-005':'სამუშაო აღწერილობა — ადმინისტრაციული მხარდაჭერა',
-    'FM-01':'ინსპექტირების ანგარიში',
-    'FM-02':'მიუკერძოებლობის დეკლარაცია',
-    'FM-03':'კონფიდენციალობის შეთანხმება',
-    'FM-04':'შიდა აუდიტის გეგმა და ანგარიში',
-    'FM-05':'მომსახურების ხელშეკრულება',
-    'FM-06':'საჩივრის და აპელაციის ფორმა',
-    'FM-07':'მოწყობილობის ვერიფიკაცია',
-    'FM-08':'კომპეტენციის შეფასება',
-    'FM-09':'ხელშეკრულების განხილვა',
-    'FM-10':'კორექტირებული ქმედების ჩანაწერი (CAPA)',
-    'FM-11':'ინსპექტირების გეგმა',
-    'FM-12':'ქვეკონტრაქტორის შეფასება',
-    'FM-13':'ტრენინგის ჩანაწერი',
-    'FM-14':'შეუსაბამო სამუშაო',
-    'FM-15':'მენეჯმენტის ანალიზის ოქმი',
-    'FM-16':'ვიზიტის ჩანაწერი',
-    'FM-18':'GAC-ის განაცხადის ფორმა',
-    'FM-21':'ინსპექტირების რეგისტრი',
-    'FM-22':'გაცნობის ფურცელი',
-    'FM-23':'დოკუმენტში ცვლილების წინადადება',
-    'FM-24':'ცვლილების რეგისტრაცია',
-    'FM-25':'ლიკვიდაციის აქტი',
     // პოლიტიკები — ავტორიტეტული BE-POL-* კოდირება (ფოლდერის შესაბამისად)
     'BE-POL-01':'მიუკერძოებლობის პოლიტიკა',
     'BE-POL-02':'კონფიდენციალურობის პოლიტიკა',
@@ -1305,21 +1230,7 @@ function stripProtected(obj) {
 api.use((req, res, next) => { stripProtected(req.body); next(); });
 
 // required/ტიპი/enum/მაქს.სიგრძე — აბრუნებს შეცდომების მასივს (ცარიელი = ვალიდურია).
-function validateBody(body, rules) {
-    const errors = [];
-    for (const [field, rule] of Object.entries(rules)) {
-        const v = body ? body[field] : undefined;
-        const empty = v === undefined || v === null || v === '';
-        if (rule.required && empty) { errors.push(`${rule.label || field}: სავალდებულოა`); continue; }
-        if (empty) continue;
-        if (rule.type === 'string' && typeof v !== 'string') errors.push(`${rule.label || field}: ტექსტი უნდა იყოს`);
-        if (rule.type === 'number' && isNaN(Number(v))) errors.push(`${rule.label || field}: რიცხვი უნდა იყოს`);
-        if (rule.type === 'email' && !(typeof v === 'string' && /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v))) errors.push(`${rule.label || field}: ელ.ფოსტა არასწორია`);
-        if (rule.maxLength && typeof v === 'string' && v.length > rule.maxLength) errors.push(`${rule.label || field}: მაქს. ${rule.maxLength} სიმბოლო`);
-        if (rule.enum && !rule.enum.includes(v)) errors.push(`${rule.label || field}: დაუშვებელი მნიშვნელობა`);
-    }
-    return errors;
-}
+// validateBody — იხ. lib/helpers.js
 // მცირე middleware-ფაბრიკა route-ებზე გამოსაყენებლად: validate({ field: {required,type,...} })
 const validate = (rules) => (req, res, next) => {
     const errors = validateBody(req.body, rules);
@@ -1445,6 +1356,15 @@ api.post('/inspections/:id/upload', upload.single('file'), async (req, res) => {
     } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
+// --- OFFICE DOCUMENTS — შემოსული განცხადებების ჟურნალი (IN-ნუმერაცია; იქმნება საქმის რეგისტრაციისას) ---
+api.get('/office-documents', async (req, res) => {
+    try {
+        const q = req.query.category ? { category: req.query.category } : {};
+        const p = paging(req, 200, 500);
+        res.json(await OfficeDocument.find(q).sort({ date: -1 }).skip(p.skip).limit(p.limit));
+    } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
 // --- USERS ---
 api.post('/users/register', requireRole('admin', 'hr'), validate({
     firstName:  { required: true, type: 'string', maxLength: 100, label: 'სახელი' },
@@ -1517,7 +1437,7 @@ api.get('/equipment', async (req, res) => {
     } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-api.post('/equipment', requireRole('admin', 'tech_manager'), validate({
+api.post('/equipment', requireRole('admin', 'tech_manager', 'quality_manager'), validate({
     name:            { required: true, type: 'string', maxLength: 200, label: 'დასახელება' },
     serialNumber:    { required: true, type: 'string', maxLength: 100, label: 'სერიული ნომერი' },
     calibrationDate: { required: true, label: 'დაკალიბრების თარიღი' },
@@ -1537,7 +1457,7 @@ api.post('/equipment', requireRole('admin', 'tech_manager'), validate({
     }
 });
 
-api.put('/equipment/:id', requireRole('admin', 'tech_manager'), validate({
+api.put('/equipment/:id', requireRole('admin', 'tech_manager', 'quality_manager'), validate({
     name:            { required: true, type: 'string', maxLength: 200, label: 'დასახელება' },
     calibrationDate: { required: true, label: 'დაკალიბრების თარიღი' },
 }), async (req, res) => {
@@ -1582,6 +1502,15 @@ api.post('/management-reviews', requireRole('admin', 'quality_manager'), async (
     } catch (err) { res.status(400).json({ error: err.message }); }
 });
 
+api.put('/management-reviews/:id', requireRole('admin', 'quality_manager'), async (req, res) => {
+    try {
+        const updated = await ManagementReview.findByIdAndUpdate(req.params.id, req.body, { new: true });
+        if (!updated) return res.status(404).json({ error: 'ვერ მოიძებნა' });
+        await logAudit(req, 'განახლება', 'management_review', updated._id, String(updated.reviewDate || ''));
+        res.json(updated);
+    } catch (err) { res.status(400).json({ error: err.message }); }
+});
+
 api.delete('/management-reviews/:id', async (req, res) => {
     if (req.user.role !== 'admin') return res.status(403).json({ error: 'წაშლის უფლება არ გაქვთ' });
     try {
@@ -1611,7 +1540,8 @@ api.get('/dashboard/stats', async (req, res) => {
             staffList,
         ] = await Promise.all([
             Inspection.countDocuments(),
-            Inspection.countDocuments({ status: 'მიმდინარე' }),
+            // „აქტიური" = ყველა შუალედური ეტაპი (BE-PR-MAIN workflow: განხილვა→დაგეგმვა→მიმდინარე→ტექ.გადამოწმება)
+            Inspection.countDocuments({ status: { $nin: ['რეგისტრირებული', 'დასრულებული'] } }),
             Inspection.countDocuments({ status: 'დასრულებული' }),
             Inspection.countDocuments({ status: 'რეგისტრირებული' }),
             User.countDocuments(),
@@ -1789,7 +1719,7 @@ api.get('/insurance', async (req, res) => {
     catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-api.post('/insurance', requireRole('admin', 'chancellor'), upload.single('file'), async (req, res) => {
+api.post('/insurance', requireRole('admin', 'chancellor', 'quality_manager'), upload.single('file'), async (req, res) => {
     try {
         const data = stripProtected(JSON.parse(req.body.data || '{}'));
         if (req.file) data.fileUrl = `uploads/docs/${req.file.filename}`;
@@ -1798,7 +1728,7 @@ api.post('/insurance', requireRole('admin', 'chancellor'), upload.single('file')
     } catch (err) { res.status(400).json({ error: err.message }); }
 });
 
-api.put('/insurance/:id', requireRole('admin', 'chancellor'), async (req, res) => {
+api.put('/insurance/:id', requireRole('admin', 'chancellor', 'quality_manager'), async (req, res) => {
     try {
         const updated = await Insurance.findByIdAndUpdate(req.params.id, req.body, { new: true });
         if (!updated) return res.status(404).json({ error: 'ვერ მოიძებნა' });
@@ -1984,7 +1914,10 @@ api.post('/price-adequacy/check', requireRole('admin', 'quality_manager', 'tech_
 });
 
 api.get('/price-adequacy', async (req, res) => {
-    try { res.json(await PriceAdequacyCheck.find({}, '-lineItems').sort({ createdAt: -1 })); }
+    try {
+        const q = req.query.caseId ? { caseId: req.query.caseId } : {};
+        res.json(await PriceAdequacyCheck.find(q, '-lineItems').sort({ createdAt: -1 }));
+    }
     catch (err) { res.status(500).json({ error: err.message }); }
 });
 
@@ -2282,6 +2215,7 @@ const SOFT_DELETE_MODELS = {
     procedure:         { model: ProcedureDoc,       retention: RETENTION_YEARS.procedure },
     checklist:         { model: ChecklistSession,   retention: RETENTION_YEARS.checklist },
     price_adequacy:    { model: PriceAdequacyCheck, retention: RETENTION_YEARS.price_adequacy },
+    filled_form:       { model: FilledForm,         retention: RETENTION_YEARS.default },
     auth_user:         { model: AuthUser,           retention: RETENTION_YEARS.user },
 };
 
@@ -2349,10 +2283,26 @@ authRouter.post('/login', loginLimiter, async (req, res) => {
             console.warn(`[AUTH] წარუმატებელი login: უცნობი username="${username}" ip=${req.ip}`); // SEC-013
             return res.status(401).json({ message: 'მომხმარებელი ან პაროლი არასწორია' });
         }
+        // per-account lockout — brute-force სხვადასხვა IP-დანაც იბლოკება (IP-ლიმიტის დამატებით)
+        if (user.lockUntil && user.lockUntil > new Date()) {
+            const min = Math.ceil((user.lockUntil - Date.now()) / 60000);
+            console.warn(`[AUTH] დაბლოკილი ანგარიშის მცდელობა: username="${username}" ip=${req.ip}`);
+            return res.status(429).json({ message: `ანგარიში დროებით დაბლოკილია — სცადეთ ${min} წუთში.` });
+        }
         const ok = await bcrypt.compare(password, user.passwordHash);
         if (!ok) {
+            user.failedLogins = (user.failedLogins || 0) + 1;
+            if (user.failedLogins >= 5) {
+                user.lockUntil = new Date(Date.now() + 15 * 60 * 1000); // 5 შეცდომა → 15 წთ ბლოკი
+                user.failedLogins = 0;
+            }
+            await user.save();
             console.warn(`[AUTH] წარუმატებელი login: username="${username}" ip=${req.ip}`); // SEC-013
             return res.status(401).json({ message: 'მომხმარებელი ან პაროლი არასწორია' });
+        }
+        if (user.failedLogins || user.lockUntil) {
+            user.failedLogins = 0; user.lockUntil = null;
+            await user.save();
         }
         const token = jwt.sign(
             { id: user._id, username: user.username, role: user.role, staffId: user.staffId || null },
@@ -2366,8 +2316,9 @@ authRouter.post('/login', loginLimiter, async (req, res) => {
 authRouter.post('/change-password', requireAuth, async (req, res) => {
     try {
         const { oldPassword, newPassword } = req.body;
-        if (typeof newPassword !== 'string' || newPassword.length < 6)
-            return res.status(400).json({ message: 'ახალი პაროლი ძალიან მოკლეა (მინ. 6 სიმბოლო)' });
+        // BE-POL-04 (IT უსაფრთხოება): ახალი პაროლი მინ. 12 სიმბოლო
+        if (typeof newPassword !== 'string' || newPassword.length < 12)
+            return res.status(400).json({ message: 'ახალი პაროლი ძალიან მოკლეა (მინ. 12 სიმბოლო)' });
         const user = await AuthUser.findById(req.user.id);
         if (!user) return res.status(404).json({ message: 'მომხმარებელი ვერ მოიძებნა' });
         const ok = await bcrypt.compare(oldPassword, user.passwordHash);
@@ -2393,8 +2344,9 @@ authRouter.post('/users', requireAuth, async (req, res) => {
         const { username, password, role, staffId } = req.body;
         if (typeof username !== 'string' || username.trim().length < 3)
             return res.status(400).json({ message: 'მომხმარებლის სახელი ძალიან მოკლეა (მინ. 3 სიმბოლო)' });
-        if (typeof password !== 'string' || password.length < 6)
-            return res.status(400).json({ message: 'პაროლი ძალიან მოკლეა (მინ. 6 სიმბოლო)' });
+        // BE-POL-04 (IT უსაფრთხოება): ახალი ანგარიშის პაროლი მინ. 12 სიმბოლო
+        if (typeof password !== 'string' || password.length < 12)
+            return res.status(400).json({ message: 'პაროლი ძალიან მოკლეა (მინ. 12 სიმბოლო)' });
         // როლი მხოლოდ ცნობილი ჩამონათვალიდან (AdminRegister.js → ROLE_OPTIONS-ის შესაბამისი)
         const VALID_ROLES = ['admin', 'chancellor', 'tech_manager', 'quality_manager', 'hr', 'inspector'];
         if (role && !VALID_ROLES.includes(role)) return res.status(400).json({ message: 'უცნობი როლი' });
@@ -2614,6 +2566,74 @@ api.delete('/checklists/:id', async (req, res) => {
         if (req.user.role !== 'admin') return res.status(403).json({ error: 'მხოლოდ ადმინი' });
         const del = await softDeleteById(ChecklistSession, req.params.id, req);
         if (del) await logAudit(req, 'წაშლა', 'checklist', del._id, del.sessionNumber || '');
+        res.json({ ok: true });
+    } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// ─────────────────────────────────────────────
+// FILLED FORMS — შევსებული ფორმების რეესტრი
+// ─────────────────────────────────────────────
+api.get('/filled-forms', async (req, res) => {
+    try {
+        const q = {};
+        if (req.query.caseId) q.caseId = req.query.caseId;
+        if (req.query.code)   q.code   = req.query.code;
+        if (req.query.staffId) q.staffId = req.query.staffId;
+        const p = paging(req, 200, 500);
+        res.json(await FilledForm.find(q).sort({ createdAt: -1 }).skip(p.skip).limit(p.limit));
+    } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+api.get('/filled-forms/:id', async (req, res) => {
+    try {
+        const f = await FilledForm.findById(req.params.id);
+        if (!f) return res.status(404).json({ error: 'ვერ მოიძებნა' });
+        res.json(f);
+    } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+api.post('/filled-forms', validate({
+    code: { required: true, type: 'string', maxLength: 60, label: 'ფორმის კოდი' },
+}), async (req, res) => {
+    try {
+        const { code, title, caseId, caseNumber, staffId, data } = req.body;
+        const f = await FilledForm.create({
+            code, title: title || '', data: data || {},
+            caseId: caseId || null, caseNumber: caseNumber || '',
+            staffId: staffId || null,
+            createdBy: req.user.username,
+        });
+        await logAudit(req, 'შექმნა', 'filled_form', f._id, `${f.code}${f.caseNumber ? ' — ' + f.caseNumber : ''}`);
+        res.status(201).json(f);
+    } catch (e) { res.status(400).json({ error: e.message }); }
+});
+
+api.put('/filled-forms/:id', async (req, res) => {
+    try {
+        const before = await FilledForm.findById(req.params.id);
+        if (!before) return res.status(404).json({ error: 'ვერ მოიძებნა' });
+        // ავტორი ან admin/quality_manager — სხვისი ჩანაწერის შეცვლა დაუშვებელია
+        if (before.createdBy !== req.user.username && !['admin', 'quality_manager'].includes(req.user.role))
+            return res.status(403).json({ error: 'მხოლოდ ავტორს ან ადმინს შეუძლია შეცვლა' });
+        const { title, data, caseId, caseNumber, staffId } = req.body;
+        if (title !== undefined) before.title = title;
+        if (data !== undefined) before.data = data;
+        if (caseId !== undefined) before.caseId = caseId || null;
+        if (caseNumber !== undefined) before.caseNumber = caseNumber;
+        if (staffId !== undefined) before.staffId = staffId || null;
+        before.markModified('data');
+        await before.save();
+        await logAudit(req, 'განახლება', 'filled_form', before._id, before.code);
+        res.json(before);
+    } catch (e) { res.status(400).json({ error: e.message }); }
+});
+
+api.delete('/filled-forms/:id', async (req, res) => {
+    if (!['admin', 'quality_manager'].includes(req.user.role))
+        return res.status(403).json({ error: 'უფლება არ გაქვთ' });
+    try {
+        const del = await softDeleteById(FilledForm, req.params.id, req);
+        if (del) await logAudit(req, 'წაშლა', 'filled_form', del._id, del.code);
         res.json({ ok: true });
     } catch (e) { res.status(500).json({ error: e.message }); }
 });

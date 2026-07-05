@@ -1,34 +1,10 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import axios from 'axios';
-import { Row, Col, Button, Modal, Form, Badge } from 'react-bootstrap';
+import { Button, Modal, Form } from 'react-bootstrap';
 import { toast, confirmDialog } from '../components/Feedback';
-import PdfDownloadButton from '../components/PdfDownloadButton';
 import { Link } from 'react-router-dom';
 
 // ── All existing PDF form components ─────────────────────────────────────────
-import BlankLetterhead             from '../pdf-components/BlankLetterhead';
-import BlankApplicationForm        from '../pdf-components/BlankApplicationForm';
-import ImpartialityDeclarationPdf  from '../pdf-components/ImpartialityDeclarationPdf';
-import ConfidentialityAgreementPdf from '../pdf-components/ConfidentialityAgreementPdf';
-import FM04_InternalAuditPdf       from '../pdf-components/FM04_InternalAuditPdf';
-import FM06_ComplaintAppealPdf     from '../pdf-components/FM06_ComplaintAppealPdf';
-import FM07_EquipmentVerificationPdf from '../pdf-components/FM07_EquipmentVerificationPdf';
-import FM08_CompetencyAssessmentPdf  from '../pdf-components/FM08_CompetencyAssessmentPdf';
-import FM09_ContractReviewPdf      from '../pdf-components/FM09_ContractReviewPdf';
-import FM10_CAPAFormPdf            from '../pdf-components/FM10_CAPAFormPdf';
-import FM11_InspectionPlanPdf      from '../pdf-components/FM11_InspectionPlanPdf';
-import FM12_SubcontractorPdf       from '../pdf-components/FM12_SubcontractorPdf';
-import FM13_TrainingRecordNewPdf   from '../pdf-components/FM13_TrainingRecordNewPdf';
-import FM14_NonConformingPdf       from '../pdf-components/FM14_NonConformingPdf';
-import FM15_MgmtReviewPdf          from '../pdf-components/FM15_MgmtReviewPdf';
-import FM16_VisitRecordPdf         from '../pdf-components/FM16_VisitRecordPdf';
-import FM21_InspectionRegisterPdf  from '../pdf-components/FM21_InspectionRegisterPdf';
-import FM22_FamiliarizationPdf     from '../pdf-components/FM22_FamiliarizationPdf';
-import FM23_DocChangePdf           from '../pdf-components/FM23_DocChangePdf';
-import FM24_ChangeRegisterPdf      from '../pdf-components/FM24_ChangeRegisterPdf';
-import FM25_LiquidationActPdf      from '../pdf-components/FM25_LiquidationActPdf';
-import FormFillModal               from '../components/FormFillModal';
-import { FORM_CONFIGS }            from '../components/formConfigs';
 
 // ═══════════════════════════════════════════════════════════════════
 // FULL DOCUMENT CATALOG — 9 categories, all codes
@@ -213,91 +189,6 @@ const ALL_DOCS_META = [
   { code: 'ORD-04', category: 'order', title: 'ბრძანება — დოკუმენტების მართვის სისტემის დამტკიცება', icon: '📌' },
   { code: 'ORD-05', category: 'order', title: 'ბრძანება — მიუკერძოებლობის კომიტეტის შექმნა', icon: '📌' },
 ];
-
-// ═══════════════════════════════════════════════════════════════════
-// PDF FORMS DATA (Tab 2)
-// ═══════════════════════════════════════════════════════════════════
-const FORMS_DATA = [
-  { section: '🏢 ბლანკები და გენერატორები', items: [
-    { icon: '📄', code: 'ბლანკი',     title: 'ოფიციალური ბლანკი',          desc: 'ლოგო და რეკვიზიტები',              pdf: <BlankLetterhead />,             fileName: 'ბილდექს_ბლანკი',    color: 'primary' },
-    { icon: '⚖️', code: 'ბრძანება',   title: 'ბრძანების გენერატორი',        desc: 'დანიშვნა / შვებულება / მივლინება', linkTo: '/order-generator',           color: 'primary' },
-    { icon: '🤝', code: 'შრ.ხელშ.',  title: 'შრომის ხელშეკრულება',          desc: '+ 2 დანართი',                      linkTo: '/contract-generator',        color: 'primary' },
-    { icon: '📑', code: 'მომ.ხელშ.', title: 'მომსახურების ხელშეკრულება',   desc: 'BE-PR-01..04',                     linkTo: '/company-docs',              color: 'primary' },
-  ]},
-  { section: '🔍 ინსპექტირების ფორმები', items: [
-    { icon: '📝', code: 'BE-FM-APP', title: 'განაცხადის ფორმა',         desc: 'ინსპექციის მოთხოვნა',           pdf: <BlankApplicationForm />,          fileName: 'FM-18_განაცხადება',  color: 'info' },
-    { icon: '📋', code: 'BE-FM-CONTRACT-REVIEW', title: 'ხელშეკრულების განხილვა',   desc: 'ISO §7.1',                      pdf: <FM09_ContractReviewPdf />,        fileName: 'FM-09_ხელშ_განხ',    color: 'info', fill: 'BE-FM-CONTRACT-REVIEW' },
-    { icon: '🗺️', code: 'BE-FM-PLAN', title: 'ინსპექტირების გეგმა',      desc: 'ISO §7.1',                      pdf: <FM11_InspectionPlanPdf />,        fileName: 'FM-11_ინსპ_გეგმა',  color: 'info', fill: 'BE-FM-PLAN' },
-    { icon: '📍', code: 'BE-FM-VISIT', title: 'ვიზიტის ჩანაწერი',         desc: 'ISO §7.3',                      pdf: <FM16_VisitRecordPdf />,           fileName: 'FM-16_ვიზ_ჩანაწ',   color: 'info', fill: 'BE-FM-VISIT' },
-    { icon: '📊', code: 'BE-FM-INSP-REG', title: 'ინსპექტირების რეგისტრი',   desc: 'ISO §7.3',                      pdf: <FM21_InspectionRegisterPdf />,   fileName: 'FM-21_ინსპ_რეგ',    color: 'info', fill: 'BE-FM-INSP-REG' },
-  ]},
-  { section: '👥 პერსონალი და კომპეტენცია', items: [
-    { icon: '⚖️', code: 'BE-FM-IMP-DECL', title: 'მიუკერძოებლობის დეკლარაცია', desc: 'ISO §4',                     pdf: <ImpartialityDeclarationPdf data={{}} />,  fileName: 'FM-02_მიუკ_დეკლ', color: 'success', fill: 'BE-FM-IMP-DECL' },
-    { icon: '🤐', code: 'BE-FM-CONF', title: 'კონფიდენციალობის შეთანხმება',  desc: 'ISO §5 — 5 წელი',           pdf: <ConfidentialityAgreementPdf data={{}} />, fileName: 'FM-03_კონფ_შეთ',  color: 'success', fill: 'BE-FM-CONF' },
-    { icon: '🎯', code: 'BE-FM-COMP-CHECK', title: 'კომპეტენციის შეფასება',        desc: 'ISO §6.1',                  pdf: <FM08_CompetencyAssessmentPdf />,          fileName: 'FM-08_კომპ_შეფ',  color: 'success', fill: 'BE-FM-COMP-CHECK' },
-    { icon: '📚', code: 'BE-FM-TRAIN', title: 'ტრენინგის ჩანაწერი',           desc: 'ISO §6.1 — 5 წელი',         pdf: <FM13_TrainingRecordNewPdf />,             fileName: 'FM-13_ტრენ_ჩანაწ', color: 'success', fill: 'BE-FM-TRAIN' },
-  ]},
-  { section: '🛡️ ხარისხის მართვა', items: [
-    { icon: '📣', code: 'BE-FM-COMPLAINT', title: 'საჩივარი / აპელაცია',         desc: 'ISO §7.5/7.7/7.8',            pdf: <FM06_ComplaintAppealPdf />,       fileName: 'FM-06_საჩ_აპ',     color: 'danger', fill: 'BE-FM-COMPLAINT' },
-    { icon: '⚠️', code: 'BE-FM-CAPA', title: 'CAPA — კორექტირებითი ქმედება',desc: 'ISO §8.5',                   pdf: <FM10_CAPAFormPdf />,              fileName: 'FM-10_CAPA',        color: 'danger', fill: 'BE-FM-CAPA' },
-    { icon: '🚫', code: 'BE-FM-NONCONF', title: 'შეუსაბამო სამუშაოს მართვა',   desc: 'ISO §8.7',                   pdf: <FM14_NonConformingPdf />,         fileName: 'FM-14_შეუსაბ',      color: 'danger', fill: 'BE-FM-NONCONF' },
-    { icon: '🔎', code: 'BE-FM-AUDIT-PLAN', title: 'შიდა აუდიტი',                  desc: 'ISO §8.6 — 2-ჯერ წელიწადში',     pdf: <FM04_InternalAuditPdf />,         fileName: 'FM-04_შ_აუდ',       color: 'danger', fill: 'BE-FM-AUDIT-PLAN' },
-    { icon: '📈', code: 'BE-FM-MGMT-REVIEW', title: 'მენეჯმენტის ანალიზი',          desc: 'ISO §8.5',                   pdf: <FM15_MgmtReviewPdf />,            fileName: 'FM-15_მენ_ანალ',    color: 'danger', fill: 'BE-FM-MGMT-REVIEW' },
-  ]},
-  { section: '🔧 მოწყობილობა და ქვეკონტრაქტორები', items: [
-    { icon: '🔩', code: 'BE-FM-EQ-CHECK', title: 'მოწყობილობის ვერიფიკაცია',    desc: 'ISO §6.2',                   pdf: <FM07_EquipmentVerificationPdf />, fileName: 'FM-07_მოწყ_ვერ',   color: 'warning', fill: 'BE-FM-EQ-CHECK' },
-    { icon: '🏗️', code: 'BE-FM-SUB-MONITOR', title: 'ქვეკონტრაქტორის შეფასება',    desc: 'ISO §6.6',                   pdf: <FM12_SubcontractorPdf />,         fileName: 'FM-12_ქვეკ_შეფ',   color: 'warning', fill: 'BE-FM-SUB-MONITOR' },
-  ]},
-  { section: '🗂️ დოკუმენტაციის მართვა', items: [
-    { icon: '👁️', code: 'BE-FM-FAMIL', title: 'გაცნობის ფურცელი',             desc: 'ISO §6.1 — 5 სამუშაო დღე',      pdf: <FM22_FamiliarizationPdf />,       fileName: 'FM-22_გაცნ_ფ',      color: 'secondary', fill: 'BE-FM-FAMIL' },
-    { icon: '✍️', code: 'BE-FM-CHANGE-INIT', title: 'ცვლილების წინადადება',         desc: 'BE-PR-12',                   pdf: <FM23_DocChangePdf />,             fileName: 'FM-23_ცვლ_წინ',     color: 'secondary', fill: 'BE-FM-CHANGE-INIT' },
-    { icon: '📒', code: 'BE-FM-CHANGE-REG', title: 'ცვლილებების რეგისტრი',         desc: 'BE-PR-12 (ჟურნალი)',         pdf: <FM24_ChangeRegisterPdf />,        fileName: 'FM-24_ცვლ_რეგ',     color: 'secondary', fill: 'BE-FM-CHANGE-REG' },
-    { icon: '🗑️', code: 'BE-FM-DESTROY-ACT', title: 'ლიკვიდაციის აქტი',            desc: 'BE-PR-12 §6',                pdf: <FM25_LiquidationActPdf />,        fileName: 'FM-25_ლიკვ',         color: 'secondary', fill: 'BE-FM-DESTROY-ACT' },
-  ]},
-];
-
-// ═══════════════════════════════════════════════════════════════════
-// FormCard — single PDF form card
-// ═══════════════════════════════════════════════════════════════════
-function FormCard({ icon, code, title, desc, pdf, fileName, linkTo, color, fill }) {
-  const [showFill, setShowFill] = useState(false);
-  return (
-    <>
-      <Col xl={2} lg={3} md={4} sm={6}>
-        <div className="h-100 shadow-sm" style={{
-          border: 'none', borderRadius: 8, background: '#fff',
-          borderTop: `3px solid var(--bs-${color})`, overflow: 'hidden',
-        }}>
-          <div className="d-flex flex-column p-2 text-center h-100">
-            <div style={{ fontSize: 20, marginBottom: 4 }}>{icon}</div>
-            <Badge bg={color} className="mb-1" style={{ fontSize: '0.6rem' }}>{code}</Badge>
-            <div className="fw-bold text-dark mb-1" style={{ fontSize: '0.73rem', lineHeight: 1.3 }}>{title}</div>
-            <p className="text-muted mb-2 flex-grow-1" style={{ fontSize: '0.62rem' }}>{desc}</p>
-            {linkTo ? (
-              <Button as={Link} to={linkTo} variant={color} size="sm" className="w-100 fw-bold" style={{ fontSize: '0.68rem' }}>⚙️ შექმნა</Button>
-            ) : (
-              <div className="d-flex flex-column gap-1">
-                {fill && FORM_CONFIGS[fill] && (
-                  <Button variant={color} size="sm" className="w-100 fw-bold" style={{ fontSize: '0.68rem' }} onClick={() => setShowFill(true)}>📝 შევსება</Button>
-                )}
-                <PdfDownloadButton document={pdf} fileName={`${fileName}_ცარიელი`} className={`btn btn-outline-${color} btn-sm w-100 fw-bold`} style={{ textDecoration: 'none', fontSize: '0.68rem' }} label="📄 ჩამოტვირთვა" />
-              </div>
-            )}
-          </div>
-        </div>
-      </Col>
-      {fill && FORM_CONFIGS[fill] && (
-        <FormFillModal show={showFill} onHide={() => setShowFill(false)}
-          config={FORM_CONFIGS[fill]} pdfComponent={pdf} pdfFileName={fileName} formCode={code} />
-      )}
-    </>
-  );
-}
-
-// ═══════════════════════════════════════════════════════════════════
-// Upload / Edit Modal
-// prefill  — catalog meta for new upload  { code, title, category }
-// existing — full DB doc for editing      { _id, code, title, ... }
 // ═══════════════════════════════════════════════════════════════════
 function ProcUploadModal({ show, onHide, onSaved, existing, prefill, defaultCategory }) {
   const isEdit = !!(existing?._id);
@@ -566,9 +457,10 @@ export default function ProceduresPage({ role }) {
         <button style={tabStyle(tab === 'procedures')} onClick={() => setTab('procedures')}>
           📄 პროცედურები და დოკუმენტები
         </button>
-        <button style={tabStyle(tab === 'forms')} onClick={() => setTab('forms')}>
-          📋 PDF ფორმები და შაბლონები
-        </button>
+        {/* ფორმების გენერაცია ერთ ადგილასაა — /documents (დუბლირება მოხსნილია) */}
+        <Link to="/documents" style={{ ...tabStyle(false), textDecoration: 'none', display: 'inline-block' }}>
+          📋 ფორმების გენერაცია →
+        </Link>
       </div>
 
       {/* ═══ PROCEDURES TAB ══════════════════════════════════════════════ */}
@@ -799,29 +691,6 @@ export default function ProceduresPage({ role }) {
               ))}
             </div>
           )}
-        </div>
-      )}
-
-      {/* ═══ FORMS TAB ═══════════════════════════════════════════════════ */}
-      {tab === 'forms' && (
-        <div style={{ background: '#fff', border: '1px solid #003366', borderTop: 'none', borderRadius: '0 8px 8px 8px', padding: 20 }}>
-          <p className="text-muted small mb-3">
-            📝 <strong>შევსება</strong> — ონლაინ შევსება + PDF გენერაცია &nbsp;|&nbsp;
-            📄 <strong>ჩამოტვირთვა</strong> — ცარიელი შაბლონი
-          </p>
-          {FORMS_DATA.map(sec => (
-            <div key={sec.section} className="mb-4">
-              <div className="d-flex align-items-center mb-2 mt-3">
-                <h6 className="fw-bold m-0" style={{ color: '#003366' }}>{sec.section}</h6>
-                <div style={{ flex: 1, height: 1, background: '#003366', opacity: 0.15, marginLeft: 10 }} />
-              </div>
-              <Row className="g-2">
-                {sec.items.map(item => (
-                  <FormCard key={item.code} {...item} />
-                ))}
-              </Row>
-            </div>
-          ))}
         </div>
       )}
 

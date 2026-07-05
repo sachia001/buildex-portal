@@ -2,6 +2,15 @@ import React, { useState, useEffect } from 'react';
 import { Container, Table, Button, Form, Card, Row, Col, Badge, Spinner, Modal } from 'react-bootstrap';
 import axios from 'axios';
 import { toast, confirmDialog } from '../components/Feedback';
+import FormLauncher from '../components/FormLauncher';
+
+// ხელსაწყოს მონაცემები → ფორმის ველების წინასწარი შევსება (ლეიბლის ფრაგმენტებით)
+const eqPrefill = (item) => ({
+    'დასახელება': item.name || '',
+    'სერიული': item.serialNumber || '',
+    'მწარმოებელი': item.manufacturer || '',
+    'კალიბრ': item.calibrationDate ? new Date(item.calibrationDate).toLocaleDateString('ka-GE') : '',
+});
 
 const EquipmentManager = () => {
     const [equipment, setEquipment] = useState([]);
@@ -164,6 +173,10 @@ const EquipmentManager = () => {
                                             <td className="text-center">
                                                 <div className="d-flex gap-1 justify-content-center">
                                                     <Button size="sm" variant="outline-warning" onClick={() => openEdit(item)}>✏️</Button>
+                                                    <FormLauncher code="BE-FM-EQ-CARD" label="🗂️ ბარათი" variant="outline-primary"
+                                                        initialByLabel={eqPrefill(item)} />
+                                                    <FormLauncher code="BE-FM-EQ-CHECK" label="☑️ ვერიფ." variant="outline-success"
+                                                        initialByLabel={eqPrefill(item)} />
                                                     <Button size="sm" variant="outline-danger" onClick={() => handleDelete(item._id)}>🗑️</Button>
                                                 </div>
                                             </td>

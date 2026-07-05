@@ -31,6 +31,7 @@ const NormsAdminPage       = lazy(() => import('./pages/NormsAdminPage'));
 const ChecklistPage        = lazy(() => import('./pages/ChecklistPage'));
 const ProceduresPage       = lazy(() => import('./pages/ProceduresPage'));
 const AuditLogPage         = lazy(() => import('./pages/AuditLogPage'));
+const TrashPage            = lazy(() => import('./pages/TrashPage'));
 const ProcurementPricePage = lazy(() => import('./pages/ProcurementPricePage'));
 
 // Attach token to every axios request
@@ -167,14 +168,14 @@ const Navbar = ({ username, role, onLogout }) => {
         inspections:   ['admin', 'chancellor', 'tech_manager', 'inspector', 'quality_manager'].includes(role),
         addInspection: ['admin', 'chancellor'].includes(role),
         documents:     ['admin', 'quality_manager'].includes(role),
-        equipment:     ['admin', 'quality_manager'].includes(role),
+        equipment:     ['admin', 'quality_manager', 'tech_manager'].includes(role),
         management:    ['admin', 'quality_manager'].includes(role),
         staff:         ['admin', 'hr'].includes(role),
-        insurance:     ['admin', 'quality_manager'].includes(role),
-        complaints:    ['admin', 'quality_manager'].includes(role),
+        insurance:     ['admin', 'quality_manager', 'chancellor'].includes(role),
+        complaints:    ['admin', 'quality_manager', 'chancellor'].includes(role),
         audits:        ['admin', 'quality_manager'].includes(role),
         corrections:   ['admin', 'quality_manager'].includes(role),
-        companyDocs:   ['admin'].includes(role),
+        companyDocs:   ['admin', 'chancellor'].includes(role),
         priceAdequacy: ['admin', 'quality_manager', 'tech_manager'].includes(role),
         procurement:   ['admin', 'quality_manager', 'tech_manager', 'inspector'].includes(role),
         normsAdmin:    ['admin', 'quality_manager'].includes(role),
@@ -200,6 +201,7 @@ const Navbar = ({ username, role, onLogout }) => {
         { to: '/corrective-actions',  label: '⚙️ CAR',               show: show.corrections },
         { to: '/complaints',          label: '📨 საჩივრები',         show: show.complaints },
         { to: '/audit-log',           label: '📋 აუდიტის ჟურნალი',  show: show.auditLog },
+        { to: '/admin-trash',         label: '🗄️ არქივი',            show: role === 'admin' },
     ];
     const resourcesItems = [
         { to: '/admin',          label: '👥 პერსონალი',      show: show.staff },
@@ -384,6 +386,7 @@ function AppContent() {
                             <Route path="/checklist" element={<ChecklistPage role={role} />} />
                             <Route path="/procedures" element={<ProceduresPage role={role} />} />
                             <Route path="/audit-log" element={<AuditLogPage role={role} />} />
+                            <Route path="/admin-trash" element={<TrashPage />} />
                             <Route path="/procurement" element={<ProcurementPricePage />} />
                             <Route path="*" element={
                                 <div className="text-center mt-5">

@@ -17,14 +17,24 @@ const ComplaintsPage = ({ role }) => {
         reviewedBy: '', resolution: '', preventiveAction: ''
     });
 
+    // საქმეების სია — inspectionRef-ის ამრჩევისთვის და ბმულებისთვის
+    const [inspections, setInspections] = useState([]);
+
     const fetch = async () => {
         try {
             const res = await axios.get('/api/complaints');
             setItems(Array.isArray(res.data) ? res.data : []);
         } catch { setItems([]); }
+        try {
+            const insp = await axios.get('/api/inspections');
+            setInspections(Array.isArray(insp.data) ? insp.data : []);
+        } catch { setInspections([]); }
     };
 
     useEffect(() => { fetch(); }, []);
+
+    // საქმის ნომერი → _id (ცხრილში ბმულისთვის)
+    const inspIdByNumber = (num) => inspections.find(i => i.inspectionNumber === num)?._id;
 
     const openAdd = () => {
         setEditItem(null);
@@ -97,11 +107,23 @@ const ComplaintsPage = ({ role }) => {
                                     <small className="text-muted">{item.complainantContact}</small>
                                 </td>
                                 <td><Badge bg={item.category === 'აპელაცია' ? 'info' : 'warning'} text="dark">{item.category}</Badge></td>
-                                <td className="small">{item.inspectionRef || '-'}</td>
+                                <td className="small">
+                                    {item.inspectionRef
+                                        ? (inspIdByNumber(item.inspectionRef)
+                                            ? <Link to={`/inspections/${inspIdByNumber(item.inspectionRef)}`}>{item.inspectionRef}</Link>
+                                            : item.inspectionRef)
+                                        : '-'}
+                                </td>
                                 <td><Badge bg={statusVariant(item.status)}>{item.status}</Badge></td>
                                 <td className="text-center">
                                     <div className="d-flex gap-1 justify-content-center">
                                         <Button size="sm" variant="outline-primary" onClick={() => openEdit(item)}>✏️</Button>
+                                        {canEdit && (
+                                            <Button size="sm" variant="outline-danger" title="მაკორექტირებელი ქმედების შექმნა ამ საჩივრიდან"
+                                                as={Link} to={`/corrective-actions?sourceType=${encodeURIComponent('საჩივარი')}&sourceRef=${encodeURIComponent(item.complaintNumber || '')}&description=${encodeURIComponent(item.description || '')}`}>
+                                                ⚙️ CAR
+                                            </Button>
+                                        )}
                                         {canEdit && <Button size="sm" variant="outline-danger" onClick={() => handleDelete(item._id)}>🗑️</Button>}
                                     </div>
                                 </td>
@@ -148,8 +170,15 @@ const ComplaintsPage = ({ role }) => {
                                 <Form.Control id="cmp-complainantContact" name="complainantContact" value={formData.complainantContact} onChange={handleChange} />
                             </Col>
                             <Col md={6}>
-                                <Form.Label htmlFor="cmp-inspectionRef" className="fw-bold small">დაკავშირებული საქმის ნომერი</Form.Label>
-                                <Form.Control id="cmp-inspectionRef" name="inspectionRef" value={formData.inspectionRef} onChange={handleChange} placeholder="BX-INS-..." />
+                                <Form.Label htmlFor="cmp-inspectionRef" className="fw-bold small">დაკავშირებული საქმე</Form.Label>
+                                <Form.Select id="cmp-inspectionRef" name="inspectionRef" value={formData.inspectionRef} onChange={handleChange}>
+                                    <option value="">— არ უკავშირდება საქმეს —</option>
+                                    {inspections.map(i => (
+                                        <option key={i._id} value={i.inspectionNumber}>{i.inspectionNumber} — {i.objectName}</option>
+                                    ))}
+                                    {formData.inspectionRef && !inspections.some(i => i.inspectionNumber === formData.inspectionRef) &&
+                                        <option value={formData.inspectionRef}>{formData.inspectionRef}</option>}
+                                </Form.Select>
                             </Col>
                             <Col md={6}>
                                 <Form.Label htmlFor="cmp-reviewedBy" className="fw-bold small">განმხილველი</Form.Label>

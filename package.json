@@ -7,7 +7,8 @@
     "start": "node server.js",
     "build": "echo 'client იგება Dockerfile-ში (client/ npm run build)'",
     "seed-admin": "node scripts/seed-admin.js",
-    "test": "echo \"(backend tests ჯერ არ არის)\""
+    "test": "node --test test/*.test.js",
+    "backup": "node scripts/backup-mongo.js"
   },
   "keywords": [
     "iso17020",
