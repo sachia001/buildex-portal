@@ -1026,6 +1026,12 @@ const ProcedureDoc = mongoose.model('ProcedureDoc', new mongoose.Schema({
     uploadedBy:    { type: String },
     notes:         { type: String, default: '' },
     fileSize:      { type: Number, default: 0 },     // bytes
+    // დოკუმენტის სასიცოცხლო ციკლი (BE-PR-04 / ISO §8.3 — დოკუმენტების კონტროლი):
+    // მოქმედი → ძალადაკარგული (ინვალიდაცია არ შლის — დოკუმენტი იდენტიფიცირებადი რჩება)
+    status:           { type: String, enum: ['მოქმედი', 'ძალადაკარგული'], default: 'მოქმედი' },
+    invalidatedAt:    { type: Date, default: null },
+    invalidatedBy:    { type: String, default: '' },
+    invalidateReason: { type: String, default: '' },
 }, { timestamps: true }));
 
 // AUDIT LOG MODEL
@@ -1148,6 +1154,7 @@ const PROC_FOLDER_MAP = {
     'F_პოლიტიკები':              'policy',
     'G_რისკების_მართვა':         'risk',
     'H_ბრძანებები':              'order',
+    'I_ნორმატიული_ბაზა':        'normative',   // СНиП/ЕНиР/რეგლამენტები (BE-PR-01..03-ის ნორმ. ჩარჩო)
 };
 // ─── CR-2 / C11 — პროცედურა/ფორმის ნუმერაცია: ერთიანი SOURCE OF TRUTH ──────────
 // სათაურები ემთხვევა client/src/pages/ProceduresPage.js → ALL_DOCS_META-ს
@@ -2624,6 +2631,39 @@ api.put('/procedures/:id', procUpload.single('file'), async (req, res) => {
         }
         await doc.save();
         await logAudit(req, 'განახლება', 'procedure', doc._id, `${doc.code} — ${doc.title}`, `ვერსია: ${doc.version}`);
+        res.json(doc);
+    } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// ── დოკუმენტის სასიცოცხლო ციკლი (BE-PR-04 / ISO §8.3) ─────────────
+// ძალადაკარგულად მონიშვნა: დოკუმენტი რჩება რეესტრში წითელი აღნიშვნით — არ იშლება.
+api.post('/procedures/:id/invalidate', async (req, res) => {
+    try {
+        if (!['admin', 'quality_manager'].includes(req.user.role))
+            return res.status(403).json({ error: 'უფლება არ გაქვთ' });
+        const doc = await ProcedureDoc.findById(req.params.id);
+        if (!doc) return res.status(404).json({ error: 'ვერ მოიძებნა' });
+        doc.status = 'ძალადაკარგული';
+        doc.invalidatedAt = new Date();
+        doc.invalidatedBy = req.user.username;
+        doc.invalidateReason = String(req.body?.reason || '');
+        await doc.save();
+        await logAudit(req, 'ძალადაკარგვა', 'procedure', doc._id, `${doc.code} — ${doc.title}`, doc.invalidateReason);
+        res.json(doc);
+    } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// ძალაში დაბრუნება (მაგ. შეცდომით მოინიშნა)
+api.post('/procedures/:id/reactivate', async (req, res) => {
+    try {
+        if (!['admin', 'quality_manager'].includes(req.user.role))
+            return res.status(403).json({ error: 'უფლება არ გაქვთ' });
+        const doc = await ProcedureDoc.findById(req.params.id);
+        if (!doc) return res.status(404).json({ error: 'ვერ მოიძებნა' });
+        doc.status = 'მოქმედი';
+        doc.invalidatedAt = null; doc.invalidatedBy = ''; doc.invalidateReason = '';
+        await doc.save();
+        await logAudit(req, 'ძალაში დაბრუნება', 'procedure', doc._id, `${doc.code} — ${doc.title}`);
         res.json(doc);
     } catch (e) { res.status(500).json({ error: e.message }); }
 });

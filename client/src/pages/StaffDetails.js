@@ -355,7 +355,6 @@ const StaffDetails = () => {
                                                         ['BE-PR-01', 'ხარჯთაღრ. შესაბამისობა'],
                                                         ['BE-PR-02', 'ფ.№2 ინსპექტირება'],
                                                         ['BE-PR-03', 'ფასწარმოქმნის ადეკვ.'],
-                                                        ['BE-PR-04', 'ტექ. ზედამხედველობა'],
                                                     ].map(([code, label]) => (
                                                         <Form.Check key={code} type="checkbox"
                                                             label={`${code} — ${label}`}

@@ -30,7 +30,9 @@ const fullName = (u) => [u.firstName, u.lastName].map(x => (x || '').trim()).fil
 // ── TableRows editor ───────────────────────────────────────────
 const TableRowsEditor = ({ field, value, onChange, staffList = [] }) => {
   const minRows = field.minRows || 1;
-  const rows = value && value.length > 0 ? value : Array.from({ length: minRows }, () => ({}));
+  const rows = value && value.length > 0 ? value
+    : (field.presetRows && field.presetRows.length > 0 ? field.presetRows.map(r => ({ ...r }))
+    : Array.from({ length: minRows }, () => ({})));
 
   const update = (idx, colId, v) => {
     const newRows = rows.map((r, i) => i === idx ? { ...r, [colId]: v } : r);
@@ -451,6 +453,19 @@ const FormFillModal = ({ show, onHide, config, pdfComponent, pdfFileName, formCo
       const caseField = allFields.find(f => f.type === 'case');
       if (caseField) next[caseField.id] = initialCase.inspectionNumber || '';
       if (config.caseAutoFill) Object.assign(next, config.caseAutoFill(initialCase));
+      // generic ფორმებზე (label-ზე დაფუძნებული ავტო-შევსება) — case-ველის/autoFill-ის ალტერნატივა
+      const byLabel = {
+        'BE-CASE': initialCase.inspectionNumber || '',
+        'საქმის ნომ': initialCase.inspectionNumber || '',
+        'ობიექტ': initialCase.objectName || '',
+        'მისამართ': initialCase.objectAddress || '',
+        'დამკვეთ': initialCase.clientName || '',
+      };
+      for (const [frag, val] of Object.entries(byLabel)) {
+        if (!val) continue;
+        const f = allFields.find(fl => (fl.label || '').includes(frag));
+        if (f && next[f.id] === undefined) next[f.id] = val;
+      }
     }
     setFormData(next);
     // eslint-disable-next-line react-hooks/exhaustive-deps

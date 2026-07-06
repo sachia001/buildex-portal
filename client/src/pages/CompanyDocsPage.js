@@ -694,7 +694,6 @@ const CompanyDocsPage = ({ role }) => {
                       <option value="BE-PR-01">BE-PR-01 — ხარჯთაღრიცხვის საპროექტო დოკ.-თან შესაბამისობა</option>
                       <option value="BE-PR-02">BE-PR-02 — შესრულებული სამ. / ფორმა №2 ვერიფიკაცია</option>
                       <option value="BE-PR-03">BE-PR-03 — ფასწარმოქმნის ადეკვატურობის ინსპექტირება</option>
-                      <option value="BE-PR-04">BE-PR-04 — ტექნიკური ზედამხედველობა–ინსპექტირება</option>
                     </Form.Select>
                   </Col>
                   <Col md={7}>

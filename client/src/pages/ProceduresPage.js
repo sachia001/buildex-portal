@@ -80,6 +80,14 @@ const CATEGORIES = [
     bg: '#dcfce7',
     folderLetter: 'H',
   },
+  {
+    key: 'normative',
+    label: '📚 ნორმატიული ბაზა',
+    shortLabel: '📚 ნორმატ.',
+    color: '#7c2d12',
+    bg: '#ffedd5',
+    folderLetter: 'I',
+  },
 ];
 
 const ALL_DOCS_META = [
@@ -358,12 +366,32 @@ export default function ProceduresPage({ role }) {
   useEffect(() => { fetchDocs(); }, [fetchDocs]);
 
   const handleDelete = async (doc) => {
-    if (!(await confirmDialog(`წაიშალოს "${doc.title}"?`))) return;
+    if (!(await confirmDialog(`წაიშალოს "${doc.title}"? (ჩანაწერი არქივში გადავა — ადმინს შეუძლია აღდგენა)`))) return;
     try {
       await axios.delete(`/api/procedures/${doc._id}`, { headers });
       setMsg({ type: 'success', text: '✅ დოკუმენტი წაიშალა' });
       fetchDocs();
     } catch (e) { setMsg({ type: 'danger', text: e.message }); }
+  };
+
+  // BE-PR-04 §8.3 — ძალადაკარგულად მონიშვნა: დოკუმენტი რეესტრში რჩება ⛔ ნიშნით
+  const handleInvalidate = async (doc) => {
+    const reason = window.prompt(`„${doc.code} — ${doc.title}" ძალადაკარგულად მოინიშნება.\nმიუთითეთ საფუძველი (მაგ. ახალი ვერსია, DCR №):`, '');
+    if (reason === null) return;
+    try {
+      await axios.post(`/api/procedures/${doc._id}/invalidate`, { reason }, { headers });
+      setMsg({ type: 'success', text: '⛔ დოკუმენტი ძალადაკარგულად მოინიშნა' });
+      fetchDocs();
+    } catch (e) { setMsg({ type: 'danger', text: e.response?.data?.error || e.message }); }
+  };
+
+  const handleReactivate = async (doc) => {
+    if (!(await confirmDialog(`„${doc.code}" დაბრუნდეს ძალაში?`))) return;
+    try {
+      await axios.post(`/api/procedures/${doc._id}/reactivate`, {}, { headers });
+      setMsg({ type: 'success', text: '♻️ დოკუმენტი ძალაშია' });
+      fetchDocs();
+    } catch (e) { setMsg({ type: 'danger', text: e.response?.data?.error || e.message }); }
   };
 
   const downloadDoc = async (doc) => {
@@ -576,8 +604,10 @@ export default function ProceduresPage({ role }) {
                           )}
                         </td>
                         <td className="px-2 text-center">
-                          {up
-                            ? <span style={{ color: '#15803d', fontWeight: 700, fontSize: '0.72rem' }}>✅ ☁️ ატვირთ.</span>
+                          {up?.status === 'ძალადაკარგული'
+                            ? <span style={{ color: '#dc2626', fontWeight: 700, fontSize: '0.72rem' }} title={`ძალადაკარგულია${up.invalidatedAt ? ' — ' + new Date(up.invalidatedAt).toLocaleDateString('ka-GE') : ''}${up.invalidateReason ? ' · ' + up.invalidateReason : ''}`}>⛔ ძალადაკარგ.</span>
+                            : up
+                            ? <span style={{ color: '#15803d', fontWeight: 700, fontSize: '0.72rem' }}>✅ მოქმედი</span>
                             : <span style={{ color: '#b45309', fontWeight: 700, fontSize: '0.72rem' }}>⚠️ ცარიელი</span>
                           }
                         </td>
@@ -622,11 +652,31 @@ export default function ProceduresPage({ role }) {
                                 ✏️
                               </button>
                             )}
+                            {canEdit && up && up.status !== 'ძალადაკარგული' && (
+                              <button
+                                className="btn btn-sm btn-outline-danger py-0 px-2"
+                                style={{ fontSize: '0.7rem' }}
+                                title="ძალადაკარგულად მონიშვნა (BE-PR-04 §8.3) — რჩება რეესტრში"
+                                onClick={() => handleInvalidate(up)}
+                              >
+                                ⛔
+                              </button>
+                            )}
+                            {canEdit && up && up.status === 'ძალადაკარგული' && (
+                              <button
+                                className="btn btn-sm btn-outline-success py-0 px-2"
+                                style={{ fontSize: '0.7rem' }}
+                                title="ძალაში დაბრუნება"
+                                onClick={() => handleReactivate(up)}
+                              >
+                                ♻️
+                              </button>
+                            )}
                             {canEdit && up && (
                               <button
                                 className="btn btn-sm btn-outline-danger py-0 px-2"
                                 style={{ fontSize: '0.7rem' }}
-                                title="წაშლა"
+                                title="წაშლა (არქივში გადატანა)"
                                 onClick={() => handleDelete(up)}
                               >
                                 🗑️

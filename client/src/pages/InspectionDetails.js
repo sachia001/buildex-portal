@@ -59,19 +59,11 @@ const InspectionDetails = ({ role }) => {
             'მოქმედი ბაზრის ფასები — ხარჯთაღრიცხვის ნორმატიული ბაზა',
             'ორგანიზაციის ხარისხის სახელმძღვანელო (BE-QM)',
         ].join('\n'),
-        'BE-PR-04': [
-            'SST ISO/IEC 17020:2012 — შესაბამისობის შეფასება; ინსპექტირების ორგანოების მოთხოვნები',
-            'ILAC G28:07/2018 — სახელმძღვანელო ინსპექტირების სფეროების ფორმულირებისთვის',
-            'СНиП 3.03.01-87 — სამშ. ნ&წ; სამშენებლო კონსტრუქციები',
-            'მოქმედი ტექნიკური რეგლამენტები სამშ. სფეროში',
-            'სამუშაო პროექტი და ხელშეკრულება (წარდგენილი)',
-            'ორგანიზაციის ხარისხის სახელმძღვანელო (BE-QM)',
-        ].join('\n'),
     };
 
     const openReportModal = () => {
         const fmtDate = d => d ? d.split('T')[0] : '';
-        const scopeCode = ['BE-PR-01','BE-PR-02','BE-PR-03','BE-PR-04'].find(c => (data.inspectionScope||'').includes(c)) || '';
+        const scopeCode = ['BE-PR-01', 'BE-PR-02', 'BE-PR-03'].find(c => (data.inspectionScope || '').includes(c)) || '';
         const autoNorms = SCOPE_NORMS[scopeCode] || '';
         const autoSubmitted = Array.isArray(data.submittedDocs) && data.submittedDocs.length > 0
             ? data.submittedDocs.join('\n')
@@ -126,7 +118,7 @@ const InspectionDetails = ({ role }) => {
             clientAddress: '',
             clientRepName: data.contactPerson || '',
             clientRepId: '',
-            serviceType: ['BE-PR-01','BE-PR-02','BE-PR-03','BE-PR-04'].find(c => (data.inspectionScope||'').includes(c)) || 'BE-PR-01',
+            serviceType: ['BE-PR-01', 'BE-PR-02', 'BE-PR-03'].find(c => (data.inspectionScope || '').includes(c)) || 'BE-PR-01',
             serviceScope: data.applicationContent || '',
             objectAddress: data.objectAddress || '',
             serviceFee: '',
@@ -140,7 +132,7 @@ const InspectionDetails = ({ role }) => {
 
     // ატვირთვა
     const [file, setFile] = useState(null);
-    const [docType, setDocType] = useState('განცხადება');
+    const [docType, setDocType] = useState('BE-FM-APP — განცხადება');
     const [uploading, setUploading] = useState(false);
 
     // ინსპექტირების სფეროები (AddInspection-ის იდენტური)
@@ -148,14 +140,20 @@ const InspectionDetails = ({ role }) => {
         "ხარჯთაღრიცხვის პროექტთან შესაბამისობის ინსპექტირება (BE-PR-01)",
         "შესრულებული სამუშაოების და ფორმა №2-ის ინსპექტირება (BE-PR-02)",
         "ხარჯთაღრიცხვის ფასწარმოქმნის ადეკვატურობის ინსპექტირება (BE-PR-03)",
-        "ტექნიკური ზედამხედველობა–ინსპექტირება (BE-PR-04)",
         "სხვა",
     ];
 
-    // დოკუმენტების ტიპები რეგლამენტის მიხედვით
+    // დოკუმენტების ტიპები — BE-FM კოდირებით (ეტალონურ ფორმებთან ჯვარედინი ბმა)
     const docTypes = [
-        "განცხადება", "ხელშეკრულება (SC)", "ბრძანება",
-        "ინსპექტირების ანგარიში (BX-INS)", "ფოტო მასალა", "სხვა"
+        "BE-FM-APP — განცხადება",
+        "BE-FM-CONTRACT — ხელშეკრულება",
+        "BE-FM-ORD — ჯგუფის დანიშვნის ბრძანება",
+        "BE-FM-PLAN — ინსპექციის გეგმა",
+        "BE-FM-VISIT — ვიზიტის ჩანაწერები",
+        "BE-FM-IR — ინსპექტირების ანგარიში",
+        "BE-FM-PHOTO-LOG — ფოტოდოკუმენტაცია",
+        "BE-FM-DELIVERY-LETTER — გადაცემის წერილი",
+        "სხვა",
     ];
 
     // საქმეზე მიბმული შევსებული ფორმები და PA-შემოწმებები

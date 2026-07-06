@@ -96,6 +96,31 @@ export default function NormsAdminPage({ role }) {
                 <button type="button" className="btn-close" onClick={() => setMsg(null)} />
             </div>}
 
+            {/* პროცედურებით მოთხოვნილი ნორმატიული ჩარჩო (BE-PR-01..03) */}
+            <div className="card shadow-sm mb-4 border-0" style={{ borderLeft: '4px solid #7c2d12' }}>
+                <div className="card-body py-3">
+                    <div className="fw-bold mb-2" style={{ color: '#7c2d12' }}>📚 ინსპექტირებისთვის საჭირო ნორმატიული ჩარჩო (პროცედურების მიხედვით)</div>
+                    <div className="row small text-muted g-2">
+                        <div className="col-md-4">
+                            <strong>BE-PR-01 — ხარჯთაღრიცხვა:</strong><br />
+                            SST ISO/IEC 17020:2012 · ILAC G28:07/2018 · მოქმედი ტექნიკური რეგლამენტები · საპროექტო დოკუმენტაცია
+                        </div>
+                        <div className="col-md-4">
+                            <strong>BE-PR-02 — შესრულებული სამუშაოები:</strong><br />
+                            ფორმა №2 (KS-2) · СНиП (მოქმედი) · ტექნიკური რეგლამენტები
+                        </div>
+                        <div className="col-md-4">
+                            <strong>BE-PR-03 — ფასწარმოქმნა:</strong><br />
+                            NER (კვარტალური) · СНиП · ЕНиР · მოქმედი საბაზრო ფასები — <em>ამ გვერდის Excel-ბაზა</em>
+                        </div>
+                    </div>
+                    <div className="small mt-2" style={{ color: '#7c2d12' }}>
+                        ⚠️ ამჟამად ჩატვირთულია <strong>საცდელი (ნიმუშის)</strong> NER+საგზაო ბაზა — აკრედიტაციის ინსპექტირებამდე ჩატვირთეთ ოფიციალური კვარტალური NER Excel („ატვირთვა" პანელით).
+                        ნორმატიული დოკუმენტების ფაილები (СНиП, რეგლამენტები) აიტვირთება „პროცედურები" გვერდზე, კატეგორია „📚 ნორმატიული ბაზა".
+                    </div>
+                </div>
+            </div>
+
             <div className="row g-4">
                 {/* Upload panel */}
                 {canUpload && (

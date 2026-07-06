@@ -18,6 +18,8 @@ export function newFormToConfig(form) {
         case 'table':  return [{
           id, label: (a && a.title) || sec.h || 'ცხრილი', type: 'tablerows', minRows: 1,
           columns: ((a && a.cols) || []).map((c, ci) => ({ id: 'c' + ci, label: c, type: 'text' })),
+          // ფიქსირებულ-სტრიქონიანი ცხრილები (მაგ. აუდიტის ჩეკლისტი) — ედიტორი მასტერის სტრიქონებით იწყება
+          presetRows: (a && a.rows) ? a.rows.map(r => Object.fromEntries(r.map((v, ci) => ['c' + ci, v]))) : undefined,
         }];
         default:       return [];
       }
